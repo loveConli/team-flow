@@ -19,6 +19,7 @@ const COMMANDS = {
   isolate:        () => import('./lib/cmd-isolate.mjs'),
   execution:      () => import('./lib/cmd-execution.mjs'),
   runtime:        () => import('./lib/cmd-runtime.mjs'),
+  solutions:      () => import('./lib/cmd-solutions.mjs'),
   'install-cursor': () => import('./lib/cmd-install-cursor.mjs'),
   'install-workbuddy': () => import('./lib/cmd-install-workbuddy.mjs'),
   'install-cline':    () => import('./lib/cmd-install-cline.mjs'),
@@ -31,6 +32,7 @@ const COMMANDS = {
   'install-pi':       () => import('./lib/cmd-install-pi.mjs'),
   'install-qoder':    () => import('./lib/cmd-install-qoder.mjs'),
   'install-zcode':     () => import('./lib/cmd-install-zcode.mjs'),
+  'prototype-sync':    () => import('./lib/prototype-sync.mjs'),
 };
 
 const HELP = `spec-superflow (ssf) — Spec-first workflow CLI
@@ -43,6 +45,8 @@ Commands:
   doctor                Health check (versions, hooks, skills, docs)
   version <semver>      Sync version to all manifest files
   sync <change-dir>     Merge delta specs into main specs
+  prototype-sync <change-dir> [--source <path>] [--prototype-dir <path>]
+                        Merge UX delta into global prototype/ + design-system.md
   config [options]      Display or modify configuration
   config --resolve-model <profile>  Resolve a configured model profile without switching models
   state <sub> <dir>     Manage .spec-superflow.yaml state (init|check|transition|get|rebuild)
@@ -78,6 +82,14 @@ Commands:
   runtime config ...    Read effective configuration (writes are rejected)
   runtime asset read <path>
                         Read one allowlisted package asset for a skill
+  solutions index-gen [--dir <solutions-dir>]
+                        Rebuild docs/solutions/INDEX.md (v0.5 compound-learning)
+  solutions inject --phase <p> [--domain <d>] [--dir <solutions-dir>]
+                        Emit top-5 filtered solution summaries for skill context injection
+  solutions capture --phase <p> --domain <d> --type <t> --severity <s> --summary "<text>" [--source <src>] [--dir <solutions-dir>]
+                        Capture one learning into docs/solutions/ + INDEX.md
+  solutions promote <change-dir> [--dir <solutions-dir>]
+                        Promote qualifying change learnings into global docs/solutions/
   install-cursor        Deploy skills/scripts/docs to .cursor/ (local Cursor setup)
   install-workbuddy     Deploy skills to WorkBuddy marketplace and enable them
   install-cline         Deploy to .cline/ + .clinerules/ (Cline)

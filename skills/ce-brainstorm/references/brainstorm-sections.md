@@ -1,17 +1,20 @@
 # Brainstorm Sections
 
-This reference describes what makes a great requirements-only unified plan
-artifact produced by `ce-brainstorm`.
+This reference describes what makes a great PRD document (产品需求文档)
+produced by `ce-brainstorm`.
 It does NOT prescribe how the doc looks on the page — rendering is handled by
 the format-specific references (`markdown-rendering.md`, `html-rendering.md`).
 
 ## The outcome
 
-A great brainstorm produces the first version of the same plan artifact that
-`ce-plan` later enriches. It enables three audiences to act:
+A great brainstorm produces the PRD document (业务要件) that defines **WHAT** to build.
+`ce-plan` then reads the PRD and produces an **independent implementation plan** (实施方案) that defines **HOW** to build it.
+The PRD and plan are separate documents in the same `prd/vN/` directory.
+
+The PRD enables three audiences to act:
 
 - **The planning agent** (`ce-plan` or a human) produces an implementation
-  plan without inventing user behavior, scope boundaries, or success
+  plan based on the PRD, without inventing user behavior, scope boundaries, or success
   criteria — the brainstorm answered those.
 - **The reviewer** sees the framing choices, distinguishes pinned from open,
   and catches scope gaps before planning.
@@ -20,48 +23,51 @@ A great brainstorm produces the first version of the same plan artifact that
 
 Sections earn their place by serving one of these audiences. Omit padding.
 
-## Unified plan skeleton contract
+## PRD skeleton contract
 
-New `ce-brainstorm` outputs live under `docs/plans/` and use the unified plan
-artifact contract:
+New `ce-brainstorm` outputs follow the PRD artifact contract:
 
-- **Path:** `docs/plans/YYYY-MM-DD-NNN-<type>-<topic>-plan.<md|html>`.
-- **`artifact_contract: ce-unified-plan/v1`**.
-- **`artifact_readiness: requirements-only`**.
-- **`product_contract_source: ce-brainstorm`**.
-- **`execution`** only when the brainstorm has enough signal to classify the
-  eventual execution domain. For software features, use `execution: code`.
-  For non-code deliverables, follow the universal-brainstorming route instead
-  of pretending the artifact is executable code.
+- **Path:** `prd/vN/prd.md` (N is the iteration version number, e.g., v1, v2).
+- **Metadata:** `project_name`, `iteration_version`, `prd_template` (template path).
+- **Template source:** read `prd.template` from project configuration, or use
+  the default `templates/prd.md`.
+- **Structure:** the PRD contains 11 chapters as defined by the PRD template:
+  1. 版本修订记录
+  2. 业务流程一览
+  3. D7.1_业务流程
+  4. D7.2_画面原型及设计
+  5. D7.3_报表清单
+  6. D7.4_业务术语字典
+  7. D7.5_系统功能清单
+  8. D7.6_系统功能处理说明书
+  9. D7.7_要件定义自查报告
+  10. D7.8_要件定义完成报告
+  11. D7.9_评审会议纪
 
-A requirements-only unified plan is kept **light and standalone-readable**. It
-includes:
+- **Filling rule:** the brainstorm phase fills chapters where information is
+  available from the dialogue; chapters without dialogue content retain
+  template placeholders. Do not fabricate content for empty chapters —
+  they belong to later BA processes or will be addressed by `ce-plan` in its
+  implementation plan.
 
-- `## Goal Capsule` with objective, product authority, and open blockers.
-- `## Product Contract` containing the brainstorm sections below.
-
-Do **not** emit a `## Goal Launch Block` or `## Reader Index`: the launch prompt
-is skill-emitted at handoff, not a doc section, and the contract carries no
-Reader Index — consumers wayfind by scanning headings. It also omits empty
-`Planning Contract`, `Implementation Units`, `Verification Contract`, and
-`Definition of Done` sections — empty placeholders make requirements-only docs
-look executable and waste downstream tokens. `ce-plan` adds those sections when
-it enriches the same file in place. The next step (planning) is conveyed by the
-Phase 4 handoff menu, not by a section in the doc.
+A brainstorm-produced PRD is kept **light and standalone-readable**. It
+includes only chapters that carry real information from the brainstorm
+dialogue, leaving the rest as template placeholders. Empty chapters serve
+as a reminder of what still needs to be defined.
 
 Historical `docs/brainstorms/*-requirements.*` files remain valid legacy
 inputs. Do not migrate or rewrite them when creating new artifacts.
 
 ## Decide whether a doc is warranted at all
 
-Brainstorm dialogue does not always need to produce a durable document.
+Brainstorm dialogue does not always need to produce a PRD document.
 Skip document creation when **both** hold:
 
 - The user only needs brief alignment — no exploration produced novel scope,
   framing, or decisions worth preserving in IDed shape.
 - Any durable decisions made during the dialogue can flow naturally to
   downstream artifacts (`ce-plan`, the commit message, `docs/solutions/`)
-  without a brainstorm doc as an intermediary.
+  without a PRD document as an intermediary.
 
 The trigger for creating a doc is when the dialogue surfaced enough
 structural decisions, scope boundaries, or acceptance criteria that
@@ -70,9 +76,9 @@ durable, IDed form — not just as conversational artifacts.
 
 **Stress test:** a brainstorm about a tiny bug fix where the user asks "fix
 this with a null check or with upstream validation?" and the agent confirms
-"upstream validation, here's why" doesn't need a brainstorm doc. The
+"upstream validation, here's why" doesn't need a PRD document. The
 decision flows to `ce-plan` (or directly to commit message, or to
-`docs/solutions/` if it's a pattern worth carrying) without a brainstorm
+`docs/solutions/` if it's a pattern worth carrying) without a PRD
 artifact in the middle.
 
 Conversely, a brainstorm about a multi-actor feature with contested scope
@@ -81,7 +87,7 @@ agent needs the structured content the dialogue produced.
 
 ## Match depth to content
 
-When a doc IS warranted, depth matches what the dialogue produced. A
+When a PRD IS warranted, depth matches what the dialogue produced. A
 brainstorm with sparse content produces a sparse doc; one with rich content
 produces a rich doc. Don't add ceremony to make a slim brainstorm look
 substantial.
@@ -99,9 +105,8 @@ Hold every kept section to these:
 - **Lead with the decision or outcome.** Put the conclusion first, then the
   reason, then background; keep one claim plus its support per paragraph. Don't
   bury the chosen scope, an open blocker, or a Key Decision beneath its
-  rationale. This does not override section roles — Summary stays proposal-only,
-  Problem Frame stays motivation-only and never restates the remedy.
-- **One idea per sentence.** A Summary is a handful of sentences, not one
+  rationale.
+- **One idea per sentence.** A requirement is a handful of sentences, not one
   sentence with five semicolons and four parentheticals. If a sentence needs a
   second parenthetical to stay true, split it.
 - **A requirement is one sentence of intent plus at most one qualifier.** When
@@ -112,6 +117,11 @@ Hold every kept section to these:
   "genuinely", "actually", "simply" carry nothing a downstream agent acts on.
 - **Prefer the verb to the nominalization.** "Demote the grid", not "the
   demotion of the grid is the deliberate change in this brief".
+- **Summary and motivation serve different purposes.** When both appear in a
+  chapter, the lead (summary or conclusion) is forward-looking — what is being
+  proposed or decided. The supporting context is backward-looking / situational —
+  why this proposal exists or why this decision was made. Don't restate the
+  proposal inside the motivation paragraph; the remedy lives in the conclusion.
 
 Precision is not padding: keep IDs, dates, actor names, domain terms,
 conditionals, and exact thresholds verbatim; when a concrete anchor is knowable
@@ -130,200 +140,125 @@ contradiction in each section in one pass? A sentence carrying more than one
 parenthetical, or a requirement specifying two outcomes, fails the test — split
 it or defer it.
 
-## Product Contract hard floor
+## PRD chapter contract
 
-When a requirements-only unified plan is warranted, these are present inside
-`## Product Contract`.
+When a PRD is warranted, the document follows the PRD template structure. The
+brainstorm dialogue fills chapters where information is available; chapters
+without dialogue content retain template placeholders.
 
-- **Summary** — what is being proposed, in 1-3 lines. Forward-looking.
-  Orients the reader before they invest in detail.
-- **Requirements** (with stable R-IDs) — what must be true about the
-  proposed thing. For very sparse brainstorms (≤3 simple items where the
-  bullets ARE the summary), plain bullets without IDs are acceptable; the
-  trigger for R-IDs is whether downstream consumers will reference them.
-  When requirements span distinct concerns (e.g., "Packaging" /
-  "Migration and compatibility" / "Contributor workflow"), group them
-  under bold inline headers within the Requirements section — group by
-  capability or concern, not by the order requirements were discussed.
-  The trigger is distinct concerns, not item count — even four
-  requirements benefit if they cover three different topics. Skip
-  grouping only when all requirements are genuinely about the same thing;
-  a long flat list is a smell that subgroups were missed. R-IDs stay
-  continuous across groups (R1, R2 in the first group; R3, R4 in the
-  second; never restart at R1 per group).
+### Always filled (from dialogue or metadata)
 
-## Include when material
+- **§1 版本修订记录** — auto-filled from metadata (date, user, iteration
+  version). §1.2 修订记录 carries the brainstorm date and a one-line summary
+  of what was brainstormed.
+- **§2 业务流程一览** — filled from brainstorm's Key Flows and Actors. Each
+  identified business process gets a row in the flow overview table.
+- **§7 D7.5_系统功能清单** — filled from brainstorm's Requirements. Each
+  requirement maps to a system function entry.
 
-The agent decides per brainstorm whether each section carries information
-that isn't covered elsewhere. Filling a section with placeholder prose is
-worse than omitting it.
+### Conditionally filled (when dialogue covers the topic)
 
-- **Problem Frame** — include when motivation isn't obvious from Summary
-  alone (the *why* needs paragraphs, not a sentence). Backward-looking /
-  situational. Does NOT restate the proposal; the remedy lives in Summary.
+- **§3 D7.1_业务流程** — filled when brainstorm produced multi-step Key Flows
+  with enough detail for process diagrams.
+- **§4 D7.2_画面原型及设计** — filled when brainstorm involves UI/visual
+  components. Prototype references go here.
+- **§6 D7.4_业务术语字典** — filled with domain terms defined during brainstorm
+  dialogue.
+- **§8 D7.6_系统功能处理说明书** — partially filled: §8.2 全局说明
+  (permissions, interactions, exceptions) from Key Decisions and constraints;
+  §8.4 功能模块 from Requirements. Hardware/network/performance sections
+  retain placeholders.
 
-- **Key Decisions** — include when the brainstorm produced opinionated
-  framing choices (defaults, scope narrowings, foundational technical picks)
-  that constrain Requirements / Flows / Scope below. Each entry names the
-  decision in bold with prose rationale. Sits high in the rendered doc so
-  readers encounter the framing choices before descending into detail.
-  An entry recording a decision settled in the invoking conversation may
-  carry the inline annotation
-  `(session-settled: <class> — chosen over <alternative>: <reason>)`, with
-  exactly two classes — `user-directed` (the user chose against or between
-  surfaced options) and `user-approved` (the agent proposed with the
-  tradeoff surfaced; the user assented). An agent never labels its own
-  unexamined proposal. `ce-plan` enrichment inherits these labels into
-  plan KTDs.
+### Always placeholder (belong to later processes)
 
-- **Actors** — include when the proposed thing has multi-party behavior
-  (multiple humans, agents, or systems meaningfully involved). Skip for
-  non-behavioral brainstorms (naming briefs, data-shape briefs, pure
-  research, decision frameworks).
+- **§5 D7.3_报表清单** — retains template placeholder. Report details are
+  defined during detailed design.
+- **§9 D7.7_要件定义自查报告** — retains template placeholder. Self-check
+  is a BA process artifact.
+- **§10 D7.8_要件定义完成报告** — retains template placeholder. Completion
+  report is a closing artifact.
+- **§11 D7.9_评审会议纪** — retains template placeholder. Review minutes
+  are recorded during review meetings.
 
-- **Key Flows** — include when the proposed thing has multi-step behavior.
-  Expected by default for behavioral brainstorms unless the proposed thing
-  is genuinely non-flow-shaped (pure API surface, policy, artifact output)
-  and Actors / Requirements / Scope Boundaries / Acceptance Examples
-  together prevent downstream invention of paths. When omitting from a
-  behavioral brainstorm, note the reason in the doc.
+## PRD chapters: fill when material
 
-- **Visualizations** — a brainstorm earns a visual when a concept has a
-  **structure worth showing**, and that decision turns on whether the
-  structure exists, *not* on whether your own prose reads clearly. Calling
-  your prose "clear enough" is the trap that quietly under-produces the
-  visuals a reader actually uses — decide on the shape, not the wording.
-  Shapes that warrant one: a data-shape transformation (before/after schema
-  or field mapping), a source-of-truth fan-out (one authority feeding many
-  derived surfaces), state-or-lifecycle logic, a multi-step flow, an
-  entity/relationship structure, a decision boundary, a quantitative
-  comparison — and, for any requirement that changes a UI, screen layout,
-  component placement, or screen flow, a **wireframe**. This applies to
-  backend and conceptual work, not only visual products: a data model, sync
-  protocol, or agent workflow earns a conceptual diagram exactly as a UI
-  requirement earns a wireframe. Match the visual to the shape — a UI/layout
-  shape takes a wireframe in HTML (a mermaid layout diagram or prose in
-  markdown; there is no inline-SVG wireframe in markdown), any other structure
-  takes a conceptual diagram. A visual is cross-cutting, not a section of its
-  own — it sits next to the Key Decision, Requirements group, or Flow it
-  illustrates. **A point with nothing structural to show gets no visual** — a
-  single-field add, a rename, or a one-line change has no structure, and a
-  before/after of one changed line is decoration. One visual per load-bearing
-  concept, never decoration or ceremony.
+The agent decides per brainstorm which PRD chapters carry information from the
+dialogue. Filling a chapter with placeholder content is worse than leaving it
+as template placeholder.
 
-  **Diagrams complement prose; they never replace it.** A diagram is an
-  on-ramp to the prose it illustrates, not a substitute. The IDed prose
-  (Requirements, Key Decisions, Acceptance Examples) stays complete and
-  standalone — a reader who ignores every diagram still gets the full
-  content in text, and a downstream agent that reads the artifact as linear
-  text is never left with a relationship that exists only in an SVG. Adding
-  a before/after diagram is not license to thin the requirement or decision
-  prose it depicts.
+- **§2 业务流程一览** — fill when brainstorm identified business processes,
+  user journeys, or system interactions. Each distinct process gets a row. Skip
+  rows for processes not discussed.
 
-- **Acceptance Examples** — include when any requirement has a
-  state-dependent or conditional shape ("When X, Y") where prose alone leaves
-  ambiguity about edge cases. **Always include AEs covering
-  behavioral-conditional requirements** — that's where the ambiguity bites
-  hardest. Skip when all requirements are unconditional and unambiguous.
+- **§3 D7.1_业务流程** — fill when brainstorm produced detailed multi-step
+  flows with enough granularity for process diagrams. Include the flow diagram
+  placeholder and step-by-step descriptions. Skip when flows are high-level
+  only.
 
-- **Success Criteria** — include when there are quality / metric / handoff
-  signals that Requirements don't already carry: quantitative metrics ("p95
-  latency under 200ms"), qualitative criteria ("the agent's output reads as
-  one voice"), process / handoff quality ("ce-doc-review can act on this
-  without follow-ups"). Skip when Requirements ARE the success criteria
-  (every R is "done when the R is true").
+- **§4 D7.2_画面原型及设计** — fill when brainstorm involves UI changes.
+  Include module names, page names, and prototype references. Skip entirely
+  when the brainstorm is non-visual (backend, data, API only).
 
-- **Scope Boundaries** — include when scope is contested or there are
-  tempting non-goals worth naming explicitly. When the brainstorm is about
-  positioning a product against adjacent ones the team could have built but
-  is rejecting, split into "Deferred for later" (eventually but not v1) and
-  "Outside this product's identity" (positioning decision). Otherwise, a
-  single list is fine.
+- **§6 D7.4_业务术语字典** — fill with domain terms actively defined during
+  dialogue. Only include terms where the conversation pinned down a precise
+  meaning. Skip terms merely mentioned in passing.
 
-- **Dependencies / Assumptions** — include when material upstream
-  dependencies exist or when load-bearing assumptions need to be surfaced.
+- **§7 D7.5_系统功能清单** — fill from brainstorm Requirements. Each R-ID
+  maps to a system function entry with the requirement's intent as the function
+  description.
 
-- **Outstanding Questions** — include when there are unresolved items.
-  Distinguish "Resolve Before Planning" (blocks planning) from "Deferred to
-  Planning" (answered during planning or codebase exploration).
-
-- **Sources / Research** — surface research that orients the planner or
-  justifies framing choices. The test: *"if I were the planner reading this
-  cold, would this breadcrumb help me make better choices?"* Yes → surface
-  (code locations, external docs, RFCs, constraints, prior plans — the
-  category is inclusive, not enumerated). Process exhaust (reading the
-  user's prompt, glancing at obvious files) → omit.
+- **§8 D7.6_系统功能处理说明书** — partially fill §8.2 when dialogue covered
+  permissions, interactions, or exception handling. Fill §8.4 from Requirements.
+  Skip §8.3 (hardware/network) and §8.5 (non-functional) unless the brainstorm
+  explicitly covered these.
 
 ## Agent agency
 
-The catalog is a floor, not a ceiling. When the brainstorm's content doesn't
-fit any catalog section, introduce a new one — don't force the content into
-a section it doesn't belong in. Content drives section choices, not vice
+The chapter catalog is a floor, not a ceiling. When the brainstorm's content
+doesn't fit any catalog chapter, introduce a new one — don't force the content
+into a chapter it doesn't belong in. Content drives chapter choices, not vice
 versa.
 
 The agent also picks per artifact:
 
-- Whether Acceptance Examples render as a separate section or embed in each
-  requirement
-- How much depth each present section gets
+- How much depth each present chapter gets
+- Whether supplementary diagrams or visuals appear inline or as appendices
+- How to organize the function module details within §8.4
 
-(Requirements grouping is covered above in the Hard Floor item — group by
-concern by default, rendering a flat list only when all requirements are
-about the same thing, with continuous R-IDs across groups.)
+## PRD metadata fields
 
-## Brainstorm metadata fields
-
-Every requirements-only unified plan carries a small set of stable metadata fields that
-downstream tooling depends on. The contract is format-independent: in
-markdown these fields appear as YAML frontmatter at the top of the file; in
-HTML they appear as visible header text (typically a `<dl>` of `<dt>`/`<dd>`
-pairs or a stats strip). Field names and semantics are the same across both
-formats so consumers can locate them without knowing which format produced the
-artifact.
+Every PRD produced by `ce-brainstorm` carries metadata in YAML frontmatter.
 
 ### Required
 
-- **`title`** — the artifact's descriptive name with a ` - Plan` suffix
-  (e.g., `Highlighter Tool - Plan`), matching the H1 (markdown) or document
-  `<h1>` (HTML). It is a unified plan at every readiness state, so the title
-  stays stable when `ce-plan` enriches it. Do not put a conventional-commit
-  prefix (`feat:`/`fix:`) in the title — the `type` field carries that.
-- **`type`** — conventional-commit-prefix-aligned classification (`feat`,
-  `fix`, `refactor`, `docs`, etc.).
-- **`date`** — creation date in ISO 8601 (`YYYY-MM-DD`), ASCII digits only.
-  Used in the filename (`docs/plans/YYYY-MM-DD-NNN-<type>-<topic>-plan.<md|html>`).
-- **`topic`** — kebab-case slug identifying the brainstorm subject (e.g.,
-  `surface-scope-earlier`, `demo-reel-local-save`). Used in the filename and
-  as the resume-detection key when `ce-brainstorm` scans for an existing
-  artifact to continue.
-- **`artifact_contract`** — always `ce-unified-plan/v1` for new outputs.
-- **`artifact_readiness`** — always `requirements-only` for new
-  `ce-brainstorm` outputs. Do not use `active`, `in_progress`, `completed`,
-  or `done`.
-- **`product_contract_source`** — always `ce-brainstorm`.
+- **`title`** — PRD title in format `{项目名称}_D7_业务要件` (matching the H1).
+- **`project_name`** — the project or product name.
+- **`iteration_version`** — the iteration version (e.g., "v1", "v2"),
+  corresponding to the `prd/vN/` directory.
+- **`date`** — creation date in ISO 8601 (`YYYY-MM-DD`).
+- **`prd_template`** — relative path to the PRD template used (e.g.,
+  `templates/prd.md`).
+- **`prd_readiness`** — always `requirements-only` for new `ce-brainstorm`
+  outputs. `ce-plan` produces a separate `plan.md` document (not modifying the PRD).
 
 ### No status field
 
-Unified plan artifacts have no `status` field and no `active → completed`
-lifecycle. `artifact_readiness` is document completeness, not execution
-progress. No CE artifact carries mutable progress state; whether work shipped
-is derived from git, not stored in the doc. Do not introduce one.
+PRD artifacts have no `status` field. `prd_readiness` is document completeness,
+not execution progress.
 
 ### Field-name stability
 
-Field names are stable across brainstorm revisions — never rename a field
-or repurpose its semantics. Agents composing new brainstorms MUST use these
-exact names; adding new fields is fine, but renaming `topic` to `subject`
-or `date` to `created` breaks filename construction and resume detection.
+Field names are stable across PRD revisions. Adding new fields is fine; renaming
+existing fields breaks downstream consumers.
 
 ## ID and content rules
 
-Same shape as plan rules.
-
-- **Stable IDs.** R-IDs (Requirements), A-IDs (if Actors fire), F-IDs (if
-  Flows fire), AE-IDs (if Acceptance Examples fire). No other ID namespaces.
-- **Plain prefix.** `R1.`, `A1.`, `F1.`, `AE1.` as bullet prefixes. Do not
-  bold; the prefix is visually distinctive on its own.
+- **Stable IDs.** PRD tables use the PRD template's numbering format
+  (e.g., `X.X.X.X_a1_f1`). R-IDs in brainstorm Requirements map to this
+  format when inserted into PRD tables.
+- **Plain prefix.** In brainstorm dialogue, use plain prefixes (`R1.`, `F1.`)
+  for readability. When rendering into PRD tables, convert to the template's
+  hierarchical numbering.
 - **Bold leader labels** inside Flows and Acceptance Examples
   (`**Trigger:**`, `**Covers R4, R8.**`) provide structure without deeper
   heading levels.
@@ -336,33 +271,15 @@ Same shape as plan rules.
   inherently about a technical or architectural change and those details are
   the subject of the decision.
 
-## Discipline: Summary vs Problem Frame
-
-When both sections are present, they earn separate sections only by holding
-to different purposes:
-
-| Section | Question it answers | Time direction | Length |
-|---|---|---|---|
-| `## Summary` | What is this doc proposing? | Forward-looking | 1-3 lines |
-| `## Problem Frame` | Why does this proposal exist? | Backward-looking / situational | Paragraphs |
-
-- **Summary doesn't need problem context.** A reader scanning Summary gets
-  the proposal at a glance.
-- **Problem Frame doesn't restate the proposal.** It establishes the
-  situation, the specific moment of pain, and the cost shape — then stops.
-  The remedy lives in Summary; restating it in Problem Frame is the
-  duplication that makes the two sections feel redundant.
-
 ## Rendering
 
-The format-specific references describe how to render these sections in each
+The format-specific references describe how to render these chapters in each
 output format:
 
 - **Markdown rendering:** `references/markdown-rendering.md`
 - **HTML rendering:** `references/html-rendering.md`
 
-This reference (`brainstorm-sections.md`) is about WHAT the brainstorm
-contains; rendering references are about HOW each format presents it. The
-brainstorm is written in one format — markdown OR HTML, never both — based
-on the resolved output mode. The section catalog is the same regardless of
-format.
+This reference (`brainstorm-sections.md`) is about WHAT the PRD contains;
+rendering references are about HOW each format presents it. The PRD is
+written in one format — markdown OR HTML, never both — based on the
+resolved output mode. The chapter catalog is the same regardless of format.

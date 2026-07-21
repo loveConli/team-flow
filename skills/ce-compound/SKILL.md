@@ -8,6 +8,91 @@ argument-hint: "[optional: brief context] [mode:headless] [depth:lightweight|ful
 
 Coordinate multiple subagents working in parallel to document a recently solved problem.
 
+## v0.5 升级：复利贯穿引擎
+
+ce-compound 从"手动触发的记录工具"升级为"复利贯穿引擎的执行层"：
+
+| 现有能力 | v0.5 升级 |
+|---------|----------|
+| 手动调用 `/ce-compound` 记录 | 阶段转换点自动检测 + 手动补充 |
+| 写入 `docs/solutions/` 无索引 | 写入 INDEX.md + 分阶段目录（三层索引） |
+| 无阶段感知 | 按 phase/domain 标签过滤注入 |
+| 无晋升机制 | change→product 晋升规则 |
+| 全量加载 | 三层索引按需加载（最坏 ~6.5k token） |
+
+### 三层索引架构
+
+```
+docs/solutions/
+├── INDEX.md                  # L1：轻量索引（≤150行，每条一行摘要+标签）
+├── prd/                      # 按阶段分目录
+├── plan/
+├── prototype/
+├── spec/
+├── build/
+├── review/
+└── cross-phase/              # 跨阶段通用经验
+```
+
+### 经验文件格式
+
+每条经验一个文件，frontmatter 包含标签：
+
+```yaml
+---
+phase: prd          # 阶段标签：prd | plan | prototype | spec | build | review | cross-phase
+domain: auth        # 领域标签（与 PRD/change 的领域对应）
+type: pitfall       # pitfall | pattern | decision | insight
+severity: high      # high | medium | low
+date: 2026-07-15
+source: change-id   # 来源 change（晋升时保留）
+---
+
+## 问题描述
+（一句话描述问题或经验）
+
+## 根因/模式
+（为什么会出现，或为什么这个模式有效）
+
+## 预防措施/应用方式
+（下次如何避免，或如何复用）
+```
+
+### INDEX.md 格式
+
+```markdown
+# Solutions Index
+<!-- 每条一行，按 severity 降序，≤150 行硬上限 -->
+| date | phase | domain | type | severity | summary | file |
+|------|-------|--------|------|----------|---------|------|
+```
+
+### 写入流程
+
+记录一条经验时：
+1. 确定 phase/domain/type/severity 标签
+2. 在对应阶段目录下创建经验文件（如 `docs/solutions/prd/2026-07-15-需求歧义.md`）
+3. 在 INDEX.md 中追加一行摘要
+4. 如果 INDEX.md 超过 150 行，按 severity 降序保留前 150 条，淘汰 low severity 且 date 最早的条目
+
+### 被流程自动调用
+
+各 skill 在阶段转换点通过 CLI 调用：
+```bash
+ssf solutions capture --phase <p> --domain <d> --type <t> --severity <s> --summary "<text>"
+```
+此命令等价于手动调用 `/ce-compound` 但无需交互，直接写入。
+
+### 晋升检查
+
+release-archivist 归档时调用：
+```bash
+ssf solutions promote <change-dir>
+```
+检查 `specs/<cap>/learnings.md` 中的经验：
+- severity ≥ medium 且 type = pitfall/pattern → 晋升到全局 `docs/solutions/`
+- 与全局 INDEX 中已有条目 domain+type 匹配 → 标记"已确认模式"，severity 升级
+
 ## Purpose
 
 Captures problem solutions while context is fresh, creating structured documentation in `docs/solutions/` with YAML frontmatter for searchability and future reference. Uses parallel subagents.
@@ -26,6 +111,16 @@ Captures problem solutions while context is fresh, creating structured documenta
 ```
 
 **One learning per run.** The workflow's grounding, overlap detection, and cross-referencing all assume a single solved problem. When a session produced multiple distinct learnings, run the skill once per learning, sequentially — each run grounds fresh against the tree. Do not batch several learnings through one run and stitch cross-references between the drafts afterward; drafting-context numbering ("Learning 3") leaking into written docs is the failure this rule prevents.
+
+### 自动调用场景（v0.5 新增）
+
+除手动调用外，以下场景由流程自动触发 ce-compound 写入：
+- 原型审查发现 PRD 遗漏/矛盾（phase=prd, type=pitfall）
+- spec/design 被拒绝或大幅修改（phase=spec, type=pitfall）
+- bug-investigator 发现同类问题第 2 次（phase=build, type=pattern）
+- change 执行中超出原始 scope（phase=build, type=pitfall）
+- re-bridge 触发（phase=spec, type=pitfall）
+- mandatory rewind 触发（phase=cross-phase, type=pitfall）
 
 ## CONCEPTS.md bootstrap requests
 

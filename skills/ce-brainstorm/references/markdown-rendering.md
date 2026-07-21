@@ -4,9 +4,10 @@ This is a format-rendering reference — it describes how to render any
 artifact in markdown, independent of which skill is producing it.
 
 It is paired with a section contract (`plan-sections.md`,
-`brainstorm-sections.md`, etc.) that describes *what* the artifact contains.
-This reference describes *how* markdown specifically presents it. The same
-content rendered by different skills shares the same markdown principles.
+`brainstorm-sections.md`, `prd-mapping.md`, etc.) that describes *what* the
+artifact contains. This reference describes *how* markdown specifically
+presents it. The same content rendered by different skills shares the same
+markdown principles.
 
 ## Hard invariants
 
@@ -28,17 +29,17 @@ These hold regardless of which skill produced the artifact.
   single line. The artifact is read rendered and shared, where fixed wraps add
   nothing and only produce noisy mid-sentence diffs; markdown joins soft line
   breaks within a paragraph, so wrapping never changes the rendered output.
-- **Unified plan sections use stable headings.** For unified plan artifacts,
-  render the required sections with exact ASCII headings so agents can find
-  them by heading scan: `## Goal Capsule`, `## Product Contract`,
-  `## Planning Contract`, `## Implementation Units`, `## Verification Contract`,
-  `## Definition of Done`, and optional `## Appendix`. Requirements-only
-  artifacts omit the plan-only sections rather than emitting empty placeholders.
+- **PRD sections use stable headings.** For PRD artifacts, render the 11
+  chapters with exact headings matching the PRD template: `## 一、版本修订记录`,
+  `## 二、业务流程一览`, `## 三、D7.1_业务流程`, `## 四、D7.2_画面原型及设计`,
+  `## 五、D7.3_报表清单`, `## 六、D7.4_业务术语字典`, `## 七、D7.5_系统功能清单`,
+  `## 八、D7.6_系统功能处理说明书`, `## 九、D7.7_要件定义自查报告`,
+  `## 十、D7.8_要件定义完成报告`, `## 十一、D7.9_评审会议纪`.
   These stable headings are the wayfinding contract: consumers scan them
   (markdown headings, or `<h1>`–`<h3>` / anchor ids in HTML) instead of reading
   the whole document.
-- **Goal Capsule is top-loaded.** It appears before Product Contract and long
-  appendices for fast orientation — not a hidden machine copy.
+- **版本修订记录 is top-loaded.** It appears first in the PRD for fast
+  orientation — document metadata, iteration version, and revision history.
 
 ## Format principles
 
@@ -112,38 +113,39 @@ are noisier in raw form and worse for diffs.
 How section types commonly render in markdown. These are patterns, not
 contracts — the agent picks the shape that fits the content.
 
-- **Goal Capsule** — bullets or a small table for objective, authority,
-  execution profile, stop conditions, and tail ownership.
-- **Product Contract** — H2 section containing Summary, Problem Frame,
-  Requirements, and product-scope subsections. Put Requirements under
-  `### Requirements` so review tools can distinguish Product Requirements
-  from implementation detail.
-- **Planning Contract** — H2 section for KTDs, high-level technical design,
-  assumptions, and sequencing.
-- **Summary / Problem Frame** — prose paragraphs.
-- **Requirements** — bullets with `R<N>.` prefix. When requirements span
-  more than one concern, grouping under bold inline headers is the default
-  shape, not optional polish (group by capability, not by discussion order);
-  render a flat list only when every requirement is about the same thing.
-  When requirements have status, traceability, or severity that warrant
-  additional columns, escalate to a table.
-- **Implementation Units** — H3 heading per unit with `U<N>.` prefix.
-  Fields (Goal, Files, Patterns, Test Scenarios, Verification) render as
-  bullets with bold leader labels, or as sub-headings if the field has
-  multi-paragraph content.
-- **Verification Contract / Definition of Done** — use tables when commands,
-  applicability, unit IDs, and done signals share a uniform shape. Name
-  concrete repo commands such as `bun test` rather than generic "run tests"
-  when the repo has known commands.
-- **Key Technical Decisions** — bullets with bold decision name + prose
-  rationale, or numbered KTD-N pattern when traceability matters. A
-  `session-settled:` annotation renders as part of the KTD bullet's
-  visible text, stem preserved verbatim.
-- **Key Flows / Acceptance Examples** — bullets with bold leader labels
-  (Trigger / Actors / Steps / Outcome / Covers / Given-When-Then).
-- **Scope Boundaries** — bullets, optionally split into "Deferred for
-  later" / "Outside this product's identity" sub-headings when the
-  positioning distinction matters.
+- **版本修订记录 (§一)** — small table for document metadata (status,
+  version, author, date) and a revision-history table below.
+- **业务流程一览 (§二)** — table with L1–L4 process taxonomy columns,
+  stakeholders, value description, change type, and related systems.
+- **D7.1_业务流程 (§三)** — per-flow subsections with a mermaid flowchart
+  table, summary prose, and step-by-step explanation. Appendix table for
+  the full process ledger.
+- **D7.2_画面原型及设计 (§四)** — per-module subsections with prototype
+  tables (ID, screenshot, summary columns), screen migration tables, and
+  information-structure diagrams.
+- **D7.3_报表清单 (§五)** — table with report ID, linked flow/activity/task,
+  report type, and description. Appendix table for the full report ledger.
+- **D7.4_业务术语字典 (§六)** — table with term name, definition, part of
+  speech, synonyms, and source. Appendix table for the full term ledger.
+- **D7.5_系统功能清单 (§七)** — table with function ID, linked
+  flow/activity, function name, description, parent function, and change
+  type. Appendix table for the full function ledger.
+- **D7.6_系统功能处理说明书 (§八)** — the largest chapter: function
+  overview table, global notes (permissions, interactions, exceptions,
+  sorting, search, loading), hardware/network specs, per-module function
+  detail tables, non-functional requirements (performance, availability,
+  security), analytics tracking, and encoding rules.
+- **D7.7_要件定义自查报告 (§九)** — structured self-check tables across
+  nine categories (accounts/roles, data, state/interaction, hardware,
+  other, UX, product framework, flow design, reading experience) with
+  pass/fail/not-applicable checkboxes.
+- **D7.8_要件定义完成报告 (§十)** — project overview prose, requirements
+  achievement matrix, deliverable completeness table, self-check summary
+  table, project team table, deliverable handover table, next-steps table,
+  and section prose summary.
+- **D7.9_评审会议纪 (§十一)** — review record table with project info,
+  review content summary, attendee matrix with opinions, review findings
+  with countermeasures, and conclusion prose.
 
 The agent picks more elaborate or simpler shapes based on what each
 specific artifact's content needs.
@@ -211,7 +213,8 @@ transcripts — not in the artifact a reader returns to weeks later.
 
 Per-skill frontmatter fields are defined in each skill's section contract
 (`plan-sections.md` lists plan frontmatter; `brainstorm-sections.md` lists
-brainstorm frontmatter). Common rules:
+brainstorm frontmatter; `prd-mapping.md` maps brainstorm output to PRD
+chapters). Common rules:
 
 - YAML at the top of the file, delimited by `---` on its own line above
   and below.

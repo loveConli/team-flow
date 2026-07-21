@@ -13,7 +13,7 @@ execution: code
 
 ## Goal Capsule
 
-**Objective：** 为 team-flow 的 17 个 skill 建立统一协作协议层，解决四套子系统（spec-superflow / compound-engineering / architecture-design / prototype）之间的数据流转、跨系统衔接和决策点交互体验问题。
+**Objective：** 为 team-flow 的 17 个 skill 建立统一协作协议层，解决四套子系统（spec-superflow / compound-engineering / architecture-design / prototype）之间的数据流转、跨系统衔接和决策点交互体验问题。第一优先级修复 ce-brainstorm 产物与 PRD 体系的不匹配。
 
 **Product Authority：** LT
 
@@ -23,98 +23,106 @@ execution: code
 
 ### Summary
 
-在现有 17 个 skill 之上叠加 Schema 声明式协议层 + Handoff 模板机制。每个 skill 通过 JSON Schema 声明其输入输出契约，skill 之间通过标准化 handoff 文件传递结构化上下文。四套子系统的衔接点定义明确的桥接协议。全部 8 个决策点保留，通过结构化信息提取优化展示效率。分三阶段实施。
+分三阶段实施：**P1 PRD 对齐** — 改造 ce-brainstorm 使其读取可配置的 PRD 模板、输出 PRD 格式到 `prd/vN/prd.md`、支持迭代版本自动检测+用户确认；**P2 Schema 协议层** — 每个 skill 声明 input/output schema，建立机器可解析的工件契约；**P3 Handoff + DP 优化** — 标准化 skill 间 handoff 文件，优化决策点信息展示。
 
 ### Problem Frame
 
-team-flow 由四套独立体系拼合而成（spec-superflow 9 skills + compound-engineering 6 skills + architecture-design 1 skill + prototype 1 skill）。拼合后的协作依赖隐式约定：skill 之间通过共享工件文件传递数据，但缺少机器可解析的契约定义；四套子系统间的衔接点（如 ce-plan → spec-writer、architecture-design → build-executor、prototype → execution-contract）靠人工约定而非协议；用户在 8 个决策点面临信息过载或信息不足。随着 skill 数量增长和协作路径复杂化，隐式约定已不可持续。
+**P1 根因（已验证）：** ce-brainstorm 是从 compound-engineering 复制过来的 skill，其产物契约（`ce-unified-plan/v1`、Goal Capsule + Product Contract 章节结构）是 compound 自己的设计。team-flow 设计要求 ce-brainstorm 产出 PRD 文档到 `prd/vN/prd.md`，支持可配置模板（`prd.template` 配置字段已设计但未落地）。实际验证发现：产出格式不对（ce-unified-plan vs PRD）、产出路径不对（`docs/plans/` vs `prd/`）、模板文件不存在、迭代版本（vN）无感知。
+
+**P2-P3 根因：** 四套体系拼合后协作依赖隐式约定，缺少机器可解析的契约定义和标准化 handoff 协议。
 
 ### Key Decisions
 
-1. **Schema 声明式协议 + Handoff 模板混合策略**（session-settled: user-directed — chosen over 中间件总线模式: 非侵入式、增量可部署，不改现有 skill 内部结构）
+1. **改造 ce-brainstorm 输出 PRD 格式**（session-settled: user-directed — chosen over 路由层适配/新建 skill: 直接改造，保持 skill 数量不变）
 
-2. **全覆盖分阶段实施**（session-settled: user-directed — chosen over 核心链路优先: 确保四套体系最终统一，避免遗留衔接缺口）
+2. **PRD 模板外部可配置**（session-settled: user-directed — 不同项目/团队的 PRD 模板不同，通过 `prd.template` 配置字段指定模板路径，`ssf runtime config --get prd.template` 读取）
 
-3. **保留全部 8 个决策点，优化信息展示**（session-settled: user-directed — chosen over 合并同类 DP: 保留每个 DP 的独立决策语义，通过结构化信息提取降低用户负担）
+3. **迭代版本 vN = 产品迭代版本**（session-settled: user-directed — `prd/vN` 中的 vN 是项目不同迭代版本（如 v1=MVP, v2=扩展），不是同一 PRD 的文档版本）
 
-4. **Schema 定义粒度：引用级为主 + 关键衔接点字段级**（session-settled: user-approved — chosen over 全字段级: 平衡精准度与维护成本；核心衔接点（如 execution-contract.md 的 intent lock、proposal.md 的 scope fence）定义字段级 schema，其他工件仅定义引用级）
+4. **迭代版本自动检测 + 用户确认**（session-settled: user-directed — ce-brainstorm 扫描 `prd/` 目录检测已有迭代，建议最新迭代或新迭代，用户确认）
 
-5. **Handoff 格式：YAML 结构化数据 + 自动 Markdown 摘要**（session-settled: user-approved — chosen over 纯 Markdown: YAML 驱动机器消费，Markdown 摘要驱动人类理解和 DP 展示）
+5. **Schema 声明式协议 + Handoff 模板混合策略**（session-settled: user-directed — chosen over 中间件总线模式: 非侵入式、增量可部署）
+
+6. **保留全部 8 个决策点，优化信息展示**（session-settled: user-directed — chosen over 合并同类 DP: 保留决策粒度）
 
 ### Requirements
 
-**Schema 协议层**
+**Phase 1：PRD 对齐**
 
-R1. 每个 skill 的 SKILL.md frontmatter 增加 `input_schema` 和 `output_schema` 字段，声明该 skill 消费和产出的工件列表及结构约束。
+R1. 创建默认 PRD 模板 `templates/prd.md`（已完成），包含 11 个一级章节：版本修订记录、业务流程一览、D7.1 业务流程、D7.2 画面原型及设计、D7.3 报表清单、D7.4 业务术语字典、D7.5 系统功能清单、D7.6 系统功能处理说明书、D7.7 要件定义自查报告、D7.8 要件定义完成报告、D7.9 评审会议纪。
 
-R2. `input_schema` 中每个工件条目包含：`artifact`（工件文件名）、`required`（是否必须）、`schema_ref`（可选，指向 JSON Schema 定义文件）。引用级 schema 只需 `artifact` + `required`；字段级 schema 额外需要 `schema_ref`。
+R2. 改造 ce-brainstorm SKILL.md，使其读取 `prd.template` 配置（`ssf runtime config --get prd.template`），如未配置则使用默认模板 `templates/prd.md`。
 
-R3. `output_schema` 格式与 `input_schema` 对称，额外增加 `consumed_by` 字段声明下游消费者 skill 列表。
+R3. ce-brainstorm 产出 PRD 文档写入 `prd/vN/prd.md`（N 为迭代版本号），而非 `docs/plans/` 目录。
 
-R4. 在 `team-flow/schemas/` 目录下维护关键衔接点的 JSON Schema 定义文件，包括：`execution-contract.schema.json`、`proposal.schema.json`、`handoff.schema.json`。
+R4. ce-brainstorm 在启动时扫描 `prd/` 目录检测已有迭代版本，自动建议最新迭代或创建新迭代，用户确认后继续。
 
-**Handoff 机制**
+R5. ce-brainstorm 的产物元数据适配 PRD 体系：移除 `artifact_contract: ce-unified-plan/v1`，替换为 PRD 相关元数据（项目名称、迭代版本、文档状态等，对齐模板 §1.1 版本信息表）。
 
-R5. 每个 skill 完成时生成标准 handoff 文件（`handoff.yaml`），存放在变更目录的 `.superpowers/sdd/handoffs/` 下（复用现有 checkpoint/handoff 目录结构）。
+R6. ce-brainstorm 的章节结构从 "Goal Capsule + Product Contract" 改为 PRD 模板的 11 章结构。brainstorm 对话中收集的信息填充到对应 PRD 章节。
 
-R6. handoff 文件包含以下标准字段：`from_skill`、`to_skill`、`timestamp`、`artifacts`（产出工件引用列表）、`context_summary`（关键决策和约束的结构化摘要）、`dp_digest`（如经过 DP，用户的决策摘要）。
+R7. 保留 ce-brainstorm 的对话式 brainstorm 能力（交互规则、Phase 1-4 流程），但产出格式和目标路径对齐 PRD 体系。
 
-R7. 四套子系统的衔接点使用专用 handoff 变体，通过 `bridge_type` 字段区分：`compound-to-spec`（ce-plan → spec-writer）、`arch-to-exec`（architecture-design → build-executor）、`prototype-to-exec`（prototype → execution-contract）、`spec-to-compound`（closing → ce-compound 复利回写）。
+**Phase 2：Schema 协议层**
 
-R8. handoff 文件同时生成人类可读的 Markdown 摘要版本（`handoff-summary.md`），用于 DP 展示和用户审查。
+R8. 每个 skill 的 SKILL.md frontmatter 增加 `input_schema` 和 `output_schema` 字段，声明该 skill 消费和产出的工件列表及结构约束。
 
-**决策点优化**
+R9. `input_schema` 中每个工件条目包含：`artifact`（工件文件名）、`required`（是否必须）、`schema_ref`（可选，指向 JSON Schema 定义文件）。
 
-R9. 每个 DP 的触发 skill 从上游 handoff 文件中自动提取结构化摘要，生成 DP 展示信息。用户看到的是精炼的决策上下文而非原始工件全文。
+R10. `output_schema` 格式与 `input_schema` 对称，额外增加 `consumed_by` 字段声明下游消费者 skill 列表。
 
-R10. DP 展示遵循统一模板：`决策背景`（1-2 句，从 context_summary 提取）、`关键选项`（如有）、`推荐/默认`（如有）、`原始工件链接`（完整信息的降级入口）。
+R11. 在 `team-flow/schemas/` 目录下维护关键衔接点的 JSON Schema 定义文件。
 
-R11. 保持全部 8 个 DP（DP-0 至 DP-7）的门禁完整性，不合并不精简。
+**Phase 3：Handoff + DP 优化**
 
-**跨系统衔接**
+R12. 每个 skill 完成时生成标准 handoff 文件（`handoff.yaml`），包含 `from_skill`、`to_skill`、`timestamp`、`artifacts`、`context_summary`、`dp_digest` 字段。
 
-R12. 定义四套子系统的衔接点清单和每个衔接点的数据契约：ce-brainstorm → ce-plan（需求 → PRD）、ce-plan → spec-writer（PRD → change）、architecture-design → build-executor（架构增量 → 执行约束）、prototype → execution-contract（UI 契约 → 执行契约）、build-executor → ce-compound（实现结果 → 复利回写）。
+R13. 四套子系统的衔接点使用专用 handoff 变体，通过 `bridge_type` 字段区分。
 
-R13. 每个衔接点的 handoff 必须携带上游 skill 的核心产出引用，确保下游 skill 无需重新扫描上游工件。
+R14. 每个 DP 的触发 skill 从上游 handoff 自动提取结构化摘要，生成精炼的 DP 展示信息。
 
-R14. workflow-start 路由时检查 handoff 链完整性：从当前状态回溯到最近的 handoff 文件，确认上游 skill 的产出可消费。
+R15. 保持全部 8 个 DP（DP-0 至 DP-7）的门禁完整性。
 
 ### Scope Boundaries
 
 **Deferred for later：**
 
-- Schema 校验引擎的自动化实现（运行时校验、CI 集成）— 属于 ce-plan 实现阶段
-- DP 展示的 UI/UX 细节设计（交互控件、布局、动画）— 需要具体宿主环境上下文
-- handoff 文件的版本演进和向后兼容策略 — 稳定运行后再议
+- Schema 校验引擎的自动化实现（运行时校验、CI 集成）
+- DP 展示的 UI/UX 细节设计（交互控件、布局、动画）
+- handoff 文件的版本演进和向后兼容策略
+- PRD 模板的多样化（不同行业/团队的模板变体）
 
 **Outside this scope：**
 
-- 不重构现有 skill 的内部逻辑和产物结构
 - 不改状态机的 8 态定义和转换规则
 - 不涉及 spec-superflow 底座（TypeScript 解析引擎）的代码改动
+- 不改变 PRD 模板的 11 章结构（由企业模板蒸馏确定）
 
 ### Dependencies / Assumptions
 
+- `ssf runtime config --get prd.template` 机制可正常读取配置（HANDOFF.md §6 提到需要实测）
 - 现有 `.superpowers/sdd/checkpoints/` 和 `.superpowers/sdd/handoffs/` 目录结构可复用
-- `ssf runtime config --get` 机制可扩展读取 schema 相关配置
-- 所有 skill 的 SKILL.md frontmatter 支持扩展字段（当前 frontmatter 已有 `name`、`description`、`version` 等字段）
+- 所有 skill 的 SKILL.md frontmatter 支持扩展字段
+- PRD 模板的 11 章结构适用于大多数项目（不适用时通过 `prd.template` 配置替换）
 
 ### Outstanding Questions
 
 **Deferred to Planning：**
 
-- `handoff.yaml` 是否需要与现有的 `checkpoint` JSON 格式保持结构一致性？（现有 checkpoint 在 `execution-plan.json` 中使用 JSON，handoff 用 YAML 是否造成格式分裂？）
-- `schemas/` 目录下的 JSON Schema 文件是否需要纳入 `check-version-consistency.mjs` 的版本守卫？
+- `prd.template` 配置字段在 `spec-superflow.config.json` 中的 schema 定义（需要扩展 config schema）
+- ce-brainstorm 如何处理"需求不够完整、无法填充全部 11 章"的场景（部分章节留空 vs 分阶段填充）
+- 迭代版本 vN 的编号规范（纯数字 v1/v2/v3 vs 语义化 v1.0/v1.1）
+- `handoff.yaml` 是否需要与现有 `checkpoint` JSON 格式保持结构一致性
 - 17 个 skill 的 input/output schema 逐一定义的具体字段清单
-- handoff 文件的命名规范（时间戳 vs skill 名 vs 序号）
-- bridge_type 变体的具体结构差异
 
 ### Acceptance Examples
 
-**AE1.** **When** workflow-start 路由到 need-explorer，**then** need-explorer 的 `input_schema` 声明了对 `workflow-context` 的依赖，workflow-start 自动将变更意图和约束写入 handoff 文件供 need-explorer 消费。
+**AE1.** **When** 用户启动 ce-brainstorm 并指定"完善产品研发工作流的设计"，**then** ce-brainstorm 扫描 `prd/` 目录，检测到已有 v1，建议"在 v1 上继续"或"创建 v2"，用户确认后在对应迭代目录下工作。
 
-**AE2.** **When** ce-plan 完成 PRD 后需要交给 spec-writer 启动 change，**then** ce-plan 生成 `bridge_type: compound-to-spec` 的 handoff 文件，spec-writer 从中读取 PRD 引用和关键决策摘要，无需用户手动转述。
+**AE2.** **When** ce-brainstorm 完成 brainstorm 对话，**then** 产出 `prd/v1/prd.md`（或 `prd/v2/prd.md`），结构对齐 `templates/prd.md` 的 11 章，占位符被对话中收集的信息填充。
 
-**AE3.** **When** 用户到达 DP-2（工件审查），**then** DP 展示从上游 handoff 自动提取 4 个工件的结构化摘要（每个工件 1-2 句话），用户基于摘要快速决策，需要详情时可展开原始工件链接。
+**AE3.** **When** 项目配置了自定义 PRD 模板（`spec-superflow.config.json` 中 `prd.template: ".team-flow/custom-prd.md"`），**then** ce-brainstorm 读取自定义模板而非默认模板。
 
-**AE4.** **When** build-executor 需要 architecture-design 的架构增量信息，**then** `bridge_type: arch-to-exec` 的 handoff 携带聚合根、限界上下文、API 映射的结构化引用，build-executor 的 `input_schema` 声明了对这些引用的消费契约。
+**AE4.** **When** ce-plan 接手 ce-brainstorm 的 PRD 产出，**then** ce-plan 在同一 `prd/vN/prd.md` 文件上就地 enrich，将 requirements-only 状态提升为 implementation-ready。
+
+**AE5.** **When** ce-plan 完成 PRD enrich 后需要交给 spec-writer 启动 change，**then** ce-plan 生成 handoff 文件，spec-writer 从中读取 PRD 引用，无需用户手动转述。

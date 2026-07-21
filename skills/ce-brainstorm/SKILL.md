@@ -1,16 +1,16 @@
 ---
 name: ce-brainstorm
-description: 'Explore vague or ambitious ideas into a right-sized requirements-only unified plan. Use when the user wants to brainstorm, think through scope, decide what to build, or needs collaborative product framing before planning. Also use when the user must scope work in territory they say they do not know ("I know nothing about X but need to...") or asks for a blindspot pass — mapping the decision surface before questions begin. Not for executing already-specified work — direct implementation, debugging, or code review where no product scope is left to decide. Not for a decisive verdict on whether to adopt or switch to a specific external technology, library, or platform — brainstorming scopes what to build, not whether to commit to an outside option.'
+description: 'Explore vague or ambitious ideas into a structured PRD document. Use when the user wants to brainstorm, think through scope, decide what to build, or needs collaborative product framing before planning. Also use when the user must scope work in territory they say they do not know ("I know nothing about X but need to...") or asks for a blindspot pass — mapping the decision surface before questions begin. Not for executing already-specified work — direct implementation, debugging, or code review where no product scope is left to decide. Not for a decisive verdict on whether to adopt or switch to a specific external technology, library, or platform — brainstorming scopes what to build, not whether to commit to an outside option.'
 argument-hint: "[feature idea or problem to explore] [output:html]"
 ---
 
 # Brainstorm a Feature or Improvement
 
-**Note: The current year is 2026.** Use this when dating requirements-only unified plans.
+**Note: The current year is 2026.** Use this when dating PRD documents.
 
-Brainstorming helps answer **WHAT** to build through collaborative dialogue. It precedes `/ce-plan`, which enriches the same unified plan artifact with **HOW** to build it.
+Brainstorming helps answer **WHAT** to build through collaborative dialogue. It precedes `/ce-plan`, which enriches the same PRD artifact with **HOW** to build it.
 
-The durable output of this workflow is a **requirements-only unified plan**. In other workflows this might be called a lightweight PRD or feature brief. In compound engineering, keep the workflow name `brainstorm`, but write the first version of the plan artifact under `docs/plans/` with `artifact_readiness: requirements-only` so planning does not need to invent product behavior, scope boundaries, or success criteria.
+The durable output of this workflow is a **PRD document** (产品需求文档). In compound engineering, keep the workflow name `brainstorm`, but write the first version of the PRD under `prd/vN/prd.md` so planning does not need to invent product behavior, scope boundaries, or success criteria. The PRD template is configurable — use the path specified by `prd.template` config, or fall back to the default template at `templates/prd.md` (relative to the skill's base directory).
 
 This skill does not implement code. It explores, clarifies, and documents decisions for later planning or execution.
 
@@ -20,7 +20,7 @@ This skill does not implement code. It explores, clarifies, and documents decisi
 2. **Be a thinking partner** - Suggest alternatives, challenge assumptions, and explore what-ifs instead of only extracting requirements.
 3. **Resolve product decisions here** - User-facing behavior, scope boundaries, and success criteria belong in this workflow. Detailed implementation belongs in planning.
 4. **Keep implementation out of the Product Contract by default** - Do not include libraries, schemas, endpoints, file layouts, or code-level design unless the brainstorm itself is inherently about a technical or architectural change.
-5. **Right-size the artifact** - Simple work gets a compact requirements-only unified plan or brief alignment. Larger work gets a fuller Product Contract. Do not add ceremony that does not help planning.
+5. **Right-size the artifact** - Simple work gets a compact PRD or brief alignment. Larger work gets a fuller PRD. Do not add ceremony that does not help planning.
 6. **Apply YAGNI to carrying cost, not coding effort** - Prefer the simplest approach that delivers meaningful value. Avoid speculative complexity and hypothetical future-proofing, but low-cost polish or delight is worth including when its ongoing cost is small and easy to maintain.
 7. **Do not turn coverage into decomposition** - For software brainstorms, treat named devices, providers, and data sources as coverage requirements, not automatically as separate integration workstreams. Split them only when a shared access path cannot satisfy a named requirement. Leave connector selection to planning unless that choice materially changes product scope or behavior.
 
@@ -59,7 +59,7 @@ Do not proceed until you have a feature description from the user.
 
 #### 0.0 Resolve Output Mode
 
-Determine `OUTPUT_FORMAT` before any other phase fires. Output mode is **exclusive** — the requirements-only unified plan is written as either markdown (`.md`) OR HTML (`.html`), never both. Precedence: in-prompt request > user-stated preference > config > default (`md`), with a hard pipeline-mode override.
+Determine `OUTPUT_FORMAT` before any other phase fires. Output mode is **exclusive** — the PRD document is written as either markdown (`.md`) OR HTML (`.html`), never both. Precedence: in-prompt request > user-stated preference > config > default (`md`), with a hard pipeline-mode override.
 
 **Read config.** Resolve `<repo-root>` at runtime by running `git rev-parse --show-toplevel` with the shell tool. Then read `<repo-root>/.compound-engineering/config.local.yaml` with the native file-read tool. If the root cannot be resolved (not a git repo) or the file does not exist, fall through to the defaults below.
 
@@ -77,17 +77,20 @@ Resolution steps:
 
 **Resolve the format here; load the rendering reference at Phase 3, not now.** The format-rendering reference (`references/markdown-rendering.md` for `md`, `references/html-rendering.md` for `html`) is consumed only when the doc is composed — loading it during Phase 0 would carry 200+ lines through the entire dialogue. Phase 3 names the load. Section content is the same in either format; presentation differs.
 
-The `output:` preference does NOT auto-propagate to `ce-plan` on handoff — ce-plan re-resolves its own `plan_output` config independently. Because both skills now operate on the same unified artifact, an explicit conversion by `ce-plan` must report the old path and new canonical path; pipeline mode may force markdown by writing the canonical markdown plan path and leaving any HTML sibling untouched as non-canonical for automated discovery.
+**Resolve PRD template.** Read `prd.template` config via `ssf runtime config --get prd.template`. If configured, use that template path. If not configured or reading fails, use the default template at `templates/prd.md` (relative to the skill's base directory). Store as `PRD_TEMPLATE_PATH`.
+
+The `output:` preference does NOT auto-propagate to `ce-plan` on handoff — ce-plan re-resolves its own `plan_output` config independently. Because both skills now operate on the same PRD artifact, an explicit conversion by `ce-plan` must report the old path and new canonical path; pipeline mode may force markdown by writing the canonical markdown PRD path and leaving any HTML sibling untouched as non-canonical for automated discovery.
 
 #### 0.1 Resume Existing Work When Appropriate
 
-If the user references an existing brainstorm topic or document, or there is an obvious recent matching unified plan in `docs/plans/` with `artifact_contract: ce-unified-plan/v1`, `artifact_readiness: requirements-only`, and `product_contract_source: ce-brainstorm`:
-- Read the document
-- Confirm with the user before resuming: "Found an existing requirements-only plan for [topic]. Should I continue from this, or start fresh?"
+If the user references an existing brainstorm topic or document, or there is an obvious recent matching PRD in the `prd/` directory:
+- Scan `prd/` for existing iteration versions (v1, v2, ...)
+- Read the latest PRD document
+- Confirm with the user before resuming: "Found an existing PRD for [topic]. Should I continue from this, or start fresh?"
 - If resuming, summarize the current state briefly, continue from its existing decisions and outstanding questions, and update the existing document instead of creating a duplicate
 - **Resume preserves the existing artifact's format, except pipeline mode.** Write back in whatever format the existing artifact uses — markdown if the existing file is `.md`, HTML if it is `.html`. Explicit `output:` arguments on this run override (e.g., resuming an `.html` doc with `output:md` switches the artifact to markdown). Pipeline mode (LFG, any `disable-model-invocation` context) always wins per Phase 0.0: even when resuming an existing `.html` brainstorm, pipeline runs force `OUTPUT_FORMAT=md` so downstream automation receives the markdown shape it expects. The resume rewrites the markdown file at the parallel path and the original `.html` is left in place untouched.
 
-Historical `docs/brainstorms/*-requirements.{md,html}` files remain legacy inputs for `ce-plan`, but new `ce-brainstorm` outputs do not write there.
+Historical `docs/brainstorms/*-requirements.{md,html}` files remain legacy inputs for `ce-plan`, but new `ce-brainstorm` outputs write to `prd/{ITERATION_VERSION}/prd.md` instead.
 
 #### 0.1b Classify Task Domain
 
@@ -103,7 +106,7 @@ Before proceeding to Phase 0.2, classify whether this is a software task. The ke
 
 **Verdict-shape carve-out — do not exit before the 0.1c gate.** A request weighing whether to **adopt / switch to / replace** a *named external technology, library, pattern, platform, or architecture* for this project is a **software** decision even when it only names the tool and asks the bare question ("should we adopt Biome here?"). Classify it as **Software** and continue so the 0.1c gate below can catch it — do **not** route it to *Neither* or *Non-software*, which would skip the gate and lose the exact verdict-shape prompts that gate is for.
 
-**If non-software brainstorming is detected:** Read `references/universal-brainstorming.md` now and follow it — it replaces Phases 0.2–4 entirely. Scope assessment, exploration moves, convergence, and the wrap-up menu for this route live there, not in this main body; improvising them produces an unstructured chat with no synthesis and no handoff. The non-software route does **not** write `artifact_contract: ce-unified-plan/v1` or `artifact_readiness: requirements-only`; those fields are reserved for software Product Contracts that can later become implementation-ready code plans. The **Core Principles and Interaction Rules above still apply unchanged** — including one-question-per-turn and the default to the platform's blocking question tool — and are the only part of this file that survives the route.
+**If non-software brainstorming is detected:** Read `references/universal-brainstorming.md` now and follow it — it replaces Phases 0.2–4 entirely. Scope assessment, exploration moves, convergence, and the wrap-up menu for this route live there, not in this main body; improvising them produces an unstructured chat with no synthesis and no handoff. The non-software route does **not** write a PRD document; PRD generation is reserved for software brainstorming that can later become implementation-ready plans. The **Core Principles and Interaction Rules above still apply unchanged** — including one-question-per-turn and the default to the platform's blocking question tool — and are the only part of this file that survives the route.
 
 #### 0.1c Route a Verdict Question to ce-pov
 
@@ -122,7 +125,7 @@ When the shape matches — at intake, or whenever later dialogue (Phases 1.3–2
 - Constrained, well-defined scope
 
 **If requirements are already clear:**
-Keep the interaction brief. Confirm understanding and present concise next-step options rather than forcing a long brainstorm. Only write a short requirements-only unified plan when a durable handoff to planning or later review would be valuable. Skip Phase 1.1 and 1.2 entirely — still classify tier in Phase 0.3, then go straight to Phase 1.3 or Phase 2.5 and follow `references/synthesis-summary.md`'s Path A / Path B gate exactly. Do not assume the synthesis is announce-only: a richly pre-loaded prompt classifies as Standard or Deep, which routes to Path B (full scoping synthesis + confirmation), not Path A — collapsing that gate is the defect `synthesis-summary.md` warns against.
+Keep the interaction brief. Confirm understanding and present concise next-step options rather than forcing a long brainstorm. Only write a short PRD when a durable handoff to planning or later review would be valuable. Skip Phase 1.1 and 1.2 entirely — still classify tier in Phase 0.3, then go straight to Phase 1.3 or Phase 2.5 and follow `references/synthesis-summary.md`'s Path A / Path B gate exactly. Do not assume the synthesis is announce-only: a richly pre-loaded prompt classifies as Standard or Deep, which routes to Path B (full scoping synthesis + confirmation), not Path A — collapsing that gate is the defect `synthesis-summary.md` warns against.
 
 #### 0.3 Assess Scope
 
@@ -156,7 +159,7 @@ The spine is five tasks, in order:
 2. Ask scoping questions
 3. Weigh approaches and recommend
 4. Confirm scope before writing
-5. Write the requirements plan
+5. Write the PRD document
 
 **Conditional work earns a task only when its gate fires** — never at creation, and never as a placeholder for a branch that may not run. A branch earns one when the user is either waiting on it or would be surprised to learn it happened: an accepted blindspot pass, a dispatched Slack researcher, a Phase 2.6 verifier working in the background. A step that fires per-decision rather than once does not — it would thrash the list. Insert it at the position where it runs.
 
@@ -165,6 +168,16 @@ The spine is five tasks, in order:
 **When a gate resolves such that a listed task will not run, record the skip — never mark it plainly complete, and never let it vanish unexplained.** In order of preference: set a `cancelled` or `skipped` status if the harness has one; otherwise rename the task to name the skip (`Skipped: no doc warranted`) and then mark it complete; only if the name cannot be changed, delete it. Say why in the conversation either way — the list carries the fact, not the reason. If Phase 3 decides no doc is warranted, that is task 5. If the 0.1c handoff is accepted mid-dialogue, clear the list entirely — `ce-pov` owns the run from there. A task you find yourself skipping routinely is misnamed: it encodes a branch rather than an outcome, so rename it to what happens in the common case.
 
 The list is a view for the user, not an instruction to you. It does not change when a phase fires or what that phase requires, and it never substitutes for a phase's own exit condition.
+
+#### 0.5 Resolve Iteration Version
+
+Scan the `prd/` directory to detect existing iteration versions (v1, v2, v3, ...).
+- If no iterations exist: suggest creating v1, ask user to confirm
+- If iterations exist: suggest the latest iteration, offer to continue or create new
+- User confirms the target iteration version
+- Store as `ITERATION_VERSION` (e.g., "v1", "v2")
+- Target PRD path: `prd/{ITERATION_VERSION}/prd.md`
+- Scan `prototype/` directory to confirm prototype branch aligns with PRD iteration version (if prototype exists).
 
 ### Phase 1: Understand the Idea
 
@@ -177,6 +190,7 @@ Scan the repo before substantive brainstorming. Match depth to scope:
 **Standard and Deep** — Two passes:
 
 *Constraint Check (inline)* — Use the project's active instructions and conventions already in your context. Read `STRATEGY.md` if it exists for product direction and `CONCEPTS.md` if it exists for canonical vocabulary. Use canonical names in dialogue, approaches, and the Product Contract; if a source adds nothing, move on.
+- **Solutions index (v0.5)**: Read `docs/solutions/INDEX.md` if it exists. Filter entries where `phase = prd OR phase = cross-phase` and `domain` matches the current topic. Inject top-5 summaries as context constraints. If INDEX.md does not exist or is empty, skip silently.
 
 *Topic Scan (grounding scout)* — Create and retain the absolute scratch directory with this shell block, substituting the absolute path of this skill's directory and a short unique run slug:
 
@@ -277,7 +291,7 @@ If relevant, call out whether the choice is:
 
 **STOP. Before composing the synthesis, read `references/synthesis-summary.md`.** The two-stage shape (internal three-bucket draft → chat-time scoping synthesis), the four scoping synthesis sections with their keep tests, the per-bullet affirmability and detail tests, the tier-aware bullet budget with re-cut rule, anti-pattern guidance, soft-cut behavior, self-redirect support, and internal-draft routing into doc body sections all live there — none of them appear in this main body. Composing a synthesis without these rules loaded reliably produces malformed output: the full internal three-bucket draft pasted verbatim into chat, implementation detail leaking into the scoping synthesis, the proposal-pitch anti-pattern. The Path A / Path B routing below decides only *whether* a confirmation fires — it is not the synthesis spec.
 
-Surface a scoping synthesis to the user before Phase 3 writes the requirements-only unified plan — the user's last opportunity to correct scope before the artifact lands. The scoping synthesis is shaped like what two product collaborators would confirm before writing a PRD, not like a comprehensive audit or a one-line preview.
+Surface a scoping synthesis to the user before Phase 3 writes the PRD document — the user's last opportunity to correct scope before the artifact lands. The scoping synthesis is shaped like what two product collaborators would confirm before writing a PRD, not like a comprehensive audit or a one-line preview.
 
 Fires for **all tiers** including Lightweight. Skip Phase 2.5 entirely on the Phase 0.1b non-software (universal-brainstorming) route.
 
@@ -293,26 +307,34 @@ Consume the verdicts at Phase 3: correct refuted claims before writing, label un
 
 Skip when Path A fires, when the doc will make no checkable claims, or on the non-software route. If the verifier dispatch fails, fall back to verifying the claims inline before the Phase 3 write — Phase 1.1's verify-before-claiming rule still holds either way.
 
-### Phase 3: Capture the Requirements-Only Unified Plan
+### Phase 3: Generate PRD Document
 
-Write or update a requirements-only unified plan only when the conversation produced durable decisions worth preserving — see `references/brainstorm-sections.md` "Decide whether a doc is warranted at all" for the criteria and the bug-fix stress test. Skip document creation when the user only needs brief alignment and the decisions can flow downstream (ce-plan, commit message, docs/solutions/) without a brainstorm artifact in the middle.
+Generate a PRD document when the conversation produced durable decisions worth preserving — see `references/brainstorm-sections.md` "Decide whether a doc is warranted at all" for the criteria and the bug-fix stress test. Skip when the user only needs brief alignment.
 
-When a doc is warranted, compose it using:
+When a doc is warranted:
 
-- `references/brainstorm-sections.md` — section contract (unified plan skeleton contract, Product Contract hard floor, include-when-material catalog, agency rules, ID conventions).
-- The format-specific rendering reference for the `OUTPUT_FORMAT` resolved at Phase 0.0 — read `references/markdown-rendering.md` (md) or `references/html-rendering.md` (html) **now**, before composing. It defines how the format presents the sections and was deliberately deferred from Phase 0.0; composing without it produces format drift the section contract alone cannot prevent.
+1. **Read the PRD template** from `PRD_TEMPLATE_PATH` (resolved at Phase 0.0). The template defines the 11-chapter PRD structure.
 
-Session-settled decisions land in the Product Contract's Key Decisions section carrying their `session-settled:` annotation (shape in `references/settled-decisions.md`), so `ce-plan` enrichment inherits the label into plan KTDs.
+2. **Fill the template** using `references/prd-mapping.md` — it maps brainstorm dialogue information to PRD chapters. Key rules:
+   - Chapters with dialogue-derived content get filled (§2-§4, §6-§8)
+   - Chapters without dialogue content retain template placeholders (§5, §9-§11)
+   - §1 (版本修订记录) is auto-filled from metadata (date, user info)
+   - Do NOT hard-fill chapters that belong to later BA processes
 
-**Write tight.** A section being material is not license to pad it. Hold every kept section to the prose-economy discipline in `references/brainstorm-sections.md`: lead with the decision or outcome, one idea per sentence, a requirement is intent plus at most one qualifier, defer forks to Outstanding Questions rather than specifying both arms, resolve superseded text in place rather than stacking strata. Before declaring the doc written, run the named test there — could a reader find a contradiction in each section in one pass?
+3. **Write to `prd/{ITERATION_VERSION}/prd.md`** (resolved at Phase 0.5). Create the directory if it doesn't exist.
 
-Write to `docs/plans/YYYY-MM-DD-NNN-<type>-<topic>-plan.<md|html>` — extension follows `OUTPUT_FORMAT`. Include `artifact_contract: ce-unified-plan/v1`, `artifact_readiness: requirements-only`, and `product_contract_source: ce-brainstorm`. Title is `<Name> - Plan` (matching the H1; no conventional-commit prefix). Keep the doc light and standalone-readable: a Goal Capsule (objective, product authority, open blockers) and the Product Contract. Do **not** emit a Goal Launch Block or Reader Index. See `references/brainstorm-sections.md` — which owns the artifact content rules, including repo-relative file paths inside the doc. When confirming in chat, report the written artifact with its absolute path so the reference is clickable.
+4. **Metadata**: Replace ce-unified-plan metadata with PRD metadata:
+   - Remove: `artifact_contract`, `artifact_readiness`, `product_contract_source`
+   - Add: `project_name`, `iteration_version`, `prd_template` (path to template used)
+   - Keep: `title`, `date`
 
-#### Vocabulary Capture — after the requirements-only unified plan (only if CONCEPTS.md already exists)
+5. **Report** the written artifact with its absolute path.
+
+#### Vocabulary Capture — after the PRD document (only if CONCEPTS.md already exists)
 
 **Skip this step entirely if `CONCEPTS.md` does not exist at repo root** — creation is owned by ce-compound and ce-compound-refresh.
 
-Run this **after** the approaches, the scope synthesis, and the requirements-only unified plan — that is where the canonical term often gets chosen or corrected, so capturing during early dialogue (before this point) would miss the final resolved name. If it exists, scan the full dialogue and the Product Contract for **resolved** domain terms — terms where the conversation actively pinned down a precise local meaning, not terms merely mentioned in passing. **Resolved means the definition is settled, not still under discussion.** Provisional terms that may still revise stay in the conversation only.
+Run this **after** the approaches, the scope synthesis, and the PRD document — that is where the canonical term often gets chosen or corrected, so capturing during early dialogue (before this point) would miss the final resolved name. If it exists, scan the full dialogue and the Product Contract for **resolved** domain terms — terms where the conversation actively pinned down a precise local meaning, not terms merely mentioned in passing. **Resolved means the definition is settled, not still under discussion.** Provisional terms that may still revise stay in the conversation only.
 
 For each resolved term: if missing, add it; if present but new precision surfaced, refine it; if already consistent, no action.
 
@@ -320,6 +342,51 @@ For each resolved term: if missing, add it; if present but new precision surface
 
 Follow the format set by existing entries. Apply edits silently. (If Phase 3 skipped the doc, still run this against the resolved dialogue.)
 
+### Phase 3.5: Prototype Inner Loop（原型内循环，v0.5 新增）
+
+PRD 文档写入后、Handoff 之前，执行原型内循环。原型是 PRD 的**验证工具**，不是 PRD 的下游。
+
+#### 3.5.1 原型触发判断
+
+检查 PRD 草稿中是否包含 UI/画面/交互相关功能点（§4 画面原型、§7 系统功能清单中的 UI 功能）。
+
+- **包含 UI 功能点** → 使用平台阻塞问题工具询问用户："PRD 包含 UI 功能点，是否需要产出原型进行验证？"
+- **不包含 UI 功能点** → 跳过原型内循环，直接进入 Phase 4
+- **用户选择跳过** → 跳过，PRD 直接冻结
+
+#### 3.5.2 原型产出
+
+如果需要原型：
+1. 读取 PRD 草稿中的功能点清单（§7 系统功能清单）
+2. 读取项目 `design-system.md`（通过 `ssf runtime config --get prototype.designSystem` 获取路径）
+3. 调用 `/prototype` skill 产出原型页面
+4. 产出 `prototype/` 目录（index.html + pages/ + components/ + flow.md）
+
+#### 3.5.3 原型审查（对照 PRD）
+
+逐功能点检查：
+- PRD 中每个 UI 功能点是否在原型中有对应页面/组件？
+- PRD 中的状态流转是否在原型 flow.md 中完整体现？
+- PRD 中的边界条件是否在原型中有体现（空状态/错误状态/加载状态）？
+
+产出审查报告：覆盖/遗漏/矛盾清单。
+
+#### 3.5.4 修正循环
+
+如果审查发现问题：
+- **遗漏** → 回到 Phase 1.3 对话，补充 PRD 功能点 → 更新原型 → 回 3.5.3
+- **矛盾** → 回到 Phase 1.3 对话，解决矛盾 → 更新原型 → 回 3.5.3
+- **最多循环 3 次**，超过则标记为"需人工介入"，在 PRD 中记录未解决项
+- 每次修正触发复利捕获：`ssf solutions capture --phase prd --domain <domain> --type pitfall --severity medium --summary "<修正原因>"`
+
+#### 3.5.5 冻结
+
+审查通过后：
+1. 写入 `prd/{ITERATION_VERSION}/prototype-review.md`（审查结论 + 版本 + 日期 + 循环次数）
+2. PRD 标记为 frozen（在 PRD frontmatter 中增加 `frozen: true` + `frozen_date: YYYY-MM-DD`）
+3. 后续阶段（ce-plan、spec-writer）不可回改 PRD（需升版 vN+1 走完整内循环）
+
 ### Phase 4: Handoff
 
-Read `references/handoff.md` now — before presenting any options. The option set and its visibility conditions, the rendering-mode rule, the per-selection dispatch instructions (including what gets passed to `ce-plan`), and the closing summary formats all live there — none of them appear in this main body. An improvised menu silently breaks pipeline routing: options surface in states where they must be hidden, and downstream skills receive the wrong payload.
+Read `references/handoff.md` now — before presenting any options. The option set and its visibility conditions, the rendering-mode rule, the per-selection dispatch instructions (including what gets passed to `ce-plan`), and the closing summary formats all live there — none of them appear in this main body. An improvised menu silently breaks pipeline routing: options surface in states where they must be hidden, and downstream skills receive the wrong payload. When handing off to `ce-plan`, pass the PRD path (`prd/{ITERATION_VERSION}/prd.md`) as the source artifact.
+Also pass the prototype path (`prototype/`) and prototype-review path (`prd/{ITERATION_VERSION}/prototype-review.md`) if the prototype inner loop ran. ce-plan reads the frozen PRD + prototype as input.

@@ -1,14 +1,24 @@
 ---
 name: ce-plan
-description: "Create structured plans for multi-step work, including software and non-software tasks. Use when asked to plan, break down implementation, plan from requirements, or deepen an existing plan; prefer ce-brainstorm for exploratory framing."
-argument-hint: "[optional: feature description, requirements doc path, plan path to deepen, or any task to plan] [output:html]"
+description: "Create structured implementation plans based on PRD documents. Use when asked to plan, break down implementation, plan from requirements, or deepen an existing plan; prefer ce-brainstorm for exploratory framing."
+argument-hint: "[optional: feature description, PRD doc path, plan path to deepen, or any task to plan] [output:html]"
 ---
 
-# Create Technical Plan
+# Create Implementation Plan
 
 **Note: The current year is 2026.** Use this when dating plans and searching for recent documentation.
 
-`ce-brainstorm` defines **WHAT** to build by creating a requirements-only unified plan. `ce-plan` enriches that same artifact with **HOW** to build it. `ce-work` executes implementation-ready plans. A prior brainstorm is useful context but never required — `ce-plan` works from any input: a requirements-only unified plan, a legacy requirements doc, a bug report, a feature idea, or a rough description.
+`ce-brainstorm` defines **WHAT** to build by creating a PRD document (业务要件). `ce-plan` produces an **independent implementation plan** (实施方案) based on the PRD, defining **HOW** to build it. The PRD and plan are **separate documents** in the same `prd/vN/` directory — the PRD is the business requirements source, the plan is the implementation strategy. `ce-work` executes implementation-ready plans. A prior brainstorm is useful context but never required — `ce-plan` works from any input: a PRD document, a legacy requirements doc, a bug report, a feature idea, or a rough description.
+
+**v0.5 职责收窄**：ce-plan 聚焦**产品级策略**——change 拆分方案（每 change 的 scope + 依赖 + 优先级）、change 间依赖图（DAG）、整体技术方向（技术选型、架构策略）。**不再产出**文件级 Implementation Units、Files 列表、Test scenarios——这些归 spec-writer 在每个 change 内产出。ce-plan 定"做什么、什么顺序"，spec-writer 定"怎么做"。
+
+## Planning Modes
+
+`ce-plan` supports two planning modes, selected at Phase 0.2:
+
+- **业务模式 (Business Mode)** — For product managers / business teams. Focuses on task breakdown, acceptance criteria, performance/compatibility requirements, and dependencies **from a business perspective**. Does NOT include technical architecture decisions, tech stack selection, or implementation details. The plan is a business-oriented implementation roadmap.
+
+- **一人公司模式 (Solo-Founder Mode)** — For technical leaders who are both product owner and developer. Includes everything in business mode **plus** technical architecture decisions, tech stack selection, implementation approach, data model changes, and API design overview. The plan is a comprehensive technical implementation blueprint.
 
 **When directly invoked, always plan.** Never classify a direct invocation as "not a planning task" and abandon the workflow. If the input is unclear, ask clarifying questions or use the planning bootstrap (Phase 0.4) to establish enough context — but always stay in the planning workflow.
 
@@ -40,7 +50,7 @@ If the input is present but unclear or underspecified, do not abandon — ask on
 
 ## Core Principles
 
-1. **Use the Product Contract as the source of truth** - If `ce-brainstorm` produced a requirements-only unified plan, planning should enrich it in place rather than re-inventing behavior or creating a second artifact.
+1. **Use the PRD as the source of truth** - If `ce-brainstorm` produced a PRD document, planning should read it as the primary input and produce an **independent implementation plan** (not modify the PRD). The PRD defines WHAT; the plan defines HOW. Both are separate artifacts in the same `prd/vN/` directory.
 2. **Decisions, not code** - Capture approach, boundaries, files, dependencies, risks, and test scenarios. Do not pre-write implementation code or shell command choreography. Pseudo-code sketches or DSL grammars that communicate high-level technical design are welcome when they help a reviewer validate direction — but they must be explicitly framed as directional guidance, not implementation specification.
 3. **Research before structuring** - Explore the codebase, institutional learnings, and external guidance when warranted before finalizing the plan.
 4. **Right-size the artifact** - Small work gets a compact plan. Large work gets more structure. The philosophy stays the same at every depth.
@@ -105,14 +115,14 @@ Pipeline / `disable-model-invocation` runs already skip the chat confirmation (h
 
 #### 0.1 Resume Existing Plan Work When Appropriate
 
-If the user references an existing plan file or there is an obvious recent matching plan in `docs/plans/`:
+If the user references an existing plan file or there is an obvious recent matching plan in `prd/vN/plan.md`:
 - Read it
 - Confirm whether to update it in place or create a new plan
 - If updating, revise only the still-relevant sections. Plans do not carry per-unit progress state — progress is derived from git by `ce-work`, so there is no progress to preserve across edits
 
-**A requirements-only unified plan is not a resume target.** A `docs/plans/` file with `artifact_readiness: requirements-only` is an *enrichment input*, not an existing plan to resume — do **not** fire the update-or-create confirm for it. Fall through to Phase 0.2, which enriches it in place to `implementation-ready`. This matters most for the hands-off `ce-brainstorm` -> `lfg` flow: `lfg` hands `ce-plan` the requirements-only path in `disable-model-invocation` pipeline mode, where no user is present to answer a resume prompt. More generally, in pipeline mode the resume choice is made automatically (default to in-place update of the referenced plan) and never prompted.
+**A PRD document is not a resume target.** A `prd/vN/prd.md` file is a *PRD input*, not an existing plan to resume — do **not** fire the update-or-create confirm for it. Fall through to Phase 0.2, which reads it as input for creating a new plan. This matters most for the hands-off `ce-brainstorm` -> `lfg` flow: `lfg` hands `ce-plan` the PRD path in `disable-model-invocation` pipeline mode, where no user is present to answer a resume prompt.
 
-**Deepen intent:** The word "deepen" (or "deepening") in reference to a plan is the primary trigger for the deepening fast path. When the user says "deepen the plan", "deepen my plan", "run a deepening pass", or similar, the target document is a **plan** in `docs/plans/`, not a requirements document. Use any path, keyword, or context the user provides to identify the right plan. If a path is provided, verify it is actually a plan document. If the match is not obvious, confirm with the user before proceeding.
+**Deepen intent:** The word "deepen" (or "deepening") in reference to a plan is the primary trigger for the deepening fast path. When the user says "deepen the plan", "deepen my plan", "run a deepening pass", or similar, the target document is a **plan** in `prd/vN/plan.md`, not a PRD document. Use any path, keyword, or context the user provides to identify the right plan. If a path is provided, verify it is actually a plan document. If the match is not obvious, confirm with the user before proceeding.
 
 Words like "strengthen", "confidence", "gaps", and "rigor" are NOT sufficient on their own to trigger deepening. These words appear in normal editing requests ("strengthen that section about the diagram", "there are gaps in the test scenarios") and should not cause a holistic deepening pass. Only treat them as deepening intent when the request clearly targets the plan as a whole and does not name a specific section or content area to change — and even then, prefer to confirm with the user before entering the deepening flow.
 
@@ -159,50 +169,62 @@ If the domain is genuinely ambiguous (e.g., "plan a migration" with no other con
 
 Otherwise, read `references/universal-planning.md` and follow that workflow instead. Skip all subsequent phases. Named tools or source links don't change this routing — they're inputs, handled per Core Principle 8.
 
-#### 0.2 Find Upstream Product Contract
+#### 0.2 Find Upstream PRD Document
 
-Before asking planning questions, resolve the upstream product source in this order:
+Before asking planning questions, resolve the upstream PRD source in this order:
 
-1. **Explicit path from the user.** If it points to a unified plan with `artifact_contract: ce-unified-plan/v1` and `artifact_readiness: requirements-only`, this run enriches that same file in place. If it is already `artifact_readiness: implementation-ready`, treat it as a resume/deepening target. If it is a legacy `docs/brainstorms/*-requirements.{md,html}` file, use it as a legacy origin and write a new unified plan in `docs/plans/`.
-2. **Recent requirements-only unified plans.** Search `docs/plans/*.{md,html}` for visible/frontmatter metadata containing `artifact_contract: ce-unified-plan/v1`, `artifact_readiness: requirements-only`, and `product_contract_source: ce-brainstorm`. **Skip a superseded sibling:** if a requirements-only candidate has a same-basename file in the other format (`<basename>.md` / `<basename>.html`) that is already `implementation-ready`, a format conversion superseded it — the implementation-ready sibling is canonical; do not re-enrich the stale requirements-only copy.
+1. **Explicit path from the user.** If it points to a PRD document (`prd/vN/prd.md`), read it as the primary input. If it points to an existing plan (`prd/vN/plan.md`), treat it as a resume/deepening target. If it is a legacy `docs/brainstorms/*-requirements.{md,html}` file, use it as a legacy origin.
+2. **Recent PRD documents.** Scan `prd/` directory for iteration versions (v1, v2, ...). For each version, check if `prd.md` exists. Use the latest version's PRD as input.
 3. **Legacy requirements docs.** Search `docs/brainstorms/` for files matching `*-requirements.md` or `*-requirements.html`. These remain readable historical inputs; do not migrate or rewrite them.
 
-**Relevance criteria:** A Product Contract source is relevant if:
+**Relevance criteria:** A PRD source is relevant if:
 - The topic semantically matches the feature description
 - It was created within the last 30 days (use judgment to override if the document is clearly still relevant or clearly stale)
 - It appears to cover the same user problem or scope
 
 If multiple source documents match, ask which one to use using the platform's blocking question tool when available (see Interaction Method). Otherwise, present numbered options in chat and wait for the user's reply before proceeding.
 
+**Select planning mode.** After resolving the PRD source, determine the planning mode:
+
+1. **Auto-detect from context:** If the user is clearly a technical leader / solo developer working alone, default to **一人公司模式**. If the user is clearly a product manager or business team member, default to **业务模式**.
+2. **Ask when ambiguous.** If context is unclear, ask the user to choose:
+   - 业务模式：从产品/业务视角制定实施方案（任务拆分、验收标准、非功能需求）
+   - 一人公司模式：在业务模式基础上补充技术方案（技术选型、架构设计、数据模型、API 设计）
+3. **Explicit mode in prompt.** If the user explicitly mentions "business mode" / "业务模式" or "solo mode" / "一人公司模式", honor it directly.
+
 **Session-settled decisions are an input tier alongside the document sources above.** Decisions already examined-and-chosen in the invoking conversation — or carried in a distilled brief passed as invocation input, from the user or a calling skill — enter planning as settled constraints, not open questions. Read `references/settled-decisions.md` before classifying conversation-carried decisions — it carries the settlement test, the two provenance classes, the annotation shape, capture rules, and brief-entry requirements. Classifying without it risks labeling unexamined assertions as settled, or re-asking decisions the user already closed.
 
-#### 0.3 Use the Product Contract as Primary Input
+#### 0.3 Use the PRD as Primary Input
 
-If a relevant requirements-only unified plan exists:
-1. Read metadata, Goal Capsule, Product Contract, Open Questions, and Sources (scan headings to locate them; don't read long appendices unless referenced).
-2. Announce that `ce-plan` will enrich that same file to `artifact_readiness: implementation-ready`.
-3. Preserve the existing Product Contract text and stable R/A/F/AE IDs unless planning discovers a direct conflict. Conflicts become explicit assumptions or questions; do not silently rewrite product scope.
-   - Because enrichment edits the same file that holds the user's product decisions, record a one-line **Product Contract preservation** note in the enriched plan: either "Product Contract unchanged" or "changed: \<R-IDs\> — \<why\>". This keeps the WHAT/HOW review boundary visible to reviewers (`ce-doc-review`, PR review) when there is no separate brainstorm file to diff against. For a *substantive* product-scope change (not a clarification), pause and confirm with the user before writing implementation units.
-4. Carry forward all applicable Product Contract sections listed below.
-5. Use the Product Contract as the primary input to planning and research.
-6. Do not create a duplicate plan unless an explicit `output:` conversion or pipeline override requires a new canonical path; when conversion happens, report old path and new canonical path.
+If a relevant PRD document exists:
+1. Read the PRD document thoroughly — all 11 chapters, focusing on filled chapters (业务流程, 系统功能清单, 画面原型, etc.).
+   1b. Read `prd/vN/prototype-review.md` if it exists — confirm the prototype inner loop completed and PRD is frozen. If PRD is not frozen (no `frozen: true` in frontmatter), warn the user that the PRD has not been through prototype review and recommend completing the inner loop before planning.
+2. Announce the selected planning mode (业务模式 or 一人公司模式, resolved at Phase 0.2).
+3. Announce that `ce-plan` will produce an independent implementation plan at `prd/vN/plan.md` (not modify the PRD).
+4. The PRD is the WHAT; the plan is the HOW. Do not rewrite or re-interpret the PRD's business requirements.
+5. Carry forward all applicable information from the PRD:
+   - 业务流程 (§2-§3) → informs task breakdown and dependencies
+   - 系统功能清单 (§7) → maps to implementation tasks
+   - 画面原型 (§4) → informs UI implementation scope
+   - 功能处理说明书 (§8) → informs acceptance criteria and non-functional requirements
+   - 业务术语字典 (§6) → use canonical terms in the plan
+6. If the plan discovers a conflict with the PRD's business requirements, surface it as an explicit assumption or question — do not silently rewrite the PRD.
 
 If a relevant legacy requirements document exists:
 1. Read it thoroughly
 2. Announce that it will serve as the origin document for planning
 3. Carry forward all of the following:
    - Problem frame
-   - Actors (A-IDs), Key Flows (F-IDs), and Acceptance Examples (AE-IDs) when present — preserve these as constraints that implementation units must honor
    - Requirements and success criteria
-   - Scope boundaries (including "Deferred for later" and "Outside this product's identity" subsections when present)
+   - Scope boundaries
    - Key decisions and rationale
    - Dependencies or assumptions
    - Outstanding questions, preserving whether they are blocking or deferred
 4. Use the source document as the primary input to planning and research
 5. Reference important carried-forward decisions in the plan with `(see origin: <source-path>)`
-6. Do not silently omit source content — if the origin document discussed it, the plan must address it even if briefly. Before finalizing, scan each section of the origin document to verify nothing was dropped.
+6. Do not silently omit source content — if the origin document discussed it, the plan must address it even if briefly.
 
-If no relevant Product Contract source exists, planning may proceed from the user's request directly and will create a complete unified plan with `product_contract_source: ce-plan-bootstrap`.
+If no relevant PRD source exists, planning may proceed from the user's request directly.
 
 **Settled decisions get the same preservation discipline as origin Product Contract decisions.** Session-settled decisions (from the conversation or a passed brief) are augmented by research, never re-asked, and never silently rewritten. Contradiction evidence routes by the severity ladder: nothing found — proceed silently; suboptimal-but-workable — proceed as settled and attach a conflict call-out to the labeled KTD at plan-write; invalidating — stop as blocked per the Phase 5.2 pipeline contract.
 
@@ -272,7 +294,7 @@ If depth is unclear, ask one targeted question and then continue.
 
 Surface call-outs to the user — the specific forks in scope or approach where user input materially changes the plan — so scope can be corrected **before Phase 1 research is spent**. Sub-agent dispatch (repo-research-analyst, learnings-researcher, etc.) is the expensive next step this phase guards against wasted effort on.
 
-Fires **only in solo invocation** — when Phase 0.2 found no upstream Product Contract source (no requirements-only unified plan and no legacy `*-requirements` doc; `product_contract_source: ce-plan-bootstrap`) AND Phase 0.4 stayed in ce-plan (did not route to ce-debug, ce-work, or universal-planning) AND Phase 0.5 cleared (no unresolved blockers) AND not on Phase 0.1 fast paths (resume normal, deepen-intent). Each guard is an explicit conditional. Skip Phase 0.7 entirely when any guard fails — upstream-sourced invocations (unified-plan enrichment or legacy brainstorm) defer to Phase 5.1.5 instead.
+Fires **only in solo invocation** — when Phase 0.2 found no upstream PRD source (no PRD document and no legacy `*-requirements` doc) AND Phase 0.4 stayed in ce-plan (did not route to ce-debug, ce-work, or universal-planning) AND Phase 0.5 cleared (no unresolved blockers) AND not on Phase 0.1 fast paths (resume normal, deepen-intent). Each guard is an explicit conditional. Skip Phase 0.7 entirely when any guard fails — PRD-sourced invocations defer to Phase 5.1.5 instead.
 
 **Read `references/synthesis-summary.md` before composing the scoping synthesis.** It carries the affirmability test, keep-test criteria, detail test, summary shape budgets, the literal confirmation and auto-proceed templates, granularity rules, anti-patterns, revision-vs-confirmation discipline, doc-shape routing, soft-cut behavior, self-redirect support, the worked PII compression example, and full headless-mode routing — all required for a well-shaped synthesis.
 
@@ -326,6 +348,8 @@ Collect:
 - **Tools available + user asked**: Dispatch a generic subagent with `references/agents/slack-researcher.md` and the planning context summary in parallel with other Phase 1.1 agents. If the origin document has a Slack context section, pass it verbatim so the researcher focuses on gaps. Include findings in consolidation.
 - **Tools available + user didn't ask**: Note in output: "Slack tools detected. Ask me to search Slack for organizational context at any point, or include it in your next prompt."
 - **No tools + user asked**: Note in output: "Slack context was requested but no Slack tools are available. Install and authenticate the Slack plugin to enable organizational context search."
+
+- **Solutions index (v0.5)**: Read `docs/solutions/INDEX.md` if it exists. Filter entries where `phase = plan OR phase = cross-phase` and `domain` matches the current topic. Inject top-5 summaries as planning constraints. If INDEX.md does not exist or is empty, skip silently.
 
 #### 1.1b Detect Execution Direction Signals
 
@@ -465,35 +489,36 @@ Ask the user only when the answer materially affects architecture, scope, sequen
 
 #### 3.1 Title and File Naming
 
-- Draft a clear, searchable title using conventional format such as `feat: Add user authentication` or `fix: Prevent checkout double-submit`
+- Draft a clear title matching the PRD's project name: `{项目名称} - 实施方案`
 - Determine the plan type: `feat`, `fix`, or `refactor`
-- Build the filename following the repository convention: `docs/plans/YYYY-MM-DD-NNN-<type>-<descriptive-name>-plan.md`
-  - Create `docs/plans/` if it does not exist
-  - Check existing files for today's date to determine the next sequence number (zero-padded to 3 digits, starting at 001)
-  - Keep the descriptive name concise (3-5 words) and kebab-cased
-  - Examples: `2026-01-15-001-feat-user-authentication-flow-plan.md`, `2026-02-03-002-fix-checkout-race-condition-plan.md`
-  - Avoid: missing sequence numbers, vague names like "new-feature", invalid characters (colons, spaces)
+- Build the filename: `prd/{ITERATION_VERSION}/plan.md`
+  - Use the same iteration version as the PRD (resolved at Phase 0.2)
+  - The plan lives in the same directory as the PRD: `prd/vN/prd.md` (PRD) and `prd/vN/plan.md` (plan)
+  - Create the directory if it does not exist
+  - If a plan already exists at this path, confirm whether to update it or create a new one
 
 #### 3.2 Stakeholder and Impact Awareness
 
 For **Standard** or **Deep** plans, briefly consider who is affected by this change — end users, developers, operations, other teams — and how that should shape the plan. For cross-cutting work, note affected parties in the System-Wide Impact section.
 
-#### 3.3 Break Work into Implementation Units
+#### 3.3 Break Work into Changes（v0.5 修正）
 
-Break the work into logical implementation units. Each unit should represent one meaningful change that an implementer could typically land as an atomic commit.
+Break the work into logical **changes** (spec-superflow change units). Each change represents one meaningful scope that can be independently implemented through the spec-superflow 8-state workflow.
 
-Good units are:
-- Focused on one component, behavior, or integration seam
-- Usually touching a small cluster of related files
-- Ordered by dependency
-- Concrete enough for execution without pre-writing code
+Good changes are:
+- Focused on one bounded context or one coherent feature area
+- Independently implementable and verifiable
+- Ordered by dependency (DAG)
+- Concrete enough for spec-writer to produce proposal/specs/design/tasks
 
 Avoid:
-- 2-5 minute micro-steps
-- Units that span multiple unrelated concerns
-- Units that are so vague an implementer still has to invent the plan
+- Changes that span multiple unrelated bounded contexts
+- Changes so large that spec-writer cannot produce a coherent spec
+- Changes so small that the spec-superflow ceremony overhead exceeds the work
 
-Each unit carries a stable plan-local **U-ID** assigned in Phase 3.5 (`U1`, `U2`, …). U-IDs survive reordering, splitting, and deletion: new units take the next unused number, gaps are fine, and existing IDs are never renumbered. This lets `ce-work` reference units unambiguously across plan edits.
+Each change carries a stable **C-ID** (`C1`, `C2`, …). C-IDs follow the same stability rule as U-IDs: never renumbered, gaps from deletion are fine.
+
+**v0.5 关键变化**：ce-plan 不再产出文件级 Implementation Units（Files/Approach/Test scenarios）。这些由 spec-writer 在每个 change 内产出。ce-plan 只定"做什么、什么顺序"。
 
 #### 3.4 High-Level Technical Design
 
@@ -519,37 +544,33 @@ For greenfield plans that create a new directory structure (new plugin, service,
 
 The tree is a scope declaration showing the expected output shape. It is not a constraint — the implementer may adjust the structure if implementation reveals a better layout. The per-unit `**Files:**` sections remain authoritative for what each unit creates or modifies.
 
-#### 3.5 Define Each Implementation Unit
+#### 3.4c Change Dependency Graph（v0.5 新增）
 
-Each unit is a level-3 heading carrying a stable U-ID prefix matching the format used for R/A/F/AE in requirements docs: `### U1. [Name]`. Number sequentially within the plan starting at U1. Do not render units as bulleted list items or prefix them with `- [ ]` / `- [x]` checkbox markers. List-based unit titles fragment in every standard renderer because the per-unit fields (`**Goal:**`, `**Files:**`, `**Approach:**`, etc.) are written flush-left, which terminates CommonMark list continuation and detaches the fields from the unit they describe. Headings render correctly everywhere, are the right semantic match for sections containing multi-block content, and give each unit an anchor link. The plan is a decision artifact; execution progress is derived from git by `ce-work` rather than stored in the plan body.
+For plans with 2+ changes, include a dependency DAG showing:
+- Which changes depend on which (by C-ID)
+- Which changes can be implemented in parallel
+- The critical path (longest dependency chain)
 
-**Stability rule.** Once assigned, a U-ID is never renumbered. Reordering units leaves their IDs in place (e.g., U1, U3, U5 in their new order is correct; renumbering to U1, U2, U3 is not). Splitting a unit keeps the original U-ID on the original concept and assigns the next unused number to the new unit. Deletion leaves a gap; gaps are fine. This rule matters most during deepening (Phase 5.3), which is the most likely accidental-renumber vector.
+Render as a mermaid graph or a simple table:
+| change | depends-on | can-parallel-with | priority |
+|--------|-----------|-------------------|----------|
+| C1     | —         | C2                | P0       |
+| C2     | —         | C1                | P0       |
+| C3     | C1, C2    | —                 | P1       |
 
-For each unit, include:
-- **Goal** - what this unit accomplishes
-- **Requirements** - which requirements or success criteria it advances (cite R-IDs, and A/F/AE IDs when origin supplies them)
-- **Dependencies** - what must exist first (cite by U-ID, e.g., "U1, U3")
-- **Files** - repo-relative file paths to create, modify, or test (never absolute paths)
-- **Approach** - key decisions, data flow, component boundaries, or integration notes
-- **Execution note** - optional natural-language direction, only when the unit benefits from non-default sequencing or proof. Do not treat this as an enum; phrase the evidence the implementer should seek.
-- **Technical design** - optional pseudo-code or diagram when the unit's approach is non-obvious and prose alone would leave it ambiguous. Frame explicitly as directional guidance, not implementation specification
-- **Patterns to follow** - existing code or conventions to mirror
-- **Test scenarios** - enumerate the specific test cases the implementer should write, right-sized to the unit's complexity and risk. Consider each category below and include scenarios from every category that applies to this unit. A simple config change may need one scenario; a payment flow may need a dozen. The quality signal is specificity — each scenario should name the input, action, and expected outcome so the implementer doesn't have to invent coverage. For units with no behavioral change (pure config, scaffolding, styling), use `Test expectation: none -- [reason]` instead of leaving the field blank. **AE-link convention:** when a test scenario directly enforces an origin Acceptance Example, prefix it with `Covers AE<N>.` (or `Covers F<N> / AE<N>.`). This is sparse-by-design — most test scenarios are finer-grained than AEs and do not link. Do not force AE links onto tests that only cover lower-level implementation details.
-  - **Happy path behaviors** - core functionality with expected inputs and outputs
-  - **Edge cases** (when the unit has meaningful boundaries) - boundary values, empty inputs, nil/null states, concurrent access
-  - **Error and failure paths** (when the unit has failure modes) - invalid input, downstream service failures, timeout behavior, permission denials
-  - **Integration scenarios** (when the unit crosses layers) - behaviors that mocks alone will not prove, e.g., "creating X triggers callback Y which persists Z". Include these for any unit touching callbacks, middleware, or multi-layer interactions
-- **Verification** - how an implementer should know the unit is complete, expressed as outcomes rather than shell command scripts
+#### 3.5 Define Each Change（v0.5 修正，原 Define Each Implementation Unit）
 
-Every feature-bearing unit should include the test file path in `**Files:**`.
+Each change is a level-3 heading carrying a stable C-ID prefix: `### C1. [Name]`.
 
-Use `Execution note` sparingly. Good uses include:
-- `Execution note: Start with a failing integration test for the request/response contract.`
-- `Execution note: Add characterization coverage before modifying this legacy parser.`
-- `Execution note: Implement new domain behavior test-first.`
-- `Execution note: This is mostly packaging/config; prefer install/runtime smoke verification over unit coverage.`
+For each change, include:
+- **Scope** - what this change covers (bounded context, feature area)
+- **Requirements** - which PRD requirements it advances (cite PRD section numbers)
+- **Dependencies** - what must exist first (cite by C-ID)
+- **Priority** - P0 (must-have for vN) / P1 (should-have) / P2 (nice-to-have)
+- **Estimated complexity** - S/M/L (guides spec-writer depth)
+- **Prototype reference** - which `prototype/pages/` are relevant (if prototype exists)
 
-Do not expand units into literal `RED/GREEN/REFACTOR` substeps.
+**不再包含**：Files 列表、Approach 细节、Test scenarios、Execution note、Patterns to follow、Verification——这些由 spec-writer 在 change 内产出。
 
 #### 3.6 Keep Planning-Time and Implementation-Time Unknowns Separate
 
@@ -582,12 +603,12 @@ Use one planning philosophy across all depths. Change the amount of detail, not 
 
 **Standard**
 - Use the full core template, omitting optional sections (including High-Level Technical Design) that add no value for this particular work
-- Usually 3-6 implementation units
+- Usually 2-5 changes
 - Include risks, deferred questions, and system-wide impact when relevant
 
 **Deep**
 - Use the full core template plus optional analysis sections where warranted
-- Usually 4-8 implementation units
+- Usually 3-6 changes
 - Group units into phases when that improves clarity
 - Include alternatives considered, documentation impacts, and deeper risk treatment when warranted
 
@@ -665,7 +686,7 @@ If the plan originated from a requirements document, re-read that document and v
 
 Surface plan-time call-outs to the user before Phase 5.2 commits the plan to disk — the latest cheap moment to catch plan-time scope errors. The brainstorm already validated WHAT to build; this phase surfaces HOW the plan will execute on the forks that matter.
 
-Fires **whenever Phase 0.2 resolved an upstream Product Contract source** — a requirements-only unified plan (an explicit path, or a discovered `product_contract_source: ce-brainstorm` plan in `docs/plans/`) **or** a legacy `*-requirements.{md,html}` brainstorm doc — AND not on Phase 0.1 fast paths (resume normal, deepen-intent). The new `ce-brainstorm` -> `ce-plan <unified-plan>` enrichment flow is brainstorm-sourced and MUST fire this gate, just like legacy flows. Skip Phase 5.1.5 only in solo invocation (no upstream source found; `product_contract_source: ce-plan-bootstrap`) — solo plans handled their synthesis in Phase 0.7.
+Fires **whenever Phase 0.2 resolved an upstream PRD source** — a PRD document (`prd/vN/prd.md`) **or** a legacy `*-requirements.{md,html}` brainstorm doc — AND not on Phase 0.1 fast paths (resume normal, deepen-intent). The `ce-brainstorm` -> `ce-plan` flow is PRD-sourced and MUST fire this gate. Skip Phase 5.1.5 only in solo invocation (no upstream source found) — solo plans handled their synthesis in Phase 0.7.
 
 **Read `references/synthesis-summary.md` before composing the scoping synthesis.** It carries the affirmability test, keep-test criteria, detail test, summary shape budgets, the literal confirmation and auto-proceed templates, granularity rules, anti-patterns, revision-vs-confirmation discipline, doc-body reading rules, doc-shape routing, soft-cut behavior, self-redirect support, the worked PII compression example, and full headless-mode routing — all required for a well-shaped synthesis.
 
@@ -685,26 +706,26 @@ HTML note: `ce-doc-review` is markdown-only today. HTML plans still render the
 unified artifact, but the Phase 5.3.8 document-review autofix pass is skipped
 for HTML by the format gate in `references/plan-handoff.md`.
 
-Use the Write tool to save the complete plan to the resolved format's extension:
+Use the Write tool to save the complete plan:
 
 ```text
-docs/plans/YYYY-MM-DD-NNN-<type>-<descriptive-name>-plan.<md|html>
+prd/{ITERATION_VERSION}/plan.md
 ```
 
-Extension follows `OUTPUT_FORMAT` from Phase 0.0 — `.md` when markdown, `.html` when HTML. Sequence number `NNN` is derived from existing plan files in `docs/plans/` regardless of extension (count both `.md` and `.html`) to ensure unique daily ordering.
+The plan is always written to the same `prd/vN/` directory as the PRD, using the iteration version resolved at Phase 0.2. The plan is always markdown (`.md`).
 
-Compose the plan using the content from `references/plan-sections.md` and the format-specific principles from the rendering reference loaded at Phase 0.0 (`markdown-rendering.md` OR `html-rendering.md`).
+Compose the plan using the content from `templates/plan.md` (the plan template) and the format-specific principles from the rendering reference loaded at Phase 0.0.
 
-**Write tight.** A section being material is not license to pad it. Hold every kept section to the prose-economy discipline in `references/plan-sections.md`: lead with the decision or outcome, one idea per sentence, a requirement or unit is intent plus at most one qualifier, defer forks to Open Questions rather than specifying both arms, resolve superseded text in place rather than stacking strata. Before declaring the plan written, run the named test there — could the implementer find a contradiction in each section in one pass?
+**Write tight.** A section being material is not license to pad it. Lead with the decision or outcome, one idea per sentence, a requirement is intent plus at most one qualifier. Before declaring the plan written, run the named test — could the implementer find a contradiction in each section in one pass?
 
-Write the unified plan artifact according to `references/plan-sections.md`.
+Write the plan following the template structure:
 
-- If the source is a requirements-only unified plan, update that file in place unless `OUTPUT_FORMAT`, pipeline mode, or an explicit conversion requires a new canonical path. Preserve Product Contract IDs and content; add Planning Contract, Implementation Units, Verification Contract, and Definition of Done. When a new canonical path *is* required (format conversion), the original artifact is left in place but is **no longer canonical** — it keeps its `requirements-only` metadata, so discovery treats a requirements-only artifact that has an implementation-ready same-basename sibling as superseded (see Phase 0.2 step 2 and `ce-work`'s blank-invocation discovery) rather than re-enriching or stopping on it.
-- If the source is a legacy requirements doc, create a new unified plan in `docs/plans/` and carry the legacy path in `origin:`.
-- If this is direct planning, create a complete unified plan in `docs/plans/` with `product_contract_source: ce-plan-bootstrap`.
-- Set `artifact_contract: ce-unified-plan/v1`, `artifact_readiness: implementation-ready`, and `execution: code` for software implementation plans.
-- Do not set `artifact_contract: ce-unified-plan/v1` on universal-planning outputs, answer-seeking outputs, or approach-plans unless they include the full software implementation contract.
-- Do not write a launch prompt into the doc. The launch prompt is generated at handoff (Phase 5.4 menu — `/goal` copy-paste on Claude Code, `create_goal` on Codex) from the plan's current content, so it never goes stale; it points to Goal Capsule, Verification Contract, Definition of Done, and U-IDs rather than duplicating them.
+- **业务模式**: Fill sections 一~四 (需求摘要, 任务拆分, 验收标准, 风险与约束). Leave section 五 (技术方案) empty with a note: "由 spec-superflow 变更链在具体 change 中设计".
+- **一人公司模式**: Fill all sections 一~七, including section 五 (技术方案) with tech stack, architecture, data model, and API design.
+- Both modes: Include section 六 (里程碑计划) and section 七 (待定事项) when applicable.
+- Include a metadata block at the top: `mode` (业务模式 or 一人公司模式), `prd_reference` (path to PRD), `iteration_version`, `date`.
+- Reference the PRD's requirements by chapter number (e.g., "关联 PRD §7 系统功能清单 TF-F001").
+- Do not write a launch prompt into the doc. The launch prompt is generated at handoff.
 
 **Session-settled KTDs.** Author each settled decision as a labeled Key Technical Decision carrying the annotation `(session-settled: user-directed — chosen over <alternative>: <one-line reason>)` (class per `references/settled-decisions.md`: `user-directed` or `user-approved`). A KTD that instantiates a labeled Key Decision from a brainstorm-sourced Product Contract inherits the label and cites the source decision.
 

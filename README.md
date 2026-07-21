@@ -1,6 +1,6 @@
 # team-flow
 
-> 当前版本：`v0.10.0`
+> 当前版本：`v0.11.0`
 
 > 统一插件：**spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）。一次安装，四套能力协同。
 
