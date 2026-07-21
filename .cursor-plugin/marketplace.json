@@ -1,0 +1,17 @@
+{
+  "name": "team-flow-marketplace",
+  "owner": {
+    "name": "LT"
+  },
+  "metadata": {
+    "description": "Unified workflow plugin marketplace for Cursor (team-flow: spec-superflow + compound + architecture-design + prototype).",
+    "version": "0.10.0"
+  },
+  "plugins": [
+    {
+      "name": "team-flow",
+      "source": ".",
+      "description": "Unified workflow plugin: spec-superflow + compound-engineering core subset + architecture-design + prototype. 17 collaborative skills."
+    }
+  ]
+}

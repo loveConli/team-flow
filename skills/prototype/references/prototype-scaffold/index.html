@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prototype · {project}</title>
+  <link rel="stylesheet" href="assets/design-tokens.css">
+  <style>/* 页面级仅做布局骨架；组件样式走 design-system tokens */</style>
+</head>
+<body>
+  <nav id="nav"><!-- 全局导航：链接各页面 --></nav>
+  <main id="app"><!-- 页面内容容器 --></main>
+  <!-- Tweaks 控件：替代云端工具栏，纯本地 -->
+  <div id="tweaks">
+    <label>主题 <select id="theme"><option>light</option><option>dark</option></select></label>
+    <label>密度 <input type="range" id="density" min="0" max="2" value="1"></label>
+  </div>
+  <script src="assets/design-tokens.js"></script>
+  <script>/* 页面内交互，无远程依赖 */</script>
+</body>
+</html>

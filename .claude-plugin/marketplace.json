@@ -1,0 +1,20 @@
+{
+  "name": "team-flow",
+  "description": "Unified workflow plugin: spec-superflow + compound-engineering core subset + architecture-design + prototype. 17 collaborative skills, one install.",
+  "owner": {
+    "name": "LT",
+    "url": "https://github.com/LT"
+  },
+  "plugins": [
+    {
+      "name": "team-flow",
+      "description": "8-state spec workflow + compound global compounding + architecture-design (4A/DDD) + local HTML prototype. 17 skills with embedded TDD, SDD, code review, debugging, delta spec sync, and design-system-driven prototyping.",
+      "version": "0.10.0",
+      "source": "./",
+      "author": {
+        "name": "LT",
+        "url": "https://github.com/LT"
+      }
+    }
+  ]
+}

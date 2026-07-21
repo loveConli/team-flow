@@ -1,0 +1,31 @@
+{
+  "name": "team-flow",
+  "displayName": "team-flow",
+  "description": "Unified workflow plugin: spec-superflow (spec-driven dev: TDD/SDD/code-review/debugging) + compound-engineering core subset (brainstorm/plan/compound/strategy/ideate/proof, global compounding) + architecture-design (4A+DDD incremental design & global compounding) + prototype (local HTML prototype, zero external deps). 17 skills, one install.",
+  "version": "0.10.0",
+  "author": {
+    "name": "LT",
+    "url": "https://github.com/LT"
+  },
+  "homepage": "https://github.com/LT/team-flow",
+  "repository": "https://github.com/LT/team-flow",
+  "license": "MIT",
+  "logo": "assets/icon.svg",
+  "keywords": [
+    "workflow",
+    "skills",
+    "spec-driven-development",
+    "tdd",
+    "sdd",
+    "contract-driven",
+    "code-review",
+    "debugging",
+    "spec-sync",
+    "architecture",
+    "compound-engineering",
+    "prototype",
+    "ai-coding"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks/"
+}

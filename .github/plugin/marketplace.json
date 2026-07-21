@@ -1,0 +1,42 @@
+{
+  "name": "team-flow",
+  "owner": {
+    "name": "LT",
+    "url": "https://github.com/LT"
+  },
+  "metadata": {
+    "description": "Unified workflow plugins and skills for AI coding agents (team-flow: spec-superflow + compound + architecture-design + prototype).",
+    "version": "0.10.0"
+  },
+  "plugins": [
+    {
+      "name": "team-flow",
+      "description": "Unified workflow with planning artifacts, execution contracts, TDD, review gates, systematic debugging, delta spec sync, architecture-design, and local HTML prototyping.",
+      "version": "0.10.0",
+      "source": ".",
+      "author": {
+        "name": "LT",
+        "url": "https://github.com/LT"
+      },
+      "homepage": "https://github.com/LT/team-flow",
+      "repository": "https://github.com/LT/team-flow",
+      "license": "MIT",
+      "keywords": [
+        "workflow",
+        "skills",
+        "spec-driven-development",
+        "tdd",
+        "sdd",
+        "contract-driven",
+        "code-review",
+        "debugging",
+        "spec-sync",
+        "architecture",
+        "compound-engineering",
+        "prototype"
+      ],
+      "category": "Productivity",
+      "skills": "skills/"
+    }
+  ]
+}
