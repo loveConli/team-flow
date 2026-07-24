@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+#
+# pre-tool-use-guard — spec-superflow implementation-edit state guard (PreToolUse)
+#
+# ----------------------------------------------------------------------------
+# Purpose
+# ----------------------------------------------------------------------------
+# Blocks Write/Edit/MultiEdit implementation edits unless the active
+# spec-superflow change is in a state that permits building. This enforces the
+# state-machine rule that "no implementation is allowed" outside the
+# build-permitted states (exploring / specifying / bridging must finish and be
+# approved before any code is written).
+#
+# ----------------------------------------------------------------------------
+# Guard logic
+# ----------------------------------------------------------------------------
+#   1. Walk up from $PWD (current dir + max 3 parent levels) looking for
+#      `.spec-superflow.yaml`.
+#        - Not found  -> ALLOW (no active spec-superflow change in scope).
+#   2. Read the current workflow state from the `state:` line of the yaml.
+#   3. For Write/Edit/MultiEdit only:
+#        - state in {approved-for-build, executing, debugging} -> ALLOW
+#        - any other state (exploring/specifying/bridging/closing/abandoned/
+#          unknown) -> BLOCK with an explanatory reason.
+#   4. Any other tool -> ALLOW.
+#
+# ----------------------------------------------------------------------------
+# Defensive contract (IMPORTANT — read before editing)
+# ----------------------------------------------------------------------------
+# This hook must NEVER block the user because of a hook bug. On ANY error
+# (unreadable/unparseable yaml, unexpected stdin, missing binaries, a failed
+# command) it defaults to ALLOW: exit 0 with no output. Only an explicit,
+# successfully detected disallowed state may emit a block decision. The single
+# `printf` that prints a block is reachable ONLY after every parse step has
+# succeeded, so a failure anywhere upstream can never produce a false block.
+#
+# ----------------------------------------------------------------------------
+# I/O contract (Claude Code PreToolUse)
+# ----------------------------------------------------------------------------
+#   stdin : JSON with `tool_name` and `tool_input` (Write/Edit/MultiEdit carry
+#           `tool_input.file_path`).
+#   block : print {"decision":"block","reason":"..."} then exit 0.
+#   allow : print nothing, exit 0.
+#
+# ----------------------------------------------------------------------------
+# Design reference
+# ----------------------------------------------------------------------------
+#   docs/state-machine.md — state definitions + "no implementation is allowed"
+#   rule. Build-permitted states: approved-for-build, executing, debugging.
+#
+# Perf: pure bash + grep/sed (no node/python). Target < 50ms.
+
+# Master safety net: any unexpected failing command falls through to ALLOW.
+# We intentionally do NOT use `set -e`/`set -u`; an aborted script must never
+# be misread as a block. The trap only ever exits 0 (allow).
+trap 'exit 0' ERR
+
+allow() { exit 0; }
+
+# --- read tool invocation from stdin ---------------------------------------
+INPUT="$(cat 2>/dev/null)" || allow
+[ -n "$INPUT" ] || allow
+
+# --- only guard implementation-edit tools ----------------------------------
+# hooks.json already restricts the matcher to Write|Edit|MultiEdit; we re-check
+# defensively so a future broader matcher can never over-block other tools.
+TOOL_NAME="$(printf '%s' "$INPUT" \
+  | grep -o '"tool_name"[[:space:]]*:[[:space:]]*"[^"]*"' \
+  | head -1 \
+  | sed 's/.*:"//; s/"$//')"
+case "$TOOL_NAME" in
+  Write|Edit|MultiEdit) : ;;   # guarded tools — continue
+  *) allow ;;                  # anything else — allow
+esac
+
+# --- locate .spec-superflow.yaml (cwd + max 3 parent levels) ---------------
+dir="$PWD"
+yaml=""
+i=0
+while [ "$i" -le 3 ]; do
+  if [ -f "$dir/.spec-superflow.yaml" ]; then
+    yaml="$dir/.spec-superflow.yaml"
+    break
+  fi
+  [ "$dir" = "/" ] && break          # reached filesystem root
+  dir="$(dirname "$dir")"
+  i=$((i + 1))
+done
+
+# No active spec-superflow change in scope -> allow.
+[ -n "$yaml" ] || allow
+[ -r "$yaml" ] || allow
+
+# --- read current state ----------------------------------------------------
+# First `state:` line, e.g. `state: executing`. Strip leading/trailing
+# whitespace and any surrounding quotes.
+state="$(grep -E '^[[:space:]]*state:[[:space:]]*' "$yaml" 2>/dev/null \
+  | head -1 \
+  | sed -E 's/^[[:space:]]*state:[[:space:]]*//; s/[[:space:]]*$//; s/^["'\'']//; s/["'\'']$//')"
+
+# Could not determine state -> defensive allow (never block on parse failure).
+[ -n "$state" ] || allow
+
+# --- decision --------------------------------------------------------------
+case "$state" in
+  approved-for-build|executing|debugging)
+    allow
+    ;;
+  *)
+    reason="spec-superflow guard: implementation edits (Write/Edit/MultiEdit) are blocked while the change is in state '$state'. Edits are only allowed in states: approved-for-build, executing, debugging. Advance the workflow to an approved build state first (see docs/state-machine.md or /spec-superflow:workflow-start). If no change is actually active, remove or fix the stray .spec-superflow.yaml."
+    # Escape backslashes and double quotes for safe JSON string embedding.
+    reason_esc="$(printf '%s' "$reason" | sed 's/\\/\\\\/g; s/"/\\"/g')"
+    printf '{"decision":"block","reason":"%s"}\n' "$reason_esc"
+    exit 0
+    ;;
+esac

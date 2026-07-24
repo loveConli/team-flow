@@ -34,12 +34,18 @@ Do NOT invoke for:
 ### S1: 需求接收与路径判断
 
 1. 接收用户的模糊需求描述
-2. 判断路径：
+2. **【v0.6 新增】检查项目基线**：
+   - 检查 `docs/architecture/baseline.md` 是否存在
+     → 存在：注入为架构上下文（技术栈/模块/数据模型），替代"从零侦察"
+     → 不存在：提示用户"建议先运行 `/workflow-bootstrap` 建立项目基线"（advisory，不阻断）
+   - 检查 `CONCEPTS.md` 是否存在
+     → 存在：注入领域词汇表
+3. 判断路径：
    - 需求模糊、范围不清 → 调用 `/ce-brainstorm`（完整头脑风暴）
    - 需求较清晰、有 PRD → 检查 `prd/` 目录是否有现有 PRD，有则询问是否续用
    - 需求非常清晰、只需计划 → 调用 `/ce-plan`（跳过 brainstorm）
-3. **复利注入**：读取 `docs/solutions/INDEX.md`（如存在），过滤 `phase = prd OR cross-phase` 且 domain 匹配的经验，取 top-5 摘要注入为上下文约束
-4. 使用平台阻塞问题工具确认路径选择
+4. **复利注入**：读取 `docs/solutions/INDEX.md`（如存在），过滤 `phase = prd OR cross-phase` 且 domain 匹配的经验，取 top-5 摘要注入为上下文约束
+5. 使用平台阻塞问题工具确认路径选择
 
 ### S2: PRD 阶段（含原型内循环）
 
@@ -69,7 +75,7 @@ Do NOT invoke for:
    ```
 2. 为每个 change 初始化 `.spec-superflow.yaml`：
    ```bash
-   npx --yes --package spec-superflow@0.10.2 ssf state init changes/<change-name>
+   npx --yes --package spec-superflow@0.11.0 ssf state init changes/<change-name>
    ```
 3. 记录 change 间依赖和优先级（在 plan.md 中已有）
 4. 告知用户各 change 已就绪，可以逐个进入 spec-superflow：
@@ -85,7 +91,7 @@ Do NOT invoke for:
    - API 变更是否影响其他 change
 3. **复利晋升**：change closing 时检查经验晋升
    ```bash
-   npx --yes --package spec-superflow@0.10.2 ssf solutions promote <change-dir>
+   npx --yes --package spec-superflow@0.11.0 ssf solutions promote <change-dir>
    ```
 
 ## Guardrails

@@ -6,7 +6,7 @@
 //   Exit 0: all versions consistent
 //   Exit 1: mismatches found (lists every file and its version)
 
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -103,6 +103,79 @@ for (const file of RUNTIME_FILES) {
     errors.push({ file, found: 'RUNTIME_PREFIX_NOT_FOUND', expected: CANONICAL });
   } else if (versions.some(version => version !== CANONICAL)) {
     errors.push({ file, found: [...new Set(versions)].join(', '), expected: CANONICAL });
+  }
+}
+
+// ── Skill count consistency ──
+// Count actual skill directories under skills/ and compare against the count
+// documented in manifests and docs. Prevents skill-count drift after add/remove.
+const skillsDir = join(ROOT, 'skills');
+const skillDirs = readdirSync(skillsDir, { withFileTypes: true })
+  .filter(entry => entry.isDirectory());
+const ACTUAL_SKILL_COUNT = skillDirs.length;
+
+// JSON manifests: extract the "N skills" number from the description field.
+const SKILL_COUNT_JSON_CHECKS = [
+  { file: 'plugin.json', path: ['description'], extract: /(\d+) skills/ },
+  { file: '.claude-plugin/plugin.json', path: ['description'], extract: /(\d+) skills/ },
+];
+
+for (const check of SKILL_COUNT_JSON_CHECKS) {
+  const fp = join(ROOT, check.file);
+  if (!existsSync(fp)) {
+    errors.push({ file: check.file, found: 'FILE_NOT_FOUND', expected: ACTUAL_SKILL_COUNT });
+    continue;
+  }
+  try {
+    const obj = JSON.parse(readFileSync(fp, 'utf-8'));
+    let val = obj;
+    for (const p of check.path) val = val?.[p];
+    const match = typeof val === 'string' ? val.match(check.extract) : null;
+    if (!match) {
+      errors.push({ file: `${check.file} [${check.path.join('.')}]`, found: 'PATTERN_NOT_MATCHED', expected: ACTUAL_SKILL_COUNT });
+    } else if (Number(match[1]) !== ACTUAL_SKILL_COUNT) {
+      errors.push({ file: `${check.file} [${check.path.join('.')}]`, found: match[1], expected: ACTUAL_SKILL_COUNT });
+    }
+  } catch (e) {
+    errors.push({ file: check.file, found: `PARSE_ERROR: ${e.message}`, expected: ACTUAL_SKILL_COUNT });
+  }
+}
+
+// Text files: extract the documented skill count.
+const SKILL_COUNT_TEXT_CHECKS = [
+  { file: 'README.md', extract: /(\d+) skills/ },
+  { file: 'AGENTS.md', extract: /Skills 索引（(\d+) 个）/ },
+];
+
+for (const check of SKILL_COUNT_TEXT_CHECKS) {
+  const fp = join(ROOT, check.file);
+  if (!existsSync(fp)) {
+    errors.push({ file: check.file, found: 'FILE_NOT_FOUND', expected: ACTUAL_SKILL_COUNT });
+    continue;
+  }
+  const content = readFileSync(fp, 'utf-8');
+  const match = content.match(check.extract);
+  if (!match) {
+    errors.push({ file: check.file, found: 'PATTERN_NOT_MATCHED', expected: ACTUAL_SKILL_COUNT });
+  } else if (Number(match[1]) !== ACTUAL_SKILL_COUNT) {
+    errors.push({ file: check.file, found: match[1], expected: ACTUAL_SKILL_COUNT });
+  }
+}
+
+// ── npx version reference consistency ──
+// Scan every skills/*/SKILL.md for `spec-superflow@X.Y.Z` references and ensure
+// each one matches the canonical version. Catches stale npx pins in any skill —
+// broader than RUNTIME_FILES above, which only covers the known runtime set.
+const SKILL_MD_FILES = skillDirs
+  .map(entry => `skills/${entry.name}/SKILL.md`)
+  .filter(file => existsSync(join(ROOT, file)));
+
+for (const file of SKILL_MD_FILES) {
+  const versions = [...readFileSync(join(ROOT, file), 'utf-8').matchAll(/spec-superflow@(\d+\.\d+\.\d+)/g)]
+    .map(match => match[1]);
+  const stale = [...new Set(versions)].filter(version => version !== CANONICAL);
+  if (stale.length > 0) {
+    errors.push({ file, found: stale.join(', '), expected: CANONICAL });
   }
 }
 

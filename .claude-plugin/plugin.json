@@ -1,7 +1,7 @@
 {
   "name": "team-flow",
   "version": "0.11.0",
-  "description": "Unified workflow plugin: spec-superflow (spec-driven dev: TDD/SDD/code-review/debugging) + compound-engineering core subset (brainstorm/plan/compound/strategy/ideate/proof, global compounding) + architecture-design (4A+DDD incremental design & global compounding) + prototype (local HTML prototype, zero external deps). 17 skills, one install.",
+  "description": "Unified workflow plugin: spec-superflow (spec-driven dev: TDD/SDD/code-review/debugging) + compound-engineering core subset (brainstorm/plan/compound/strategy/ideate/proof, global compounding) + architecture-design (4A+DDD incremental design & global compounding) + prototype (local HTML prototype, zero external deps) + e2e (Playwright E2E, AC-driven) + workflow-orchestrator (product-level workflow orchestration) + workflow-bootstrap (existing project onboarding). 20 skills, one install.",
   "source": "./",
   "author": {
     "name": "LT",

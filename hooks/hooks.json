@@ -1,5 +1,5 @@
 {
-  "description": "spec-superflow session start hook - injects workflow-start as session context",
+  "description": "spec-superflow workflow hooks - session-start context injection + pre-tool-use implementation-edit state guard",
   "hooks": {
     "SessionStart": [
       {
@@ -7,6 +7,17 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/pre-tool-use-guard\""
           }
         ]
       }
