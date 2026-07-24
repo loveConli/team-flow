@@ -1,6 +1,6 @@
 ---
 name: ce-brainstorm
-description: 'Explore vague or ambitious ideas into a structured PRD document. Use when the user wants to brainstorm, think through scope, decide what to build, or needs collaborative product framing before planning. Also use when the user must scope work in territory they say they do not know ("I know nothing about X but need to...") or asks for a blindspot pass — mapping the decision surface before questions begin. Not for executing already-specified work — direct implementation, debugging, or code review where no product scope is left to decide. Not for a decisive verdict on whether to adopt or switch to a specific external technology, library, or platform — brainstorming scopes what to build, not whether to commit to an outside option.'
+description: 'Explore vague or ambitious ideas into a structured PRD document. For NEW product-level requirements, prefer workflow-orchestrator (which calls this skill internally with baseline check, compounding injection, and PRD version management). Use this skill directly ONLY when: (a) focused brainstorm on a specific topic without full orchestration, (b) resuming an existing brainstorm/PRD, (c) called by workflow-orchestrator internally. Also use when the user must scope work in territory they say they do not know ("I know nothing about X but need to...") or asks for a blindspot pass. Not for executing already-specified work. Not for a decisive verdict on whether to adopt or switch to a specific external technology, library, or platform.'
 argument-hint: "[feature idea or problem to explore] [output:html]"
 ---
 
@@ -13,6 +13,17 @@ Brainstorming helps answer **WHAT** to build through collaborative dialogue. It 
 The durable output of this workflow is a **PRD document** (产品需求文档). In compound engineering, keep the workflow name `brainstorm`, but write the first version of the PRD under `prd/vN/prd.md` so planning does not need to invent product behavior, scope boundaries, or success criteria. The PRD template is configurable — use the path specified by `prd.template` config, or fall back to the default template at `templates/prd.md` (relative to the skill's base directory).
 
 This skill does not implement code. It explores, clarifies, and documents decisions for later planning or execution.
+
+## 调用模式（v0.7 新增）
+
+本 skill 支持两种调用模式：
+
+| 模式 | 触发条件 | Phase 3.5 行为 |
+|------|---------|---------------|
+| `standalone`（默认） | 用户直接调用 /ce-brainstorm | Phase 3.5 原型循环正常执行 |
+| `orchestrated` | 被 workflow-orchestrator 内部调用（传入 mode: orchestrated） | Phase 3.5 **跳过**，原型循环由 orchestrator 编排 |
+
+> **显式参数规约**：orchestrator 调用时必须传入 `mode: orchestrated`。ce-brainstorm 检测到该参数即跳过 Phase 3.5 并在输出中回执"原型循环已委托编排层"。未收到该参数时默认为 standalone 模式。
 
 ## Core Principles
 
@@ -343,6 +354,8 @@ For each resolved term: if missing, add it; if present but new precision surface
 Follow the format set by existing entries. Apply edits silently. (If Phase 3 skipped the doc, still run this against the resolved dialogue.)
 
 ### Phase 3.5: Prototype Inner Loop（原型内循环，v0.5 新增）
+
+> **v0.7 条件化**：当 `mode: orchestrated` 时，跳过整个 Phase 3.5（原型循环由 orchestrator 编排，含 prototype-reviewer 自动评审 + 人工评审）。以下为 standalone 模式的 Phase 3.5 流程。
 
 PRD 文档写入后、Handoff 之前，执行原型内循环。原型是 PRD 的**验证工具**，不是 PRD 的下游。
 

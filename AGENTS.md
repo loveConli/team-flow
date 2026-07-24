@@ -55,8 +55,9 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 - AC 驱动 Playwright E2E 测试：从 spec 验收场景生成测试、执行并审计覆盖率
 - 用法：`/e2e [原型|集成|验收] [spec路径]`
 
-### 6. workflow-orchestrator（1 skill，产品级编排）
-- 编排产品级工作流：ce-brainstorm → 原型内循环 → ce-plan → 拆 change → 分发到 spec-superflow
+### 6. workflow-orchestrator（1 skill，产品级编排，v0.7 重设计）
+- 编排产品级工作流：S1 路径路由 → S2 PRD+原型（循环上提，orchestrator 直接编排）→ S3 ce-plan（pipeline 快速路径）→ S4 拆分验证+分发 → S5 全局监控
+- v0.7 关键变更：原型循环从 ce-brainstorm 内部上提到 orchestrator 层直接编排；新增反馈环路（vN 内修订+变更履历，非升版）；新增增量入口（S1 路径路由器，6 种入口路径）；S5 多 change 并行时必选
 - 与 workflow-start 分层：orchestrator 管"做什么、什么顺序"（产品级策略），workflow-start 管"怎么做"（变更级执行）
 
 ### 7. workflow-bootstrap（1 skill，既有项目接入）
@@ -71,6 +72,7 @@ prd/                    PRD（有版本 v1→v2→v3，git 分支隔离）
       ├── prd.md              # 业务要件（ce-brainstorm 产出）
       ├── plan.md             # 实施方案（ce-plan 产出，产品级策略）
       └── prototype-review.md # 原型审查记录（PRD 内循环产出）
+      ├── prototype-auto-review.md # 原型自动评审报告（prototype-reviewer agent 产出，编排层落盘，v0.7 新增）
 prototype/             全局原型系统（UI 契约真相源）：index.html / pages / components / assets / design-system.md / flow.md
 docs/
   ├── architecture/    全局架构锚点：ARCHITECTURE.md / DATABASE.md / <bc>/（限界上下文目录）/ baseline.md（v0.6 新增）
@@ -82,7 +84,7 @@ specs/<cap>/            每变更设计/任务/契约：spec.md / design.md / ta
 STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 ```
 
-## 标准工作流（SOP，v0.6 修订）
+## 标准工作流（SOP，v0.7 修订）
 
 ```
 模糊需求
@@ -95,14 +97,20 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
   │
   ▼
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  产品级编排层（workflow-orchestrator）
+  产品级编排层（workflow-orchestrator，v0.7 重设计）
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  S1 ce-brainstorm → PRD(vN) 草稿
-     ├─ 原型内循环（可选）：prototype skill → 原型审查 → 修正 → PRD+原型冻结
-     └─ 不需要原型 → PRD 直接冻结
-  S2 ce-plan → plan(vN)（产品级策略：change 拆分 + 依赖 + 技术方向）
-  S3 拆 change → change-1, change-2, ...
-  S4 分发 → 各 change 进入 spec-superflow（workflow-start）
+  S1 路径路由器 → 判断入口路径（全新/续版/重新计划/继续执行/快速通道/Hotfix）
+     检查 baseline.md / CONCEPTS.md → 注入上下文 + 复利注入（top-5）
+  S2 PRD + 原型阶段 → ce-brainstorm 产出 PRD
+     原型循环由 orchestrator 直接编排（上提）：
+     prototype skill → 自动评审（prototype-reviewer）→ 人工评审 → 冻结
+     PRD vN 内修订 + 变更履历（不升版）；反馈环路：scope 问题可回退修订
+  S3 计划阶段 → ce-plan（pipeline 快速路径）
+     plan.md：change 拆分 + 依赖 DAG + 技术方向
+     反馈环路：plan 暴露 PRD 问题可回退 S2
+  S4 拆分验证与分发 → change-split-auditor 审计 → 创建 change → 进入 spec-superflow
+     并行策略建议 + 验收标准预分配；反馈环路：依赖图不可执行可回退 S3
+  S5 全局监控（change≥2 必选）→ 跨 change 一致性 + 复利晋升 + 动态重规划
   │
   [复利贯穿层] ← 每个阶段转换点：检测→捕获→索引→注入
   │
@@ -150,8 +158,33 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | architecture-design | architecture-design | 4A+DDD 增量设计 |
 | prototype | prototype | 本地 HTML 原型 |
 | e2e | e2e | AC 驱动 Playwright E2E 测试（v0.10.0） |
-| workflow-orchestrator | 产品级编排 | 产品级工作流编排（v0.5） |
+| workflow-orchestrator | 产品级编排 | 产品级工作流编排（v0.7 重设计） |
 | workflow-bootstrap | 既有项目接入 | 既有项目侦察+基线建立（v0.6） |
+
+### 触发域分层（v0.12.0 新增）
+
+各 skill 按触发层级划分，避免触发词冲突导致误路由：
+
+| 层级 | 入口 Skill | 触发域 | 说明 |
+|------|-----------|--------|------|
+| 接入层 | workflow-bootstrap | "初始化/接入/分析代码库" | 一次性，触发词独特，无冲突 |
+| 产品级（唯一入口） | **workflow-orchestrator** | 新的产品级需求（"新需求/从头开始/我有个想法/做一个XX"） | 拥有所有"产品级新需求"触发词，内部路由到 ce-brainstorm/ce-plan |
+| 变更级（唯一入口） | workflow-start | change 上下文内的操作（.spec-superflow.yaml） | 有强上下文约束，与产品级天然隔离 |
+| 步骤级 - 独立工具 | ce-ideate, ce-strategy, ce-compound, ce-proof, architecture-design, prototype, e2e | 各自独特触发词 | 无冲突，可独立触发 |
+| 步骤级 - 受限独立 | ce-brainstorm, ce-plan | 可独立触发，但产品级新需求应走 orchestrator | description 中标注路由指导 |
+| 步骤级 - 仅路由 | need-explorer, spec-writer, contract-builder, build-executor, code-reviewer, spec-merger, release-archivist, bug-investigator | 仅由 workflow-start 路由 | 不独立触发 |
+
+> **规则**：新增 skill 时必须在此表登记所属层级。产品级新需求触发词归 workflow-orchestrator 独占。
+
+### Agents 索引（v0.7 新增）
+
+| Agent | 职责 | Tools | 触发场景 |
+|-------|------|-------|---------|
+| code-reviewer | spec 合规审查（批次完成/合并门禁） | Read/Bash/Grep/Glob | build-executor 批次完成、release-archivist 合并前 |
+| bug-investigator | 科学方法根因调查（执行期 bug/测试失败） | Read/Bash/Grep/Glob/Write | build-executor 遇阻、DP-5 升级 |
+| prototype-reviewer | PRD vs 原型 6 维度一致性自动评审 | Read/Bash/Grep/Glob | orchestrator S2 原型循环每轮产出后 |
+| change-split-auditor | plan.md 拆分质量审计 | Read/Bash/Grep/Glob | orchestrator S4 脚手架前 |
+| cross-change-consistency-checker | 跨 change 冲突检测 | Read/Bash/Grep/Glob | orchestrator S5 多 change 并行/closing 时 |
 
 ## 复利贯穿机制（v0.5 新增）
 

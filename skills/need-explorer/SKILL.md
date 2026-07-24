@@ -1,6 +1,6 @@
 ---
 name: need-explorer
-description: Clarify intent, scope, constraints, and success criteria before artifact creation. Invoke when the request is fuzzy, the user is comparing options, or the workflow needs a stable change definition before writing artifacts.
+description: Change-level requirement exploration, routed by workflow-start within a spec-superflow change. Clarify intent, scope, constraints, and success criteria before artifact creation. NOT for product-level requirements (use workflow-orchestrator). Invoke only when inside a change context and the request is fuzzy, the user is comparing options, or the workflow needs a stable change definition before writing artifacts.
 ---
 
 # Need Explorer
@@ -37,8 +37,8 @@ Restate what you heard: "Here's what I'm hearing: [problem, scope, non-goals, su
 
 After user confirms the summary:
 ```bash
-npx --yes --package spec-superflow@0.11.0 ssf state set <change-dir> dp_1_result "confirmed: <one-line summary>"
-npx --yes --package spec-superflow@0.11.0 ssf state set <change-dir> dp_1_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package spec-superflow@0.14.0 ssf state set <change-dir> dp_1_result "confirmed: <one-line summary>"
+npx --yes --package spec-superflow@0.14.0 ssf state set <change-dir> dp_1_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 DP-1 confirms scope, non-goals, and success criteria before artifact creation.
 

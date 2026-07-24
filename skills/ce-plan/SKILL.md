@@ -1,6 +1,6 @@
 ---
 name: ce-plan
-description: "Create structured implementation plans based on PRD documents. Use when asked to plan, break down implementation, plan from requirements, or deepen an existing plan; prefer ce-brainstorm for exploratory framing."
+description: "Create structured implementation plans based on PRD documents. For product-level planning from scratch, prefer workflow-orchestrator. Use this skill directly ONLY when: (a) a frozen PRD already exists and only planning is needed, (b) deepening an existing plan, (c) called by workflow-orchestrator internally. Prefer ce-brainstorm for exploratory framing."
 argument-hint: "[optional: feature description, PRD doc path, plan path to deepen, or any task to plan] [output:html]"
 ---
 
@@ -30,6 +30,20 @@ Two modes, selected at Phase 0.2:
 - **一人公司模式 (Solo-Founder Mode)** — business mode **plus** tech stack, architecture, data model, API design.
 
 See `references/planning-modes.md` for mode selection logic and PRD chapter mapping.
+
+## Pipeline 快速路径（v0.7 新增）
+
+当被 workflow-orchestrator 调用时（传入 `pipeline_mode: orchestrator`），ce-plan 使用快速路径：
+
+| 保留（核心价值） | 跳过（仪式开销） |
+|-----------------|-----------------|
+| Phase 1 repo research（代码库侦察） | output format 解析（强制 md） |
+| Phase 3 change splitting + 依赖 DAG | handoff 菜单（Proof/Issue/Browser） |
+| 技术方向决策（一人公司模式） | confidence check 降级为 Lightweight |
+| 风险与约束分析 | ce-doc-review 降级为 headless |
+| 里程碑计划 | 独立调用时的 scoping synthesis 确认 |
+
+> **显式参数规约**：orchestrator 调用时传入 `pipeline_mode: orchestrator`。未收到时按标准模式执行全部 Phase。
 
 ## Core Workflow
 

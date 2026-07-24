@@ -1,8 +1,26 @@
 # team-flow
 
-> 当前版本：`v0.11.0`
+> 当前版本：`v0.14.0`
 
 > 统一插件：**spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同。
+
+## 30 秒上手
+
+告诉它你的想法，它会帮你理清楚要做什么、怎么做、先做哪个。
+
+```bash
+# 在 Claude Code 中输入：
+/workflow-orchestrator
+# 然后说你的想法，例如："我想做一个任务管理功能"
+# 跟着走就行——它会自动安排需求澄清、原型验证、计划拆分
+```
+
+**你只需要知道 3 个概念**：
+1. **PRD**：你的需求文档（它帮你写）
+2. **change**：拆分后的实施单元（它帮你拆）
+3. **workflow-start**：开始实施一个 change（它帮你启动）
+
+更多能力（原型验证、复利经验库、动态重规划等）在使用中自然接触，无需提前学习。
 
 ## 安装（plugin.json 一次安装）
 
@@ -62,15 +80,29 @@ STRATEGY.md CONCEPTS.md 策略 / 领域词汇
 - **产品级编排**（1）：workflow-orchestrator（brainstorm→原型内循环→plan→拆change→分发）
 - **既有项目接入**（1）：workflow-bootstrap（代码库侦察→架构基线→领域词汇→目录初始化）
 
-## 工作流（SOP）
+### 命名约定
+
+Skills 命名保留其来源前缀，作为功能分组的自然标识：
+
+| 前缀 | 来源 | 含义 | Skills |
+|------|------|------|--------|
+| `ce-` | compound-engineering | 产品级思维工具（头脑风暴、计划、策略、复利、创意、验证） | ce-brainstorm, ce-plan, ce-strategy, ce-compound, ce-ideate, ce-proof |
+| 无前缀 | spec-superflow | 变更级开发流程工具（状态机、规格、构建、审查、归档） | workflow-start, need-explorer, spec-writer, contract-builder, build-executor, code-reviewer, spec-merger, release-archivist, bug-investigator |
+| 无前缀 | team-flow 新增 | 编排/接入/设计/原型/测试 | workflow-orchestrator, workflow-bootstrap, architecture-design, prototype, e2e |
+
+> `ce-` 前缀来自 compound-engineering 项目，team-flow 整合时保留了这一命名以维持功能分组的可辨识性。这不是命名不一致，而是有意的来源标注。
+
+## 工作流（SOP，v0.7 修订）
 
 ```
 模糊需求
   → [既有项目接入层 workflow-bootstrap]（一次性，baseline.md 已存在则跳过）
-  → [产品级编排层 workflow-orchestrator]
-  → S1 ce-brainstorm → PRD(vN)（含原型内循环，可选）
-  → S2 ce-plan → plan(vN)（产品级策略：change 拆分+依赖+技术方向）
-  → S3 拆 change → S4 分发 → 各 change 进入 spec-superflow（workflow-start 8态状态机）
+  → [产品级编排层 workflow-orchestrator]（v0.7 重设计）
+  → S1 路径路由器 → 判断入口路径（全新/续版/重新计划/继续执行/快速通道/Hotfix）
+  → S2 PRD + 原型阶段 → ce-brainstorm + 原型循环上提（prototype → 自动评审 → 人工评审 → 冻结）
+  → S3 计划阶段 → ce-plan（pipeline 快速路径）→ plan.md（change 拆分+依赖+技术方向）
+  → S4 拆分验证与分发 → change-split-auditor 审计 → 创建 change → 进入 spec-superflow
+  → S5 全局监控（change≥2 必选）→ 跨 change 一致性 + 复利晋升 + 动态重规划
   → [复利贯穿层] 每个阶段转换点：检测→捕获→索引→注入
   → change 完成：arch-merge → prototype-sync（顺序提交）+ 复利晋升
 ```
