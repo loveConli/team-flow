@@ -6,6 +6,29 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-07-25
+
+### Added（subagent 编排下沉 + 状态治理）
+
+- **subagent 结构化交接协议（设计增强方案 v0.8 §18.1）**：统一 `done / done_with_questions / blocked` + `blockers[] / outstanding_questions[]` 返回契约——主代理只编排、执行下沉子代理；非阻断疑问按默认假设继续后批量返回，阻断疑问立即返回 `blocked`。不引入 agent team，保跨平台健壮性。
+- **多需求并行状态模型**：`.team-flow/registry.yaml` 注册表 + 每需求一份 `.team-flow/requirements/<req-id>/orchestrator.yaml`，状态天然隔离（原单文件 `.workflow-orchestrator.yaml` 自动迁移）。
+- **3 个新插件 agent**：`prd-completeness-reviewer`（PRD 完整性评审，冻结前门禁，只读）、`prototype-builder`（原型绘制执行者，有 Write）、`prototype-env-scout`（原型环境探查，只读）。agents 5 → 8。
+- **2 个新种子提示**：`codebase-recon-analyst`（bootstrap 侦察）、`design-system-architect`（设计系统创建/迭代）。
+- **`recon-probe.sh` 确定性侦察脚本**（workflow-bootstrap）：固定化代码库质量采集（目录树/依赖/LOC/测试计数含 `.mjs`/DB 迁移/文档），可复现可横展对比。
+- **prototype 内部编排器重构**：主代理只编排不实施——env-scout 探查 → 方案/人工评审 → builder 绘制 → reviewer 评审 → 循环 → 人工路由；新增设计系统生命周期（创建→引用→增量更新）。
+- **PRD 完整性评审门禁**：ce-brainstorm/orchestrator S2 冻结前派 `prd-completeness-reviewer`（管"说得全不全"，区别于 claim verifier 管"说得对不对"）。
+- **PRD 版本格式规范**：迭代版本 `vN` / 文档修订次版本 `vN.M` / 文档状态枚举（编辑中/已冻结-下游/已冻结-绝对），与 frontmatter `frozen` 一致性硬约束。
+
+### Changed
+
+- **ce-plan 收窄**：模式强制询问（pipeline 下 orchestrator 问定后显式传 `plan_mode`，禁止隐式默认一人公司）；一人公司模式收窄到「高阶技术设计」，**删除接口清单段**（接口/字段/签名属各 change 的 spec-writer）；SKILL.md 顶部新增产品级/变更级作用边界硬声明。
+- **workflow-bootstrap B1 重构**：主代理只编排，先跑 `recon-probe.sh` 脚本再并行派发侦察子代理；SKILL.md 瘦身至 ≤150 行（细节进 `references/b1-reconnaissance.md`）。
+- **状态文件治理（P1-6 第一阶段）**：产品级编排状态迁入 `.team-flow/`（变更级 `.spec-superflow.yaml`→`.team-flow.yaml` 改名归 P1-6 第二阶段 v1.0.0，与 npm 包名/CLI 同批）。
+
+### Fixed
+
+- **冻结措辞 BUG**：ce-brainstorm 把 `frozen_downstream` 误写成「升版 vN+1」语义，违反反馈环路「迭代内变更不升版」设计；已修正为区分双层冻结（frozen_downstream 可 vN 内修订 / frozen_absolute 才升版），并横展到 PRD 模板与 prd-mapping。
+
 ## [0.10.0] - 2026-07-16
 
 ### Added

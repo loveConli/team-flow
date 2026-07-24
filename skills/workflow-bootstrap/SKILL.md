@@ -51,51 +51,16 @@ Do NOT invoke for:
 
 ## Execution Flow
 
-### B1: Codebase Reconnaissance（代码侦察）
+### B1: Codebase Reconnaissance（代码侦察，v0.15.0 重构：脚本 + 并行子代理）
 
-自动分析既有代码库，产出结构化摘要。
+> **硬原则**：主代理只编排（派发 + 汇总 + 写 baseline.md），侦察执行下沉子代理（§18.1 交接协议）。先跑确定性脚本固定化采集基底，再派子代理做语义增强——**可复现、可横展对比**。
 
-**两种模式**（询问用户选择）：
-- **Quick**（默认）：只分析目录结构 + 技术栈 + 模块边界，~2 分钟
-- **Deep**：读取核心代码、提取领域模型、分析 API 表面，~10 分钟
+- **模式**（询问用户）：Quick（默认，技术栈+模块+架构模式+测试文档，~2 分钟）/ Deep（+数据模型+API 表面，~10 分钟）。
+- **B1.1 脚本采集**：`bash scripts/recon-probe.sh --root <根> --out /tmp/recon-<slug>.json`（固定化，两次接入结果一致）。
+- **B1.2 并行子代理**：读 `references/agents/codebase-recon-analyst.md`，把 JSON 路径作 `recon_json` 入参，按维度并行派发（§18.1 返回）。
+- **B1.3 主代理汇总**：只汇总不重新侦察，整合已有文档（合并而非覆盖，标注来源），写 `docs/architecture/baseline.md`。
 
-**侦察内容**：
-
-```
-├── 技术栈识别（语言、框架、构建工具、数据库）
-│   ├── 检查 package.json / pom.xml / build.gradle / requirements.txt / go.mod 等
-│   ├── 识别框架（Spring Boot / Express / Vue / React / Django 等）
-│   └── 识别构建工具和数据库
-├── 模块结构（包/目录分层、模块边界）
-│   ├── 分析顶层目录结构
-│   ├── 识别模块/服务/包
-│   └── 推断分层（controller/service/repository 等）
-├── 已有架构模式
-│   ├── DDD 分层？MVC？微服务？单体？
-│   └── 是否有明确的领域层/应用层/基础设施层
-├── 数据模型（Deep 模式）
-│   ├── 扫描实体类 / 数据库迁移文件 / schema 定义
-│   ├── 识别聚合根候选
-│   └── 推断实体关系
-├── API 表面（Deep 模式）
-│   ├── 扫描 REST endpoints / gRPC services / CLI commands
-│   └── 列出主要 API
-├── 测试现状
-│   ├── 有无测试目录和测试文件
-│   ├── 测试框架
-│   └── 粗略覆盖率
-└── 已有文档
-    ├── README.md
-    ├── docs/ 目录
-    └── 注释密度
-```
-
-**已有文档处理**：
-- 如果项目已有 `README.md`、`docs/`、`ARCHITECTURE.md` 等，**读取并整合**
-- **不覆盖**，而是**合并**——已有文档作为输入，team-flow 格式作为输出
-- 标注信息来源（代码分析 vs 原有文档）
-
-**产出**：`docs/architecture/baseline.md`（格式见 §19.4 设计文档）
+详细流程（脚本采集项、子代理维度表、侦察内容树、已有文档处理）见 `references/b1-reconnaissance.md`。
 
 ### B2: Architecture Baseline（架构基线文档化）
 
@@ -143,30 +108,11 @@ Do NOT invoke for:
 - 读取已有词汇，补充从代码中新发现的术语
 - 标注来源："workflow-bootstrap B3 补充"
 
-**与 ce-compound 的关系**：
-- ce-compound 是"等待遇到问题后被动记录"
-- B3 是"主动从代码中提取"
-- 两者互补——B3 建立种子词汇表，ce-compound 在后续开发中持续补充
+**与 ce-compound 的关系**：ce-compound 是"遇到问题后被动记录"，B3 是"主动从代码提取"——B3 建种子词汇表，ce-compound 后续持续补充。
 
 ### B4: Directory Initialization（目录初始化）
 
-创建 team-flow 需要的目录结构：
-
-```bash
-mkdir -p prd/
-mkdir -p prototype/
-mkdir -p docs/architecture/
-mkdir -p docs/solutions/
-mkdir -p changes/
-```
-
-**已有目录处理**：
-- 如果目录已存在 → 不覆盖、不删除，只创建缺失的目录
-- 如果目录中有文件 → 保留，不修改
-
-**Discoverability 检查**：
-- 检查 `AGENTS.md` 或 `CLAUDE.md` 是否暴露了 `docs/architecture/` 和 `prototype/`
-- 如果没有 → 建议用户添加（advisory，不自动修改）
+创建 team-flow 目录结构：`mkdir -p prd/ prototype/ docs/architecture/ docs/solutions/ changes/`。已有目录不覆盖不删除，只补缺失；目录中有文件保留不改。**Discoverability 检查**：若 `AGENTS.md`/`CLAUDE.md` 未暴露 `docs/architecture/` 和 `prototype/`，advisory 建议用户添加（不自动改）。
 
 ### B5: Path Decision（路径判断）
 
@@ -199,25 +145,4 @@ mkdir -p changes/
 
 ## Success Output
 
-```
-✓ 既有项目接入完成
-
-侦察模式：Quick | Deep
-
-产出：
-- docs/architecture/baseline.md（项目基线画像）
-- docs/architecture/ARCHITECTURE.md（架构锚点，如适用）
-- docs/architecture/DATABASE.md（数据模型，如适用）
-- CONCEPTS.md（领域词汇，N 个术语）
-- 目录结构：prd/ prototype/ docs/ changes/
-
-关键发现：
-- 技术栈：Java 17 + Spring Boot 3 + MySQL 8
-- 模块数：5（user-service, order-service, ...）
-- 架构模式：微服务 + DDD 分层
-- 测试覆盖：约 60%（JUnit 5 + Mockito）
-
-下一步：
-→ 运行 /workflow-orchestrator 开始产品级流程
-→ 或运行 /architecture-design 进行完整架构设计
-```
+接入结束时输出：侦察模式、产出清单（baseline.md / ARCHITECTURE.md / DATABASE.md / CONCEPTS.md / 目录结构）、关键发现（技术栈/模块数/架构模式/测试覆盖）、下一步建议。完整模板见 `references/b1-reconnaissance.md`「Success Output 模板」。

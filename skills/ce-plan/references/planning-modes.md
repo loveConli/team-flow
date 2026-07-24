@@ -6,17 +6,18 @@
 
 - **业务模式 (Business Mode)** — For product managers / business teams. Focuses on task breakdown, acceptance criteria, performance/compatibility requirements, and dependencies **from a business perspective**. Does NOT include technical architecture decisions, tech stack selection, or implementation details. The plan is a business-oriented implementation roadmap.
 
-- **一人公司模式 (Solo-Founder Mode)** — For technical leaders who are both product owner and developer. Includes everything in business mode **plus** technical architecture decisions, tech stack selection, implementation approach, data model changes, and API design overview. The plan is a comprehensive technical implementation blueprint.
+- **一人公司模式 (Solo-Founder Mode)** — For technical leaders who are both product owner and developer. Includes everything in business mode **plus** technical architecture decisions, tech stack selection, implementation approach, data model changes, and **high-level technical design**（模块边界 + 技术选型 + 数据流方向 + 关键聚合/上下文划分）. **不含接口清单 / 字段定义 / 方法签名 / 请求响应 schema**——这些变更级详细设计属于各 change 的 spec-writer / architecture-design（见 SKILL.md「作用边界」）。The plan is a product-level technical implementation blueprint, not a per-change detailed design.
 
 ## Mode Selection Logic
 
 After resolving the PRD source, determine the planning mode:
 
-1. **Auto-detect from context:** If the user is clearly a technical leader / solo developer working alone, default to **一人公司模式**. If the user is clearly a product manager or business team member, default to **业务模式**.
-2. **Ask when ambiguous.** If context is unclear, ask the user to choose:
+1. **Pipeline 显式传参优先（v0.8）**：若调用方（workflow-orchestrator）传入 `plan_mode: business | solo`（S3 入口已一次性问定），直接采用，**不再询问**。
+2. **standalone 强制询问（v0.8 修订，禁止隐式默认）**：未收到 `plan_mode` 时，**必须用阻塞问题工具询问**用户选择，**不得因"看起来是技术 leader"就静默默认一人公司模式**：
    - 业务模式：从产品/业务视角制定实施方案（任务拆分、验收标准、非功能需求）
-   - 一人公司模式：在业务模式基础上补充技术方案（技术选型、架构设计、数据模型、API 设计）
+   - 一人公司模式：在业务模式基础上补充**高阶技术方案**（技术选型、架构设计、数据模型、技术方向；**不含接口清单**）
 3. **Explicit mode in prompt.** If the user explicitly mentions "business mode" / "业务模式" or "solo mode" / "一人公司模式", honor it directly.
+4. **异常回退**：pipeline 调用但未收到 `plan_mode` → 回退到第 2 条强制询问（不隐式默认）。
 
 ## PRD Input
 
@@ -61,7 +62,7 @@ If no relevant PRD source exists, planning may proceed from the user's request d
 Write the plan following the template structure:
 
 - **业务模式**: Fill sections 一~四 (需求摘要, 任务拆分, 验收标准, 风险与约束). Leave section 五 (技术方案) empty with a note: "由 spec-superflow 变更链在具体 change 中设计".
-- **一人公司模式**: Fill all sections 一~七, including section 五 (技术方案) with tech stack, architecture, data model, and API design.
+- **一人公司模式**: Fill all sections 一~七, including section 五 (技术方案) with tech stack, architecture, data model, and **high-level technical design**（模块边界 + 技术选型 + 数据流方向 + 关键聚合/上下文划分）. **禁止输出「接口清单」段**——接口签名/字段/请求响应 schema 属各 change 的 spec-writer / architecture-design（见 SKILL.md「作用边界」）。
 - Both modes: Include section 六 (里程碑计划) and section 七 (待定事项) when applicable.
 - Include a metadata block at the top: `mode` (业务模式 or 一人公司模式), `prd_reference` (path to PRD), `iteration_version`, `date`.
 - Reference the PRD's requirements by chapter number (e.g., "关联 PRD §7 系统功能清单 TF-F001").

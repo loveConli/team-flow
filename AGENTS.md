@@ -1,6 +1,6 @@
 # AGENTS.md · team-flow
 
-> team-flow 统一插件 = **spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（20 skills），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
+> team-flow 统一插件 = **spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（20 skills + 8 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
 
 ## What This Is
 
@@ -12,7 +12,7 @@
 
 ### 身份与依赖关系
 
-- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 20 个 skills + hooks + templates
+- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 20 个 skills + 8 个 agents + hooks + templates
 - **spec-superflow**（npm 底座包）：team-flow 的 CLI 工具层（`package.json` name = `spec-superflow`，bin = `ssf`），提供状态机、校验、复利 CLI 等运行时能力
 - 关系：team-flow **包含** spec-superflow 作为底座（同一仓库、同一版本）。skills 中的 `npx --yes --package spec-superflow@x.y.z ssf ...` 调用的是已发布的 npm 底座包，版本号必须与当前 `package.json` version 一致
 
@@ -46,33 +46,40 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 - 4A 企业架构 + DDD 领域驱动；识别聚合/限界上下文、CQRS 读写模型、API 指令映射
 - 每 change 增量设计，经 `arch-merge` 顺序提交回写全局 `docs/architecture/`（ARCHITECTURE.md / DATABASE.md / `<bc>/`），复利真相源
 
-### 4. prototype（1 skill，本地 HTML 原型）
+### 4. prototype（1 skill，本地 HTML 原型，v0.15.0 内部编排重构）
 - 全局一份 `prototype/`（与 PRD 同级，git 分支隔离），零外部依赖、可离线
-- 设计系统渲染：读取项目 `design-system.md`（9 段 schema + 5 方向调色板）
-- change 完成经 `prototype-sync` 回写全局 `prototype/` + `design-system.md`
+- **内部编排器（v0.15.0）**：主代理只编排不实施——环境探查(`prototype-env-scout`)→方案/人工评审→绘制(`prototype-builder`)→评审(`prototype-reviewer`)→循环→人工路由
+- 设计系统生命周期：首次创建(`design-system-architect`)→引用→增量更新（变更履历）；设计系统渲染读取 `design-system.md`（9 段 schema + 5 方向调色板）
+- change 完成经 `prototype-sync` 回写全局 `prototype/` + `design-system.md`（写入路由到子代理）
 
 ### 5. e2e（1 skill，v0.10.0 新增）
 - AC 驱动 Playwright E2E 测试：从 spec 验收场景生成测试、执行并审计覆盖率
 - 用法：`/e2e [原型|集成|验收] [spec路径]`
 
-### 6. workflow-orchestrator（1 skill，产品级编排，v0.7 重设计）
-- 编排产品级工作流：S1 路径路由 → S2 PRD+原型（循环上提，orchestrator 直接编排）→ S3 ce-plan（pipeline 快速路径）→ S4 拆分验证+分发 → S5 全局监控
+### 6. workflow-orchestrator（1 skill，产品级编排，v0.7 重设计 + v0.15.0 多需求）
+- 编排产品级工作流：S1 路径路由（含需求选择）→ S2 PRD+原型（循环上提，orchestrator 直接编排，**冻结前 PRD 完整性评审**）→ S3 ce-plan（pipeline 快速路径，**入口问定 plan_mode**）→ S4 拆分验证+分发 → S5 全局监控
 - v0.7 关键变更：原型循环从 ce-brainstorm 内部上提到 orchestrator 层直接编排；新增反馈环路（vN 内修订+变更履历，非升版）；新增增量入口（S1 路径路由器，6 种入口路径）；S5 多 change 并行时必选
+- **v0.15.0 多需求并行**：`.team-flow/registry.yaml` 注册表 + 每需求一份 `.team-flow/requirements/<req-id>/orchestrator.yaml`，状态天然隔离
 - 与 workflow-start 分层：orchestrator 管"做什么、什么顺序"（产品级策略），workflow-start 管"怎么做"（变更级执行）
 
-### 7. workflow-bootstrap（1 skill，既有项目接入）
+### 7. workflow-bootstrap（1 skill，既有项目接入，v0.15.0 脚本+子代理侦察）
 - 一次性"侦察 + 基线建立"：代码库侦察 → 架构基线文档化 → 领域词汇提取 → 目录初始化 → 进入 workflow-orchestrator
+- **B1 侦察（v0.15.0）**：先跑确定性脚本 `scripts/recon-probe.sh`（可复现固定化采集）→ 并行派发 `codebase-recon-analyst` 子代理语义增强 → 主代理汇总写 baseline.md
 - 仅首次使用时执行；`docs/architecture/baseline.md` 已存在则跳过
 
 ## 全局产物结构（Discoverability —— 设计/开发前先检索）
 
 ```
+.team-flow/             状态文件（v0.15.0，原 .workflow-orchestrator.yaml 迁入）
+  ├── registry.yaml             # 需求注册表（多需求并行 + active_requirement）
+  └── requirements/<req-id>/orchestrator.yaml  # 每需求产品级编排状态
 prd/                    PRD（有版本 v1→v2→v3，git 分支隔离）
   └── vN/
       ├── prd.md              # 业务要件（ce-brainstorm 产出）
       ├── plan.md             # 实施方案（ce-plan 产出，产品级策略）
       └── prototype-review.md # 原型审查记录（PRD 内循环产出）
       ├── prototype-auto-review.md # 原型自动评审报告（prototype-reviewer agent 产出，编排层落盘，v0.7 新增）
+      ├── prd-completeness-review.md # PRD 完整性评审报告（prd-completeness-reviewer 产出，v0.15.0 新增）
 prototype/             全局原型系统（UI 契约真相源）：index.html / pages / components / assets / design-system.md / flow.md
 docs/
   ├── architecture/    全局架构锚点：ARCHITECTURE.md / DATABASE.md / <bc>/（限界上下文目录）/ baseline.md（v0.6 新增）
@@ -84,7 +91,7 @@ specs/<cap>/            每变更设计/任务/契约：spec.md / design.md / ta
 STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 ```
 
-## 标准工作流（SOP，v0.7 修订）
+## 标准工作流（SOP，v0.7 修订，v0.15.0 增补）
 
 ```
 模糊需求
@@ -93,20 +100,22 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   既有项目接入层（workflow-bootstrap，一次性，baseline.md 已存在则跳过）
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  B1 代码库侦察 → B2 架构基线文档化 → B3 领域词汇提取 → B4 目录初始化
+  B1 代码库侦察（recon-probe.sh 脚本 + codebase-recon-analyst 并行子代理）
+     → B2 架构基线文档化 → B3 领域词汇提取 → B4 目录初始化
   │
   ▼
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  产品级编排层（workflow-orchestrator，v0.7 重设计）
+  产品级编排层（workflow-orchestrator，v0.7 重设计 + v0.15.0 多需求）
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  S1 路径路由器 → 判断入口路径（全新/续版/重新计划/继续执行/快速通道/Hotfix）
+  S1 路径路由器 → 需求选择（.team-flow/registry.yaml）+ 判断入口路径
      检查 baseline.md / CONCEPTS.md → 注入上下文 + 复利注入（top-5）
   S2 PRD + 原型阶段 → ce-brainstorm 产出 PRD
-     原型循环由 orchestrator 直接编排（上提）：
-     prototype skill → 自动评审（prototype-reviewer）→ 人工评审 → 冻结
+     冻结前 PRD 完整性评审（prd-completeness-reviewer，v0.15.0）
+     原型循环由 orchestrator 直接编排（prototype skill 内部编排器，主代理只编排）：
+     env-scout → builder 绘制 → reviewer 评审 → 人工评审 → 冻结
      PRD vN 内修订 + 变更履历（不升版）；反馈环路：scope 问题可回退修订
-  S3 计划阶段 → ce-plan（pipeline 快速路径）
-     plan.md：change 拆分 + 依赖 DAG + 技术方向
+  S3 计划阶段 → ce-plan（pipeline 快速路径，入口问定 plan_mode）
+     plan.md：change 拆分 + 依赖 DAG + 高阶技术方向（不含接口清单）
      反馈环路：plan 暴露 PRD 问题可回退 S2
   S4 拆分验证与分发 → change-split-auditor 审计 → 创建 change → 进入 spec-superflow
      并行策略建议 + 验收标准预分配；反馈环路：依赖图不可执行可回退 S3
@@ -176,7 +185,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 
 > **规则**：新增 skill 时必须在此表登记所属层级。产品级新需求触发词归 workflow-orchestrator 独占。
 
-### Agents 索引（v0.7 新增）
+### Agents 索引（v0.7 新增，v0.15.0 增至 8 个）
 
 | Agent | 职责 | Tools | 触发场景 |
 |-------|------|-------|---------|
@@ -185,6 +194,9 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | prototype-reviewer | PRD vs 原型 6 维度一致性自动评审 | Read/Bash/Grep/Glob | orchestrator S2 原型循环每轮产出后 |
 | change-split-auditor | plan.md 拆分质量审计 | Read/Bash/Grep/Glob | orchestrator S4 脚手架前 |
 | cross-change-consistency-checker | 跨 change 冲突检测 | Read/Bash/Grep/Glob | orchestrator S5 多 change 并行/closing 时 |
+| prd-completeness-reviewer | PRD 完整性评审（能否支撑 plan/spec，5 维度） | Read/Bash/Grep/Glob | orchestrator S2 / ce-brainstorm 冻结前门禁（v0.15.0） |
+| prototype-builder | 原型绘制执行者（按确认方案写 prototype/） | Read/Write/Edit/Bash/Grep/Glob | prototype skill 内部编排步骤③/⑤修正轮（v0.15.0） |
+| prototype-env-scout | 原型环境探查（设计系统/分支/PRD/已有页面） | Read/Bash/Grep/Glob | prototype skill 内部编排步骤①（v0.15.0） |
 
 ## 复利贯穿机制（v0.5 新增）
 

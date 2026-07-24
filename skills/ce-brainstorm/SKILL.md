@@ -392,12 +392,22 @@ PRD 文档写入后、Handoff 之前，执行原型内循环。原型是 PRD 的
 - **最多循环 3 次**，超过则标记为"需人工介入"，在 PRD 中记录未解决项
 - 每次修正触发复利捕获：`ssf solutions capture --phase prd --domain <domain> --type pitfall --severity medium --summary "<修正原因>"`
 
-#### 3.5.5 冻结
+#### 3.5.5 PRD 完整性评审（v0.8 新增，冻结前门禁）
 
-审查通过后：
+原型审查通过后、冻结前，派发 `prd-completeness-reviewer` 子代理（只读，独立上下文），评审 PRD「是否完整到能支撑后续 plan/spec 实施」（区别于 Phase 2.6 claim verifier——后者管"说得对不对"，本评审管"说得全不全"）。
+
+- 派发：按名派发插件 agent `prd-completeness-reviewer`（定义见插件 `agents/prd-completeness-reviewer.md`，只读审查员），传入 PRD 路径 + CONCEPTS.md 路径。
+- 子代理按 §18.1 交接协议返回（status/deliverable/blockers/outstanding_questions/summary）。报告写在 response，本 skill 落盘到 `prd/{ITERATION_VERSION}/prd-completeness-review.md`。
+- 判定（柔性）：PASS / PASS_WITH_WARNINGS → 进入冻结；**FAIL（Critical>0）→ 回 Phase 1.3 补充**后重审。
+- 5 维度：用户故事完整性(Critical)/验收标准(Critical)/边界与非功能(Important)/术语一致性(Minor)/范围闭环(Important)。
+
+#### 3.5.6 冻结
+
+完整性评审通过后：
 1. 写入 `prd/{ITERATION_VERSION}/prototype-review.md`（审查结论 + 版本 + 日期 + 循环次数）
-2. PRD 标记为 frozen（在 PRD frontmatter 中增加 `frozen: true` + `frozen_date: YYYY-MM-DD`）
-3. 后续阶段（ce-plan、spec-writer）不可回改 PRD（需升版 vN+1 走完整内循环）
+2. PRD 标记为 frozen（在 PRD frontmatter 中增加 `frozen: true` + `frozen_date: YYYY-MM-DD`），并在正文标题下插入冻结声明（措辞见 `references/prd-mapping.md`「冻结声明」节）
+3. **冻结语义为 `frozen_downstream`（非升版）**：后续阶段（ce-plan、spec-writer）**不可直接回改** PRD；如 plan 或实施暴露 scope 问题，经 **S3→S2 回退在 vN 内修订**并记录「决策与变更履历」（不升版）。**仅当启动新迭代 vN+1 或用户显式绝对冻结（`frozen: absolute`）时才需升版。**
+4. 同步更新正文 §1.1 文档状态为「已冻结-下游」（与 frontmatter `frozen: true` 一致，见 `references/prd-mapping.md`「版本格式规范」）
 
 ### Phase 4: Handoff
 

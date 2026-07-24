@@ -47,4 +47,4 @@ ce-plan 在 orchestrator pipeline 上下文中减少仪式开销，但**保留�
 ## 完成条件
 
 - `prd/vN/plan.md` 已产出，含 change 拆分 + 依赖 DAG + 技术方向
-- `.workflow-orchestrator.yaml` 中 S3 状态 = completed
+- `.team-flow/requirements/<req-id>/orchestrator.yaml` 中 S3 状态 = completed

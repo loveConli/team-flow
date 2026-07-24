@@ -54,7 +54,7 @@
 检测可复利时刻（需求矛盾、原型返工、自动评审发现不一致并修正等）。每次自动评审发现不一致并修正后触发：
 
 ```bash
-npx --yes --package spec-superflow@0.14.0 ssf solutions capture --phase prd --domain <domain> --type pitfall --severity <sev> --summary "<summary>"
+npx --yes --package spec-superflow@0.15.0 ssf solutions capture --phase prd --domain <domain> --type pitfall --severity <sev> --summary "<summary>"
 ```
 
 ### 6. 反馈环路检查点
@@ -93,4 +93,4 @@ npx --yes --package spec-superflow@0.14.0 ssf solutions capture --phase prd --do
 
 - `prd/vN/prd.md` frontmatter `frozen: true`（frozen_downstream 已设置）
 - 如需原型：`prd/vN/prototype-auto-review.md` 已落盘且 verdict 为 PASS / PASS_WITH_WARNINGS（人工已裁定）
-- `.workflow-orchestrator.yaml` 中 S2 状态 = completed，`prd_version` 已记录
+- `.team-flow/requirements/<req-id>/orchestrator.yaml` 中 S2 状态 = completed，`prd_version` 已记录

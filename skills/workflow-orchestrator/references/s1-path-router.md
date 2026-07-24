@@ -4,7 +4,16 @@
 
 ## 职责边界
 
-S1 只做编排动作（存在性检查、路径判断、阻塞式用户确认），上下文简报组装委托 `kickoff-context-assembler`（种子提示，建议做）。S1 不产出任何业务制品。
+S1 只做编排动作（需求选择、存在性检查、路径判断、阻塞式用户确认），上下文简报组装委托 `kickoff-context-assembler`（种子提示，建议做）。S1 不产出任何业务制品。
+
+## 需求选择（v0.15.0 新增，多需求并行第一步）
+
+读 `.team-flow/registry.yaml`：
+- **无注册表 / 无需求** → 新建需求：询问需求短码（`<req-id>`）与标题，创建 `.team-flow/requirements/<req-id>/orchestrator.yaml` + 登记 registry，设为 `active_requirement`。
+- **单个需求** → 直接采用为活跃需求。
+- **多个需求** → 用阻塞问题工具询问 LT 操作哪个（列出各需求 title/phase/prd_version），或选择「新建需求」；选中者设为 `active_requirement`。
+
+后续阶段读写的 `orchestrator.yaml` 一律指 `active_requirement` 对应的那份。迁移兼容：检测到旧 `<root>/.workflow-orchestrator.yaml` → 自动迁入 `.team-flow/requirements/<req-id>/orchestrator.yaml` 并登记 registry（一次性，提示用户）。
 
 ## 6 种入口路径
 
@@ -17,7 +26,7 @@ S1 只做编排动作（存在性检查、路径判断、阻塞式用户确认�
 | **单 change 快速通道** | 需求极清晰，无需 PRD（仅限单一功能点、无 UI、无跨模块依赖的极小变更） | → 直接创建 change → workflow-start | 最轻量路径，无 PRD 锚点，**不可触发 S3→S2 回退** |
 | **紧急修复（Hotfix）** | bug/生产问题，需最小范围修复 | → 直接创建 change（type: hotfix，注入 bug 描述替代 PRD）→ workflow-start | closing 时强制补录复利 |
 
-**判断顺序**：先查 `.workflow-orchestrator.yaml`（如存在 → 多半是「继续执行」或「重新计划」），再查 `prd/` 目录（有 PRD → 「续版」候选），最后落到「全新需求」。Hotfix 由用户语义（bug/生产/紧急修复）显式触发。
+**判断顺序**：先查活跃需求的 `orchestrator.yaml`（`.team-flow/requirements/<req-id>/orchestrator.yaml`，如存在 → 多半是「继续执行」或「重新计划」），再查 `prd/` 目录（有 PRD → 「续版」候选），最后落到「全新需求」。Hotfix 由用户语义（bug/生产/紧急修复）显式触发。
 
 ## 项目基线与词汇检查
 
@@ -44,7 +53,7 @@ S1 只做编排动作（存在性检查、路径判断、阻塞式用户确认�
 
 ## 「继续执行」状态恢复简报
 
-读取 `.workflow-orchestrator.yaml` 的 `change_dag`，汇总各 change 状态（从各 change 的 `.spec-superflow.yaml` 同步），输出简报后由用户选择下一步（**支持跳过被阻塞的 change**）：
+读取活跃需求的 `orchestrator.yaml` 的 `change_dag`，汇总各 change 状态（从各 change 的 `.team-flow.yaml` 同步），输出简报后由用户选择下一步（**支持跳过被阻塞的 change**）：
 
 ```
 状态恢复简报：
@@ -58,7 +67,8 @@ S1 只做编排动作（存在性检查、路径判断、阻塞式用户确认�
 
 ## 完成条件
 
+- 活跃需求已确定（`active_requirement` 已设置，registry 已登记）
 - 入口路径已确认（用户确认）
 - baseline/CONCEPTS 已注入（或 advisory 提示）
 - 复利经验已注入（或静默跳过）
-- `.workflow-orchestrator.yaml` 已初始化/更新 `workflow_phase` 与 S1 阶段状态
+- 活跃需求的 `orchestrator.yaml`（`.team-flow/requirements/<req-id>/orchestrator.yaml`）已初始化/更新 `workflow_phase` 与 S1 阶段状态

@@ -37,13 +37,13 @@ Do NOT invoke for:
 ## Execution Flow（S1-S5）
 
 ### S1: 路径路由器
-接收用户输入，判断 6 种入口路径之一；检查 baseline.md / CONCEPTS.md 并注入；复利注入（INDEX.md top-5）。**路由结果必须向用户显式确认**（路由是建议非决定）。详见 `references/s1-path-router.md`。
+**先做需求选择**（v0.15.0 多需求）：读 `.team-flow/registry.yaml`，确定 `active_requirement`（多需求则询问操作哪个/新建）。再判断 6 种入口路径之一；检查 baseline.md / CONCEPTS.md 并注入；复利注入（INDEX.md top-5）。**路由结果必须向用户显式确认**（路由是建议非决定）。详见 `references/s1-path-router.md`。
 
 ### S2: PRD + 原型阶段
-调用 `/ce-brainstorm`（mode: orchestrated）产出 PRD 草稿；原型循环由编排层直接编排（prototype skill 产出 → prototype-reviewer 自动评审 → 人工评审 → 冻结）；冻结后迭代内变更不升版。反馈环路检查点：scope 是否合理。详见 `references/s2-prd-prototype-loop.md`。
+调用 `/ce-brainstorm`（mode: orchestrated）产出 PRD 草稿；**冻结前派 `prd-completeness-reviewer` 子代理做 PRD 完整性评审**（v0.15.0，管"说得全不全"）；原型循环由编排层直接编排（prototype skill 内部编排产出 → prototype-reviewer 自动评审 → 人工评审 → 冻结）；冻结语义为 `frozen_downstream`（迭代内变更不升版）。反馈环路检查点：scope 是否合理。详见 `references/s2-prd-prototype-loop.md`。
 
 ### S3: 计划阶段
-调用 `/ce-plan`（pipeline_mode: orchestrator，跳过仪式开销、保留 repo research + change splitting + 依赖 DAG + 技术方向）产出 `prd/vN/plan.md`。反馈环路检查点：plan 是否暴露 PRD scope 问题（是→回退 S2）。详见 `references/s3-plan-pipeline.md`。
+**入口一次性问定计划模式**（业务/一人公司），调用 `/ce-plan`（`pipeline_mode: orchestrator` + `plan_mode: business|solo`，跳过仪式开销、保留 repo research + change splitting + 依赖 DAG + 技术方向）产出 `prd/vN/plan.md`。plan 只到产品级策略 + 高阶技术设计，**不含接口清单**（属各 change 的 spec-writer）。反馈环路检查点：plan 是否暴露 PRD scope 问题（是→回退 S2）。详见 `references/s3-plan-pipeline.md`。
 
 ### S4: 拆分验证与分发
 change-split-auditor 审计拆分质量（粒度/DAG 无环/并行策略/AC 预分配）；创建 change 目录 + `.spec-superflow.yaml`；写入 change_dag；按依赖顺序分发。反馈环路检查点：依赖图是否可执行（否→回退 S3）。详见 `references/s4-split-validate.md`。
@@ -72,7 +72,7 @@ change-split-auditor 审计拆分质量（粒度/DAG 无环/并行策略/AC 预�
 
 ## 状态模型
 
-跨阶段、跨 session 状态持久化到 `.workflow-orchestrator.yaml`（持久化记忆 / checkpointer）。含 workflow_phase / phases / replan_log / change_dag / prd_version。双层冻结（frozen_downstream / frozen_absolute），frozen 以 PRD frontmatter 为单一真相源。动态重规划（三级意图分类器 + 红/绿/灰区 + DP-R 确认）见 `references/state-model.md`。
+**多需求并行（v0.15.0）**：`.team-flow/registry.yaml`（需求注册表 + `active_requirement` 活跃指针）+ 每需求一份 `.team-flow/requirements/<req-id>/orchestrator.yaml`（持久化记忆 / checkpointer）。各需求状态天然隔离，支持并行。单需求 orchestrator.yaml 含 requirement_id / workflow_phase / phases / replan_log / change_dag / prd_version。双层冻结（frozen_downstream / frozen_absolute），frozen 以 PRD frontmatter 为单一真相源。迁移兼容：检测旧 `<root>/.workflow-orchestrator.yaml` 自动迁入。动态重规划（三级意图分类器 + 红/绿/灰区 + DP-R 确认）见 `references/state-model.md`。
 
 ## Guardrails
 
@@ -86,6 +86,6 @@ change-split-auditor 审计拆分质量（粒度/DAG 无环/并行策略/AC 预�
 ## Output Standard
 
 每次交互结束时说明：
-1. 当前所处阶段（S1-S5）与 `.workflow-orchestrator.yaml` 状态
+1. 当前所处阶段（S1-S5）与 `.team-flow/requirements/<req-id>/orchestrator.yaml` 状态
 2. 已产出的制品（PRD/原型/plan/changes）
 3. 下一步建议（调用哪个 skill / 进入哪个 change）

@@ -33,14 +33,14 @@
 
 ```bash
 mkdir -p changes/<change-name>
-npx --yes --package spec-superflow@0.14.0 ssf state init changes/<change-name>
+npx --yes --package spec-superflow@0.15.0 ssf state init changes/<change-name>
 ```
 
 > 建议新增 `ssf change scaffold` CLI 一次性完成目录创建 + state init + change_dag 写入（确定性脚本，无需 LLM 判断）。
 
 ### 4. 写入 change_dag
 
-把每个 change 的 id / spec_dir / state_file / depends_on / priority / parallel_group / status 写入 `.workflow-orchestrator.yaml` 的 `change_dag`。详见 state-model.md「change_dag 结构」。
+把每个 change 的 id / spec_dir / state_file / depends_on / priority / parallel_group / status 写入 `.team-flow/requirements/<req-id>/orchestrator.yaml` 的 `change_dag`。详见 state-model.md「change_dag 结构」。
 
 ### 5. 分发
 
@@ -54,5 +54,5 @@ Change C1 已就绪，运行 /workflow-start 进入变更级流程。
 ## 完成条件
 
 - 所有 change 目录已创建，`.spec-superflow.yaml` 已初始化
-- `.workflow-orchestrator.yaml` 的 `change_dag` 已填充
+- `.team-flow/requirements/<req-id>/orchestrator.yaml` 的 `change_dag` 已填充
 - S4 状态 = completed，已告知用户执行顺序

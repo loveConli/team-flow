@@ -14,6 +14,11 @@ argument-hint: "[optional: feature description, PRD doc path, plan path to deepe
 
 **v0.5 scope**: ce-plan focuses on **product-level strategy** — change splitting (scope + dependencies + priority per change), inter-change dependency graph (DAG), and overall technical direction. It does NOT produce file-level Implementation Units, Files lists, or Test scenarios — those belong to spec-writer within each change.
 
+## 作用边界（v0.8 新增，硬声明）
+
+> **ce-plan = 产品级策略**：change 拆分（scope + 依赖 + 优先级 + 复杂度）、change 依赖 DAG、技术方向决策、风险与约束、里程碑计划。
+> **ce-plan ≠ 变更级详细设计**：**接口清单、字段定义、方法签名、请求/响应 schema、文件级 Implementation Unit** 一律属于各 change 的 `spec-writer` / `architecture-design`，**不进 plan.md**。一人公司模式的技术方案也只到「高阶技术设计」（模块边界 + 技术选型 + 数据流方向 + 关键聚合/上下文划分），**禁止输出接口清单段**。
+
 ## When to Use
 
 - User asks to plan, break down implementation, or plan from requirements
@@ -27,7 +32,11 @@ This workflow does **not** implement code, run tests, or learn from execution re
 
 Two modes, selected at Phase 0.2:
 - **业务模式 (Business Mode)** — business-oriented roadmap: task breakdown, acceptance criteria, non-functional requirements. No technical architecture.
-- **一人公司模式 (Solo-Founder Mode)** — business mode **plus** tech stack, architecture, data model, API design.
+- **一人公司模式 (Solo-Founder Mode)** — business mode **plus** tech stack, architecture, data model, and **high-level technical design**（模块边界 + 技术选型 + 数据流方向；**不含接口清单/字段定义**，见「作用边界」）.
+
+**模式选择（v0.8 修订，禁止隐式默认）**：
+- **standalone**（用户直接调用）：Phase 0.2 **必须用阻塞问题工具询问**模式，**不得静默默认一人公司模式**。
+- **pipeline**（orchestrator 调用，`pipeline_mode: orchestrator`）：orchestrator 在 S3 入口已一次性问定模式并**显式传参 `plan_mode: business | solo`**；ce-plan 收到即采用，不再询问。未收到 `plan_mode`（异常）→ 回退到强制询问。
 
 See `references/planning-modes.md` for mode selection logic and PRD chapter mapping.
 
@@ -43,7 +52,7 @@ See `references/planning-modes.md` for mode selection logic and PRD chapter mapp
 | 风险与约束分析 | ce-doc-review 降级为 headless |
 | 里程碑计划 | 独立调用时的 scoping synthesis 确认 |
 
-> **显式参数规约**：orchestrator 调用时传入 `pipeline_mode: orchestrator`。未收到时按标准模式执行全部 Phase。
+> **显式参数规约**：orchestrator 调用时传入 `pipeline_mode: orchestrator` 与 `plan_mode: business | solo`（S3 入口已问定）。未收到 `pipeline_mode` 时按标准模式执行全部 Phase；未收到 `plan_mode` 时强制询问模式（不得隐式默认）。
 
 ## Core Workflow
 

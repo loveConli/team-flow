@@ -1,27 +1,58 @@
-# `.workflow-orchestrator.yaml` 状态模型（v0.7 新增）
+# 编排状态模型（v0.7 新增，v0.15.0 多需求重构 + `.team-flow/` 治理）
 
-> orchestrator 的持久化记忆 / checkpointer（对标 LangGraph Checkpointer），跨阶段、跨 session 的状态一律读 yaml 而非依赖上下文记忆。设计依据：设计增强方案 v0.7 §17.9。
+> orchestrator 的持久化记忆 / checkpointer（对标 LangGraph Checkpointer），跨阶段、跨 session 的状态一律读 yaml 而非依赖上下文记忆。设计依据：设计增强方案 v0.7 §17.9 + v0.8 §18.2/§18.3。
 
-## 完整 Schema
+## 状态文件布局（v0.15.0：每需求一份 + 注册表）
+
+> **v0.15.0 重构**：从「单需求单文件 `.workflow-orchestrator.yaml`（项目根）」升级为「每需求一份 + 注册表索引」，支持多需求并行；所有状态文件收敛到 `.team-flow/` 目录（P1-6 第一阶段）。
+
+```
+.team-flow/
+├── registry.yaml                        # 需求注册表（索引 + 活跃指针）
+└── requirements/
+    └── <req-id>/                        # 每个需求独立目录（req-id = prd 迭代主题短码）
+        └── orchestrator.yaml            # 该需求的产品级编排状态（原 .workflow-orchestrator.yaml）
+```
+
+- **迁移兼容**：检测到旧 `<root>/.workflow-orchestrator.yaml` 存在时，自动迁移到 `.team-flow/requirements/<req-id>/orchestrator.yaml` 并提示用户（一次性）。
+- **变更级状态**：各 change 的状态文件由 `.spec-superflow.yaml` 改名为 `.team-flow.yaml`（`<change>/.team-flow.yaml`），检测逻辑保留对旧文件名的向后兼容探测。
+
+## registry.yaml Schema
+
+```yaml
+schema_version: 1
+active_requirement: <req-id>          # 当前活跃需求（orchestrator 默认操作对象）
+requirements:
+  - id: <req-id>
+    title: <需求标题>
+    prd_version: v1
+    phase: S3                          # 冗余快照，真相源仍是各 orchestrator.yaml
+    orchestrator_state: .team-flow/requirements/<req-id>/orchestrator.yaml
+    created_at: "..."
+    updated_at: "..."
+```
+
+## 单需求 orchestrator.yaml Schema
 
 ```yaml
 schema_version: 1                     # schema 版本号
+requirement_id: <req-id>              # 需求标识（与 registry 对应）
 workflow_phase: S2                    # 当前阶段
 phases:                               # 各阶段状态
   - { id: S1, status: completed, started_at: "...", completed_at: "...", artifacts: [...] }
   - { id: S2, status: active, started_at: "...", artifacts: [...] }
   - { id: S3, status: pending }
-custom_phases: []                     # reserved, Phase 2 (v0.15.0)
+custom_phases: []                     # reserved
 replan_log:                           # 重规划履历
   - { seq: 1, trigger: "用户要求跳过原型", before: "S2→S3", after: "S2(skip-proto)→S3", approved_by: user }
 change_dag:                           # change 依赖图（S4 后填充）
   - id: change-1
     spec_dir: specs/change-1/
-    state_file: specs/change-1/.spec-superflow.yaml
+    state_file: specs/change-1/.spec-superflow.yaml   # 变更级状态文件（P1-6 第二阶段 v1.0.0 改名为 .team-flow.yaml）
     depends_on: []
     priority: 1
     parallel_group: A                 # 同组可并行
-    status: executing                 # 从 .spec-superflow.yaml 同步
+    status: executing                 # 从 .team-flow.yaml 同步
   - id: change-2
     depends_on: [change-1]
     status: pending
@@ -54,13 +85,15 @@ S4 后填充。每个节点字段：
 - `depends_on`：依赖的 change id 列表（构成 DAG）
 - `priority`：优先级数值
 - `parallel_group`：同组可并行（如 A、B）
-- `status`：从该 change 的 `.spec-superflow.yaml` 同步
+- `status`：从该 change 的 `.spec-superflow.yaml` 同步（变更级状态文件，P1-6 第二阶段改名 `.team-flow.yaml`）
 
 ## yaml 定位与并发约束
 
 - **持久化记忆 / checkpointer**：跨阶段、跨 session 状态读 yaml，不依赖上下文记忆
 - **幂等恢复**：S1「继续执行」入口通过 yaml + 制品实际存在性双重校验重建状态
-- **单写者**：产品级 yaml 只由 orchestrator 单写，各 change 只写自己的 `.spec-superflow.yaml`，避免并发写冲突
+- **多需求隔离（v0.15.0）**：每个需求的 `orchestrator.yaml` 只由该需求的 orchestrator 实例单写——多需求并行时**天然隔离，无写冲突**（原「单写者」约束自动成立）。
+- **registry 写入**：`registry.yaml` 只在需求创建/切换/状态快照时由 orchestrator 写，频率低。
+- **变更级单写者**：各 change 只写自己的状态文件（当前 `.spec-superflow.yaml`，P1-6 第二阶段改名 `.team-flow.yaml`），避免并发写冲突。
 
 ---
 
@@ -138,4 +171,4 @@ S4 后填充。每个节点字段：
 
 **关键约束**：Phase 0 是一切前提；所有 L2 注入为 advisory 级；L3（自动工作流修改）明确不做，人在环。
 
-> **当前实现状态**：本 SKILL.md 描述的是 v0.7 完整目标设计。`.workflow-orchestrator.yaml` 持久化（Phase 0）落地前，编排层以上下文 + 制品存在性做最佳努力状态推断；动态重规划相关能力随路线图分版本交付。
+> **当前实现状态**：状态持久化（Phase 0）已于 **v0.15.0** 落地，并升级为多需求模型（`.team-flow/registry.yaml` + `.team-flow/requirements/<req-id>/orchestrator.yaml`）。动态重规划相关能力（三级意图分类器、红/绿/灰区、workflow_pattern 复利）随路线图分版本交付。
