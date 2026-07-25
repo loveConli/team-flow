@@ -46,7 +46,7 @@ Do NOT invoke for:
 **入口一次性问定计划模式**（业务/一人公司），调用 `/ce-plan`（`pipeline_mode: orchestrator` + `plan_mode: business|solo`，跳过仪式开销、保留 repo research + change splitting + 依赖 DAG + 技术方向）产出 `prd/vN/plan.md`。plan 只到产品级策略 + 高阶技术设计，**不含接口清单**（属各 change 的 spec-writer）。反馈环路检查点：plan 是否暴露 PRD scope 问题（是→回退 S2）。详见 `references/s3-plan-pipeline.md`。
 
 ### S4: 拆分验证与分发
-change-split-auditor 审计拆分质量（粒度/DAG 无环/并行策略/AC 预分配）；创建 change 目录 + `.spec-superflow.yaml`；写入 change_dag；按依赖顺序分发。反馈环路检查点：依赖图是否可执行（否→回退 S3）。详见 `references/s4-split-validate.md`。
+change-split-auditor 审计拆分质量（**必选门禁**，粒度/DAG 无环/并行策略/AC 预分配，PASS 后方可创建 change）；创建 change 目录（项目根 `changes/<name>/`）+ `.spec-superflow.yaml`；写入 change_dag；按依赖顺序分发。反馈环路检查点：依赖图是否可执行（否→回退 S3）。详见 `references/s4-split-validate.md`。
 
 ### S5: 全局监控（change ≥ 2 必选）
 跟踪各 change 进度；cross-change-consistency-checker 检测跨 change 冲突；change closing 时复利晋升；必要时触发动态重规划。详见 `references/s5-monitoring.md`。
@@ -79,6 +79,7 @@ change-split-auditor 审计拆分质量（粒度/DAG 无环/并行策略/AC 预�
 - **不替代 workflow-start**：本 skill 不管理 8 态状态机流转
 - **不直接实施代码**：只编排，实施由 build-executor 执行
 - **不跳过 PRD 冻结**：PRD 必须经原型循环（或显式跳过）后才能进 ce-plan
+- **不跳过拆分审计**：change-split-auditor 审计 verdict = PASS 是创建 change 脚手架的前置条件（S4 必选门禁）
 - **路由是建议非决定**：S1 路由判断必须用户确认；重规划必须 DP-R 阻塞确认
 - **回退必写 replan_log**：active → pending 回退必须记录；受影响制品归档为 .revN，重入不读旧制品
 - **不阻断流程**：所有复利操作为 advisory 级，INDEX.md 读取失败时静默跳过

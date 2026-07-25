@@ -47,8 +47,8 @@ replan_log:                           # 重规划履历
   - { seq: 1, trigger: "用户要求跳过原型", before: "S2→S3", after: "S2(skip-proto)→S3", approved_by: user }
 change_dag:                           # change 依赖图（S4 后填充）
   - id: change-1
-    spec_dir: specs/change-1/
-    state_file: specs/change-1/.spec-superflow.yaml   # 变更级状态文件（P1-6 第二阶段 v1.0.0 改名为 .team-flow.yaml）
+    change_dir: changes/change-1/                      # 项目根 changes/<change-name>/（非 specs/，非 .team-flow/）
+    state_file: changes/change-1/.spec-superflow.yaml   # 变更级状态文件（P1-6 第二阶段 v1.0.0 改名为 .team-flow.yaml）
     depends_on: []
     priority: 1
     parallel_group: A                 # 同组可并行
@@ -81,7 +81,7 @@ prd_version: v1                       # PRD 版本
 
 S4 后填充。每个节点字段：
 - `id`：change 标识（与 C-ID 对应）
-- `spec_dir` / `state_file`：change 目录与状态文件路径
+- `change_dir` / `state_file`：change 目录与状态文件路径。`change_dir` 固定为项目根 `changes/<change-name>/`，不是 `specs/<cap>/`（后者是 change 内部的设计产物目录），也不是 `.team-flow/`（仅存产品级编排状态）
 - `depends_on`：依赖的 change id 列表（构成 DAG）
 - `priority`：优先级数值
 - `parallel_group`：同组可并行（如 A、B）

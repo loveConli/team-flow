@@ -59,7 +59,7 @@ You are a read-only checker. You did NOT implement any change. You read all chan
 
 | Parameter | Description |
 |-----------|-------------|
-| `change_dirs[]` | 多个 change 目录路径（e.g., `specs/change-1/`, `specs/change-2/`） |
+| `change_dirs[]` | 多个 change 目录路径（e.g., `changes/change-1/`, `changes/change-2/`） |
 | `arch_path` | 全局架构目录（e.g., `docs/architecture/`，含 ARCHITECTURE.md / DATABASE.md） |
 | `prototype_path` | 全局原型目录（e.g., `prototype/`） |
 

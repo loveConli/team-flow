@@ -101,6 +101,7 @@ docs/
       ├── INDEX.md     # L1 轻量索引（≤150行，每条一行摘要+标签）
       ├── prd/ plan/ prototype/ spec/ build/ review/ cross-phase/  # L2 分阶段目录
       └── <file>.md    # L3 经验文件（YAML frontmatter: phase/domain/type/severity）
+changes/<name>/        变更脚手架（S4 创建）：.spec-superflow.yaml（变更级状态文件，P1-6 第二阶段改名 .team-flow.yaml）
 specs/<cap>/            每变更设计/任务/契约：spec.md / design.md / tasks.md / execution-contract.md / architecture.md / database.md / api.md / learnings.md
 STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 ```
@@ -131,7 +132,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
   S3 计划阶段 → ce-plan（pipeline 快速路径，入口问定 plan_mode）
      plan.md：change 拆分 + 依赖 DAG + 高阶技术方向（不含接口清单）
      反馈环路：plan 暴露 PRD 问题可回退 S2
-  S4 拆分验证与分发 → change-split-auditor 审计 → 创建 change → 进入 spec-superflow
+  S4 拆分验证与分发 → change-split-auditor 审计（必选门禁）→ 创建 change → 进入 spec-superflow
      并行策略建议 + 验收标准预分配；反馈环路：依赖图不可执行可回退 S3
   S5 全局监控（change≥2 必选）→ 跨 change 一致性 + 复利晋升 + 动态重规划
   │
@@ -208,7 +209,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | code-reviewer | spec 合规审查（批次完成/合并门禁） | Read/Bash/Grep/Glob | build-executor 批次完成、release-archivist 合并前 |
 | bug-investigator | 科学方法根因调查（执行期 bug/测试失败） | Read/Bash/Grep/Glob/Write | build-executor 遇阻、DP-5 升级 |
 | prototype-reviewer | PRD vs 原型 6 维度一致性自动评审 | Read/Bash/Grep/Glob | orchestrator S2 原型循环每轮产出后 |
-| change-split-auditor | plan.md 拆分质量审计 | Read/Bash/Grep/Glob | orchestrator S4 脚手架前 |
+| change-split-auditor | plan.md 拆分质量审计 | Read/Bash/Grep/Glob | orchestrator S4 脚手架前（必选门禁，PASS 方可继续） |
 | cross-change-consistency-checker | 跨 change 冲突检测 | Read/Bash/Grep/Glob | orchestrator S5 多 change 并行/closing 时 |
 | prd-completeness-reviewer | PRD 完整性评审（能否支撑 plan/spec，5 维度） | Read/Bash/Grep/Glob | orchestrator S2 / ce-brainstorm 冻结前门禁（v0.15.0） |
 | prototype-builder | 原型绘制执行者（按确认方案写 prototype/） | Read/Write/Edit/Bash/Grep/Glob | prototype skill 内部编排步骤③/⑤修正轮（v0.15.0） |

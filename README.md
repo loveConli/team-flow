@@ -1,6 +1,6 @@
 # team-flow
 
-> 当前版本：`v0.16.0`
+> 当前版本：`v0.17.0`
 
 > 统一插件：**spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同。
 
@@ -107,7 +107,7 @@ Skills 命名保留其来源前缀，作为功能分组的自然标识：
   → S1 路径路由器 → 判断入口路径（全新/续版/重新计划/继续执行/快速通道/Hotfix）
   → S2 PRD + 原型阶段 → ce-brainstorm + 原型循环上提（prototype → 自动评审 → 人工评审 → 冻结）
   → S3 计划阶段 → ce-plan（pipeline 快速路径）→ plan.md（change 拆分+依赖+技术方向）
-  → S4 拆分验证与分发 → change-split-auditor 审计 → 创建 change → 进入 spec-superflow
+  → S4 拆分验证与分发 → change-split-auditor 审计（必选门禁）→ 创建 change → 进入 spec-superflow
   → S5 全局监控（change≥2 必选）→ 跨 change 一致性 + 复利晋升 + 动态重规划
   → [复利贯穿层] 每个阶段转换点：检测→捕获→索引→注入
   → change 完成：arch-merge → prototype-sync（顺序提交）+ 复利晋升
