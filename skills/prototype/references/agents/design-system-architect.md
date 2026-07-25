@@ -32,6 +32,19 @@ Every `design-system.md` follows this schema (9 sections + a 5-direction palette
 | `brand` | logo / 品牌主色 |
 | `anti-patterns` | 禁止内联样式漂移 / 禁止非 token 颜色 |
 | `palette`（5 方向确定性调色板） | neutral / primary / success / warning / danger，各含 50–900 阶梯 |
+| `aliases`（B-slot 别名层，v0.18.0） | `--fg-2 → var(--fg)` / `--meta → var(--muted)` / `--border-soft → var(--border)` / `--surface-warm → var(--surface)`——组件引用 B-slot 永远可解析 |
+| `extensions`（C-extension 待提升清单，v0.18.0） | 品牌专有 token 名单制；提升路径：C→B（≥2 品牌需要）→A2（有全局默认值） |
+
+### Token 四层模型（v0.18.0，参照 open-design token-schema）
+
+| 层 | 语义 | 完整性 |
+|----|------|--------|
+| **A1-identity** | 品牌即 token：`--bg` `--surface` `--fg` `--muted` `--border` `--accent` `--font-display` `--font-body`（8 必选） | 缺 = guard 失败 |
+| **A1-structure** | 字号阶梯 `--text-xs~4xl` / 行高 / 字距 / section 间距 / 容器 / 栅格（16 项） | 缺 = guard 失败 |
+| **A2-derived** | 必选但有默认公式：`--accent-hover: color-mix(in oklab, var(--accent), black 8%)` / `--accent-active: ... black 14%` / `--focus-ring: ... accent transparent 70%` / `--elev-raised: ... fg transparent 92%` / `--success` `--warn` `--danger` / `--font-mono` / `--space-1~12` / `--radius-sm/md/lg/pill` / `--motion-fast/base` / `--ease-standard`（21 项） | 缺 = guard 失败 |
+| **B-slot** | 可选别名层：`--fg-2 → var(--fg)` / `--meta → var(--muted)` / `--border-soft → var(--border)` / `--surface-warm → var(--surface)`（4 项） | 组件引用永远可解析 |
+
+> **完整性约束**：每份 design-tokens.css 必须声明全部 A1+A2+B-slot token——agent 把单份 `:root` 块粘进单个 `<style>`，无全局级联，缺一个 token 规则悄悄失效。可运行 `node scripts/guard/design-token-guard.mjs` 校验。
 
 ## Methodology
 
@@ -40,8 +53,11 @@ Every `design-system.md` follows this schema (9 sections + a 5-direction palette
 When the project has no `design-system.md`:
 
 1. Read available inputs (PRD voice/domain, brand hints, the prototype scaffold `design-system.md` as a structural template).
-2. Produce a **complete** 9-段 schema:
+2. Produce a **complete** 9-段 schema + aliases + extensions:
    - **palette first, deterministically**: derive the 5-direction palette (neutral / primary / success / warning / danger), each with 50–900 steps, from the brand primary / product tone. "确定性" = the same input yields the same palette (rule-based derivation, not random). With no brand input, use a neutral default palette and note it as an assumption.
+   - **A2 派生状态色**（v0.18.0）：用 `color-mix(in oklab, ...)` 公式派生 accent-hover(black 8%) / accent-active(black 14%) / focus-ring(accent 30%) / elev-raised(fg 8%)。不手写固定 hex。
+   - **B-slot 别名层**（v0.18.0）：`--fg-2 → var(--fg)` / `--meta → var(--muted)` / `--border-soft → var(--border)` / `--surface-warm → var(--surface)`。
+   - **C-extension 清单**（v0.18.0）：如有品牌专有 token，列入 `extensions` 段（名单制），标注提升路径。
    - Fill color / typography / spacing / layout / motion / voice / brand / anti-patterns consistently with the palette.
    - `components` references the reusable components the prototype will need (button/input/card/table at minimum), all token-bound.
    - `anti-patterns` MUST include "禁止内联样式漂移" and "禁止非 token 颜色".
@@ -68,7 +84,7 @@ When prototype-sync (or a change) introduces new components / tokens / anti-patt
 ### Target path: {design_system_path}
 
 ### design-system.md (draft content)
-{完整 9 段 schema + palette 的 markdown 内容，可直接落盘}
+{完整 9 段 schema + palette + aliases + extensions 的 markdown 内容，含 A2 派生色公式和 B-slot 别名层，可直接落盘}
 
 ### 变更履历 (iterate only)
 | 时间 | 变更内容 | 来源 change |

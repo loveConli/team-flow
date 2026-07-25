@@ -208,12 +208,12 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 |-------|------|-------|---------|
 | code-reviewer | spec 合规审查（批次完成/合并门禁） | Read/Bash/Grep/Glob | build-executor 批次完成、release-archivist 合并前 |
 | bug-investigator | 科学方法根因调查（执行期 bug/测试失败） | Read/Bash/Grep/Glob/Write | build-executor 遇阻、DP-5 升级 |
-| prototype-reviewer | PRD vs 原型 6 维度一致性自动评审 | Read/Bash/Grep/Glob | orchestrator S2 原型循环每轮产出后 |
+| prototype-reviewer | PRD 6 维度 + P0 grep + craft 4 席 rubric 评审 | Read/Bash/Grep/Glob | orchestrator S2 原型循环每轮产出后 |
 | change-split-auditor | plan.md 拆分质量审计 | Read/Bash/Grep/Glob | orchestrator S4 脚手架前（必选门禁，PASS 方可继续） |
 | cross-change-consistency-checker | 跨 change 冲突检测 | Read/Bash/Grep/Glob | orchestrator S5 多 change 并行/closing 时 |
 | prd-completeness-reviewer | PRD 完整性评审（能否支撑 plan/spec，5 维度） | Read/Bash/Grep/Glob | orchestrator S2 / ce-brainstorm 冻结前门禁（v0.15.0） |
-| prototype-builder | 原型绘制执行者（按确认方案写 prototype/） | Read/Write/Edit/Bash/Grep/Glob | prototype skill 内部编排步骤③/⑤修正轮（v0.15.0） |
-| prototype-env-scout | 原型环境探查（设计系统/分支/PRD/已有页面） | Read/Bash/Grep/Glob | prototype skill 内部编排步骤①（v0.15.0） |
+| prototype-builder | 原型绘制执行者（种子优先：template.html+layouts.md 组合） | Read/Write/Edit/Bash/Grep/Glob | prototype skill 内部编排步骤③/⑤修正轮（v0.15.0，v0.18.0 种子优先） |
+| prototype-env-scout | 原型环境探查 + 2-3 差异化方向（direction-picker） | Read/Bash/Grep/Glob | prototype skill 内部编排步骤①（v0.15.0，v0.18.0 direction-picker） |
 
 ## 复利贯穿机制（v0.5 新增）
 

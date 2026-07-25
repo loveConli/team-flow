@@ -18,10 +18,10 @@ description: 本地 HTML 原型设计与维护 skill（零外部依赖、可离�
 > **硬原则**：本 skill 加载进主上下文后，**主代理只做编排**（环境探查派发、评审组织、循环控制、人工评审、路由决策），**严禁主代理直接 Write/Edit 原型 HTML 或 design-system.md**。所有探查/绘制/设计系统产出经子代理（§18.1 交接协议）。人工评审/路由因需 AskUserQuestion 必须由主代理执行（subagent 不能阻塞提问）。
 
 ```
-① 环境探查 + 方案设计   → sub: prototype-env-scout（只读，产出环境简报+原型方案设计）
-② 方案评审 + 人工评审   → 主代理（简报评审 → AskUserQuestion 确认方案/设计系统/分支/版本）
-③ 原型绘制             → sub: prototype-builder（有 Write，按已确认方案绘制 prototype/）
-④ 原型评审             → sub: prototype-reviewer（只读，对照 PRD 6 维度）
+① 环境探查 + 方案设计   → sub: prototype-env-scout（只读，产出环境简报+2-3 个差异化方向，v0.18.0）
+② 方案评审 + 人工评审   → 主代理（方向选定+方案确认 → AskUserQuestion）
+③ 原型绘制             → sub: prototype-builder（有 Write，种子优先：template.html+layouts.md 组合，v0.18.0）
+④ 原型评审             → sub: prototype-reviewer（只读，PRD 6 维度+P0 grep+craft 4 席 rubric，v0.18.0）
 ⑤ 循环编排             → 主代理：FAIL→回③修正(≤3轮,收敛检测)；PASS/PASS_WITH_WARNINGS→⑥
 ⑥ 人工评审路由         → 主代理 AskUserQuestion：
                           - PRD 有问题 → 回 orchestrator S2 修订 PRD（vN 内修订，非升版）→ 再更新原型
@@ -33,17 +33,19 @@ description: 本地 HTML 原型设计与维护 skill（零外部依赖、可离�
 
 | 步骤 | 载体 | 写文件权 |
 |------|------|---------|
-| ①环境探查+方案设计 | sub `prototype-env-scout`（插件 agent，只读） | 无（简报写 response，主代理按需落盘） |
-| ②方案/人工评审 | 主代理 | 无 |
-| ③绘制 | sub `prototype-builder`（插件 agent） | prototype/ 全部 |
-| ④评审 | sub `prototype-reviewer`（插件 agent，只读） | 无（报告写 response，主代理落盘） |
+| ①环境探查+方案设计 | sub `prototype-env-scout`（插件 agent，只读） | 无（简报+方向写 response） |
+| ②方案/人工评审 | 主代理（含方向选定，v0.18.0） | 无 |
+| ③绘制 | sub `prototype-builder`（插件 agent，种子优先） | prototype/ 全部 |
+| ④评审 | sub `prototype-reviewer`（插件 agent，只读，含 craft rubric） | 无（报告写 response，主代理落盘） |
 | ⑤循环编排 | 主代理 | 落盘评审报告 |
 | ⑥人工路由 | 主代理 | 无 |
 
 ## 内核（零外部依赖）
 - 自包含 HTML：CSS 进 `<style>`、JS 进 `<script>`，页面内 `<div id="tweaks">` 控件替代云端工具栏。
 - **avoid remote dependencies**：无 CDN、无外部字体/脚本，可完全离线。
-- 设计系统渲染：读取项目 `design-system.md`（9 段 schema + 5 方向确定性调色板），渲染 token 到 `assets/design-tokens.css`。
+- 设计系统渲染：读取项目 `design-system.md`（9 段 schema + 5 方向调色板 + aliases 别名层 + extensions，v0.18.0 token 四层模型），渲染 token 到 `assets/design-tokens.css`。
+- **种子模板 + 骨架库（v0.18.0）**：builder 从 `references/template.html`（种子）+ `references/layouts.md`（8 个 B 端 section 骨架 + 类清单契约）组合，不从零写 CSS。
+- **工艺规则层（v0.18.0）**：`references/checklist.md`（P0/P1/P2）+ `references/craft/`（anti-ai-slop / state-coverage / typography-hierarchy / accessibility-baseline / laws-of-ux），品牌无关，B 端导向。
 
 ## 产出结构（全局 prototype/）
 ```

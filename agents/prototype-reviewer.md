@@ -77,7 +77,7 @@ If either path is missing or unreadable, report `FAIL` with reason `INPUT_ERROR`
 
 ## Review Process
 
-### Phase 1: Pre-check（Bash 结构化预检，D1/D4）
+### Phase 1: Pre-check（Bash 结构化预检，D1/D4 + P0 工艺 grep）
 
 机械化验证，无需 LLM 语义判断：
 
@@ -94,6 +94,15 @@ If either path is missing or unreadable, report `FAIL` with reason `INPUT_ERROR`
    - 比对：PRD 定义的跳转路径是否在原型中存在
    - 缺失跳转 = Important finding
 
+3. **P0 工艺机械检查（v0.18.0，参照 `references/checklist.md`）**——**P0 违规 = Critical finding**：
+   - 裸 hex：grep `#[0-9a-fA-F]{3,8}` 在 `:root{}` 块外 → 命中 = Critical
+   - 靛蓝黑名单：grep `#6366f1\|#4f46e5\|#4338ca\|#3730a3\|#8b5cf6\|#7c3aed\|#a855f7` → 命中 = Critical
+   - emoji 图标：grep `✨\|🚀\|🎯\|⚡\|🔥\|💡` 在 h*/button/li 元素中 → 命中 = Critical
+   - 填充文案：grep -i `lorem\|功能一\|功能二\|功能三\|placeholder text\|示例文本` → 命中 = Critical
+   - scrollIntoView：grep `scrollIntoView` → 命中 = Critical
+   - data-testid 缺失：每个顶层 `<section>` 无 `data-testid` = Critical
+   - accent 超限：每屏 `var(--accent)` 可见使用 ≥3 处 = Critical
+
 ### Phase 2: Deep-check（LLM 语义对比，D2/D3/D5/D6）
 
 需要语义理解的维度，标注为"建议级，误报可被人工推翻"：
@@ -101,9 +110,22 @@ If either path is missing or unreadable, report `FAIL` with reason `INPUT_ERROR`
 3. **D2 功能覆盖**：读 PRD §7 功能清单，逐项在原型 HTML 中查找对应交互元素（button/form/input/link）。未覆盖 = Critical。
 4. **D3 字段一致性**：读 PRD §8.4 字段定义，在对应页面 HTML 中查找表单字段（label/input/select）。缺失 = Important。
 5. **D5 术语一致性**：读 PRD §6 + CONCEPTS.md，与原型中的中文标签/英文命名比对。不一致 = Minor。
-6. **D6 状态覆盖**：读 PRD §8.2.3 异常状态定义，检查原型是否有对应状态展示（空列表提示、错误提示、loading 占位）。缺失 = Important，结构性不可实现 = N/A。
+6. **D6 状态覆盖（v0.18.0 五状态契约）**：读 PRD §8.2.3 异常状态定义，逐页面检查 **Loading / Empty / Error / Populated / Edge** 五状态覆盖（参照 `references/craft/state-coverage.md`）。每态必含物：Loading=骨架/进度指示；Empty=说明+主操作；Error=what/why/what-to-do；Populated=正常数据；Edge=极端值/长文本/零结果。缺失 = Important，结构性不可实现 = N/A（附理由）。测试矩阵填入报告。
 
-### Phase 3: 汇总判定
+### Phase 3: Craft Quality Review（工艺质量 4 席 rubric，v0.18.0）
+
+独立于 PRD 6 维度的**工艺质量评审**。4 席独立打分（0-10），每席输出 must-fix 列表（位置 + 问题 + 修复建议）：
+
+| 席 | 权重 | 评审内容 |
+|----|------|---------|
+| **工艺席** | 0.4 | checklist P1 合规 + anti-ai-slop 七宗罪 + 80/20 灵魂法则（参照 `references/craft/anti-ai-slop.md`） |
+| **品牌席** | 0.2 | design-system.md token 合规 + 视觉一致性（无内联漂移） |
+| **无障碍席** | 0.2 | accessibility-baseline 合规（参照 `references/craft/accessibility-baseline.md`） |
+| **文案席** | 0.2 | 无填充 / CTA 说明动作 / 标题 ≤14 词 / 术语一致 |
+
+加权合成：`工艺×0.4 + 品牌×0.2 + 无障碍×0.2 + 文案×0.2`
+
+### Phase 4: 汇总判定
 
 按判定标准输出最终 verdict。
 
@@ -111,11 +133,11 @@ If either path is missing or unreadable, report `FAIL` with reason `INPUT_ERROR`
 
 | Verdict | Condition | Action |
 |---------|-----------|--------|
-| **PASS** | Critical=0 且 Important=0 | 进入人工评审 |
-| **PASS_WITH_WARNINGS** | Critical=0 且 Important>0 | 警告项交人工裁定，不阻断 |
-| **FAIL** | Critical>0 | 必须修正后重新评审 |
+| **PASS** | Critical=0 且 Important=0 且 craft 合成 ≥6.0 | 进入人工评审 |
+| **PASS_WITH_WARNINGS** | Critical=0 且（Important>0 或 craft 合成 <6.0），无未清 must-fix | 警告项交人工裁定，不阻断 |
+| **FAIL** | Critical>0（含 P0 违规）或有未清 must-fix | 必须修正后重新评审 |
 
-**FAIL 仅由 Critical 触发**。Important 误报不触发 FAIL。
+**FAIL 由 Critical 或未清 must-fix 触发**。Important 误报不触发 FAIL。
 
 ## Output Format
 
@@ -156,7 +178,22 @@ If either path is missing or unreadable, report `FAIL` with reason `INPUT_ERROR`
 [不一致术语列表]
 
 ### D6 状态覆盖 — {PASS/WARN/N/A}
-[逐状态检查结果，N/A 项附理由]
+[逐页面五状态检查结果表格：页面 | Loading | Empty | Error | Populated | Edge | N/A 项附理由]
+
+## Craft Quality（v0.18.0）
+
+| 席 | 分数 (0-10) | must-fix 数 |
+|----|------------|------------|
+| 工艺（×0.4） | {n} | {m} |
+| 品牌（×0.2） | {n} | {m} |
+| 无障碍（×0.2） | {n} | {m} |
+| 文案（×0.2） | {n} | {m} |
+| **加权合成** | **{weighted}** | **{total}** |
+
+### Must-Fix Details
+| # | 席 | 位置 | 问题 | 修复建议 |
+|---|-----|------|------|---------|
+| 1 | 工艺 | pages/dashboard.html:42 | accent 使用 4 处超限 | 去掉 2 处 accent，改用 --muted |
 
 ## Inconsistency Summary
 | # | Dim | Severity | PRD Source | Prototype Location | Description |

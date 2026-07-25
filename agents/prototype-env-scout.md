@@ -67,7 +67,13 @@ Turn the probe into a decision-ready brief: what exists, what is missing, and a 
 ### Step 4: Synthesize Brief + Recommended Plan
 Produce:
 1. **Environment brief**: design-system status (9-段 completeness + palette), branch status, PRD version, existing prototype inventory.
-2. **Recommended prototype design plan**: proposed page list (from PRD §4), component list (reuse existing where possible, flag new ones to sediment into the design system), navigation flow (from PRD §8.2), target branch + version.
+2. **Recommended prototype design plan（v0.18.0 升级：direction-picker）**: 产出 **2-3 个差异化方向**（反模式：>3 个、互为变体），每个方向含：
+   - 布局策略（section 组合，参照 `references/layouts.md` 页面类型节奏表）
+   - 视觉侧重（信息密度 / 留白 / 数据可视化程度）
+   - 风险权衡（复杂度 / 用户认知负荷 / 实施成本）
+   - 方向间必须有**实质差异**（如"数据密集仪表盘" vs "任务流导向" vs "渐进披露"）
+   - 附推荐方向 + 理由（1 个）
+   通用部分不变：page list (from PRD §4), component list (reuse vs new→sediment), navigation flow (from PRD §8.2), target branch + version.
 3. **Readiness verdict**: `ready`（设计系统完整 + 方案可定）/ `needs_design_system`（缺/不全，需先派 design-system-architect）/ `needs_prd`（PRD 缺页面/功能定义）.
 
 ## Output Format
@@ -92,7 +98,26 @@ Produce:
 - Functions (§7): {list}
 - Navigation (§8.2): {transitions}
 
-### Recommended Prototype Plan
+### Directions（v0.18.0：2-3 个差异化方向）
+
+#### 方向 A: {名称，如"数据密集仪表盘"}
+- 布局策略: {section 组合，如 stats → grid-2-1 charts → log recent}
+- 视觉侧重: {信息密度高 / 数据优先}
+- 风险权衡: {复杂度高但信息量大}
+
+#### 方向 B: {名称，如"任务流导向"}
+- 布局策略: {section 组合}
+- 视觉侧重: {流程清晰 / 操作引导}
+- 风险权衡: {简洁但信息密度低}
+
+#### 方向 C（可选）: {名称}
+- ...
+
+### Recommended Direction
+- 推荐: {方向 X}
+- 理由: {一句话}
+
+### Prototype Plan（通用部分）
 - Target branch / version: {prd-vN}
 - Page list: {slug — one-line purpose}
 - Component list: {reuse vs. new (new → sediment into design-system)}

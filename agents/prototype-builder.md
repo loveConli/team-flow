@@ -94,9 +94,20 @@ Do NOT proceed past a failed gate.
 
 ### Step 1: Render Design Tokens
 
-1. Read `design-system.md`（9 段 schema：color / typography / spacing / layout / components / motion / voice / brand / anti-patterns + palette 5 方向调色板）.
-2. Generate/refresh `assets/design-tokens.css` with CSS custom properties for every token (colors incl. palette 50–900 steps, spacing scale, font scale, radii, shadows, durations).
-3. If `design-tokens.js` is part of the scaffold, keep it consistent.
+1. Read `design-system.md`（9 段 schema：color / typography / spacing / layout / components / motion / voice / brand / anti-patterns + palette 5 方向调色板 + aliases 别名层 + extensions 待提升清单）.
+2. Generate/refresh `assets/design-tokens.css` with CSS custom properties for every token (colors incl. palette 50–900 steps, spacing scale, font scale, radii, shadows, durations, A2 派生状态色, B-slot 别名).
+3. **完整性约束**：design-tokens.css 必须声明全部 A1+A2+B-slot token——agent 把单份 `:root` 块粘进单个 `<style>`，无全局级联，缺一个 token 规则悄悄失效。可运行 `node scripts/guard/design-token-guard.mjs <design-system.md> <design-tokens.css>` 自检。
+
+### Step 1.5: Seed Composition（种子优先，v0.18.0）
+
+**不从零写 CSS——从种子模板 + 骨架库组合。**
+
+1. 读 `references/template.html`（至少到 `</style>` 结尾）+ 读 `references/layouts.md`（8 个 section 骨架 + 类清单契约 + 页面类型节奏表）。
+2. **先选 section 列表再写文案**：按页面类型查节奏表（管理后台列表页 / 表单页 / 仪表盘 / Landing / 文档索引），为每个页面选定 section 组合。选定后**用一句话向主代理报出 section 列表**（写入 `outstanding_questions`，question = "页面 X 计划用 section 组合：hero → log → stats，此刻改向便宜，而不是 200 行 HTML 之后"，default_assumption = 按此组合继续）。
+3. 从 `layouts.md` 粘贴对应骨架到 `<main id="content">`，替换 `[REPLACE]` 槽为 PRD 中的真实、具体文案。
+   - **"槽位空着说明选错了布局，换一个，不许编文案。"**
+   - 类清单契约：只用 template.html `<style>` 中已定义的类；够不到的类先在页面 `<style>` 定义，绝不凭空发明全局类。
+4. 纪律约束（来自 layouts.md 各骨架）：stats ≤3 个且不编造指标；quote 每页 ≤1 个；accent 每屏 ≤2 处；section 节奏交替（禁止连续同类型）。
 
 ### Step 2: Build Structure
 
@@ -117,8 +128,23 @@ For each page in `confirmed_plan`:
 ### Step 3: Flow + Consistency
 
 1. Write/refresh `flow.md` describing page transitions / user flows, consistent with PRD navigation.
-2. Self-check (Bash): grep for hardcoded colors/spacing outside tokens; grep for any `http://`/`https://`/CDN/`@import` external references — if found, remove and replace with tokens/local. 
+2. Self-check (Bash): grep for hardcoded colors/spacing outside tokens; grep for any `http://`/`https://`/CDN/`@import` external references — if found, remove and replace with tokens/local.
 3. Verify every confirmed page file exists and is linked from `index.html`.
+
+### Step 3.5: P0/P1/P2 Quality Self-Check（v0.18.0）
+
+逐项过 `references/checklist.md`。**P0 用 Bash grep 机械验证**，任一失败 → 自行修正后再提交：
+
+- 裸 hex 检查：grep `#[0-9a-fA-F]{3,8}` 在 `:root{}` 块外 = 0 命中
+- 靛蓝黑名单：grep `#6366f1\|#4f46e5\|#4338ca\|#3730a3\|#8b5cf6\|#7c3aed\|#a855f7` = 0 命中
+- emoji 图标：grep `✨\|🚀\|🎯\|⚡\|🔥\|💡` 在 h*/button/li 中 = 0 命中
+- 填充文案：grep `lorem\|功能一\|功能二\|功能三\|placeholder\|示例文本` = 0 命中
+- scrollIntoView：grep `scrollIntoView` = 0 命中（用 `scrollTo({...})` 替代）
+- data-testid：每个顶层 `<section>` 有 `data-testid` 属性
+- accent 超限：每屏 `var(--accent)` 使用 ≤2 处
+
+P1 逐项自查（节奏交替 / 标题 ≤14 词 / CTA 说明动作 / hover 态）；P2 酌情加分。
+**Anti-slop 两秒直觉检查**：截图后外人能认出是哪个产品？看不出 → 把一个特性格换成只有这个产品才有的东西，去掉一个 accent。
 
 ### Step 4: 修正轮（when review_findings provided）
 
@@ -142,13 +168,18 @@ Your `deliverable` is the **absolute path to the prototype entry** (`<abs>/proto
 **DO:**
 - Verify all three required inputs (design system / confirmed plan / PRD) before writing
 - Render design tokens to `assets/design-tokens.css` first, reference via `var(--token)` everywhere
+- **从种子模板组合，不从零写 CSS**（template.html + layouts.md 骨架，v0.18.0）
+- **先报 section 列表再写文案**（写入 outstanding_questions 交主代理确认）
 - Keep everything self-contained and offline (CSS in `<style>`, JS in `<script>`)
 - Reuse existing `components/`; sediment new components into the design system before reuse
 - Self-check for hardcoded styles and external references before finishing
+- **P0/P1/P2 自检通过后再提交**（checklist.md，P0 grep 机械验证）
 
 **DON'T:**
 - Write any prototype file when the design system or confirmed plan is missing — return `blocked`
 - Introduce inline style drift (hardcoded hex / px outside tokens)
+- **编造指标或填充文案**（"10× 更快"无来源 = 删除；槽位空着 = 换布局，不许编）
+- **accent 每屏超过 2 处**；**连续同类型 section**（视觉疲劳）
 - Add CDN / external fonts / external scripts or stylesheets — breaks the offline hard constraint
 - Add or drop pages beyond the confirmed plan on your own authority
 - Invent design tokens or palette values not present in `design-system.md`
