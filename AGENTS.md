@@ -1,6 +1,6 @@
 # AGENTS.md · team-flow
 
-> team-flow 统一插件 = **spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（20 skills + 8 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
+> team-flow 统一插件 = **spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（22 skills + 8 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
 
 ## What This Is
 
@@ -12,7 +12,7 @@
 
 ### 身份与依赖关系
 
-- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 20 个 skills + 8 个 agents + hooks + templates
+- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 22 个 skills + 8 个 agents + hooks + templates
 - **spec-superflow**（npm 底座包）：team-flow 的 CLI 工具层（`package.json` name = `spec-superflow`，bin = `ssf`），提供状态机、校验、复利 CLI 等运行时能力
 - 关系：team-flow **包含** spec-superflow 作为底座（同一仓库、同一版本）。skills 中的 `npx --yes --package spec-superflow@x.y.z ssf ...` 调用的是已发布的 npm 底座包，版本号必须与当前 `package.json` version 一致
 
@@ -32,7 +32,7 @@ node --test tests/e2e.test.mjs --test-name-pattern="parseDeltaSpec"
 npm run validate
 ```
 
-## 能力概览（七套合一，20 skills）
+## 能力概览（九套合一，22 skills）
 
 ### 1. spec-superflow（底座，9 skills）
 spec 驱动开发过程。8 态变更机：`exploring → specifying → bridging → approved-for-build → executing → closing`（另有 `debugging` 侧路径 + `abandoned` 终态）。
@@ -67,12 +67,26 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 - **B1 侦察（v0.15.0）**：先跑确定性脚本 `scripts/recon-probe.sh`（可复现固定化采集）→ 并行派发 `codebase-recon-analyst` 子代理语义增强 → 主代理汇总写 baseline.md
 - 仅首次使用时执行；`docs/architecture/baseline.md` 已存在则跳过
 
+### 8. session-handoff（1 skill，会话交接，v0.16.0 新增）
+- 上下文腐化时将当前会话压缩为结构化交接文档（10 节），供新会话无缝继续
+- 自动检测 `.team-flow/` 状态文件构建工作流快照；无状态文件时降级为通用 handoff
+- 输出到 `.team-flow/handoffs/`（.gitignore，临时性质）；引用产物路径，不复制内容
+- 区别于 change 级 `ssf handoff`（任务委派）和 `.team-flow/` yaml（结构化状态自动恢复）
+
+### 9. workflow-feedback（1 skill，工作流反馈，v0.16.0 新增）
+- 记录工作流使用中的问题（10 类分类），转化为可追踪的改进项
+- 与 ce-compound 互补：ce-compound 是"经验沉淀端"，workflow-feedback 是"问题发现端"
+- 输出到 `.team-flow/feedback/`（git 跟踪，改进输入持久化）
+- release-archivist 收尾时联动建议触发
+
 ## 全局产物结构（Discoverability —— 设计/开发前先检索）
 
 ```
 .team-flow/             状态文件（v0.15.0，原 .workflow-orchestrator.yaml 迁入）
   ├── registry.yaml             # 需求注册表（多需求并行 + active_requirement）
-  └── requirements/<req-id>/orchestrator.yaml  # 每需求产品级编排状态
+  ├── requirements/<req-id>/orchestrator.yaml  # 每需求产品级编排状态
+  ├── handoffs/                 # 会话交接文档（v0.16.0 新增，session-handoff 产出，.gitignore）
+  └── feedback/                 # 工作流问题记录（v0.16.0 新增，workflow-feedback 产出，git 跟踪）
 prd/                    PRD（有版本 v1→v2→v3，git 分支隔离）
   └── vN/
       ├── prd.md              # 业务要件（ce-brainstorm 产出）
@@ -145,7 +159,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
   全局作为下一 change / 下一 PRD 版本的 grounding → 闭环
 ```
 
-## Skills 索引（20 个）
+## Skills 索引（22 个）
 
 | Skill | 归属 | 用途 |
 |---|---|---|
@@ -169,6 +183,8 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | e2e | e2e | AC 驱动 Playwright E2E 测试（v0.10.0） |
 | workflow-orchestrator | 产品级编排 | 产品级工作流编排（v0.7 重设计） |
 | workflow-bootstrap | 既有项目接入 | 既有项目侦察+基线建立（v0.6） |
+| session-handoff | 会话交接 | 上下文腐化时压缩会话为交接文档（v0.16.0） |
+| workflow-feedback | 工作流反馈 | 工作流问题结构化记录（v0.16.0） |
 
 ### 触发域分层（v0.12.0 新增）
 
@@ -179,7 +195,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | 接入层 | workflow-bootstrap | "初始化/接入/分析代码库" | 一次性，触发词独特，无冲突 |
 | 产品级（唯一入口） | **workflow-orchestrator** | 新的产品级需求（"新需求/从头开始/我有个想法/做一个XX"） | 拥有所有"产品级新需求"触发词，内部路由到 ce-brainstorm/ce-plan |
 | 变更级（唯一入口） | workflow-start | change 上下文内的操作（.spec-superflow.yaml） | 有强上下文约束，与产品级天然隔离 |
-| 步骤级 - 独立工具 | ce-ideate, ce-strategy, ce-compound, ce-proof, architecture-design, prototype, e2e | 各自独特触发词 | 无冲突，可独立触发 |
+| 步骤级 - 独立工具 | ce-ideate, ce-strategy, ce-compound, ce-proof, architecture-design, prototype, e2e, session-handoff, workflow-feedback | 各自独特触发词 | 无冲突，可独立触发 |
 | 步骤级 - 受限独立 | ce-brainstorm, ce-plan | 可独立触发，但产品级新需求应走 orchestrator | description 中标注路由指导 |
 | 步骤级 - 仅路由 | need-explorer, spec-writer, contract-builder, build-executor, code-reviewer, spec-merger, release-archivist, bug-investigator | 仅由 workflow-start 路由 | 不独立触发 |
 

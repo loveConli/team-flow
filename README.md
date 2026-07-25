@@ -1,6 +1,6 @@
 # team-flow
 
-> 当前版本：`v0.15.0`
+> 当前版本：`v0.16.0`
 
 > 统一插件：**spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同。
 
@@ -34,7 +34,7 @@
 git clone <your-repo> && <cli> plugin install ./team-flow
 ```
 
-> 不同宿主 CLI 的安装子命令略有差异（如 Claude Code 为 `/plugin add`，Cursor 为 `plugin install`）。以宿主文档为准；本插件提供单一 `plugin.json`，一次安装即加载全部 20 个 skills。
+> 不同宿主 CLI 的安装子命令略有差异（如 Claude Code 为 `/plugin add`，Cursor 为 `plugin install`）。以宿主文档为准；本插件提供单一 `plugin.json`，一次安装即加载全部 22 个 skills。
 
 ## 配置（插件层扩展字段）
 
@@ -70,7 +70,7 @@ specs/<cap>/        每变更设计/任务/契约 + learnings.md
 STRATEGY.md CONCEPTS.md 策略 / 领域词汇
 ```
 
-## 七套能力（20 skills）
+## 九套能力（22 skills）
 
 - **spec-superflow**（9）：workflow-start / need-explorer / spec-writer / contract-builder / build-executor / code-reviewer / spec-merger / release-archivist / bug-investigator
 - **compound 核心子集**（6）：ce-brainstorm / ce-plan / ce-compound / ce-strategy / ce-ideate / ce-proof
@@ -79,6 +79,8 @@ STRATEGY.md CONCEPTS.md 策略 / 领域词汇
 - **e2e**（1）：e2e（AC 驱动 Playwright E2E 测试）
 - **产品级编排**（1）：workflow-orchestrator（brainstorm→原型内循环→plan→拆change→分发）
 - **既有项目接入**（1）：workflow-bootstrap（代码库侦察→架构基线→领域词汇→目录初始化）
+- **会话交接**（1）：session-handoff（上下文腐化时压缩会话为交接文档，v0.16.0）
+- **工作流反馈**（1）：workflow-feedback（工作流问题结构化记录，与 ce-compound 互补，v0.16.0）
 
 ### 配套 agents（8 个，v0.15.0 增至 8）
 
@@ -92,7 +94,7 @@ Skills 命名保留其来源前缀，作为功能分组的自然标识：
 |------|------|------|--------|
 | `ce-` | compound-engineering | 产品级思维工具（头脑风暴、计划、策略、复利、创意、验证） | ce-brainstorm, ce-plan, ce-strategy, ce-compound, ce-ideate, ce-proof |
 | 无前缀 | spec-superflow | 变更级开发流程工具（状态机、规格、构建、审查、归档） | workflow-start, need-explorer, spec-writer, contract-builder, build-executor, code-reviewer, spec-merger, release-archivist, bug-investigator |
-| 无前缀 | team-flow 新增 | 编排/接入/设计/原型/测试 | workflow-orchestrator, workflow-bootstrap, architecture-design, prototype, e2e |
+| 无前缀 | team-flow 新增 | 编排/接入/设计/原型/测试/交接/反馈 | workflow-orchestrator, workflow-bootstrap, architecture-design, prototype, e2e, session-handoff, workflow-feedback |
 
 > `ce-` 前缀来自 compound-engineering 项目，team-flow 整合时保留了这一命名以维持功能分组的可辨识性。这不是命名不一致，而是有意的来源标注。
 

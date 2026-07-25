@@ -18,6 +18,9 @@ CLAUDE.md
 
 # Session working directories (stray artifacts from skill execution)
 workflow-start-workspace/
+
+# Session handoff documents (temporary, v0.16.0)
+.team-flow/handoffs/
 opt-results/
 
 # Dependencies
