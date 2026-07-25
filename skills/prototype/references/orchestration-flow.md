@@ -2,6 +2,19 @@
 
 > 本 skill 主代理只编排不实施。所有非交互步骤（探查/绘制/评审/设计系统产出）派子代理，遵循 §18.1 subagent 结构化交接协议（status/deliverable/blockers/outstanding_questions/summary）。人工评审/路由由主代理用阻塞问题工具执行（subagent 不能 AskUserQuestion）。
 
+## 子代理决策点中继（v0.21.0，§22.1.1 stop-and-resume）
+
+子代理（scout / builder）**没有 AskUserQuestion**。当其在决策点经 `SendMessage(to: "main")` 发来结构化提问请求（`<agent-message>` 含 `{ question, why, options[] }`）并停止时，主代理**负责中继**：
+
+1. **收通知识别**：经 `task-notification` 收到子代理提问请求（**不要用 TaskOutput 轮询**，对齐 §22.2 等待范式）。识别其为「中继请求」而非终态交接（子代理末条消息会明示「已发问、等待回传」）。
+2. **代问用户**：用 `AskUserQuestion` 把问题转给 LT（包装措辞、给选项）；属主代理权限内的技术决策可自行拍板。并行多子代理提问可**合并为一个多问弹窗**一次问完。
+3. **回传即唤醒**：拿到答案后 `SendMessage(to: <agentId>)` 回传——该调用**自动 resume 已停止的子代理**带答案续跑。
+
+**请求-应答匹配纪律（实证暴露的真风险，必守）**：
+- 维护每子代理的「未决提问请求」台账，**仅回传子代理实际提出过的提问**；**不要自发追加问题**再把答案错配回传（实录中主代理曾把无主答案回传给未发追问的子代理，被子代理按「正确优先」拒绝）。
+- 回传时附上下文（「这是你关于 X 提问的回答：Y」），便于子代理校验对应性。
+- harness 不支持 resume 时，降级为读子代理 `blocked` 返回 + 携答案**重新派发**。
+
 ## 步骤 ① 环境探查 + 方案设计（子代理）
 
 派发插件 agent `prototype-env-scout`（只读，tools 硬限 Read/Bash/Grep/Glob），传入：PRD 路径、config 的 `prototype.designSystem`/`prototype.entry`、当前 git 分支。简报写在 response，主代理按需落盘。

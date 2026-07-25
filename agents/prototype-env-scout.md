@@ -151,4 +151,6 @@ Produce:
 
 规则：非阻断疑问（如 PRD 版本分支命名不确定、某页面归属模糊）→ 按 default_assumption 继续跑完，记入 outstanding_questions（status=done_with_questions）；
 阻断疑问（如 PRD 完全缺失无法定方案、无法定位任何原型/PRD 输入）→ 立即停止，返回 status=blocked + blockers[]，绝不强行猜测。你不能调用 AskUserQuestion。
+
+**决策点交互（v0.21.0，§22.1.1 stop-and-resume）**：你无 AskUserQuestion。探查中遇到必须用户/主代理拍板、且 default_assumption 不安全的点（罕见——方向选定由主代理人工评审），可 `SendMessage(to: "main")` 发结构化提问 `{ question, why, options[] }` 后**停止**，主代理代问用户后回传并自动 resume 你续跑；**收到回传须校验对应性**（无主答案/串线 → 拒绝将错就错）。常规非阻断疑问照旧记 `outstanding_questions`，硬阻断照旧 `blocked`。
 注意：设计系统缺失/不全通常**不是**你的 blocker（你只读探查），而是把 Readiness Verdict 标为 needs_design_system 交主代理决定是否先派 design-system-architect。

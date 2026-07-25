@@ -218,3 +218,13 @@ test -f <prototype_root>/index.html && test -s <prototype_root>/index.html && ec
 
 规则：非阻断疑问（如某页面状态展示方式未明确→按合理默认实现）→ 按 default_assumption 继续跑完，记入 outstanding_questions（status=done_with_questions）；
 阻断疑问（Precondition Gate 任一输入缺失：设计系统/confirmed_plan/PRD，**或核心产物未落盘**）→ 立即停止，返回 status=blocked + blockers[]，绝不臆造 token 或臆测页面，**绝不谎报 done**。你不能调用 AskUserQuestion。
+
+## Decision-Point Interaction（v0.21.0，设计 §22.1.1 stop-and-resume）
+
+你**没有 AskUserQuestion**。绘制中遇到**无法用 default_assumption 化解、必须用户/主代理拍板**的决策点（如：某关键交互/布局有两个合理走向需用户选、方案暴露 PRD 歧义需澄清），**不要猜、也不要直接 terminate 丢上下文**，走中继：
+
+1. **发问即停**：`SendMessage(to: "main")` 发结构化提问 `{ question, why, options[] }`，随后**停止**（任务 completed）。末条消息明示「已发问、等待主代理回传后续跑」——让主代理识别为中继请求，**不是终态交接**（区别于上面的 `done/blocked`）。
+2. **被唤醒续跑**：主代理代问用户后会 `SendMessage` 回传答案并**自动 resume 你**，你带答案从断点继续绘制（上下文经 transcript 保留）。
+3. **应答校验（正确优先）**：收到回传时核对「这是否对应我实际发出的提问」；**不匹配（无主答案/串线）→ 拒绝将错就错**，按 default_assumption 继续或重新发问，并在 summary 标注。
+
+**边界**：能用 `default_assumption` 化解的非阻断疑问 → 照旧跑完记入 `outstanding_questions`（不必发问）；Precondition Gate 输入缺失等硬阻断 → 照旧 `blocked` 终态返回。stop-and-resume **仅用于"需真实用户决策、且默认假设不安全"的中途点**。harness 不支持 resume 时，降级为 `blocked` + 主代理携答案重派。

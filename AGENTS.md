@@ -50,6 +50,7 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 - 全局一份 `prototype/`（与 PRD 同级，git 分支隔离），零外部依赖、可离线
 - **内部编排器（v0.15.0）**：主代理只编排不实施——环境探查(`prototype-env-scout`)→方案/人工评审→绘制(`prototype-builder`)→评审(`prototype-reviewer`)→循环→人工路由
 - **v0.20.0 产出质量闸门**：builder→reviewer 间主代理强制 `test -f && test -s` 校验入口产物落盘（不信 status=done 字面值，缺失则 resume，不空转评审）；后台子代理依赖 `<task-notification>` 完成通知，禁反复 `TaskOutput(block=true)` 轮询（设计 §22）
+- **v0.21.0 决策点中继（stop-and-resume）**：子代理（无 AskUserQuestion）决策点经 `SendMessage(to: main)` 发问即停，主代理收 task-notification 代问用户、回传自动 resume 子代理续跑；主代理须维护请求-应答匹配（设计 §22.1.1，修订 §18.1.2，LT 实证确认）
 - 设计系统生命周期：首次创建(`design-system-architect`)→引用→增量更新（变更履历）；设计系统渲染读取 `design-system.md`（9 段 schema + 5 方向调色板）
 - change 完成经 `prototype-sync` 回写全局 `prototype/` + `design-system.md`（写入路由到子代理）
 
@@ -183,6 +184,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | ce-proof | compound | 验证证明 |
 | architecture-design | architecture-design | 4A+DDD 增量设计 |
 | prototype | prototype | 本地 HTML 原型 |
+| design-system | design-system | 项目级设计系统独立创建/迭代（用户主导交互，base+变体，v0.19.0） |
 | e2e | e2e | AC 驱动 Playwright E2E 测试（v0.10.0） |
 | workflow-orchestrator | 产品级编排 | 产品级工作流编排（v0.7 重设计） |
 | workflow-bootstrap | 既有项目接入 | 既有项目侦察+基线建立（v0.6） |
@@ -214,7 +216,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | change-split-auditor | plan.md 拆分质量审计 | Read/Bash/Grep/Glob | orchestrator S4 脚手架前（必选门禁，PASS 方可继续） |
 | cross-change-consistency-checker | 跨 change 冲突检测 | Read/Bash/Grep/Glob | orchestrator S5 多 change 并行/closing 时 |
 | prd-completeness-reviewer | PRD 完整性评审（能否支撑 plan/spec，5 维度） | Read/Bash/Grep/Glob | orchestrator S2 / ce-brainstorm 冻结前门禁（v0.15.0） |
-| prototype-builder | 原型绘制执行者（种子优先：template.html+layouts.md 组合；**v0.20.0 产物落盘硬闸门**：index.html 未落盘非空禁返 done + 大产出分片） | Read/Write/Edit/Bash/Grep/Glob | prototype skill 内部编排步骤③/⑤修正轮（v0.15.0，v0.18.0 种子优先） |
+| prototype-builder | 原型绘制执行者（种子优先：template.html+layouts.md 组合；**v0.20.0 产物落盘硬闸门**：index.html 未落盘非空禁返 done + 大产出分片；**v0.21.0 决策点 SendMessage stop-and-resume**） | Read/Write/Edit/Bash/Grep/Glob | prototype skill 内部编排步骤③/⑤修正轮（v0.15.0，v0.18.0 种子优先） |
 | prototype-env-scout | 原型环境探查 + 2-3 差异化方向（direction-picker；**v0.20.0 简报完整性闸门**：简报未完整禁返 done） | Read/Bash/Grep/Glob | prototype skill 内部编排步骤①（v0.15.0，v0.18.0 direction-picker） |
 
 ## 复利贯穿机制（v0.5 新增）

@@ -6,6 +6,24 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-07-25
+
+### Added（子代理决策点 SendMessage stop-and-resume 交互协议，设计 §22.1.1，修订 §18.1.2）
+
+- **决策点 SendMessage stop-and-resume（P1-14，完成 P1-13 的 SendMessage 子项）**：子代理工具集不含 AskUserQuestion，决策点需用户/主代理输入时经 `SendMessage(to: main)` 发结构化提问后**主动停止**（status=completed）；主代理经 `task-notification` 收到（零 TaskOutput 轮询）→ `AskUserQuestion` 代问用户 → `SendMessage(to: agentId)` 回传**自动 resume** 子代理带答案续跑（上下文经 transcript 保留）。LT 实证确认（Session d6801ab4，单轮/多轮追问/三子代理并行/多问合并四形态）。
+- **请求-应答匹配纪律**：主代理维护未决提问台账、仅回传子代理实际所问；子代理收到回传校验对应性，不匹配按「正确优先」拒绝将错就错（实证暴露的真风险，必设）。
+- **跨平台降级**：harness 不支持 resume → 降级 `blocked` + 携答案重派（承 §17.8 / §18.1.2）。
+- 落点：`prototype-builder.md`（Decision-Point Interaction）+ `prototype-env-scout.md`（决策点交互）+ `prototype/references/orchestration-flow.md`（主代理中继协议）。
+
+### Changed
+
+- **§18.1.2 修订**：「不引入 agent team」明确指不采用**常驻 teammate 架构**，不排斥决策点 SendMessage stop-and-resume 中途交互；结构化返回仍为终态主协议。
+- **AGENTS.md**：§4 prototype 增 v0.21.0 决策点中继说明；Agents 索引 prototype-builder 补注；**Skills 索引补 `design-system` 行**（v0.19.0 漏登，标题「23 个」与表体 22 行不一致修复，plugin-validator W1）。
+
+### Deferred → Adopted
+
+- v0.20.0 §22.1.1 曾标 Deferred（CC 误判为类 agent-team 常驻），经 LT 指认实证实录后纠正：实为 stop-and-resume，与 §18.1.2 兼容，采纳实施。
+
 ## [0.20.0] - 2026-07-25
 
 ### Added（工作流反馈三件套落地，设计增强方案 v0.8 §22）
