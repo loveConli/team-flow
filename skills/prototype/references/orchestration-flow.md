@@ -45,6 +45,16 @@ prototype-builder **从种子模板组合**（template.html + layouts.md 骨架�
 
 **主代理严禁在此步直接 Write/Edit 原型文件。**
 
+**交接后产物校验（v0.20.0，defense in depth，设计 §22.1）**：收到 builder 交接、**派 reviewer 之前**，主代理**不信 `status=done` 字面值**，先机械校验入口产物真实落盘：
+
+```bash
+test -f <prototype_path>/index.html && test -s <prototype_path>/index.html && echo OK
+```
+
+- `OK` → 进入 ④ 评审。
+- 缺失/为空（builder 谎报 done 或中途耗尽预算）→ **不派 reviewer（避免对空目录空转评审）**，`SendMessage` resume builder 续写（指出缺失文件），或按 builder 返回的 `blockers` 裁决。
+- 此校验与 builder 的 Deliverable Hard Gate 互为冗余：即便个别 agent 未守闸门谎报 done，编排层仍在此截断缺陷向下游传导。
+
 ## 步骤 ④ 原型评审（子代理）
 
 派发插件 agent `prototype-reviewer`（只读，独立上下文），**传入：`prd_path`、`prototype_path`（及当前轮次 N）**，执行：

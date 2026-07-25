@@ -37,7 +37,7 @@ Do NOT invoke for:
 ## Execution Flow（S1-S5）
 
 ### S1: 路径路由器
-**先做需求选择**（v0.15.0 多需求）：读 `.team-flow/registry.yaml`，确定 `active_requirement`（多需求则询问操作哪个/新建）。再判断 6 种入口路径之一；检查 baseline.md / CONCEPTS.md 并注入；复利注入（INDEX.md top-5）。**路由结果必须向用户显式确认**（路由是建议非决定）。详见 `references/s1-path-router.md`。
+**先做需求选择**（v0.15.0 多需求）：读 `.team-flow/registry.yaml`，确定 `active_requirement`（多需求则询问操作哪个/新建）。再判断 7 种入口路径之一；检查 baseline.md / CONCEPTS.md 并注入；复利注入（INDEX.md top-5）。**路由结果必须向用户显式确认**（路由是建议非决定）。详见 `references/s1-path-router.md`。
 
 ### S2: PRD + 原型阶段
 调用 `/ce-brainstorm`（mode: orchestrated）产出 PRD 草稿；**冻结前派 `prd-completeness-reviewer` 子代理做 PRD 完整性评审**（v0.15.0，管"说得全不全"）；原型循环由编排层直接编排（prototype skill 内部编排产出 → prototype-reviewer 自动评审 → 人工评审 → 冻结）；冻结语义为 `frozen_downstream`（迭代内变更不升版）。反馈环路检查点：scope 是否合理。详见 `references/s2-prd-prototype-loop.md`。
@@ -59,7 +59,7 @@ change-split-auditor 审计拆分质量（**必选门禁**，粒度/DAG 无环/�
 
 振荡上限：S2↔S3 回退 ≤2 次，超过升级人工介入。详见 `references/feedback-loops.md`。
 
-## 增量入口（S1 路由的 6 种路径）
+## 增量入口（S1 路由的 7 种路径）
 
 | 入口 | 条件 | 跳转 |
 |------|------|------|
@@ -69,6 +69,7 @@ change-split-auditor 审计拆分质量（**必选门禁**，粒度/DAG 无环/�
 | 继续执行 | changes 已拆分，继续下一个 | → S4/S5（先输出状态恢复简报） |
 | 单 change 快速通道 | 需求极清晰、无 UI、无跨模块依赖的极小变更 | → 直接建 change → workflow-start |
 | 紧急修复（Hotfix） | bug/生产问题，最小范围修复 | → 建 change（type: hotfix）→ workflow-start |
+| **原型补跑/重跑**（v0.20.0） | PRD 已冻结（`frozen_downstream`）∧ `prototype/` 缺失/为空，或用户显式要求重做原型 | → 部分重入 S2 原型循环（S2 步骤 2→3→4）；PRD 不动，保留有效 S3/S4，闭环后恢复原 phase |
 
 ## 状态模型
 
@@ -78,6 +79,7 @@ change-split-auditor 审计拆分质量（**必选门禁**，粒度/DAG 无环/�
 
 - **不替代 workflow-start**：本 skill 不管理 8 态状态机流转
 - **不直接实施代码**：只编排，实施由 build-executor 执行
+- **后台子代理等待范式（v0.20.0）**：派发后台子代理（prototype-builder / reviewer / architecture-design 等长任务）后**依赖完成通知（`<task-notification>`）再行动**，**禁止反复 `TaskOutput(block=true)` 阻塞轮询**——其对长任务超时返回会倾泻完整子代理 transcript，撑爆主上下文、抵消"只编排"的轻上下文优势。长任务派发后可先处理可并行工作或结束本轮等待通知，**不空转死等**；确需中途观察用 `block=false` 轻量查询（仍返转录，尽量不用）。（设计 §22.2）
 - **不跳过 PRD 冻结**：PRD 必须经原型循环（或显式跳过）后才能进 ce-plan
 - **不跳过拆分审计**：change-split-auditor 审计 verdict = PASS 是创建 change 脚手架的前置条件（S4 必选门禁）
 - **路由是建议非决定**：S1 路由判断必须用户确认；重规划必须 DP-R 阻塞确认

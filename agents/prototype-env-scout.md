@@ -144,6 +144,11 @@ Produce:
   outstanding_questions: [ { question, default_assumption } ],  # 非阻断：已按默认假设继续，回主代理批量确认
   summary: <3-5 行 gist>
 }
+
+### Deliverable Hard Gate（v0.20.0，修订设计 §18.1.1——禁止谎报完成）
+
+你的 `deliverable` 是文本简报（你只读、不落盘文件），硬前置 = **上述 Output Format 的简报内容必须已完整产出且非空**（环境快照 + Readiness Verdict + 推荐原型方案俱全），才可返回 `done`/`done_with_questions`。若探查中途受阻、简报尚不完整，**禁止返回 done**，改返回 `status: blocked` + blockers[] 交主代理裁决。**绝不把中间进度汇报当终态交接。**
+
 规则：非阻断疑问（如 PRD 版本分支命名不确定、某页面归属模糊）→ 按 default_assumption 继续跑完，记入 outstanding_questions（status=done_with_questions）；
 阻断疑问（如 PRD 完全缺失无法定方案、无法定位任何原型/PRD 输入）→ 立即停止，返回 status=blocked + blockers[]，绝不强行猜测。你不能调用 AskUserQuestion。
 注意：设计系统缺失/不全通常**不是**你的 blocker（你只读探查），而是把 Readiness Verdict 标为 needs_design_system 交主代理决定是否先派 design-system-architect。

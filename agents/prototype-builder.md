@@ -125,6 +125,12 @@ For each page in `confirmed_plan`:
 - Wire navigation links so every page is reachable from `index.html`.
 - Reflect PRD §4 画面 / §7 功能清单 / §8.4 字段 / §8.2 交互 in the page content.
 
+**大产出分片纪律（v0.20.0，防输出预算耗尽/单次 Write 截断）**：规划要**克制**——数据模型/改善方向等推演够用即可，不要把大量输出预算耗在 thinking 阶段的详尽规划上，留足预算给真正 Write 产物。对超大文件（经验阈值 ~800 行，如带完整数据层的 `index.html`）**默认分片写**：
+
+1. 先 `Write` 主体骨架（HTML 结构 + `<style>` token 引用 + 导航 + 空的 `<script>` 数据/渲染占位），落盘一个**可运行的最小入口**；
+2. 再 `Edit` 分段追加：数据层 → 渲染层 → 各页面/组件，每段追加后文件保持完整；
+3. **任何一刻被中断，已落盘的骨架都构成有效进展**——配合下方 Deliverable Hard Gate，绝不出现"规划完、产物没写、却报 done"。
+
 ### Step 3: Flow + Consistency
 
 1. Write/refresh `flow.md` describing page transitions / user flows, consistent with PRD navigation.
@@ -174,9 +180,11 @@ Your `deliverable` is the **absolute path to the prototype entry** (`<abs>/proto
 - Reuse existing `components/`; sediment new components into the design system before reuse
 - Self-check for hardcoded styles and external references before finishing
 - **P0/P1/P2 自检通过后再提交**（checklist.md，P0 grep 机械验证）
+- **返回 done 前 `test -f && test -s` 确认 index.html 已落盘非空**（Deliverable Hard Gate，v0.20.0）；超大文件先 Write 骨架再 Edit 分段追加
 
 **DON'T:**
 - Write any prototype file when the design system or confirmed plan is missing — return `blocked`
+- **谎报完成**：核心产物 index.html 未落盘/非空时返回 `done`，或把中间进度汇报当终态交接（v0.20.0 硬闸门：未完成一律 `blocked`/`done_with_questions`）
 - Introduce inline style drift (hardcoded hex / px outside tokens)
 - **编造指标或填充文案**（"10× 更快"无来源 = 删除；槽位空着 = 换布局，不许编）
 - **accent 每屏超过 2 处**；**连续同类型 section**（视觉疲劳）
@@ -195,5 +203,18 @@ Your `deliverable` is the **absolute path to the prototype entry** (`<abs>/proto
   outstanding_questions: [ { question, default_assumption } ],  # 非阻断：已按默认假设继续，回主代理批量确认
   summary: <3-5 行 gist>
 }
+
+### Deliverable Hard Gate（v0.20.0，修订设计 §18.1.1——禁止谎报完成）
+
+**返回 `status: done` 的硬前置：你声明的 `deliverable`（`<abs>/prototype/index.html`）必须已 `Write` 落盘且非空。** 终态交接前**必须**自检（Bash）：
+
+```bash
+test -f <prototype_root>/index.html && test -s <prototype_root>/index.html && echo OK
+```
+
+- 自检 **OK** 才可返回 `done` / `done_with_questions`。
+- 若核心产物（index.html / confirmed_plan 要求的页面）**尚未落盘或非空**——无论原因是输出预算将尽、单次 Write 担心截断、还是规划过重——**禁止返回 `done`**。改为返回 `status: blocked`，blocker 写明：「核心产物 `<文件>` 未落盘/未完成，原因 `<输出预算不足 | 单次 Write 过大>`，请 resume 续写」，由主代理裁决续跑。
+- **绝不把中间状态汇报（如 "Scaffold is ready… Next I'll write index.html…"）当作终态交接返回 done**——那只是进度，不是产物。
+
 规则：非阻断疑问（如某页面状态展示方式未明确→按合理默认实现）→ 按 default_assumption 继续跑完，记入 outstanding_questions（status=done_with_questions）；
-阻断疑问（Precondition Gate 任一输入缺失：设计系统/confirmed_plan/PRD）→ 立即停止，返回 status=blocked + blockers[]，绝不臆造 token 或臆测页面。你不能调用 AskUserQuestion。
+阻断疑问（Precondition Gate 任一输入缺失：设计系统/confirmed_plan/PRD，**或核心产物未落盘**）→ 立即停止，返回 status=blocked + blockers[]，绝不臆造 token 或臆测页面，**绝不谎报 done**。你不能调用 AskUserQuestion。

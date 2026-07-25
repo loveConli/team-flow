@@ -77,6 +77,17 @@ prd_version: v1                       # PRD 版本
 - **`frozen_absolute`**（用户显式确认或 vN+1 启动时设置）：任何修改都必须升版 vN+1。
 - **单一真相源**：frozen 状态以 `prd/vN/prd.md` frontmatter 为准，yaml 只存指针不重复存 frozen 值，避免双写不一致。
 
+## 原型补跑/重跑：部分重入语义（v0.20.0，S1 第 7 入口）
+
+S1 判定「原型补跑/重跑」（PRD `frozen_downstream` ∧ `prototype/` 缺失/需重做）时的状态转换规则，**区别于 S3→S2 回退**：
+
+- **状态转换**：`workflow_phase` 临时回 `S2`，S2 阶段状态置 `active` 并加子标记 `prototype-only`（仅重跑 S2 步骤 2 判断→3 原型循环→4 冻结）；**不重置** S3/S4 已 `completed` 的 phases。记录原 phase（如 `S4`）到 `replan_log`，闭环后恢复。
+- **冻结语义**：PRD `frozen_downstream` **保持不变**（与 S3→S2 回退会临时解除 frozen 不同）——原型补跑不修 PRD，故无需解除冻结。
+- **制品保留**：S3 `plan.md` / S4 `changes/` 已存在且仍有效则**保留不动**，不重做、不归档。
+- **闭环恢复**：原型循环闭环（自动评审 PASS / 人工通过）后，`workflow_phase` 恢复原 phase（如 `s4-distribution`），S2 状态回 `completed`（去掉 `prototype-only` 子标记）。
+- **replan_log 必写**：`{ seq, trigger: "prototype-rerun", before: <原 phase>, after: "S2(prototype-only)", approved_by }`，并记结论「未暴露 scope 问题、changes 保持有效」。
+- **升级路径**：若原型循环暴露 PRD scope 问题 → **脱离本路径**，升级为 S3→S2 回退修订（临时解除 `frozen_downstream`，PRD vN 内修订 + 变更履历），不再按 prototype-only 处理。
+
 ## change_dag 结构
 
 S4 后填充。每个节点字段：

@@ -49,6 +49,7 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 ### 4. prototype（1 skill，本地 HTML 原型，v0.15.0 内部编排重构）
 - 全局一份 `prototype/`（与 PRD 同级，git 分支隔离），零外部依赖、可离线
 - **内部编排器（v0.15.0）**：主代理只编排不实施——环境探查(`prototype-env-scout`)→方案/人工评审→绘制(`prototype-builder`)→评审(`prototype-reviewer`)→循环→人工路由
+- **v0.20.0 产出质量闸门**：builder→reviewer 间主代理强制 `test -f && test -s` 校验入口产物落盘（不信 status=done 字面值，缺失则 resume，不空转评审）；后台子代理依赖 `<task-notification>` 完成通知，禁反复 `TaskOutput(block=true)` 轮询（设计 §22）
 - 设计系统生命周期：首次创建(`design-system-architect`)→引用→增量更新（变更履历）；设计系统渲染读取 `design-system.md`（9 段 schema + 5 方向调色板）
 - change 完成经 `prototype-sync` 回写全局 `prototype/` + `design-system.md`（写入路由到子代理）
 
@@ -58,7 +59,8 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 
 ### 6. workflow-orchestrator（1 skill，产品级编排，v0.7 重设计 + v0.15.0 多需求）
 - 编排产品级工作流：S1 路径路由（含需求选择）→ S2 PRD+原型（循环上提，orchestrator 直接编排，**冻结前 PRD 完整性评审**）→ S3 ce-plan（pipeline 快速路径，**入口问定 plan_mode**）→ S4 拆分验证+分发 → S5 全局监控
-- v0.7 关键变更：原型循环从 ce-brainstorm 内部上提到 orchestrator 层直接编排；新增反馈环路（vN 内修订+变更履历，非升版）；新增增量入口（S1 路径路由器，6 种入口路径）；S5 多 change 并行时必选
+- v0.7 关键变更：原型循环从 ce-brainstorm 内部上提到 orchestrator 层直接编排；新增反馈环路（vN 内修订+变更履历，非升版）；新增增量入口（S1 路径路由器，**7 种入口路径**，v0.20.0 增「原型补跑/重跑」）；S5 多 change 并行时必选
+- **v0.20.0**：S1 路由新增第 7 种入口「原型补跑/重跑」（PRD 冻结 ∧ prototype 缺失/需重做 → 部分重入 S2 原型循环，PRD 不动、保留有效 S3/S4）；后台子代理等待范式（依赖完成通知，禁 TaskOutput 轮询）（设计 §22）
 - **v0.15.0 多需求并行**：`.team-flow/registry.yaml` 注册表 + 每需求一份 `.team-flow/requirements/<req-id>/orchestrator.yaml`，状态天然隔离
 - 与 workflow-start 分层：orchestrator 管"做什么、什么顺序"（产品级策略），workflow-start 管"怎么做"（变更级执行）
 
@@ -212,8 +214,8 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | change-split-auditor | plan.md 拆分质量审计 | Read/Bash/Grep/Glob | orchestrator S4 脚手架前（必选门禁，PASS 方可继续） |
 | cross-change-consistency-checker | 跨 change 冲突检测 | Read/Bash/Grep/Glob | orchestrator S5 多 change 并行/closing 时 |
 | prd-completeness-reviewer | PRD 完整性评审（能否支撑 plan/spec，5 维度） | Read/Bash/Grep/Glob | orchestrator S2 / ce-brainstorm 冻结前门禁（v0.15.0） |
-| prototype-builder | 原型绘制执行者（种子优先：template.html+layouts.md 组合） | Read/Write/Edit/Bash/Grep/Glob | prototype skill 内部编排步骤③/⑤修正轮（v0.15.0，v0.18.0 种子优先） |
-| prototype-env-scout | 原型环境探查 + 2-3 差异化方向（direction-picker） | Read/Bash/Grep/Glob | prototype skill 内部编排步骤①（v0.15.0，v0.18.0 direction-picker） |
+| prototype-builder | 原型绘制执行者（种子优先：template.html+layouts.md 组合；**v0.20.0 产物落盘硬闸门**：index.html 未落盘非空禁返 done + 大产出分片） | Read/Write/Edit/Bash/Grep/Glob | prototype skill 内部编排步骤③/⑤修正轮（v0.15.0，v0.18.0 种子优先） |
+| prototype-env-scout | 原型环境探查 + 2-3 差异化方向（direction-picker；**v0.20.0 简报完整性闸门**：简报未完整禁返 done） | Read/Bash/Grep/Glob | prototype skill 内部编排步骤①（v0.15.0，v0.18.0 direction-picker） |
 
 ## 复利贯穿机制（v0.5 新增）
 

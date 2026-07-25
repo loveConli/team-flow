@@ -15,7 +15,7 @@ S1 只做编排动作（需求选择、存在性检查、路径判断、阻塞�
 
 后续阶段读写的 `orchestrator.yaml` 一律指 `active_requirement` 对应的那份。迁移兼容：检测到旧 `<root>/.workflow-orchestrator.yaml` → 自动迁入 `.team-flow/requirements/<req-id>/orchestrator.yaml` 并登记 registry（一次性，提示用户）。
 
-## 6 种入口路径
+## 7 种入口路径
 
 | 入口 | 判断条件 | 跳转 | 说明 |
 |------|---------|------|------|
@@ -25,8 +25,15 @@ S1 只做编排动作（需求选择、存在性检查、路径判断、阻塞�
 | **继续执行** | changes 已拆分，继续下一个 | → S4/S5 | 先输出状态恢复简报，用户确认后继续 |
 | **单 change 快速通道** | 需求极清晰，无需 PRD（仅限单一功能点、无 UI、无跨模块依赖的极小变更） | → 直接创建 change → workflow-start | 最轻量路径，无 PRD 锚点，**不可触发 S3→S2 回退** |
 | **紧急修复（Hotfix）** | bug/生产问题，需最小范围修复 | → 直接创建 change（type: hotfix，注入 bug 描述替代 PRD）→ workflow-start | closing 时强制补录复利 |
+| **原型补跑/重跑**（v0.20.0） | PRD 已冻结（`frozen_downstream`）∧ `prototype/` 缺失/为空，或用户显式要求重做/重跑原型 | → 部分重入 S2 原型循环（S2 步骤 2→3→4） | PRD 不动，保留有效 S3 plan / S4 changes，闭环后恢复原 phase；`replan_log` 记往返 |
 
 **判断顺序**：先查活跃需求的 `orchestrator.yaml`（`.team-flow/requirements/<req-id>/orchestrator.yaml`，如存在 → 多半是「继续执行」或「重新计划」），再查 `prd/` 目录（有 PRD → 「续版」候选），最后落到「全新需求」。Hotfix 由用户语义（bug/生产/紧急修复）显式触发。
+
+**原型补跑/重跑判据（v0.20.0，与「重新计划」「续版」区分）**：当 PRD 已冻结时，按用户意图三分：
+- 用户要**重做/补做原型**（「重新跑一遍原型」「prototype 没有了」「原型重做」）∧ `prototype/` 缺失/为空或用户明确不满现有原型 → **原型补跑/重跑**（部分重入 S2 原型循环，**PRD/plan/changes 不动**）。
+- 用户要**调整 plan**（拆分/依赖/技术方向）→ **重新计划**（→ S3）。
+- 用户要**加功能/扩 scope** → **续版需求**（→ S2，PRD vN+1 升版）。
+- 判别关键：原型补跑**不升 PRD 版、不重做 plan**，仅原型循环重入；若原型循环暴露 scope 问题，再升级为 S3→S2 回退修订（脱离本路径）。
 
 ## 项目基线与词汇检查
 

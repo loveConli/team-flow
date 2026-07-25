@@ -6,6 +6,24 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-07-25
+
+### Added（工作流反馈三件套落地，设计增强方案 v0.8 §22）
+
+- **产出型子代理质量闸门（P1-13，§22.1，修订 §18.1.1 返回契约）**：`prototype-builder` 新增 Deliverable Hard Gate——声明的 deliverable（`index.html`）未落盘非空禁止返回 `done`，终态交接前自检 `test -f && test -s` 通过方可 `done`；规划过重/预算将尽时诚实返回 `blocked` 交主代理 resume，杜绝「谎报 completed」。新增大产出分片纪律（先 Write 骨架 → Edit 分段追加）。`prototype-env-scout` 同步加简报完整性闸门。
+- **编排层交接后产物校验（defense in depth）**：`prototype/references/orchestration-flow.md` builder→reviewer 间主代理强制校验入口产物落盘，不信 `status=done` 字面值，缺失则 resume，不空转评审。
+- **编排层完成通知等待范式（P2-11，§22.2）**：`workflow-orchestrator` / `prototype` 明文派发后台子代理后依赖 `<task-notification>` 完成通知再行动，禁反复 `TaskOutput(block=true)` 阻塞轮询（其对长任务超时返回会倾泻完整 transcript 撑爆主上下文）。
+- **S1 路由第 7 种入口「原型补跑/重跑」（P2-12，§22.3）**：PRD 冻结 ∧ `prototype/` 缺失/需重做 → 部分重入 S2 原型循环（PRD 不动、保留有效 S3/S4、闭环恢复原 phase）。`workflow-orchestrator/SKILL.md` 路由表 6→7 + `s1-path-router.md` 判据分支 + `state-model.md` 部分重入冻结语义与状态转换。
+
+### Changed
+
+- **AGENTS.md 能力概览**：§4 prototype / §6 orchestrator 补 v0.20.0 说明；Agents 索引 prototype-builder / env-scout 标注产物落盘硬闸门。
+- **.cursor-plugin/plugin.json 描述横展对齐**：17 skills → 23 skills + 8 agents（与主清单一致，修 P0-3 遗漏的 cursor 副本）。
+
+### Deferred
+
+- **决策点 SendMessage 交互协议（§22.1.1，修订 §18.1.2）**：与「不引入 agent team / 统一返回结构」有张力；硬闸门已根治谎报完成，作为可选扩展待 LT 确认是否采纳后再写入 agent 定义。
+
 ## [0.16.0] - 2026-07-25
 
 ### Added（会话交接 + 工作流反馈）
