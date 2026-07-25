@@ -15,7 +15,7 @@
 
 ### 1. 拆分质量审计（必选门禁，不可跳过）
 
-调用 `change-split-auditor` agent（插件 agent，提示词>30行 + 需固定 tools 白名单）对 `plan.md` 做拆分质量审计，输出审计报告（覆盖矩阵 / DAG 无环 / 粒度均衡）。质量自检清单：
+调用 `change-split-auditor` agent 对 `plan.md` 做拆分质量审计，输出审计报告（覆盖矩阵 / DAG 无环 / 粒度均衡）。质量自检清单：
 
 **必选约束**：审计 verdict = PASS 是 Step 3（创建脚手架）的前置条件。
 verdict = FAIL → 必须回退 S3 调整拆分后重新审计，不可绕过直接创建 change。
@@ -44,7 +44,7 @@ npx --yes --package spec-superflow@0.15.0 ssf state init changes/<change-name>
 > 不要与 `specs/<cap>/`（change 内部设计产物目录）混淆。
 > 不要放入 `.team-flow/`（仅存产品级编排状态）。
 
-> 建议新增 `ssf change scaffold` CLI 一次性完成目录创建 + state init + change_dag 写入（确定性脚本，无需 LLM 判断）。
+> 建议新增 `ssf change scaffold` CLI 一次性完成目录创建 + state init + change_dag 写入（确定性脚本，无需 LLM 判断）。（规划中，尚未实现——v0.17.0 时仍用上方手动步骤）
 
 ### 4. 写入 change_dag
 

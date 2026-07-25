@@ -46,7 +46,7 @@ Do NOT invoke for:
 **入口一次性问定计划模式**（业务/一人公司），调用 `/ce-plan`（`pipeline_mode: orchestrator` + `plan_mode: business|solo`，跳过仪式开销、保留 repo research + change splitting + 依赖 DAG + 技术方向）产出 `prd/vN/plan.md`。plan 只到产品级策略 + 高阶技术设计，**不含接口清单**（属各 change 的 spec-writer）。反馈环路检查点：plan 是否暴露 PRD scope 问题（是→回退 S2）。详见 `references/s3-plan-pipeline.md`。
 
 ### S4: 拆分验证与分发
-change-split-auditor 审计拆分质量（**必选门禁**，粒度/DAG 无环/并行策略/AC 预分配，PASS 后方可创建 change）；创建 change 目录（项目根 `changes/<name>/`）+ `.spec-superflow.yaml`；写入 change_dag；按依赖顺序分发。反馈环路检查点：依赖图是否可执行（否→回退 S3）。详见 `references/s4-split-validate.md`。
+change-split-auditor 审计拆分质量（**必选门禁**，粒度/DAG 无环/并行策略/AC 预分配，PASS 后方可创建 change；FAIL → 回退 S3 调整后重新审计）；创建 change 目录（项目根 `changes/<name>/`）+ `.spec-superflow.yaml`；写入 change_dag；按依赖顺序分发。反馈环路检查点：依赖图是否可执行（否→回退 S3）。详见 `references/s4-split-validate.md`。
 
 ### S5: 全局监控（change ≥ 2 必选）
 跟踪各 change 进度；cross-change-consistency-checker 检测跨 change 冲突；change closing 时复利晋升；必要时触发动态重规划。详见 `references/s5-monitoring.md`。
