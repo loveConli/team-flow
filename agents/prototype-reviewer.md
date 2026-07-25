@@ -119,7 +119,7 @@ If either path is missing or unreadable, report `FAIL` with reason `INPUT_ERROR`
 | 席 | 权重 | 评审内容 |
 |----|------|---------|
 | **工艺席** | 0.4 | checklist P1 合规 + anti-ai-slop 七宗罪 + 80/20 灵魂法则（参照 `references/craft/anti-ai-slop.md`） |
-| **品牌席** | 0.2 | design-system.md token 合规 + 视觉一致性（无内联漂移） |
+| **品牌席** | 0.2 | `.team-flow/design-system/` token 合规 + 视觉一致性（无内联漂移） |
 | **无障碍席** | 0.2 | accessibility-baseline 合规（参照 `references/craft/accessibility-baseline.md`） |
 | **文案席** | 0.2 | 无填充 / CTA 说明动作 / 标题 ≤14 词 / 术语一致 |
 

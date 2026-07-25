@@ -1,6 +1,6 @@
 # team-flow
 
-> 当前版本：`v0.18.0`
+> 当前版本：`v0.19.0`
 
 > 统一插件：**spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同。
 
@@ -70,7 +70,7 @@ specs/<cap>/        每变更设计/任务/契约 + learnings.md
 STRATEGY.md CONCEPTS.md 策略 / 领域词汇
 ```
 
-## 九套能力（22 skills）
+## 九套能力（23 skills）
 
 - **spec-superflow**（9）：workflow-start / need-explorer / spec-writer / contract-builder / build-executor / code-reviewer / spec-merger / release-archivist / bug-investigator
 - **compound 核心子集**（6）：ce-brainstorm / ce-plan / ce-compound / ce-strategy / ce-ideate / ce-proof
@@ -81,6 +81,7 @@ STRATEGY.md CONCEPTS.md 策略 / 领域词汇
 - **既有项目接入**（1）：workflow-bootstrap（代码库侦察→架构基线→领域词汇→目录初始化）
 - **会话交接**（1）：session-handoff（上下文腐化时压缩会话为交接文档，v0.16.0）
 - **工作流反馈**（1）：workflow-feedback（工作流问题结构化记录，与 ce-compound 互补，v0.16.0）
+- **设计系统**（1）：design-system（独立创建/迭代项目级设计系统，用户主导交互，v0.19.0）
 
 ### 配套 agents（8 个，v0.15.0 增至 8）
 

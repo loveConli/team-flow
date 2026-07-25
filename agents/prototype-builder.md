@@ -64,7 +64,7 @@ You build ONLY from confirmed inputs. You do not invent the design system, and y
 | Parameter | Description | Required |
 |-----------|-------------|----------|
 | `prd_path` | PRD 文件路径（e.g., `prd/v1/prd.md`），页面/功能/字段/导航的真相源 | ✓ |
-| `design_system_path` | 项目 `design-system.md` 路径（9 段 schema + palette），token 真相源 | ✓ |
+| `design_system_path` | 项目设计系统路径（`.team-flow/design-system/<variant>.md` + base.md），token 真相源 | ✓ |
 | `confirmed_plan` | 已确认的原型方案设计（页面清单 / 组件清单 / 导航流 / 分支 / 版本） | ✓ |
 | `prototype_root` | 原型目录路径（默认 `prototype/`） | 可选 |
 | `review_findings` | （修正轮）上一轮评审 finding 列表 | 修正轮必带 |
@@ -94,7 +94,7 @@ Do NOT proceed past a failed gate.
 
 ### Step 1: Render Design Tokens
 
-1. Read `design-system.md`（9 段 schema：color / typography / spacing / layout / components / motion / voice / brand / anti-patterns + palette 5 方向调色板 + aliases 别名层 + extensions 待提升清单）.
+1. Read `.team-flow/design-system/<variant>.md` + `base.md`（合并 base 品牌层 + 变体端特有层：9 段 schema + palette 5 方向调色板 + aliases 别名层 + extensions 待提升清单）.
 2. Generate/refresh `assets/design-tokens.css` with CSS custom properties for every token (colors incl. palette 50–900 steps, spacing scale, font scale, radii, shadows, durations, A2 派生状态色, B-slot 别名).
 3. **完整性约束**：design-tokens.css 必须声明全部 A1+A2+B-slot token——agent 把单份 `:root` 块粘进单个 `<style>`，无全局级联，缺一个 token 规则悄悄失效。可运行 `node scripts/guard/design-token-guard.mjs <design-system.md> <design-tokens.css>` 自检。
 

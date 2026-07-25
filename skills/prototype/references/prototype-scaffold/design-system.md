@@ -1,33 +1,7 @@
-# Design System（项目级 · config 注入 · 复利真相源）
+# Design System（已迁移到 .team-flow/design-system/，v0.19.0）
 
-> 由项目 spec-superflow.config.json 的 `prototype.designSystem` 注入；change 完成经 prototype-sync 复利回写。
-
-## color
-- primary / secondary / neutral / semantic（success/warning/danger）
-
-## typography
-- font-family / scale（1.25 比例）/ line-height
-
-## spacing
-- 4 / 8 / 12 / 16 / 24 阶梯（基于 4 基数）
-
-## layout
-- 栅格 12 列 / 断点 sm/md/lg / 容器 max-width
-
-## components
-- button / input / card / table 规范（见 components/）
-
-## motion
-- duration 150–300ms / easing standard
-
-## voice
-- 文案语气（专业、简洁）
-
-## brand
-- logo / 品牌主色
-
-## anti-patterns
-- 禁止内联样式漂移 / 禁止非 token 颜色
-
-## palette（5 方向确定性调色板）
-- neutral / primary / success / warning / danger（各含 50–900 阶梯）
+> **v0.19.0 变更**：设计系统存储位置从 `prototype/design-system.md` 迁移到 `.team-flow/design-system/`（base.md + 变体文件）。
+> 请使用 `/team-flow:design-system` skill 创建和管理设计系统。
+> 本文件仅作迁移提示占位，不再作为 token 真相源。
+>
+> 新位置：`.team-flow/design-system/base.md`（品牌共享层）+ `b-end.md` / `c-end.md`（端变体）

@@ -1,0 +1,319 @@
+<!-- design-system 预览画廊（v0.19.0）：由 design-system skill 生成，token 值已填充。零外部依赖。 -->
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light" data-density="balanced">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design System 预览画廊</title>
+<style>
+/* ===== TOKEN 定义（由 skill 从派生规则填充） ===== */
+:root {
+  /* A1-identity */
+  --bg: #FAFAF9;
+  --surface: #FFFFFF;
+  --fg: #1A1916;
+  --muted: #6B6964;
+  --border: #E8E5DF;
+  --accent: #3B82F6;
+  --font-display: Georgia, serif;
+  --font-body: -apple-system, system-ui, sans-serif;
+
+  /* A2-derived */
+  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+  --accent-active: color-mix(in oklab, var(--accent), black 14%);
+  --accent-soft: color-mix(in oklab, var(--accent), transparent 86%);
+  --focus-ring: 0 0 0 3px color-mix(in oklab, var(--accent), transparent 70%);
+  --elev-raised: 0 2px 8px color-mix(in oklab, var(--fg), transparent 92%);
+  --success: #16A34A;
+  --warn: #EAB308;
+  --danger: #DC2626;
+  --font-mono: ui-monospace, 'JetBrains Mono', monospace;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px;
+  --space-4: 16px; --space-5: 20px; --space-6: 24px;
+  --space-7: 32px; --space-8: 40px; --space-9: 48px;
+  --space-10: 64px; --space-11: 80px; --space-12: 96px;
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-pill: 9999px;
+  --motion-fast: 150ms; --motion-base: 200ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* B-slot 别名 */
+  --fg-2: var(--fg);
+  --meta: var(--muted);
+  --border-soft: var(--border);
+  --surface-warm: var(--surface);
+
+  /* 5 方向调色板 — primary */
+  --primary-50: color-mix(in oklab, var(--accent), white 95%);
+  --primary-100: color-mix(in oklab, var(--accent), white 90%);
+  --primary-200: color-mix(in oklab, var(--accent), white 75%);
+  --primary-300: color-mix(in oklab, var(--accent), white 55%);
+  --primary-400: color-mix(in oklab, var(--accent), white 30%);
+  --primary-500: var(--accent);
+  --primary-600: color-mix(in oklab, var(--accent), black 10%);
+  --primary-700: color-mix(in oklab, var(--accent), black 22%);
+  --primary-800: color-mix(in oklab, var(--accent), black 35%);
+  --primary-900: color-mix(in oklab, var(--accent), black 48%);
+
+  /* 密度修正（balanced 默认） */
+  --text-base: 16px;
+  --container: 1120px;
+}
+
+/* Dark 模式覆盖 */
+[data-theme="dark"] {
+  --bg: #1A1916;
+  --surface: #26251F;
+  --fg: #F5F5F4;
+  --muted: #A8A29E;
+  --border: #44403C;
+}
+
+/* Density: compact */
+[data-density="compact"] { --text-base: 14px; --container: 1280px; }
+/* Density: spacious */
+[data-density="spacious"] { --text-base: 18px; --container: 960px; }
+
+/* ===== 基础样式 ===== */
+* { box-sizing: border-box; margin: 0; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.6;
+  padding: var(--space-6);
+  transition: background var(--motion-base) var(--ease-standard),
+              color var(--motion-base) var(--ease-standard);
+}
+.container { max-width: var(--container); margin: 0 auto; }
+h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.25; }
+section { margin-bottom: var(--space-9); }
+section > h2 { margin-bottom: var(--space-4); border-bottom: 1px solid var(--border-soft); padding-bottom: var(--space-2); }
+
+/* ===== 控制面板 ===== */
+.tweaks {
+  display: flex; gap: var(--space-3); align-items: center;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-md); margin-bottom: var(--space-7);
+}
+.tweaks button {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--fg); cursor: pointer;
+  font-size: 0.85em; transition: all var(--motion-fast) var(--ease-standard);
+}
+.tweaks button:hover { background: var(--accent-soft); }
+
+/* ===== 色板区 ===== */
+.swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: var(--space-3); }
+.swatch {
+  border: 1px solid var(--border-soft); border-radius: var(--radius-sm);
+  overflow: hidden; text-align: center; font-size: 0.75em;
+}
+.swatch .block { height: 64px; }
+.swatch .label { padding: var(--space-1) var(--space-2); color: var(--meta); }
+.palette-row { display: flex; gap: 2px; margin-bottom: var(--space-2); }
+.palette-row .cell { flex: 1; height: 40px; display: flex; align-items: flex-end; justify-content: center; font-size: 0.6em; padding: 2px; }
+
+/* ===== 排版区 ===== */
+.type-specimen { margin-bottom: var(--space-3); }
+.type-specimen .px-label { font-size: 0.7em; color: var(--meta); font-family: var(--font-mono); }
+
+/* ===== 间距区 ===== */
+.space-ruler { display: flex; flex-direction: column; gap: var(--space-2); }
+.space-bar { display: flex; align-items: center; gap: var(--space-2); }
+.space-bar .bar { height: 16px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 2px; }
+.space-bar .lbl { font-size: 0.75em; color: var(--meta); font-family: var(--font-mono); white-space: nowrap; }
+
+/* ===== 组件区 ===== */
+.component-row { display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: flex-start; margin-bottom: var(--space-4); }
+.btn {
+  padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm);
+  font-size: 0.9em; cursor: pointer; border: 1px solid transparent;
+  transition: all var(--motion-fast) var(--ease-standard);
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:active { background: var(--accent-active); }
+.btn-secondary { background: var(--surface); color: var(--fg); border-color: var(--border); }
+.btn-secondary:hover { background: var(--accent-soft); }
+.btn-ghost { background: transparent; color: var(--accent); }
+.btn-ghost:hover { background: var(--accent-soft); }
+.input-field {
+  padding: var(--space-2) var(--space-3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 0.9em; background: var(--surface); color: var(--fg);
+  width: 240px;
+}
+.input-field:focus { outline: none; box-shadow: var(--focus-ring); border-color: var(--accent); }
+.card {
+  background: var(--surface); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md); padding: var(--space-5);
+  box-shadow: var(--elev-raised); max-width: 280px;
+}
+.card h4 { margin-bottom: var(--space-2); }
+.card p { font-size: 0.85em; color: var(--meta); }
+.demo-table { border-collapse: collapse; font-size: 0.85em; }
+.demo-table th, .demo-table td {
+  padding: var(--space-2) var(--space-3); border: 1px solid var(--border); text-align: left;
+}
+.demo-table th { background: var(--accent-soft); font-weight: 600; }
+.badge {
+  display: inline-block; padding: 2px var(--space-2);
+  border-radius: var(--radius-pill); font-size: 0.75em; font-weight: 500;
+}
+.badge-success { background: color-mix(in oklab, var(--success), transparent 85%); color: var(--success); }
+.badge-warn { background: color-mix(in oklab, var(--warn), transparent 85%); color: #92610A; }
+.badge-danger { background: color-mix(in oklab, var(--danger), transparent 85%); color: var(--danger); }
+
+/* ===== 派生色区 ===== */
+.state-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--space-3); }
+.state-chip {
+  padding: var(--space-3); border-radius: var(--radius-sm);
+  text-align: center; font-size: 0.8em; border: 1px solid var(--border-soft);
+}
+.focus-demo { padding: var(--space-3); box-shadow: var(--focus-ring); border-radius: var(--radius-sm); text-align: center; font-size: 0.8em; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 控制面板 -->
+  <div class="tweaks">
+    <button id="themeToggle">🌙 切换暗色</button>
+    <button id="densityCompact">紧凑</button>
+    <button id="densityBalanced">均衡</button>
+    <button id="densitySpacious">宽松</button>
+  </div>
+
+  <!-- 1. 色板区 -->
+  <section>
+    <h2>色板区 Color Palette</h2>
+    <div class="swatch-grid">
+      <div class="swatch"><div class="block" style="background:var(--bg)"></div><div class="label">--bg</div></div>
+      <div class="swatch"><div class="block" style="background:var(--surface)"></div><div class="label">--surface</div></div>
+      <div class="swatch"><div class="block" style="background:var(--fg)"></div><div class="label">--fg</div></div>
+      <div class="swatch"><div class="block" style="background:var(--muted)"></div><div class="label">--muted</div></div>
+      <div class="swatch"><div class="block" style="background:var(--border)"></div><div class="label">--border</div></div>
+      <div class="swatch"><div class="block" style="background:var(--accent)"></div><div class="label">--accent</div></div>
+    </div>
+    <h3 style="margin:var(--space-4) 0 var(--space-2)">Primary 50–900</h3>
+    <div class="palette-row">
+      <div class="cell" style="background:var(--primary-50)">50</div>
+      <div class="cell" style="background:var(--primary-100)">100</div>
+      <div class="cell" style="background:var(--primary-200)">200</div>
+      <div class="cell" style="background:var(--primary-300)">300</div>
+      <div class="cell" style="background:var(--primary-400)">400</div>
+      <div class="cell" style="background:var(--primary-500);color:#fff">500</div>
+      <div class="cell" style="background:var(--primary-600);color:#fff">600</div>
+      <div class="cell" style="background:var(--primary-700);color:#fff">700</div>
+      <div class="cell" style="background:var(--primary-800);color:#fff">800</div>
+      <div class="cell" style="background:var(--primary-900);color:#fff">900</div>
+    </div>
+  </section>
+
+  <!-- 2. 排版区 -->
+  <section>
+    <h2>排版区 Typography</h2>
+    <div class="type-specimen"><span class="px-label">32px / font-display</span><h1>Heading 1 标题一</h1></div>
+    <div class="type-specimen"><span class="px-label">26px / font-display</span><h2 style="border:none;padding:0">Heading 2 标题二</h2></div>
+    <div class="type-specimen"><span class="px-label">22px / font-display</span><h3>Heading 3 标题三</h3></div>
+    <div class="type-specimen"><span class="px-label">18px / font-display</span><h4>Heading 4 标题四</h4></div>
+    <div class="type-specimen"><span class="px-label">16px / font-body</span><p>正文段落。设计系统确保跨页面的视觉一致性，所有颜色与间距均来自 token 变量。</p></div>
+    <div class="type-specimen"><span class="px-label">14px / font-body small</span><p style="font-size:0.875em;color:var(--meta)">辅助文字 / 说明信息。</p></div>
+    <div class="type-specimen"><span class="px-label">14px / font-mono</span><code style="font-family:var(--font-mono);font-size:0.875em;background:var(--accent-soft);padding:2px 6px;border-radius:4px">const token = "deterministic";</code></div>
+  </section>
+
+  <!-- 3. 间距区 -->
+  <section>
+    <h2>间距区 Spacing</h2>
+    <div class="space-ruler">
+      <div class="space-bar"><div class="bar" style="width:var(--space-1)"></div><div class="lbl">space-1: 4px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-2)"></div><div class="lbl">space-2: 8px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-3)"></div><div class="lbl">space-3: 12px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-4)"></div><div class="lbl">space-4: 16px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-5)"></div><div class="lbl">space-5: 20px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-6)"></div><div class="lbl">space-6: 24px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-7)"></div><div class="lbl">space-7: 32px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-8)"></div><div class="lbl">space-8: 40px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-9)"></div><div class="lbl">space-9: 48px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-10)"></div><div class="lbl">space-10: 64px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-11)"></div><div class="lbl">space-11: 80px</div></div>
+      <div class="space-bar"><div class="bar" style="width:var(--space-12)"></div><div class="lbl">space-12: 96px</div></div>
+    </div>
+  </section>
+
+  <!-- 4. 组件区 -->
+  <section>
+    <h2>组件区 Components</h2>
+    <div class="component-row">
+      <button class="btn btn-primary">主按钮</button>
+      <button class="btn btn-secondary">次按钮</button>
+      <button class="btn btn-ghost">幽灵按钮</button>
+    </div>
+    <div class="component-row">
+      <input class="input-field" type="text" placeholder="输入框示例…">
+      <span class="badge badge-success">成功</span>
+      <span class="badge badge-warn">警告</span>
+      <span class="badge badge-danger">危险</span>
+    </div>
+    <div class="component-row">
+      <div class="card">
+        <h4>卡片标题</h4>
+        <p>卡片内容示例。所有样式均来自 token 变量，零硬编码色值。</p>
+      </div>
+      <table class="demo-table">
+        <thead><tr><th>列 A</th><th>列 B</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>数据 1</td><td>值 X</td><td><span class="badge badge-success">通过</span></td></tr>
+          <tr><td>数据 2</td><td>值 Y</td><td><span class="badge badge-warn">待定</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5. 派生色区 -->
+  <section>
+    <h2>派生色区 Derived States</h2>
+    <div class="state-grid">
+      <div class="state-chip" style="background:var(--accent);color:#fff">accent</div>
+      <div class="state-chip" style="background:var(--accent-hover);color:#fff">accent-hover</div>
+      <div class="state-chip" style="background:var(--accent-active);color:#fff">accent-active</div>
+      <div class="state-chip" style="background:var(--accent-soft)">accent-soft</div>
+      <div class="focus-demo">focus-ring 演示</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function() {
+  var html = document.documentElement;
+  // 恢复 localStorage 偏好
+  var savedTheme = localStorage.getItem('ds-theme');
+  var savedDensity = localStorage.getItem('ds-density');
+  if (savedTheme) html.setAttribute('data-theme', savedTheme);
+  if (savedDensity) html.setAttribute('data-density', savedDensity);
+  updateLabels();
+
+  document.getElementById('themeToggle').addEventListener('click', function() {
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('ds-theme', next);
+    updateLabels();
+  });
+  ['compact','balanced','spacious'].forEach(function(d) {
+    document.getElementById('density' + d.charAt(0).toUpperCase() + d.slice(1))
+      .addEventListener('click', function() {
+        html.setAttribute('data-density', d);
+        localStorage.setItem('ds-density', d);
+      });
+  });
+  function updateLabels() {
+    document.getElementById('themeToggle').textContent =
+      html.getAttribute('data-theme') === 'dark' ? '☀️ 切换亮色' : '🌙 切换暗色';
+  }
+})();
+</script>
+</body>
+</html>

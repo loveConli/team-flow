@@ -1,6 +1,6 @@
 # AGENTS.md · team-flow
 
-> team-flow 统一插件 = **spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（22 skills + 8 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
+> team-flow 统一插件 = **spec-superflow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（23 skills + 8 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
 
 ## What This Is
 
@@ -12,7 +12,7 @@
 
 ### 身份与依赖关系
 
-- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 22 个 skills + 8 个 agents + hooks + templates
+- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 23 个 skills + 8 个 agents + hooks + templates
 - **spec-superflow**（npm 底座包）：team-flow 的 CLI 工具层（`package.json` name = `spec-superflow`，bin = `ssf`），提供状态机、校验、复利 CLI 等运行时能力
 - 关系：team-flow **包含** spec-superflow 作为底座（同一仓库、同一版本）。skills 中的 `npx --yes --package spec-superflow@x.y.z ssf ...` 调用的是已发布的 npm 底座包，版本号必须与当前 `package.json` version 一致
 
@@ -32,7 +32,7 @@ node --test tests/e2e.test.mjs --test-name-pattern="parseDeltaSpec"
 npm run validate
 ```
 
-## 能力概览（九套合一，22 skills）
+## 能力概览（九套合一，23 skills）
 
 ### 1. spec-superflow（底座，9 skills）
 spec 驱动开发过程。8 态变更机：`exploring → specifying → bridging → approved-for-build → executing → closing`（另有 `debugging` 侧路径 + `abandoned` 终态）。
@@ -160,7 +160,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
   全局作为下一 change / 下一 PRD 版本的 grounding → 闭环
 ```
 
-## Skills 索引（22 个）
+## Skills 索引（23 个）
 
 | Skill | 归属 | 用途 |
 |---|---|---|

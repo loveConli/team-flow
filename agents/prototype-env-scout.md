@@ -51,9 +51,9 @@ Turn the probe into a decision-ready brief: what exists, what is missing, and a 
 ## Methodology
 
 ### Step 1: Design System Probe
-- Check whether `design-system.md` exists at the configured/inferred path.
-- If present, assess **9-段 schema completeness**: color / typography / spacing / layout / components / motion / voice / brand / anti-patterns, plus the **palette（5 方向确定性调色板：neutral/primary/success/warning/danger，各含 50–900 阶梯）**.
-- Report which sections are present / thin / missing. A missing or near-empty design system is a **blocker for the builder** — flag it via Readiness Verdict `needs_design_system` so the orchestrator can dispatch `design-system-architect` first.
+- Check whether `.team-flow/design-system/` exists（v0.19.0：base.md + 变体文件）；若 `prototype/design-system.md` 存在但 `.team-flow/design-system/` 不存在 → 在 outstanding_questions 标注迁移建议。
+- If present, assess **9-段 schema completeness**: color / typography / spacing / layout / components / motion / voice / brand / anti-patterns, plus the **palette（5 方向确定性调色板：neutral/primary/success/warning/danger，各含 50–900 阶梯）**. Report **变体清单**（b-end.md / c-end.md 是否存在）。
+- Report which sections are present / thin / missing. A missing or near-empty design system is a **blocker for the builder** — flag it via Readiness Verdict `needs_design_system` so the orchestrator can invoke `/team-flow:design-system` skill first.
 
 ### Step 2: Prototype Repository / Branch Probe
 - Detect the current git branch and whether a `prototype/` already exists on it.
@@ -82,10 +82,11 @@ Produce:
 ## Prototype Environment Brief
 
 ### Design System
-- Path: {path or "MISSING"}
+- Path: {.team-flow/design-system/ or "MISSING"}
+- 变体清单: {base.md ✅ | b-end.md ✅ | c-end.md ❌}
 - 9-段 schema: {present/thin/missing per section}
 - palette (5 方向): {present/missing}
-- Status: {完整 | 不完整(列出缺段) | 缺失}
+- Status: {完整 | 不完整(列出缺段) | 缺失 | 需迁移(旧 prototype/design-system.md)}
 
 ### Prototype Repo / Branch
 - Current branch: {branch}

@@ -58,13 +58,14 @@ prototype/
 └── flow.md             # 页面跳转 / 用户流
 ```
 
-## 设计系统生命周期（v0.15.0 新增）
+## 设计系统生命周期（v0.15.0 新增，v0.19.0 独立化）
 ```
 首次创建 → 引用 → 增量更新（变更履历）
 ```
-- **首次创建**：项目无 `design-system.md` 时，①环境探查发现缺失 → 派 `design-system-architect` 子代理（`references/agents/design-system-architect.md`）按 9 段 schema + 5 方向确定性调色板产出草案（`confirmed: false`）→ 主代理评审 + 人工确认 → **带 `confirmed: true` 重派 design-system-architect 写入正式 `prototype/design-system.md`**（设计系统也走主代理只编排：architect 是唯一写者，主代理不直接写 design-system.md）。
-- **引用**：prototype-builder 绘制时强制读 `design-system.md` 渲染 token，禁止内联样式漂移。
-- **增量更新**：prototype-sync 回写时若涉及新组件/token/anti-pattern，**派 `design-system-architect`（`iterate` 模式）**合并进 `design-system.md` 并记**变更履历**（时间/变更内容/来源 change）；主代理不直接写。
+- **首次创建**：项目无设计系统时，①环境探查发现缺失 → 主代理调用 `/team-flow:design-system` skill（独立入口，用户主导交互创建），产出 `.team-flow/design-system/`（base.md + 变体 + preview.html）。
+- **引用**：prototype-builder 绘制时强制读 `.team-flow/design-system/<variant>.md`（+ base.md 合并 token）渲染，禁止内联样式漂移。
+- **增量更新**：prototype-sync 回写时若涉及新组件/token/anti-pattern，调用 `/team-flow:design-system`（iterate 模式）合并进 `.team-flow/design-system/` 并记**变更履历**。
+- **迁移兼容**：检测旧 `prototype/design-system.md` → 提示迁移到 `.team-flow/design-system/base.md`（一次性）。
 
 ## 测试契约（data-testid，可选开启）
 - **原则**：`data-testid` 是"测试—组件"契约层，由 spec / `execution-contract.md` 定义；原型 HTML 与实际 UI 代码共用同一命名（详见设计规格第十六章 E2E 集成）。
@@ -73,7 +74,7 @@ prototype/
 - **可选开启**：由项目 config 驱动（如 `prototype.e2e: true` 时强制）。
 
 ## 配置驱动（插件通用 + 项目注入）
-- 项目 `spec-superflow.config.json` 注入（插件层扩展字段）：`prototype.designSystem`（design-system.md 路径）、`prototype.entry`（默认 `prototype/index.html`）。
+- 项目 `spec-superflow.config.json` 注入（插件层扩展字段）：`prototype.designSystem`（`.team-flow/design-system/<variant>.md` 路径）、`prototype.designSystemBase`（`.team-flow/design-system/base.md`）、`prototype.entry`（默认 `prototype/index.html`）。
 - 插件层用 `ssf runtime config --get <key>` 自读；插件保持通用，不固化任何公司/产品风格。
 
 ## 膨胀防控
@@ -87,9 +88,9 @@ prototype/
 ## prototype-sync（change 完成回写，SOP，主代理只编排）
 1. 取 change 完成的 UX 增量（来自 `execution-contract.md` / 设计结论）。
 2. **派 `prototype-builder`（修正/演进模式）**把增量合并进全局 `prototype/`（pages/components/assets/flow.md）——主代理不直接写原型 HTML。
-3. 若涉及设计系统迭代，**派 `design-system-architect`（`iterate` 模式）**合并进 `prototype/design-system.md` 并记变更履历——主代理不直接写 design-system.md。
+3. 若涉及设计系统迭代，调用 `/team-flow:design-system`（iterate 模式）合并进 `.team-flow/design-system/` 并记变更履历。
 4. 人工确认增量无误。
 5. **顺序提交**：`arch-merge` → `prototype-sync`（同一 change closing 内）。
 
 ## 脚手架
-新建项目：`cp -r references/prototype-scaffold/ <project>/prototype/`，再按 `design-system.md` 填 token。
+新建项目：`cp -r references/prototype-scaffold/ <project>/prototype/`，再按 `.team-flow/design-system/` 的设计系统填 token（缺设计系统先用 `/team-flow:design-system` 创建）。

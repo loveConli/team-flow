@@ -14,14 +14,16 @@
 - **原型方案设计建议**：页面结构、组件复用、导航 flow 草案
 - **差异化方向（v0.18.0）**：产出 2-3 个差异化方向（布局策略 / 视觉侧重 / 风险权衡），附推荐方向 + 理由
 
-子代理按 §18.1 返回。若发现 `design-system.md` 缺失 → 在 `outstanding_questions`/`blockers` 标注，主代理转入设计系统创建（见下）。
+子代理按 §18.1 返回。若发现 `.team-flow/design-system/` 缺失 → 在 `outstanding_questions`/`blockers` 标注，主代理转入设计系统创建（见下）。
 
-## 步骤 ①b 设计系统创建（条件，子代理）
+## 步骤 ①b 设计系统创建（条件，调用独立 skill，v0.19.0）
 
 环境简报显示设计系统缺失/不完整时：
-1. 派 `references/agents/design-system-architect.md`（`mode: create`, `confirmed: false`）按 9 段 schema + 5 方向确定性调色板产出 `design-system.md` 草案（写 scratch 或 response，**不写正式路径**）。
-2. 主代理评审草案 → **人工评审**（AskUserQuestion 确认/调整）。
-3. 确认后**带 `confirmed: true` 重派 design-system-architect**，由它写入正式 `prototype/design-system.md`（**主代理不直接写**），再回 ① 补齐环境简报。
+1. 主代理调用 `/team-flow:design-system` skill（独立入口，用户主导交互创建）。
+2. design-system skill 内部执行：需求收集（≤5 个预填推荐问题）→ 确定性 token 派生 → 草稿生成（base.md + 变体）→ 预览生成（preview.html）→ 用户评审确认 → 落盘 `.team-flow/design-system/` + guard 校验。
+3. 创建完成后回 ① 补齐环境简报。
+
+> **v0.19.0 变更**：①b 从"内部派 design-system-architect 种子代理"升级为"调用独立 design-system skill"。architect 迁移为 design-system skill 的内部执行引擎。存储从 `prototype/design-system.md` 迁移到 `.team-flow/design-system/`（base.md + 变体）。
 
 ## 步骤 ② 方案评审 + 人工评审（主代理）
 
