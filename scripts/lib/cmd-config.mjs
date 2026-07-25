@@ -36,7 +36,7 @@ export async function run(args) {
       val = val[p];
     }
     if (val !== undefined) {
-      console.log(typeof val === 'object' ? JSON.stringify(val, null, 2) : val);
+      console.log(typeof val === 'object' ? JSON.stringify(val, null, 2) : String(val));
     } else {
       console.error(`Config path not found: ${args[1]}`);
       process.exit(1);

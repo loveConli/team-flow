@@ -6,6 +6,21 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-07-25
+
+### Added（会话交接 + 工作流反馈）
+
+- **session-handoff skill（设计增强方案 v0.8 §21.1）**：上下文腐化时将当前会话压缩为结构化交接文档（10 节），供新会话无缝继续。自动检测 `.team-flow/` 状态文件构建工作流快照；无状态文件时降级为通用 handoff。输出到 `.team-flow/handoffs/`（.gitignore，临时性质）。区别于 change 级 `ssf handoff`（任务委派）和 `.team-flow/` yaml（结构化状态自动恢复）。含 3 个 references（交接文档模板 / 上下文萃取规则 / skill 推荐矩阵）。
+- **workflow-feedback skill（设计增强方案 v0.8 §21.2）**：工作流使用问题结构化记录（10 类分类），转化为可追踪的改进项。与 ce-compound 互补——ce-compound 是"经验沉淀端"，workflow-feedback 是"问题发现端"。输出到 `.team-flow/feedback/`（git 跟踪，改进输入持久化）。含 3 个 references（问题记录模板 / 分类指南 / 回顾模式信号识别）。
+- **release-archivist 收尾联动**：change 收尾时建议触发 workflow-feedback 回顾工作流问题。
+- **产物目录**：`.team-flow/handoffs/`（.gitignore）+ `.team-flow/feedback/`（git 跟踪）。
+
+### Changed
+
+- **Skill 计数 20 → 22**（九套能力）：plugin.json / .claude-plugin/ / .cursor-plugin/ / .codex-plugin/ / gemini-extension.json / README / AGENTS.md 全链路同步。
+- **AGENTS.md 能力概览**：新增第 8 节（session-handoff）和第 9 节（workflow-feedback）；触发域分层表登记为「步骤级 - 独立工具」。
+- **CLAUDE.md**：skills 表新增 2 行、产物结构追加 handoffs/feedback/、Roadmap 追加 v0.16.0 里程碑、P1-9 横展补入 ce-ideate/ce-proof 超标。
+
 ## [0.15.0] - 2026-07-25
 
 ### Added（subagent 编排下沉 + 状态治理）

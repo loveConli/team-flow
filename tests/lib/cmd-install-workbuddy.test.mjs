@@ -102,7 +102,7 @@ describe('cmd-install-workbuddy', () => {
     process.chdir(tempDir);
     try {
       const plan = planInstall({ homeDir: join(tempDir, 'home') });
-      assert.equal(plan.skillNames.length, 9);
+      assert.equal(plan.skillNames.length, 22);
       assert.equal(plan.skillsDir, join(plan.pluginRoot, 'skills'));
       assert.ok(existsSync(plan.skillsDir));
       assert.notEqual(plan.skillsDir, join(tempDir, 'skills'));

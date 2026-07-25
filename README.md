@@ -114,3 +114,71 @@ Skills 命名保留其来源前缀，作为功能分组的自然标识：
 ```
 
 详见 `AGENTS.md`。
+
+## 受 guard 保护的执行计划（execution plan）
+
+full/hotfix 在 DP-4 必须保存 current execution plan 到
+`<change>/.superpowers/sdd/execution-plan.json`；它不属于 `execution-contract.md`。
+先运行 `ssf execution recommend`（执行模式推荐）：它按任务量和 wave 策略列出 `inline`、
+`batch-inline`、`sdd` 并给出推荐，并保存当前 wave 的推荐凭据到
+`<change>/.superpowers/sdd/execution-recommendation.json`。Agent 展示候选项和理由后，
+`plan` 与 `revise` 必须消费匹配当前 artifact、contract 和 wave 的凭据；用户用 `--confirm`
+确认；若选择非推荐方式，必须用 `--acknowledge-recommendation` 记录确认风险。Batch
+Inline 始终串行，不会表示并行。`tweak` 免除 execution plan 与 review receipt gate。
+
+```bash
+ssf execution recommend changes/my-change \
+  --wave foundation:parallel:1.1,1.2 \
+  --wave integration:serial:2.1:foundation --json
+ssf execution plan changes/my-change --mode sdd --confirm --reason "independent work" \
+  --wave foundation:parallel:1.1,1.2 \
+  --wave integration:serial:2.1:foundation
+ssf execution show changes/my-change --json
+# inline/batch-inline 可升级为 sdd，或重规划已有 sdd 的 wave/依赖；不能降级。
+ssf execution recommend changes/my-change \
+  --wave foundation:parallel:1.1,1.2 \
+  --wave integration:serial:2.1:foundation --json
+ssf execution revise changes/my-change --mode sdd --confirm --reason "need parallel work" \
+  --wave foundation:parallel:1.1,1.2 \
+  --wave integration:serial:2.1:foundation
+ssf execution review changes/my-change --wave foundation --base <sha> --head <sha> \
+  --report .superpowers/sdd/reviews/foundation.md --verdict pass
+```
+
+`--report` 相对于 `<change>` 解析，且必须位于
+`<change>/.superpowers/sdd/reviews/` 之下。`--base` 和 `--head` 必须是该
+`<change>` Git 工作树中的真实 commit，且 `base` 必须是 `head` 的祖先。
+`<change>/.superpowers/sdd/reviews/` 的目录层级必须是物理、非符号链接目录；
+report 本身必须为普通、非空、非符号链接文件。
+
+每一个 wave 均须有当前 `pass` review receipt，才可启动依赖 wave 或进入 closing；
+修订计划会废止旧 receipt。#47 所提出的恢复、切换与手动保存 slash command 尚未实现，
+不能假定有 `/ssf:*` 命令。
+
+## OpenAI Codex CLI 安装与升级
+
+```bash
+codex plugin marketplace add hashgraph-online/awesome-codex-plugins
+codex plugin add spec-superflow@awesome-codex-plugins
+```
+
+直接安装指定 release tag（绕过社区镜像延迟）：
+
+```bash
+codex plugin marketplace add MageByte-Zero/spec-superflow --ref v0.9.0
+codex plugin add spec-superflow@spec-superflow
+```
+
+升级：
+
+```bash
+codex plugin marketplace upgrade awesome-codex-plugins
+codex plugin add spec-superflow@awesome-codex-plugins
+codex plugin list | rg spec-superflow
+```
+
+## v0.9.0 亮点
+
+- **Node 20** 最低运行时要求
+- **model profiles**（`ssf config --resolve-model`）：mechanical / standard / strong / review 四档模型配置，只读解析，不切换当前会话模型
+- **最小性**原则：零运行时依赖、自包含插件、按需加载
