@@ -70,7 +70,7 @@ specs/<cap>/        每变更设计/任务/契约 + learnings.md
 STRATEGY.md CONCEPTS.md 策略 / 领域词汇
 ```
 
-## 九套能力（24 skills）
+## 九套能力（23 skills）
 
 - **spec-superflow**（9）：workflow-start / need-explorer / spec-writer / contract-builder / build-executor / code-reviewer / spec-merger / release-archivist / bug-investigator
 - **compound 核心子集**（6）：ce-brainstorm / ce-plan / ce-compound / ce-strategy / ce-ideate / ce-proof
