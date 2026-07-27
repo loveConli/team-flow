@@ -11,7 +11,7 @@ import { PLATFORM_RUNTIME_INVENTORY, ZCODE_COMPATIBILITY_PATH } from '../../scri
 
 const ROOT = process.cwd();
 const VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version;
-const PREFIX = `npx --yes --package team-flow@${VERSION} tf`;
+const PREFIX = `npx --yes --package @xulthekl/team-flow@${VERSION} tf`;
 const CLI = join(ROOT, 'scripts', 'team-flow.mjs');
 const RUNTIME_SKILLS = [
   'workflow-start',

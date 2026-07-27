@@ -116,7 +116,7 @@ function checkRuntimeDistribution(root) {
     return { pass: false, message: 'runtime distribution cannot be checked: package.json or skills/ is missing; reinstall team-flow' };
   }
 
-  const canonicalPrefix = `npx --yes --package team-flow@${pkg.version} tf`;
+  const canonicalPrefix = `npx --yes --package @xulthekl/team-flow@${pkg.version} tf`;
   const issues = [];
   for (const name of readdirSync(skillsDir)) {
     if (!RUNTIME_SKILLS.has(name)) continue;

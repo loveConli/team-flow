@@ -102,7 +102,7 @@ for (const file of RUNTIME_FILES) {
     errors.push({ file, found: 'FILE_NOT_FOUND', expected: CANONICAL });
     continue;
   }
-  const versions = [...readFileSync(fp, 'utf8').matchAll(/npx --yes --package team-flow@(\d+\.\d+\.\d+) tf/g)]
+  const versions = [...readFileSync(fp, 'utf8').matchAll(/npx --yes --package @xulthekl\/team-flow@(\d+\.\d+\.\d+) tf/g)]
     .map(match => match[1]);
   if (versions.length === 0) {
     errors.push({ file, found: 'RUNTIME_PREFIX_NOT_FOUND', expected: CANONICAL });

@@ -105,7 +105,7 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
         content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, pluginRootAbs);
       }
       content = content.replace(
-        /npx --yes --package team-flow@\d+\.\d+\.\d+ tf/g,
+        /npx --yes --package @xulthekl\/team-flow@\d+\.\d+\.\d+ tf/g,
         `node ${shellQuote(join(pluginRootAbs, 'scripts', 'team-flow.mjs'))}`,
       );
       writeFileSync(skillMd, content, 'utf-8');
@@ -119,7 +119,7 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
         content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, pluginRootAbs);
       }
       content = content.replace(
-        /npx --yes --package team-flow@\d+\.\d+\.\d+ tf/g,
+        /npx --yes --package @xulthekl\/team-flow@\d+\.\d+\.\d+ tf/g,
         `node ${shellQuote(join(pluginRootAbs, 'scripts', 'team-flow.mjs'))}`,
       );
       writeFileSync(subPath, content, 'utf-8');

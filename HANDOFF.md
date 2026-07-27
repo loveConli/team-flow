@@ -184,7 +184,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
   - `package.json` 的 `"name": "team-flow"`（npm 包名；bin 暴露 `tf` 与 `team-flow`）。建议保留 bin `tf`，包名可改 `team-flow`。
   - `GEMINI.md` 第 1/3/5 行、`llms.txt` 第 1/3-5 行、`.claude/always/phase-guard.md` 第 1 行头部 `# team-flow v0.10.0 |`（**注意**：`check-version-consistency.mjs` 的 GEMINI/phase-guard 版本正则硬编码了 `team-flow`，若改头部须同步改该脚本的正则，否则一致性检查会失败）。
   - `INSTALL.md` 的 marketplace 命令 `MageByte-Zero/team-flow`、`/plugin install team-flow@team-flow`（第 44-45、53 行等）—— 要发布到 Claude Code marketplace 前必须替换。
-  - 各 team-flow skill 内 `npx --yes --package team-flow@0.10.0 tf`（由 `check-version-consistency.mjs` 的 RUNTIME_FILES 校验，必须保持 `team-flow@0.10.0` 直到 team-flow 发布到 npm）。
+  - 各 team-flow skill 内 `npx --yes --package @xulthekl/team-flow@0.10.0 tf`（由 `check-version-consistency.mjs` 的 RUNTIME_FILES 校验，必须保持 `team-flow@0.10.0` 直到 team-flow 发布到 npm）。
 - [ ] **实测 v0.3 修正 A**：验证 `tf runtime config --get prototype.designSystem` 真能读到扩展字段（当前未跑，是设计假设）。
 
 ### P1 —— 质量与发布

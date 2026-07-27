@@ -6,6 +6,19 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.22.4] - 2026-07-27
+
+### Changed（npm 包名 scope 化，发布至 npm）
+
+- **npm 包名**：`team-flow` → `@xulthekl/team-flow`（scoped package，解决 npm publish 权限冲突）
+- **author**：`MageByte` → `xulthekl`
+- **npx 引用**：全部 `npx --yes --package team-flow@X.Y.Z tf` → `npx --yes --package @xulthekl/team-flow@X.Y.Z tf`（179 处）
+- **版本号**：bump 0.22.3 → 0.22.4（全量同步：plugin.json、marketplace.json、phase-guard.md、llms.txt、INSTALL.md、README.md 等 15 个文件）
+
+### Verified
+
+- 待执行 check-version-consistency + npm test
+
 ## [0.22.3] - 2026-07-27
 
 ### Changed（身份统一 spec-superflow → team-flow，P1-6 第二阶段）
