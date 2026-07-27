@@ -263,6 +263,59 @@ if (newSkills.length > 0) {
   console.warn(`   Consider adding them to AGENTS.md Skills 索引`);
 }
 
+// ── Post-fix verification (only in --fix mode) ──
+// If we made any fixes, re-verify that all fixed files are now consistent.
+// This catches cases where auto-fix introduced new issues (e.g., wrong count).
+if (AUTO_FIX && fixes.length > 0) {
+  console.log('🔍 Verifying fixes...');
+
+  // Re-check skill counts
+  for (const check of SKILL_COUNT_JSON_CHECKS) {
+    const fp = join(ROOT, check.file);
+    if (!existsSync(fp)) continue;
+    try {
+      const obj = JSON.parse(readFileSync(fp, 'utf-8'));
+      let val = obj;
+      for (const p of check.path) val = val?.[p];
+      const match = typeof val === 'string' ? val.match(check.extract) : null;
+      if (match && Number(match[1]) !== ACTUAL_SKILL_COUNT) {
+        errors.push({
+          file: `${check.file} [${check.path.join('.')}]`,
+          found: match[1],
+          expected: ACTUAL_SKILL_COUNT,
+          note: 'Post-fix verification failed'
+        });
+      }
+    } catch (e) { /* ignore parse errors in verification */ }
+  }
+
+  for (const check of SKILL_COUNT_TEXT_CHECKS) {
+    const fp = join(ROOT, check.file);
+    if (!existsSync(fp)) continue;
+    const content = readFileSync(fp, 'utf-8');
+    const match = content.match(check.extract);
+    if (match && Number(match[1]) !== ACTUAL_SKILL_COUNT) {
+      errors.push({
+        file: check.file,
+        found: match[1],
+        expected: ACTUAL_SKILL_COUNT,
+        note: 'Post-fix verification failed'
+      });
+    }
+  }
+
+  if (errors.length > 0) {
+    console.error('❌ Post-fix verification found remaining issues:');
+    for (const e of errors) {
+      console.error(`  ${e.file}: expected ${e.expected}, found ${e.found}`);
+    }
+    console.error('\nAuto-fix may have introduced errors. Please fix manually.');
+    process.exit(1);
+  }
+
+  console.log('✅ All fixes verified\n');
+}
+
 // ── Report ──
 if (fixes.length > 0) {
   console.log(`🔧 Auto-fixed ${fixes.length} issue(s):`);
