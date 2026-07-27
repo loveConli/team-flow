@@ -25,9 +25,20 @@ If `prototype/` does not exist or is empty, skip silently — not all projects h
 
 Read `docs/solutions/INDEX.md` if it exists. Filter entries where `phase = spec OR phase = cross-phase` and `domain` matches the current change's domain. Inject top-5 summaries as context constraints for artifact generation. If INDEX.md does not exist or is empty, skip silently.
 
+### Change Brief (v0.9)
+
+若 `change-brief.md` 存在（本 change 由 workflow-orchestrator S4 分发），读取其 Scope / 约束 / AC 列表 / 全局技术方向：
+- **Scope** 作为 proposal.md 的 scope 边界基线——不静默超出 brief scope。
+- **AC 列表** 作为 specs/ 的 AC 覆盖上限——brief 列出的 AC 必须在 specs/ 中体现，**不**静默丢弃；若认为 brief AC 有误或与 plan.md 冲突，以 `prd/vN/plan.md` / PRD 为准并在 proposal 注明，而非静默改写。
+- brief 不存在时（手动新建 / 快速通道）跳过本段，按原流程从 `dp_0_decisions` 取意图。
+
+### Plan Technical Direction (v0.9)
+
+若产品级 `prd/vN/plan.md` 存在，读取其**高阶技术设计段**（模块边界 / 技术选型 / 数据流方向 / 关键聚合与上下文划分），作为 design.md 的 `## Decisions` 约束输入——保证各 change 的技术方案与全局方向一致，避免各自为政。**禁止**反向要求 plan.md 提供接口清单 / 字段定义 / 方法签名（这些是 spec-writer / architecture-design 在本 change 内的产出，plan.md 不含，见 ce-plan 作用边界与 v0.8 §18.7.2）。plan.md 不存在时跳过本段。
+
 ## Config Check
 
-Run: `npx --yes --package spec-superflow@0.21.0 ssf runtime config --get artifacts.order` — generate in configured order (default: proposal → specs → design → tasks). Run with `artifacts.skip` — skip any listed artifacts.
+Run: `npx --yes --package spec-superflow@0.22.0 ssf runtime config --get artifacts.order` — generate in configured order (default: proposal → specs → design → tasks). Run with `artifacts.skip` — skip any listed artifacts.
 
 ## Artifact Roles
 
@@ -40,6 +51,8 @@ Run: `npx --yes --package spec-superflow@0.21.0 ssf runtime config --get artifac
 ## Working Rules
 
 **Honor DP-0**: Read `dp_0_decisions`, respect confirmed constraints, don't silently expand scope. Pause on unconfirmed decisions.
+
+**Honor Brief (v0.9)**: 若 `change-brief.md` 存在，尊重其 scope 边界与 AC 列表（见 Required Inputs「Change Brief」）——不静默丢弃 brief AC、不静默超出 brief scope；与 plan.md 冲突时以 plan.md 为准并注明。
 
 ### proposal.md
 Must state: problem, what changes, capabilities affected, impact areas.
@@ -102,8 +115,8 @@ Generate one at a time. Confirm each before next. This prevents scope drift — 
 
 Present summary of all 4 artifacts (2-3 sentences each). Ask user for adjustments. After approval:
 ```bash
-npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_2_result "approved: <summary>"
-npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_2_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_2_result "approved: <summary>"
+npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_2_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 
 ## Handoff Rule

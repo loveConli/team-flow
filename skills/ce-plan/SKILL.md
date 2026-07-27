@@ -16,7 +16,7 @@ argument-hint: "[optional: feature description, PRD doc path, plan path to deepe
 
 ## 作用边界（v0.8 新增，硬声明）
 
-> **ce-plan = 产品级策略**：change 拆分（scope + 依赖 + 优先级 + 复杂度）、change 依赖 DAG、技术方向决策、风险与约束、里程碑计划。
+> **ce-plan = 产品级策略**：change 拆分（scope + 依赖 + 优先级 + 复杂度）、change 依赖 DAG、技术方向决策、风险与约束、里程碑计划。**产品阶段拆到用户故事/功能模块即止**——拆分维度是用户故事或内聚功能模块（见 `references/change-splitting.md` v0.9 正向定义），接口/文件/任务级拆分属变更级 spec-writer。
 > **ce-plan ≠ 变更级详细设计**：**接口清单、字段定义、方法签名、请求/响应 schema、文件级 Implementation Unit** 一律属于各 change 的 `spec-writer` / `architecture-design`，**不进 plan.md**。一人公司模式的技术方案也只到「高阶技术设计」（模块边界 + 技术选型 + 数据流方向 + 关键聚合/上下文划分），**禁止输出接口清单段**。
 
 ## When to Use

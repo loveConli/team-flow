@@ -17,6 +17,10 @@ Agree on: problem, scope, non-goals, success criteria, whether to split before s
 
 Before asking questions, understand what exists and what constraints are in place.
 
+### 1.5 Upstream Inheritance (v0.9)
+
+若 `change-brief.md` 存在（本 change 由 workflow-orchestrator S4 分发），**先读它再提问**：把 brief 的 Scope / 约束 / AC 列表作为提问的**默认值**，只就 brief 未覆盖或用户存疑的部分追问，**不**重新询问已被产品级定稿的意图与 scope。若 brief 不存在（手动新建 / 快速通道），按原流程从零探索。brief 与 `prd/vN/plan.md` 冲突时以 plan.md 为准。
+
 ### 2. One Question at a Time
 
 Ask a single clear question, wait for the answer, digest, then ask the next. Never ask 3+ questions at once. Each answer informs the next question.
@@ -37,8 +41,8 @@ Restate what you heard: "Here's what I'm hearing: [problem, scope, non-goals, su
 
 After user confirms the summary:
 ```bash
-npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_1_result "confirmed: <one-line summary>"
-npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_1_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_1_result "confirmed: <one-line summary>"
+npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_1_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 DP-1 confirms scope, non-goals, and success criteria before artifact creation.
 
@@ -55,6 +59,8 @@ Once DP-1 is recorded, hand off to `spec-writer`.
 ## Exploration Standard
 
 You must leave exploration with: a usable change name, a crisp problem statement, scope boundaries, non-goals, success criteria, and a decomposition decision (one change or split).
+
+**Decomposition 默认采纳产品级拆分 (v0.9)**：当 brief 存在时，本 change 已是 PRD 经 ce-plan + change-split-auditor 拆出的独立单元，decomposition decision **默认 = 不再二次拆分**（继承产品级结论）。用户仍可显式提出再拆分，但需明确确认并说明理由——变更层不应静默推翻产品级拆分决策。
 
 ## Strong Rule
 

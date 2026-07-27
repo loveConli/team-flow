@@ -15,7 +15,7 @@
 ```
 
 - **迁移兼容**：检测到旧 `<root>/.workflow-orchestrator.yaml` 存在时，自动迁移到 `.team-flow/requirements/<req-id>/orchestrator.yaml` 并提示用户（一次性）。
-- **变更级状态**：各 change 的状态文件由 `.spec-superflow.yaml` 改名为 `.team-flow.yaml`（`<change>/.team-flow.yaml`），检测逻辑保留对旧文件名的向后兼容探测。
+- **变更级状态**：各 change 的状态文件**当前仍为** `<change>/.spec-superflow.yaml`，检测逻辑不动；**计划 v1.0.0（P1-6 第二阶段）改名**为 `.team-flow.yaml`（对齐设计增强方案 v0.8 §18.3）。改名落地前，编排层与变更层一律以 `.spec-superflow.yaml` 为准。
 
 ## registry.yaml Schema
 
@@ -52,7 +52,7 @@ change_dag:                           # change 依赖图（S4 后填充）
     depends_on: []
     priority: 1
     parallel_group: A                 # 同组可并行
-    status: executing                 # 从 .team-flow.yaml 同步
+    status: executing                 # 从 .spec-superflow.yaml 同步（计划 v1.0.0 改名 .team-flow.yaml）
   - id: change-2
     depends_on: [change-1]
     status: pending

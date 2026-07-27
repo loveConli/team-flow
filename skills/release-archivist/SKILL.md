@@ -71,12 +71,12 @@ If an `e2e/` suite exists for the change, fold its report into verification (see
 - Scope added without artifact updates?
 - Unresolved blockers or known risks?
 - Delta specs exist that need merging?
-- Run `npx --yes --package spec-superflow@0.21.0 ssf audit <change-dir>` — include `decision-point-audit.md` in archive
+- Run `npx --yes --package spec-superflow@0.22.0 ssf audit <change-dir>` — include `decision-point-audit.md` in archive
 
 ### DP-6 (Verification Outcome)
 ```bash
-npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_6_result "<pass|conditional|fail>: <summary>"
-npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_6_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_6_result "<pass|conditional|fail>: <summary>"
+npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_6_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 If FAIL, do NOT proceed to DP-7. Route back or ask about abandonment.
 
@@ -84,13 +84,13 @@ After recording a PASS outcome, also record it as the verification gate so the
 `executing → closing` transition is allowed (the guard accepts either
 `test_result: pass` or a `dp_6_result` starting with `pass`):
 ```bash
-npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> test_result pass
+npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> test_result pass
 ```
 
 ### DP-7 (Archive Confirmation)
 ```bash
-npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_7_result "confirmed: <archive summary>"
-npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_7_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_7_result "confirmed: <archive summary>"
+npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_7_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 Verify DP-0 through DP-6 are recorded before DP-7.
 
@@ -100,14 +100,14 @@ If implementation diverged from the contract, return to `bridging` before closur
 
 ## Post-Verification
 
-Run `npx --yes --package spec-superflow@0.21.0 ssf state transition <change-dir> closing`. If delta specs exist, route to `spec-merger`.
+Run `npx --yes --package spec-superflow@0.22.0 ssf state transition <change-dir> closing`. If delta specs exist, route to `spec-merger`.
 
 ### Prototype Sync (v0.5)
 
 After `arch-merge` completes, run prototype-sync to merge UX deltas back to the global prototype:
 
 ```bash
-npx --yes --package spec-superflow@0.21.0 ssf prototype-sync <change-dir>
+npx --yes --package spec-superflow@0.22.0 ssf prototype-sync <change-dir>
 ```
 
 **Write-back order (mandatory)**: `arch-merge` → `prototype-sync` must be executed **sequentially** within the same change closing. Do not run them in parallel — the global `docs/architecture/` and `prototype/` must not be in a half-updated state when the next change grounds on them.
@@ -119,7 +119,7 @@ If `prototype-sync` reports conflicts, list them in the closing summary and flag
 During closing, promote change-level learnings to the global solutions library:
 
 ```bash
-npx --yes --package spec-superflow@0.21.0 ssf solutions promote <change-dir>
+npx --yes --package spec-superflow@0.22.0 ssf solutions promote <change-dir>
 ```
 
 This checks `specs/<cap>/learnings.md` for entries meeting promotion criteria:
@@ -139,7 +139,7 @@ Before finalizing the closing, check if this change produced any learnable momen
 
 If any of the above occurred, capture the learning:
 ```bash
-npx --yes --package spec-superflow@0.21.0 ssf solutions capture \
+npx --yes --package spec-superflow@0.22.0 ssf solutions capture \
   --phase cross-phase --domain <domain> --type pitfall \
   --severity medium --summary "<what happened and how to prevent it>"
 ```
@@ -161,6 +161,6 @@ Verify files exist and are non-empty, run `node --check` on code files, skip 5-s
 ## Exception Handling
 
 - **Parse failures**: Report exact file and section
-- **Missing files**: If audit can't generate, run `npx --yes --package spec-superflow@0.21.0 ssf audit` manually
+- **Missing files**: If audit can't generate, run `npx --yes --package spec-superflow@0.22.0 ssf audit` manually
 - **User interruption**: Re-run verification from the beginning on resume
 - **DP gaps**: Flag missing DPs during DP-6; ask user whether to proceed or return
