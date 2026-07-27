@@ -1,6 +1,6 @@
 ---
 name: architecture-design
-description: 基于 4A 企业架构 + DDD 领域驱动设计的架构/API/DB 设计 skill。当用户需要做架构设计、识别聚合与限界上下文、划分写/读模型(CQRS)、设计 API 指令映射，或在 spec-superflow / compound-engineering 工作流中做每变更架构增量设计与全局复利回写时使用。不适用于：纯业务逻辑编码、与架构无关的需求分析、非 DDD 语境的数据库建模。
+description: 基于 4A 企业架构 + DDD 领域驱动设计的架构/API/DB 设计 skill。当用户需要做架构设计、识别聚合与限界上下文、划分写/读模型(CQRS)、设计 API 指令映射，或在 spec-superflow / compound-engineering 工作流中做每变更架构增量设计与全局复利回写时使用。在 workflow-start 编排中作为子代理调用，承担判断+执行一体化职责（五项检查判定是否涉及架构变更，涉及则执行完整增量设计，不涉及则返回 skip）。不适用于：纯业务逻辑编码、与架构无关的需求分析、非 DDD 语境的数据库建模。
 ---
 
 # Architecture Design (4A + DDD)
@@ -54,6 +54,87 @@ description: 基于 4A 企业架构 + DDD 领域驱动设计的架构/API/DB 设
 - Command / Read / Query → ch05
 - 阻断测试 / 三维判定 → ch05
 - 增量设计 / As-Is 冻结 / 复利回写 / 全局锚点 → ch06
+
+## Workflow Integration: 判断+执行一体化（v0.9 §26）
+
+本 skill 在 workflow-start 编排下作为子代理调用，承担**判断+执行一体化**职责。
+
+### 调用入口
+
+由 workflow-start 在 `exploring` 完成后、`specifying` 之前调用。
+
+### 输入
+
+- `change-brief.md`（scope / AC / 技术方向）
+- `prd/vN/plan.md` 高阶技术设计段（模块边界/技术选型/数据流/关键聚合划分）
+- 现有 `specs/`（若有）
+- 全局 `docs/architecture/`（As-Is 基线）
+
+### 五项检查（架构变更判定）
+
+依次检查以下五项，**全部为否** → `decision: skipped`；**任一为是** → `decision: required`：
+
+1. **聚合变更**：是否新增/修改聚合（aggregate）或聚合根
+2. **限界上下文变更**：是否涉及限界上下文（bounded context）边界变化或新增上下文映射关系
+3. **读写模型变更**：是否涉及 CQRS 写模型或读模型变化
+4. **API 变更**：是否涉及 API 新增/变更（端点、方法签名、请求响应 schema）
+5. **DB schema 变更**：是否涉及数据库表结构、字段、索引变更
+
+### 执行流程
+
+```
+1. 读取输入（brief + plan + specs + 全局 ARCHITECTURE.md）
+2. 执行五项检查
+3. 全部为否：
+   → decision: skipped
+   → reason: 简述不涉及架构变更的理由
+   → 返回结构化输出
+4. 任一为是：
+   → decision: required
+   → reason: 简述涉及的架构变更项
+   → 执行完整 4A+DDD 增量设计（F1-F8）
+   → 产出 architecture/architecture.md + database.md + api.md
+   → artifacts: 产出路径列表
+   → 返回结构化输出
+```
+
+### 结构化输出契约
+
+返回给 workflow-start 的结果**必须**包含以下字段：
+
+```yaml
+decision: required | skipped
+reason: "..."                    # skipped 时：不涉及架构变更的理由
+                                 # required 时：涉及的变更项摘要
+artifacts:                       # required 时必填，skipped 时为空
+  - architecture/architecture.md
+  - architecture/database.md
+  - architecture/api.md
+```
+
+### 产出目录
+
+架构设计产出放在 change 目录下的独立 `architecture/` 子目录：
+
+```
+changes/<name>/
+└── architecture/                # ★ 架构设计独立一等产物
+    ├── architecture.md          # DDD 增量（聚合/限界上下文/CQRS/Context Map）
+    ├── database.md              # DB 增量（实体/读写模型/schema 变更）
+    └── api.md                   # API 增量（Command/Read/Query 分流 + 端点设计）
+```
+
+**语义分离**：架构设计与行为规格（`specs/`）是不同专业领域，独立目录避免混杂。
+
+**下游消费**：
+- `architecture/architecture.md` → spec-writer：design.md Decisions 约束
+- `architecture/database.md` → spec-writer：design.md + tasks.md 数据层约束
+- `architecture/api.md` → spec-writer：tasks.md 接口定义约束
+- 全部 → release-archivist → arch-merge → 全局 `docs/architecture/` 回写
+
+### 独立调用
+
+除 workflow-start 编排调用外，本 skill 仍支持用户显式独立调用（`/team-flow:architecture-design`），此时不走五项检查判定门，直接执行完整 4A+DDD 设计。
 
 ## Scope & Limits
 本 skill 覆盖 4A+DDD 架构设计方法及其与 spec-superflow/compound-engineering 的衔接。落地实现结合项目具体工具；超出本范围见相关 skill 或直接问 agent。

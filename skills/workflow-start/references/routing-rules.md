@@ -5,8 +5,45 @@
 ## Route to need-explorer
 Change is fuzzy, scope unclear, comparing options, no stable change name.
 
+## Route to architecture-design (v0.9 §26)
+
+Guard: `arch_design_decision` in `.spec-superflow.yaml` is `null` → must run before spec-writer.
+
+Dispatch `architecture-design` as sub-agent with inputs:
+- `change-brief.md`（scope / AC / 技术方向）
+- `prd/vN/plan.md` 高阶技术设计段
+- existing `specs/`
+- global `docs/architecture/`（As-Is 基线）
+
+Sub-agent returns structured output:
+```yaml
+decision: required | skipped
+reason: "..."                    # skipped 时：不涉及架构变更的理由
+                                 # required 时：涉及的变更项摘要
+artifacts:                       # required 时必填
+  - architecture/architecture.md
+  - architecture/database.md
+  - architecture/api.md
+```
+
+**Reasonableness check**（workflow-start 确认后写入 yaml）：
+- `skipped` + reason inconsistent with brief/plan scope → **BLOCK**（如 scope 含"新增 API"但 reason 说"不涉及架构变更"）
+- `required` + artifacts files missing on disk → **BLOCK**
+- `null`（未判定）→ **BLOCK**
+
+```bash
+npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> arch_design_decision "<required|skipped>"
+npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> arch_design_reason "<reason>"
+npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> arch_design_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+# if required:
+npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> arch_design_artifacts "architecture/architecture.md,architecture/database.md,architecture/api.md"
+```
+
+**hotfix / tweak 不豁免**：同样过 architecture-design 子代理判断门。
+
 ## Route to spec-writer
-Guard: `npx --yes --package spec-superflow@0.22.0 ssf runtime guard check <dir> exploring specifying --json` → fail = BLOCK.
+Guard: `npx --yes --package spec-superflow@0.22.2 ssf runtime guard check <dir> exploring specifying --json` → fail = BLOCK.
+**arch_design_decision must not be null** → fail = BLOCK（architecture-design gate not passed，v0.9 §26）。
 User knows what they want, artifacts missing/incomplete.
 
 ## Route to contract-builder
@@ -18,12 +55,12 @@ Contract exists and approved, contract matches artifacts. Include DP-4: 执行�
 
 Propose waves, run:
 ```bash
-npx --yes --package spec-superflow@0.22.0 ssf execution recommend <change-dir> [--wave ...]
+npx --yes --package spec-superflow@0.22.2 ssf execution recommend <change-dir> [--wave ...]
 ```
 Show every available mode plus evidence and recommendation, obtain clear selection. Then:
 ```bash
-npx --yes --package spec-superflow@0.22.0 ssf execution plan <change-dir> --mode <selected> --confirm ...
-npx --yes --package spec-superflow@0.22.0 ssf execution show <change-dir> --json
+npx --yes --package spec-superflow@0.22.2 ssf execution plan <change-dir> --mode <selected> --confirm ...
+npx --yes --package spec-superflow@0.22.2 ssf execution show <change-dir> --json
 ```
 Do not transition to `executing` until `show` reports `current: true`.
 Guard: `... check <dir> approved-for-build executing --json` → fail = BLOCK.
@@ -34,7 +71,7 @@ Execution hit blockage: test failure, unexpected behavior, build error. After de
 ## Route to code-reviewer
 Current planned wave implemented and ready for review. Reviewer must write:
 ```bash
-npx --yes --package spec-superflow@0.22.0 ssf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>
+npx --yes --package spec-superflow@0.22.2 ssf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>
 ```
 
 ## Route to release-archivist
@@ -50,15 +87,16 @@ User explicitly requests, bug-investigator escalates after 3+ failures AND user 
 
 - **Hotfix**: Route to contract-builder (minimal), skip need-explorer + spec-writer, guard check `exploring bridging --workflow hotfix`, then `bridging -> approved-for-build`, after DP-3 → build-executor, after → release-archivist (lightweight).
 - **Tweak**: Route to build-executor (direct edit), skip need-explorer + spec-writer + contract-builder, guard check `exploring approved-for-build --workflow tweak`, after → release-archivist (lightweight).
+- **architecture-design 不豁免**（v0.9 §26）：hotfix / tweak 同样过 architecture-design 子代理判断门（hotfix 可能正是架构缺陷导致）。
 
 ## Optional Prototype Handoff
 
 When the user's brief explicitly contains UI/screen/interaction/layout/UX uncertainty, ask once whether a prototype would reduce uncertainty. After confirmation:
 ```bash
-npx --yes --package spec-superflow@0.22.0 ssf handoff create <change-dir> \
+npx --yes --package spec-superflow@0.22.2 ssf handoff create <change-dir> \
   --type prototype --objective "<confirmed objective>" \
   --expected-output "<expected evidence>" --acceptance "<completion criterion>"
-npx --yes --package spec-superflow@0.22.0 ssf isolate <change-dir> prototype-<handoff-id>
+npx --yes --package spec-superflow@0.22.2 ssf isolate <change-dir> prototype-<handoff-id>
 ```
 Never suggest for backend/CLI/config/internal-refactor work. Never pass `--force`.
 
@@ -92,17 +130,17 @@ else:
 
 After confirmation:
 ```bash
-npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_0_decisions "<summary>"
-npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_0_result confirmed
-npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_0_confirmed true
-npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_0_decisions "<summary>"
+npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_0_result confirmed
+npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_0_confirmed true
+npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 
 ## Mode Detection
 
 If workflow is `auto`/`null`/unset:
 ```bash
-npx --yes --package spec-superflow@0.22.0 ssf runtime infer <change-dir>
+npx --yes --package spec-superflow@0.22.2 ssf runtime infer <change-dir>
 ```
 Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **tweak** (≤4 tasks, config/doc only), **full** (anything larger).
 
@@ -114,4 +152,4 @@ Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **twe
 - **Brief drift (advisory, v0.9)**: change-brief.md 的 `plan_hash` 与当前 plan.md 不一致 → 提示回 orchestrator 重新分发；**不**阻断、**不**进 artifacts_hash、**不**混入上述三条产物互查
 
 ## Post-transition
-💡 `npx --yes --package spec-superflow@0.22.0 ssf inject <change-dir>` to update phase-guard artifacts.
+💡 `npx --yes --package spec-superflow@0.22.2 ssf inject <change-dir>` to update phase-guard artifacts.

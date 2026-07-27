@@ -6,6 +6,29 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.22.2] - 2026-07-27
+
+### Added（架构设计显式编排与产物独立化，设计 v0.9 §26）
+
+- **workflow-start 显式编排 architecture-design**：路由表新增 architecture-design 子代理调用（exploring→specifying 之间），作为架构设计必经之门。子代理承担判断+执行一体化职责（五项检查判定是否涉及架构变更，涉及则执行完整 4A+DDD 增量设计，不涉及则返回 skip+理由）。workflow-start 接收结果后做合理性确认（skipped reason 与 scope 一致性 / required artifacts 存在性），写入 yaml 字段 `arch_design_decision` / `arch_design_reason` / `arch_design_artifacts` / `arch_design_timestamp`。null 状态硬阻断，不允许路由到 spec-writer。hotfix / tweak 不豁免。详细编排协议抽取到 `references/routing-rules.md`「Route to architecture-design」。
+- **architecture-design 判断+执行一体化 SOP**：SKILL.md 新增「Workflow Integration」段，定义五项检查（聚合变更/限界上下文变更/读写模型变更/API 变更/DB schema 变更）、结构化输出契约（decision/reason/artifacts）、产出目录独立为 `architecture/`（不混入 `specs/`）。支持 workflow-start 编排调用和用户独立调用两种模式。
+- **spec-writer 显式读取 architecture/ 约束**：Required Inputs 新增「Architecture Design Outputs (v0.9 §26)」段，读取 `architecture/architecture.md` / `database.md` / `api.md` 作为 design.md / tasks.md 的架构约束输入。Working Rules 新增「Honor Architecture」。Validation Checklist 新增 Architecture alignment 检查项。
+- **contract-builder 读取 architecture/ 约束**：Artifact Mapping 表新增 `architecture/` 行，确保 execution-contract.md 的 Implementation Constraints 段包含架构设计的关键约束（聚合边界/CQRS 分流/API 契约/schema 变更）。
+- **ch06-integration.md 产物布局修正**：从 `specs/<cap>/` 修正为独立 `architecture/` 目录，完整列出 change 容器内全部目录结构。
+
+### Changed
+
+- **s4-split-validate.md**：路径约束说明增加 `architecture/` 目录（与 `specs/<cap>/` 并列说明）。
+- **state-model.md**：change_dir 说明增加 `architecture/` 目录（与 `specs/<cap>/` 并列说明）。
+- **routing-rules.md**：Fast-Path 段补充「architecture-design 不豁免」提示（v0.9 §26）。
+
+### Verified
+
+- check-version-consistency：✅ PASS（全部 0.22.2）
+- npm test：✅ 421/421 通过
+- plugin-validator：✅ 0 Critical / 0 Important / 5 Advisory（1 个可操作性 Advisory 已修复）
+- SKILL.md 行数：✅ 全部 ≤150（workflow-start 147 / architecture-design 140 / spec-writer 149 / contract-builder 72）
+
 ## [0.21.0] - 2026-07-25
 
 ### Added（子代理决策点 SendMessage stop-and-resume 交互协议，设计 §22.1.1，修订 §18.1.2）

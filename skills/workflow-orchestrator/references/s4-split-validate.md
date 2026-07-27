@@ -38,11 +38,11 @@ verdict = FAIL → 必须回退 S3 调整拆分后重新审计，不可绕过直
 
 ```bash
 mkdir -p changes/<change-name>
-npx --yes --package spec-superflow@0.22.0 ssf state init changes/<change-name>
+npx --yes --package spec-superflow@0.22.2 ssf state init changes/<change-name>
 ```
 
 > ⚠️ **路径约束**：change 脚手架目录固定为项目根 `changes/<change-name>/`。
-> 不要与 `specs/<cap>/`（change 内部设计产物目录）混淆。
+> 不要与 `specs/<cap>/`（change 内部行为规格目录）或 `architecture/`（change 内部架构设计目录）混淆。
 > 不要放入 `.team-flow/`（仅存产品级编排状态）。
 
 > 建议新增 `ssf change scaffold` CLI 一次性完成目录创建 + state init + change_dag 写入（确定性脚本，无需 LLM 判断）。（规划中，尚未实现——v0.17.0 时仍用上方手动步骤）

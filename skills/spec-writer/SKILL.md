@@ -36,9 +36,24 @@ Read `docs/solutions/INDEX.md` if it exists. Filter entries where `phase = spec 
 
 若产品级 `prd/vN/plan.md` 存在，读取其**高阶技术设计段**（模块边界 / 技术选型 / 数据流方向 / 关键聚合与上下文划分），作为 design.md 的 `## Decisions` 约束输入——保证各 change 的技术方案与全局方向一致，避免各自为政。**禁止**反向要求 plan.md 提供接口清单 / 字段定义 / 方法签名（这些是 spec-writer / architecture-design 在本 change 内的产出，plan.md 不含，见 ce-plan 作用边界与 v0.8 §18.7.2）。plan.md 不存在时跳过本段。
 
+### Architecture Design Outputs (v0.9 §26)
+
+若 `architecture/` 目录存在（本 change 经 workflow-start 的 architecture-design 判断门判定为 `required` 并产出了架构设计），读取以下文件作为 design.md / tasks.md 的架构约束输入：
+
+- `architecture/architecture.md` → design.md `## Decisions` 的架构约束（聚合/限界上下文/CQRS 决策）
+- `architecture/database.md` → design.md + tasks.md 的数据层约束（实体/读写模型/schema 变更）
+- `architecture/api.md` → tasks.md 的接口定义约束（端点/方法签名/Command-Read-Query 分流）
+
+**约束传递规则**：
+- design.md 的 `## Decisions` 段必须**引用** architecture/ 中的架构决策，不得与之矛盾
+- tasks.md 的接口定义（Interfaces 段）必须与 `architecture/api.md` 的 API 设计对齐
+- tasks.md 的数据层任务必须与 `architecture/database.md` 的 schema 变更对齐
+
+`architecture/` 目录不存在时（判定为 `skipped`）跳过本段。
+
 ## Config Check
 
-Run: `npx --yes --package spec-superflow@0.22.0 ssf runtime config --get artifacts.order` — generate in configured order (default: proposal → specs → design → tasks). Run with `artifacts.skip` — skip any listed artifacts.
+Run: `npx --yes --package spec-superflow@0.22.2 ssf runtime config --get artifacts.order` — generate in configured order (default: proposal → specs → design → tasks). Run with `artifacts.skip` — skip any listed artifacts.
 
 ## Artifact Roles
 
@@ -53,6 +68,8 @@ Run: `npx --yes --package spec-superflow@0.22.0 ssf runtime config --get artifac
 **Honor DP-0**: Read `dp_0_decisions`, respect confirmed constraints, don't silently expand scope. Pause on unconfirmed decisions.
 
 **Honor Brief (v0.9)**: 若 `change-brief.md` 存在，尊重其 scope 边界与 AC 列表（见 Required Inputs「Change Brief」）——不静默丢弃 brief AC、不静默超出 brief scope；与 plan.md 冲突时以 plan.md 为准并注明。
+
+**Honor Architecture (v0.9 §26)**: 若 `architecture/` 目录存在，design.md 的 Decisions 段必须引用其架构决策（聚合/限界上下文/CQRS/API/DB），tasks.md 的接口定义和数据层任务必须与 architecture/ 产出对齐——不得静默忽略或矛盾架构设计产出。
 
 ### proposal.md
 Must state: problem, what changes, capabilities affected, impact areas.
@@ -105,6 +122,7 @@ Generate one at a time. Confirm each before next. This prevents scope drift — 
 
 ### design.md
 - `## Context`, `## Goals`, `## Decisions` (≥1, with Choice+Rationale+Alternatives), `## Risks And Trade-Offs`
+- **Architecture alignment (v0.9 §26)**: 若 `architecture/` 存在，`## Decisions` 必须引用架构设计产出中的关键决策（聚合/限界上下文/CQRS/API/DB）
 
 ### tasks.md
 - `## File Structure`, `## Interfaces`, numbered tasks, exact file paths, TDD phases, ≤5 min steps, no placeholders, every requirement mapped, explicit dependencies
@@ -115,8 +133,8 @@ Generate one at a time. Confirm each before next. This prevents scope drift — 
 
 Present summary of all 4 artifacts (2-3 sentences each). Ask user for adjustments. After approval:
 ```bash
-npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_2_result "approved: <summary>"
-npx --yes --package spec-superflow@0.22.0 ssf state set <change-dir> dp_2_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_2_result "approved: <summary>"
+npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_2_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 
 ## Handoff Rule

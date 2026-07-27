@@ -92,7 +92,7 @@ S1 判定「原型补跑/重跑」（PRD `frozen_downstream` ∧ `prototype/` �
 
 S4 后填充。每个节点字段：
 - `id`：change 标识（与 C-ID 对应）
-- `change_dir` / `state_file`：change 目录与状态文件路径。`change_dir` 固定为项目根 `changes/<change-name>/`，不是 `specs/<cap>/`（后者是 change 内部的设计产物目录），也不是 `.team-flow/`（仅存产品级编排状态）
+- `change_dir` / `state_file`：change 目录与状态文件路径。`change_dir` 固定为项目根 `changes/<change-name>/`，不是 `specs/<cap>/`（change 内部行为规格目录）或 `architecture/`（change 内部架构设计目录），也不是 `.team-flow/`（仅存产品级编排状态）
 - `depends_on`：依赖的 change id 列表（构成 DAG）
 - `priority`：优先级数值
 - `parallel_group`：同组可并行（如 A、B）

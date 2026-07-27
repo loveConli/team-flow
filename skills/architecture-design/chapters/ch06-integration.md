@@ -10,11 +10,23 @@
 ├── docs/architecture/       # 【技术锚点层，独立于 STRATEGY.md】
 │   ├── ARCHITECTURE.md      # 全局架构（瘦锚点：Context Map+聚合清单+关键决策）
 │   └── DATABASE.md          # 全局 DB（实体+读写模型+OLTP/OLAP）
-├── specs/<cap>/
-│   ├── architecture.md      # 每变更 DDD 增量
-│   ├── database.md          # 每变更 DB 增量
-│   └── api.md               # 每变更 API 设计（全局不另设）
+
+changes/<name>/              # change 容器
+├── change-brief.md          # 上游交接物（orchestrator S4）
+├── proposal.md              # spec-writer：why + scope
+├── design.md                # spec-writer：decisions + trade-offs
+├── tasks.md                 # spec-writer：implementation steps
+├── execution-contract.md    # contract-builder：execution handshake
+├── specs/                   # 行为规格（spec-writer）
+│   └── <cap>.md             # SHALL/MUST + Scenario + WHEN/THEN
+├── architecture/            # ★ 架构设计（architecture-design，独立一等产物）
+│   ├── architecture.md      # 每变更 DDD 增量（聚合/限界上下文/CQRS）
+│   ├── database.md          # 每变更 DB 增量（实体/读写模型变更）
+│   └── api.md               # 每变更 API 设计（Command/Read/Query 分流）
+└── prototype/               # 原型（prototype skill）
 ```
+
+> **语义分离**：架构产出独立 `architecture/` 目录，不混入 `specs/`（行为规格）。目录存在 = 有架构产出，目录不存在 = 判定为不需要。下游消费方（spec-writer / release-archivist）显式读取此目录。
 
 ## 每变更增量设计（SOP 步骤）
 1. (LLM) 读全局 ARCHITECTURE.md 作 grounding；用活动对象矩阵识别限界上下文/聚合。
@@ -39,4 +51,4 @@
 ## 第二大脑整合（ima「LT的知识库」）
 - 方法层(kb)：存 4A/DDD 方法 skill + 每限界上下文一个 `architecture-anchor`（frontmatter 索引）。
 - 项目层(repo)：`docs/architecture/` 为权威源；设计前检索 kb skill + 读全局 ARCHITECTURE.md；回写后**批量**同步 Context Map 索引入 kb，避免每 delta 双写。
-- API 留债：脚本化 `API-INDEX.md`（扫描所有 `specs/*/api.md` 抽取端点/方法/错误码/幂等），反对手写全局 API 文档。
+- API 留债：脚本化 `API-INDEX.md`（扫描所有 `changes/*/architecture/api.md` 抽取端点/方法/错误码/幂等），反对手写全局 API 文档。
