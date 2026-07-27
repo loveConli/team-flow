@@ -243,11 +243,14 @@ const MANIFEST_SKILLS = new Set();
 // Extract from plugin.json description
 const pluginDesc = pkg.description || '';
 const skillListMatch = pluginDesc.match(/(\d+) skills/);
-// We'll check AGENTS.md for skill list
+// We'll check AGENTS.md for skill list (table format: | skill-name | ... |)
 const agentsMd = readFileSync(join(ROOT, 'AGENTS.md'), 'utf-8');
 const skillIndexMatch = agentsMd.match(/## Skills 索引[\s\S]*?(?=##|$)/);
 if (skillIndexMatch) {
-  const skillNames = [...skillIndexMatch[0].matchAll(/skills\/([a-z-]+)\//g)].map(m => m[1]);
+  // Match table rows: | skill-name | ... |
+  const skillNames = [...skillIndexMatch[0].matchAll(/^\|\s*([a-z][a-z0-9-]*)\s*\|/gm)]
+    .map(m => m[1])
+    .filter(name => name !== 'Skill'); // Skip header row
   skillNames.forEach(name => MANIFEST_SKILLS.add(name));
 }
 

@@ -163,7 +163,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
   全局作为下一 change / 下一 PRD 版本的 grounding → 闭环
 ```
 
-## Skills 索引（23 个）
+## Skills 索引（24 个）
 
 | Skill | 归属 | 用途 |
 |---|---|---|
