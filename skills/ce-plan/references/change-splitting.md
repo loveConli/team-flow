@@ -1,20 +1,30 @@
 # Change Splitting
 
-## Overview (v0.5, v0.9 增强)
+## Overview (v0.5, v0.9 重写：所有权自包含判据)
 
 Break the work into logical **changes** (spec-superflow change units). Each change represents one meaningful scope that can be independently implemented through the spec-superflow 8-state workflow.
 
 **v0.5 关键变化**：ce-plan 不再产出文件级 Implementation Units（Files/Approach/Test scenarios）。这些由 spec-writer 在每个 change 内产出。ce-plan 只定"做什么、什么顺序"。
 
-**v0.9 认知声明**：一个迭代版本的 PRD 通常是**多个用户故事或多个功能模块的合集**——ce-plan 拆分 change 时必须认识到这一点，拆分应**跟着用户故事 / 功能模块走**，而不是跟着接口、文件或任务走。产品阶段的 change 粒度目标是"一个用户故事 / 一个内聚功能模块"，这是变更阶段能**并行设计与实施**的前提。不要拆得更细——变更阶段的 spec-writer 还有 proposal / specs / design / tasks 四层产物 + 实施 task 拆分，产品阶段拆到接口 / 任务级 = 越界做变更级设计 + 重复劳动。
+**v0.9 根因判据（所有权自包含）**：change 的边界 = **所有权边界**。一个 change 当且仅当它对应**一个所有权自包含的架构设计单元**——即该 change 能独立做一次架构增量设计（`architecture-design` skill 的核心动作：识别聚合 / 限界上下文 / 读写模型 / API 映射），且该设计不依赖其它 change 去重新定义同一聚合/上下文/读模型/契约的所有权。
+
+**认知声明**：一个迭代版本的 PRD 通常涵盖**多个所有权自包含的设计单元**（每个可对应一个用户故事或功能模块）。产品级 change 拆分的首要动作是识别这些**所有权单元**——不是识别"视角""页面""接口""层"等实现组织。用户故事 / 功能模块 / 视角 / 层 / 页面，都是 **change 内部** spec-writer / build-executor 的实现组织启发式，**不提级**为 change 边界。
+
+**为何如此**：变更级 `architecture-design` 对每个 change 做"架构增量设计"。若两个 change 共享同一聚合/读模型/契约的所有权，则两家的增量设计互相重叠、复利回写打架、所有权不自包含——这是产品阶段"拆太细"的真正病根。反过来说，一个所有权单元内部按视角/层/页面组织 specs 和 tasks，是变更级实现组织，**完全正确且推荐**。
+
+**启发式近似**（与根因判据冲突时以根因为准）：
+- 一个用户故事（角色-动作-价值）通常对应一个所有权单元 → 通常 = 一个 change
+- 一个内聚功能模块（如"下单""权限体系"）通常对应一个所有权单元 → 通常 = 一个 change
+- 但"一个用户故事"不等于"一个 change"的充要条件——若多个故事共享同一所有权单元（如看板多视角共享同一读模型），它们应合为一个 change
 
 ## Good Changes
 
-**拆分维度（v0.9 正向定义）**：每个 change 的 scope 必须是**一个用户故事**（角色-动作-价值）或**一个内聚功能模块**（如"下单""报表导出""权限体系"）。这与 DDD 的 bounded context 话语对齐——一个 bounded context 内的一个内聚功能域 = 一个 change。
+**根因判据**：每个 change 的 scope 必须对应**一个所有权自包含的架构设计单元**——持有不被其它 change 分享的聚合/上下文/读模型/契约所有权，且该设计能在本 change 内闭合。
 
 Good changes are:
-- **按用户故事或功能模块拆分**（v0.9 硬约束）——scope 以故事/模块命名，内部可含多个接口/文件/任务（这些留给 spec-writer 在 tasks.md 拆）
-- Focused on one bounded context or one coherent feature area
+- **所有权自包含**（v0.9 根因硬约束）——change 内的 architecture-design 能独立完成，不依赖其它 change 去定义同一聚合/上下文的所有权
+- **不被切碎**（v0.9 硬约束）——不存在 ≥2 个 change 瓜分同一聚合/上下文/读模型/契约的所有权
+- **不跨所有权单元臃肿**（v0.9 硬约束）——一个 change 不横跨多个互不相关的限界上下文/所有权单元（否则增量设计无法聚焦）
 - Independently implementable and verifiable
 - Ordered by dependency (DAG)
 - Concrete enough for spec-writer to produce proposal/specs/design/tasks
@@ -22,10 +32,13 @@ Good changes are:
 ## Anti-Patterns
 
 Avoid:
-- Changes that span multiple unrelated bounded contexts
+- **切碎所有权**（v0.9 核心反模式，Critical）：把一个所有权单元按"视角/层/页面/前后端/DB"切成多个 change，每个碎片都不自包含。例：看板 4 个视角 + 读侧基座 + 页面骨架 共享同一看板读模型/契约 → 应合为 **1 个 change**，而非 6 个。又如：把"下单"按 C-后端 + C-前端 + C-读模型 切 3 个 change → 三家瓜分"下单"聚合所有权 → FAIL
+- **跨无关节所有权单元**（Critical）：一个 change 的 scope 横跨多个互不相关的限界上下文，导致一次 architecture-design 无法聚焦
+- **细到无所有权单元**（Critical）：scope 是单接口/单文件/单方法/单 SQL/单 task → 无设计单元可识别，属变更级实现组织
 - Changes so large that spec-writer cannot produce a coherent spec
 - Changes so small that the spec-superflow ceremony overhead exceeds the work
-- **按实现单元拆 change**（v0.9 新增，硬约束）：scope 主体是单个接口路径（`/api/xxx`）、单个文件、单个方法/函数、单条 SQL、单个 task 动作（"添加字段""写校验"）→ 这是实现单元，不是用户故事/功能模块。change-split-auditor D5 会判 Critical/FAIL。反例：scope="实现 `/api/order/create` 接口"→ FAIL；scope="订单下单用户故事（含创建接口+库存校验+下单页）"→ PASS
+
+> change-split-auditor D5 检查上述前三条（所有权粒度合规）。
 
 ## C-ID Convention
 
