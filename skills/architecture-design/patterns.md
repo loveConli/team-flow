@@ -23,7 +23,7 @@
 cap_id / date / change_type(new|modify) /
 bounded_contexts / aggregates_affected / cqrs(write/read_model)
 ```
-用正则提取 key 做 advisory 校验，不引第三方 YAML 依赖（保全 spec-superflow 零依赖）。
+用正则提取 key 做 advisory 校验，不引第三方 YAML 依赖（保全 team-flow 零依赖）。
 
 ## P7 · API 指令映射（每变更 api.md）
 对每个端点标 Command/Read/Query；Query 标注阻断测试归属(业务/数据服务)。下游脚本扫所有 api.md 生成 API-INDEX.md。

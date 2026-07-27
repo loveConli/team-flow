@@ -27,7 +27,7 @@ change_dir: <path | null>
 
 - 活跃需求：`<req-id>` — `<title>`
 - 产品级阶段：`<S1-S5>`（详见 `.team-flow/requirements/<req-id>/orchestrator.yaml`）
-- 变更级状态：`<state>`（详见 `<change>/.spec-superflow.yaml`）
+- 变更级状态：`<state>`（详见 `<change>/.team-flow.yaml`）
 - PRD 版本：`<vN>`，冻结状态：`<frozen_downstream | frozen_absolute | unfrozen>`
 
 > 通用 handoff 模式下跳过本节。

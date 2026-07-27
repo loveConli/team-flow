@@ -12,7 +12,7 @@ describe('state-loader: readState()', () => {
   let stateLoader;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-state-test-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-state-test-'));
     const modulePath = join(process.cwd(), 'scripts/lib/state-loader.mjs');
     stateLoader = await import(modulePath);
   });
@@ -49,7 +49,7 @@ describe('state-loader: readState()', () => {
       'dp_1_result: confirmed: add csv export',
     ].join('\n');
 
-    writeFileSync(join(tempDir, '.spec-superflow.yaml'), stateYaml);
+    writeFileSync(join(tempDir, '.team-flow.yaml'), stateYaml);
 
     const state = stateLoader.readState(tempDir);
 
@@ -71,7 +71,7 @@ describe('state-loader: readState()', () => {
       'dp_0_timestamp: null',
     ].join('\n');
 
-    writeFileSync(join(tempDir, '.spec-superflow.yaml'), stateYaml);
+    writeFileSync(join(tempDir, '.team-flow.yaml'), stateYaml);
 
     const state = stateLoader.readState(tempDir);
 
@@ -90,7 +90,7 @@ describe('state-loader: readState()', () => {
       'workflow: tweak',
     ].join('\n');
 
-    writeFileSync(join(tempDir, '.spec-superflow.yaml'), stateYaml);
+    writeFileSync(join(tempDir, '.team-flow.yaml'), stateYaml);
 
     const state = stateLoader.readState(tempDir);
 
@@ -101,7 +101,7 @@ describe('state-loader: readState()', () => {
   it('merges partial state file with defaults', () => {
     const stateYaml = 'state: approved-for-build\nworkflow: hotfix';
 
-    writeFileSync(join(tempDir, '.spec-superflow.yaml'), stateYaml);
+    writeFileSync(join(tempDir, '.team-flow.yaml'), stateYaml);
 
     const state = stateLoader.readState(tempDir);
     assert.equal(state.state, 'approved-for-build');
@@ -116,7 +116,7 @@ describe('state-loader: writeState()', () => {
   let stateLoader;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-state-write-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-state-write-'));
     const modulePath = join(process.cwd(), 'scripts/lib/state-loader.mjs');
     stateLoader = await import(modulePath);
   });
@@ -139,7 +139,7 @@ describe('state-loader: writeState()', () => {
 
     stateLoader.writeState(tempDir, state);
 
-    const filePath = join(tempDir, '.spec-superflow.yaml');
+    const filePath = join(tempDir, '.team-flow.yaml');
     assert.ok(existsSync(filePath));
 
     const content = readFileSync(filePath, 'utf-8');
@@ -172,7 +172,7 @@ describe('state-loader: writeState()', () => {
 
     stateLoader.writeState(tempDir, state);
 
-    const content = readFileSync(join(tempDir, '.spec-superflow.yaml'), 'utf-8');
+    const content = readFileSync(join(tempDir, '.team-flow.yaml'), 'utf-8');
     assert.ok(content.includes('dp_0_decisions: scope: csv export only, tech: nestjs'));
     assert.ok(content.includes('dp_0_result: confirmed: scope ok'));
     assert.ok(content.includes('dp_0_confirmed: true'));
@@ -189,7 +189,7 @@ describe('state-loader: writeState()', () => {
 
     stateLoader.updateField(tempDir, 'dp_0_result', 'confirmed: manual');
 
-    const content = readFileSync(join(tempDir, '.spec-superflow.yaml'), 'utf-8');
+    const content = readFileSync(join(tempDir, '.team-flow.yaml'), 'utf-8');
     const state = stateLoader.readState(tempDir);
 
     assert.ok(content.includes('dp_0_result: confirmed: manual'));
@@ -222,7 +222,7 @@ describe('state-loader: updateField()', () => {
   let stateLoader;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-state-update-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-state-update-'));
     const modulePath = join(process.cwd(), 'scripts/lib/state-loader.mjs');
     stateLoader = await import(modulePath);
   });

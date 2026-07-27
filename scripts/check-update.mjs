@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/check-update.mjs — compare local spec-superflow version with npm latest
+// scripts/check-update.mjs — compare local team-flow version with npm latest
 import { existsSync, readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
@@ -11,7 +11,7 @@ function readLocalVersion() {
     if (existsSync(path)) {
       try {
         const json = JSON.parse(readFileSync(path, 'utf-8'));
-        if (json.name === 'spec-superflow' && json.version) {
+        if (json.name === 'team-flow' && json.version) {
           return json.version;
         }
       } catch { /* ignore */ }
@@ -25,8 +25,8 @@ function readInstalledPluginVersion() {
   const home = process.env.HOME || process.env.USERPROFILE;
   if (!home) return null;
   const pluginPaths = [
-    join(home, '.claude', 'plugins', 'spec-superflow@spec-superflow', 'plugin.json'),
-    join(home, '.claude', 'plugins', 'spec-superflow', 'plugin.json'),
+    join(home, '.claude', 'plugins', 'team-flow@team-flow', 'plugin.json'),
+    join(home, '.claude', 'plugins', 'team-flow', 'plugin.json'),
   ];
   for (const path of pluginPaths) {
     if (existsSync(path)) {
@@ -41,7 +41,7 @@ function readInstalledPluginVersion() {
 
 function readNpmLatest() {
   try {
-    const out = execFileSync('npm', ['view', 'spec-superflow', 'version'], {
+    const out = execFileSync('npm', ['view', 'team-flow', 'version'], {
       encoding: 'utf-8',
       timeout: 10_000,
     });
@@ -74,17 +74,17 @@ function main() {
 
   const cmp = compareVersions(localVersion, latestVersion);
   if (cmp >= 0) {
-    console.log(`✅ spec-superflow is up to date (${localVersion}).`);
+    console.log(`✅ team-flow is up to date (${localVersion}).`);
     process.exit(0);
   }
 
-  console.log(`⚠️  A new version of spec-superflow is available: ${latestVersion} (current: ${localVersion})`);
+  console.log(`⚠️  A new version of team-flow is available: ${latestVersion} (current: ${localVersion})`);
   console.log('');
   console.log('Upgrade commands:');
-  console.log('  Claude Code: /plugin update spec-superflow@spec-superflow');
+  console.log('  Claude Code: /plugin update team-flow@team-flow');
   console.log('  Cursor:      re-run the install-cursor.mjs script');
-  console.log('  WorkBuddy:   npx spec-superflow@latest install-workbuddy');
-  console.log('  npm:         npm install -g spec-superflow@latest');
+  console.log('  WorkBuddy:   npx team-flow@latest install-workbuddy');
+  console.log('  npm:         npm install -g team-flow@latest');
   process.exit(1);
 }
 

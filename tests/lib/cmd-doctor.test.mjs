@@ -12,7 +12,7 @@ describe('cmd-doctor: checkVersionConsistency()', () => {
   let checkVersionConsistency;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-doctor-ver-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-doctor-ver-'));
     const modulePath = join(process.cwd(), 'scripts/lib/cmd-doctor.mjs');
     const mod = await import(modulePath);
     checkVersionConsistency = mod.checkVersionConsistency;
@@ -72,7 +72,7 @@ describe('cmd-doctor: checkHooks()', () => {
   let checkHooks;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-doctor-hooks-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-doctor-hooks-'));
     const modulePath = join(process.cwd(), 'scripts/lib/cmd-doctor.mjs');
     const mod = await import(modulePath);
     checkHooks = mod.checkHooks;
@@ -121,7 +121,7 @@ describe('cmd-doctor: checkCodexManifest()', () => {
   let checkCodexManifest;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-doctor-codex-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-doctor-codex-'));
     const modulePath = join(process.cwd(), 'scripts/lib/cmd-doctor.mjs');
     const mod = await import(modulePath);
     checkCodexManifest = mod.checkCodexManifest;
@@ -174,7 +174,7 @@ describe('cmd-doctor: checkSkills()', () => {
   let checkSkills;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-doctor-skills-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-doctor-skills-'));
     const modulePath = join(process.cwd(), 'scripts/lib/cmd-doctor.mjs');
     const mod = await import(modulePath);
     checkSkills = mod.checkSkills;
@@ -220,7 +220,7 @@ describe('cmd-doctor: checkDist()', () => {
   let checkDist;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-doctor-dist-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-doctor-dist-'));
     const modulePath = join(process.cwd(), 'scripts/lib/cmd-doctor.mjs');
     const mod = await import(modulePath);
     checkDist = mod.checkDist;
@@ -253,7 +253,7 @@ describe('cmd-doctor: checkRootPluginAuthor()', () => {
   let checkRootPluginAuthor;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-doctor-author-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-doctor-author-'));
     const modulePath = join(process.cwd(), 'scripts/lib/cmd-doctor.mjs');
     const mod = await import(modulePath);
     checkRootPluginAuthor = mod.checkRootPluginAuthor;
@@ -329,7 +329,7 @@ describe('cmd-doctor: checkDocs()', () => {
   let checkDocs;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-doctor-docs-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-doctor-docs-'));
     const modulePath = join(process.cwd(), 'scripts/lib/cmd-doctor.mjs');
     const mod = await import(modulePath);
     checkDocs = mod.checkDocs;
@@ -380,12 +380,12 @@ describe('cmd-doctor: checkRuntimeDistribution()', () => {
   });
 
   it('reports an unrewritten plugin-root placeholder as an upgrade issue', () => {
-    const root = mkdtempSync(join(tmpdir(), 'ssf-doctor-runtime-'));
+    const root = mkdtempSync(join(tmpdir(), 'tf-doctor-runtime-'));
     try {
       mkdirSync(join(root, 'skills', 'workflow-start'), { recursive: true });
       writeFileSync(join(root, 'package.json'), JSON.stringify({ version: '1.2.3' }));
       writeFileSync(join(root, 'skills', 'workflow-start', 'SKILL.md'),
-        'node "${CLAUDE_PLUGIN_ROOT}/scripts/spec-superflow.mjs" state get demo');
+        'node "${CLAUDE_PLUGIN_ROOT}/scripts/team-flow.mjs" state get demo');
 
       const result = checkRuntimeDistribution(root);
       assert.equal(result.pass, false);
@@ -396,12 +396,12 @@ describe('cmd-doctor: checkRuntimeDistribution()', () => {
   });
 
   it('checks code-reviewer as a portable runtime skill', () => {
-    const root = mkdtempSync(join(tmpdir(), 'ssf-doctor-code-reviewer-'));
+    const root = mkdtempSync(join(tmpdir(), 'tf-doctor-code-reviewer-'));
     try {
       mkdirSync(join(root, 'skills', 'code-reviewer'), { recursive: true });
       writeFileSync(join(root, 'package.json'), JSON.stringify({ version: '1.2.3' }));
       writeFileSync(join(root, 'skills', 'code-reviewer', 'SKILL.md'),
-        'node "${CLAUDE_PLUGIN_ROOT}/scripts/spec-superflow.mjs" execution review demo');
+        'node "${CLAUDE_PLUGIN_ROOT}/scripts/team-flow.mjs" execution review demo');
 
       const result = checkRuntimeDistribution(root);
       assert.equal(result.pass, false);
@@ -412,14 +412,14 @@ describe('cmd-doctor: checkRuntimeDistribution()', () => {
   });
 
   it('rejects a local command whose referenced runtime file is missing', () => {
-    const root = mkdtempSync(join(tmpdir(), 'ssf-doctor-stale-runtime-'));
+    const root = mkdtempSync(join(tmpdir(), 'tf-doctor-stale-runtime-'));
     try {
       mkdirSync(join(root, 'skills', 'workflow-start'), { recursive: true });
       mkdirSync(join(root, 'scripts'), { recursive: true });
       writeFileSync(join(root, 'package.json'), JSON.stringify({ version: '1.2.3' }));
-      writeFileSync(join(root, 'scripts', 'spec-superflow.mjs'), '// unrelated bundled CLI');
+      writeFileSync(join(root, 'scripts', 'team-flow.mjs'), '// unrelated bundled CLI');
       writeFileSync(join(root, 'skills', 'workflow-start', 'SKILL.md'),
-        'node "/tmp/missing-runtime/scripts/spec-superflow.mjs" state get demo');
+        'node "/tmp/missing-runtime/scripts/team-flow.mjs" state get demo');
 
       const result = checkRuntimeDistribution(root);
       assert.equal(result.pass, false);
@@ -430,9 +430,9 @@ describe('cmd-doctor: checkRuntimeDistribution()', () => {
   });
 
   it('accepts a POSIX-escaped local runtime path containing a single quote', () => {
-    const root = mkdtempSync(join(tmpdir(), "ssf-doctor-quote-'"));
+    const root = mkdtempSync(join(tmpdir(), "tf-doctor-quote-'"));
     try {
-      const localCli = join(root, 'scripts', 'spec-superflow.mjs');
+      const localCli = join(root, 'scripts', 'team-flow.mjs');
       mkdirSync(join(root, 'skills', 'workflow-start'), { recursive: true });
       mkdirSync(join(root, 'scripts'), { recursive: true });
       writeFileSync(join(root, 'package.json'), JSON.stringify({ version: '1.2.3' }));

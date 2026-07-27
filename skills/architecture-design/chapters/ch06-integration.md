@@ -1,6 +1,6 @@
-# ch06 · 与 spec-superflow / compound-engineering 的集成
+# ch06 · 与 team-flow / compound-engineering 的集成
 
-本章把 F1–F7 落到两个工作流：spec-superflow（开发过程，change-centric）+ compound-engineering（全局产物+复利）。融合四方专家会审的硬伤修正。
+本章把 F1–F7 落到两个工作流：team-flow（开发过程，change-centric）+ compound-engineering（全局产物+复利）。融合四方专家会审的硬伤修正。
 
 ## 产物布局
 ```
@@ -43,7 +43,7 @@ changes/<name>/              # change 容器
 - **Discoverability 正名**：在 AGENTS.md/CLAUDE.md 暴露 `docs/architecture/`，使代理设计前"发现并查阅"（存在/结构/何时检索）——这是 compound 原义，勿与内容冲突检查混淆。
 - 下游检索复用：下一 change 设计前从 `docs/architecture/` 检索相关上下文/聚合（grounding 用 CONCEPTS.md）。
 
-## 集成纪律（来自 spec-superflow 源码事实）
+## 集成纪律（来自 team-flow 源码事实）
 - **design.md 不可变**：原型覆盖层 never mutate design.md/tasks.md。原型结论走 `handoff --type prototype` → 新 requirement delta → 正常 `specifying→closing→spec-merger` 闭环，不得直接改 design.md。
 - **guard 软集成**：三份增量文档为推荐产出、非阻断；全局回写经独立 `arch-compound` skill/overlay，不进状态机硬矩阵；frontmatter 校验仅 advisory 脚本（正则提取 key，不引第三方 YAML 依赖），保全零依赖。
 - **术语正名**：IA/AA 非"技术架构"（仅 TA 是）；4A 是四域非三层；技术架构对 STRATEGY.md 是"补位 compound 缺位"而非"修正其错误"，且 ARCHITECTURE.md 是 anchor 而非评审巨著。

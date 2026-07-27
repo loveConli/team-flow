@@ -1,4 +1,4 @@
-// ssf sync <change-dir> — merge delta specs into main specs with conflict detection
+// tf sync <change-dir> — merge delta specs into main specs with conflict detection
 import { readFileSync, readdirSync, writeFileSync, existsSync, statSync, mkdirSync } from 'node:fs';
 import path, { join, basename } from 'node:path';
 import { validateSpecPathLayout } from './spec-paths.mjs';
@@ -19,7 +19,7 @@ export function deriveCapabilityDir(changeSpecsDir, specFile) {
 
 export async function run(args) {
   if (args.length < 1) {
-    console.error('Usage: ssf sync <change-dir>');
+    console.error('Usage: tf sync <change-dir>');
     process.exit(2);
   }
 

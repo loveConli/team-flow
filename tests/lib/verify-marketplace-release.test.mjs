@@ -36,7 +36,7 @@ describe('verify marketplace release', () => {
       () => verifyMarketplaceRelease({
         manifestUrl: 'https://example.test/plugin.json',
         expectedVersion: '0.9.0',
-        fetchImpl: async () => response({ body: { name: 'spec-superflow' } }),
+        fetchImpl: async () => response({ body: { name: 'team-flow' } }),
       }),
       /missing a string version/,
     );

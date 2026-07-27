@@ -12,7 +12,7 @@ describe('cmd-list: detectChangeStatus()', () => {
   let detectChangeStatus;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-list-test-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-list-test-'));
     const modulePath = join(process.cwd(), 'scripts/lib/cmd-list.mjs');
     const mod = await import(modulePath);
     detectChangeStatus = mod.detectChangeStatus;
@@ -27,7 +27,7 @@ describe('cmd-list: detectChangeStatus()', () => {
     for (const [key, value] of Object.entries(state)) {
       lines.push(`${key}: ${value}`);
     }
-    writeFileSync(join(dir, '.spec-superflow.yaml'), lines.join('\n'));
+    writeFileSync(join(dir, '.team-flow.yaml'), lines.join('\n'));
   }
 
   it('returns EXPLORING when state file says exploring', () => {
@@ -96,28 +96,28 @@ describe('cmd-list: detectChangeStatus()', () => {
   // Fallback: when no state file exists, infer from file presence
   // Each test must clean up previous state file to test fallback path
   it('falls back to INCOMPLETE when no state file and no proposal', () => {
-    rmSync(join(tempDir, '.spec-superflow.yaml'), { force: true });
+    rmSync(join(tempDir, '.team-flow.yaml'), { force: true });
     const result = detectChangeStatus(tempDir);
     assert.equal(result.status, 'INCOMPLETE');
     assert.ok(result.detail.includes('Missing proposal.md'));
   });
 
   it('falls back to SPECIFYING when proposal exists but no contract and no state file', () => {
-    rmSync(join(tempDir, '.spec-superflow.yaml'), { force: true });
+    rmSync(join(tempDir, '.team-flow.yaml'), { force: true });
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nTest proposal');
     const result = detectChangeStatus(tempDir);
     assert.equal(result.status, 'SPECIFYING');
   });
 
   it('falls back to ABANDONED when abandonment-summary.md exists', () => {
-    rmSync(join(tempDir, '.spec-superflow.yaml'), { force: true });
+    rmSync(join(tempDir, '.team-flow.yaml'), { force: true });
     writeFileSync(join(tempDir, 'abandonment-summary.md'), '# Abandoned\nGave up on this');
     const result = detectChangeStatus(tempDir);
     assert.equal(result.status, 'ABANDONED');
   });
 
   it('falls back to UNKNOWN when artifacts exist but no state file', () => {
-    rmSync(join(tempDir, '.spec-superflow.yaml'), { force: true });
+    rmSync(join(tempDir, '.team-flow.yaml'), { force: true });
     rmSync(join(tempDir, 'abandonment-summary.md'), { force: true });
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nTest proposal');
     writeFileSync(join(tempDir, 'execution-contract.md'), '## Intent Lock\nTest contract');

@@ -172,7 +172,7 @@ export function readCurrentReview(changeDir, waveId, plan = readPlan(changeDir))
 }
 
 /**
- * Machine-readable execution status used by `ssf execution show`. A wave is
+ * Machine-readable execution status used by `tf execution show`. A wave is
  * eligible when it has no current receipt, or its current receipt failed and
  * is therefore retryable, and all declared dependencies have passing receipts.
  */
@@ -443,7 +443,7 @@ function stableJson(value, seen = new WeakSet()) {
 }
 
 function writeExecutionPlanSummary(changeDir, plan) {
-  const statePath = join(changeDir, '.spec-superflow.yaml');
+  const statePath = join(changeDir, '.team-flow.yaml');
   const state = readState(changeDir);
   const original = existsSync(statePath)
     ? readFileSync(statePath, 'utf8')

@@ -11,8 +11,8 @@ import { PLATFORM_RUNTIME_INVENTORY, ZCODE_COMPATIBILITY_PATH } from '../../scri
 
 const ROOT = process.cwd();
 const VERSION = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version;
-const PREFIX = `npx --yes --package spec-superflow@${VERSION} ssf`;
-const CLI = join(ROOT, 'scripts', 'spec-superflow.mjs');
+const PREFIX = `npx --yes --package team-flow@${VERSION} tf`;
+const CLI = join(ROOT, 'scripts', 'team-flow.mjs');
 const RUNTIME_SKILLS = [
   'workflow-start',
   'need-explorer',
@@ -47,7 +47,7 @@ describe('canonical skill runtime protocol', () => {
     assert.match(content, /runtime asset read skills\/build-executor\/task-reviewer-prompt\.md/);
   });
 
-  it('does not leave bare ssf commands in runtime instructions or reviewer templates', () => {
+  it('does not leave bare tf commands in runtime instructions or reviewer templates', () => {
     const files = [
       ...RUNTIME_SKILLS.map(name => join(ROOT, 'skills', name, 'SKILL.md')),
       join(ROOT, 'skills', 'build-executor', 'implementer-prompt.md'),
@@ -57,26 +57,26 @@ describe('canonical skill runtime protocol', () => {
 
     for (const file of files) {
       const content = readFileSync(file, 'utf8');
-      assert.doesNotMatch(content, /`ssf\s+(?:handoff|checkpoint|execution|state|runtime|validate|doctor|config|version)\b/,
-        `${file} contains a bare ssf command`);
-      assert.doesNotMatch(content, /^\s*ssf\s+(?:handoff|checkpoint|execution|state|runtime|validate|doctor|config|version)\b/m,
-        `${file} contains an unprefixed ssf command line`);
+      assert.doesNotMatch(content, /`tf\s+(?:handoff|checkpoint|execution|state|runtime|validate|doctor|config|version)\b/,
+        `${file} contains a bare tf command`);
+      assert.doesNotMatch(content, /^\s*tf\s+(?:handoff|checkpoint|execution|state|runtime|validate|doctor|config|version)\b/m,
+        `${file} contains an unprefixed tf command line`);
     }
   });
 });
 
 describe('local runtime deployment', () => {
   it('rewrites the canonical prefix to ZCODE\'s installed runtime tree', () => {
-    const target = mkdtempSync(join(tmpdir(), 'ssf-zcode-runtime-'));
+    const target = mkdtempSync(join(tmpdir(), 'tf-zcode-runtime-'));
     try {
       execFileSync(process.execPath, [CLI, 'install-zcode', '--local', ROOT], {
         cwd: target,
         stdio: 'pipe',
       });
 
-      const pluginRoot = join(target, '.zcode', 'spec-superflow');
+      const pluginRoot = join(target, '.zcode', 'team-flow');
       const content = readFileSync(join(target, '.zcode', 'skills', 'workflow-start', 'SKILL.md'), 'utf8');
-      const localPrefix = `node '${join(realpathSync(pluginRoot), 'scripts', 'spec-superflow.mjs')}'`;
+      const localPrefix = `node '${join(realpathSync(pluginRoot), 'scripts', 'team-flow.mjs')}'`;
 
       assert.match(content, new RegExp(localPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
       assert.doesNotMatch(content, new RegExp(PREFIX.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
@@ -86,7 +86,7 @@ describe('local runtime deployment', () => {
   });
 
   it('emits a shell-literal local runtime command when the target path contains a dollar sign', () => {
-    const target = mkdtempSync(join(tmpdir(), 'ssf-$runtime-'));
+    const target = mkdtempSync(join(tmpdir(), 'tf-$runtime-'));
     try {
       execFileSync(process.execPath, [CLI, 'install-zcode', '--local', ROOT], {
         cwd: target,

@@ -1,4 +1,4 @@
-# Installing spec-superflow for OpenCode
+# Installing team-flow for OpenCode
 
 ## Prerequisites
 
@@ -11,31 +11,31 @@
 Clone the repository and point OpenCode to the plugin entry:
 
 ```bash
-git clone https://github.com/MageByte-Zero/spec-superflow.git ~/spec-superflow
+git clone https://github.com/MageByte-Zero/team-flow.git ~/team-flow
 ```
 
 Then in your OpenCode project, reference this plugin file by absolute path in `.opencode/config.json` (or via the UI):
 
 ```text
-~/spec-superflow/.opencode/plugins/spec-superflow.js
+~/team-flow/.opencode/plugins/team-flow.js
 ```
 
-Do not copy only `spec-superflow.js` into another project; the plugin reads `../../skills` and `../../GEMINI.md` relative to its own location.
+Do not copy only `team-flow.js` into another project; the plugin reads `../../skills` and `../../GEMINI.md` relative to its own location.
 
 ### Manual Skills Symlink
 
 OpenCode discovers agent skills from project skill directories. For a specific project:
 
 ```bash
-git clone https://github.com/MageByte-Zero/spec-superflow.git
+git clone https://github.com/MageByte-Zero/team-flow.git
 mkdir -p your-project/.agents
-ln -s /absolute/path/to/spec-superflow/skills your-project/.agents/skills
+ln -s /absolute/path/to/team-flow/skills your-project/.agents/skills
 ```
 
 If symlinks are not available, copy instead:
 
 ```bash
-cp -R /absolute/path/to/spec-superflow/skills your-project/.agents/skills
+cp -R /absolute/path/to/team-flow/skills your-project/.agents/skills
 ```
 
 ## Usage
@@ -49,7 +49,7 @@ Ask OpenCode to use the workflow entry skill:
 Or explicitly:
 
 ```
-/spec-superflow:workflow-start
+/team-flow:workflow-start
 ```
 
 ## Troubleshooting

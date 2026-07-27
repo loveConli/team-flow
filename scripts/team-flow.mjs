@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// spec-superflow CLI — zero-dependency CLI for spec management
-// Usage: ssf <command> [options]
+// team-flow CLI — zero-dependency CLI for spec management
+// Usage: tf <command> [options]
 
 import { parseArgs } from 'node:util';
 
@@ -35,9 +35,9 @@ const COMMANDS = {
   'prototype-sync':    () => import('./lib/prototype-sync.mjs'),
 };
 
-const HELP = `spec-superflow (ssf) — Spec-first workflow CLI
+const HELP = `team-flow (tf) — Unified workflow plugin CLI
 
-Usage: ssf <command> [options]
+Usage: tf <command> [options]
 
 Commands:
   list                  List all changes and their status
@@ -49,9 +49,9 @@ Commands:
                         Merge UX delta into global prototype/ + design-system.md
   config [options]      Display or modify configuration
   config --resolve-model <profile>  Resolve a configured model profile without switching models
-  state <sub> <dir>     Manage .spec-superflow.yaml state (init|check|transition|get|rebuild)
+  state <sub> <dir>     Manage .team-flow.yaml state (init|check|transition|get|rebuild)
   inject <dir>          Generate phase-guard artifacts; use --platforms <name|all> when platform is ambiguous
-  audit <dir>           Generate decision-point-audit.md from .spec-superflow.yaml
+  audit <dir>           Generate decision-point-audit.md from .team-flow.yaml
   checkpoint save <change-dir> --task <id> --next <text>
                         Save a task-level recovery checkpoint
   checkpoint list <change-dir>
@@ -107,24 +107,24 @@ Options:
   --version, -v         Show CLI version
 
 Examples:
-  ssf list
-  ssf validate changes/v0.4.0-platform-evolution/
-  ssf doctor
-  ssf version 0.4.0
-  ssf sync changes/v0.3.0-workflow-enhancements/
-  ssf config --get execution.inlineThreshold
-  ssf config --resolve-model mechanical
-  ssf config --set verification.language=zh
-  ssf state init changes/my-change/
-  ssf state check changes/my-change/
-  ssf state transition changes/my-change/ approved-for-build
-  ssf state get changes/my-change/ batches_completed
-  ssf checkpoint save changes/my-change/ --task 1.1 --next "Run focused tests"
-  ssf checkpoint list changes/my-change/
-  ssf handoff create changes/my-change/ --type research --objective "Compare approaches" --expected-output "Recommendation" --acceptance "Evidence recorded"
-  ssf install-cursor
-  ssf install-workbuddy
-  ssf install-cline --local /path/to/spec-superflow
+  tf list
+  tf validate changes/v0.4.0-platform-evolution/
+  tf doctor
+  tf version 0.4.0
+  tf sync changes/v0.3.0-workflow-enhancements/
+  tf config --get execution.inlineThreshold
+  tf config --resolve-model mechanical
+  tf config --set verification.language=zh
+  tf state init changes/my-change/
+  tf state check changes/my-change/
+  tf state transition changes/my-change/ approved-for-build
+  tf state get changes/my-change/ batches_completed
+  tf checkpoint save changes/my-change/ --task 1.1 --next "Run focused tests"
+  tf checkpoint list changes/my-change/
+  tf handoff create changes/my-change/ --type research --objective "Compare approaches" --expected-output "Recommendation" --acceptance "Evidence recorded"
+  tf install-cursor
+  tf install-workbuddy
+  tf install-cline --local /path/to/team-flow
 `;
 
 async function main() {
@@ -150,7 +150,7 @@ async function main() {
 
   if (!COMMANDS[command]) {
     console.error(`Unknown command: ${command}`);
-    console.error(`Run "ssf --help" for available commands.`);
+    console.error(`Run "tf --help" for available commands.`);
     process.exit(2);
   }
 

@@ -29,7 +29,7 @@
 - `spec.md` 含 `#### Scenario:` 块（验收场景），validation 要求每 Requirement 有 SHALL/MUST + ≥1 Scenario（机器级校验在 `scripts/validate-artifacts` → `dist/index.js` 的 `Validator.validateDeltaSpec`）。
 - `release-archivist` 在 closing 态有 `verification-before-completion` gate（state-machine.md），承担验收证据聚合。
 - `ce-proof` 是 **Proof Markdown 编辑器**（外部托管 proofeditor.ai），与测试/验证无关。
-- 插件自身 `tests/e2e.test.mjs` 是 ssf 解析引擎测试，**非产品 UI E2E**。
+- 插件自身 `tests/e2e.test.mjs` 是 tf 解析引擎测试，**非产品 UI E2E**。
 - `prototype` skill 产出自包含 HTML，但**不自动生成 Playwright**。
 
 ### 1.2 核心缺口

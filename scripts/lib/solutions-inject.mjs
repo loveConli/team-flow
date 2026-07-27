@@ -3,7 +3,7 @@
  * solutions-inject — 按 phase+domain 过滤 INDEX.md，输出 top-5 摘要
  *
  * v0.5 复利贯穿机制脚本
- * 用法：ssf solutions inject --phase <p> --domain <d>
+ * 用法：tf solutions inject --phase <p> --domain <d>
  *
  * 功能：
  * 1. 读取 docs/solutions/INDEX.md

@@ -1,6 +1,6 @@
 ---
 name: spec-writer
-description: Create or refine spec-superflow planning artifacts. Invoke when the change is understood well enough to write proposal.md, specs/, design.md, and tasks.md.
+description: Create or refine team-flow planning artifacts. Invoke when the change is understood well enough to write proposal.md, specs/, design.md, and tasks.md.
 ---
 
 # Spec Writer
@@ -9,7 +9,7 @@ Create or refine planning artifacts when the change has moved beyond exploration
 
 ## Required Inputs
 
-Read `.spec-superflow.yaml` (especially `dp_0_decisions`, `dp_0_confirmed`) and any existing planning artifacts. If `dp_0_confirmed` is not `true`, stop and route back to `workflow-start` for DP-0.
+Read `.team-flow.yaml` (especially `dp_0_decisions`, `dp_0_confirmed`) and any existing planning artifacts. If `dp_0_confirmed` is not `true`, stop and route back to `workflow-start` for DP-0.
 
 ### Global Prototype Reading (v0.5)
 
@@ -53,7 +53,7 @@ Read `docs/solutions/INDEX.md` if it exists. Filter entries where `phase = spec 
 
 ## Config Check
 
-Run: `npx --yes --package spec-superflow@0.22.2 ssf runtime config --get artifacts.order` — generate in configured order (default: proposal → specs → design → tasks). Run with `artifacts.skip` — skip any listed artifacts.
+Run: `npx --yes --package team-flow@0.22.3 tf runtime config --get artifacts.order` — generate in configured order (default: proposal → specs → design → tasks). Run with `artifacts.skip` — skip any listed artifacts.
 
 ## Artifact Roles
 
@@ -133,8 +133,8 @@ Generate one at a time. Confirm each before next. This prevents scope drift — 
 
 Present summary of all 4 artifacts (2-3 sentences each). Ask user for adjustments. After approval:
 ```bash
-npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_2_result "approved: <summary>"
-npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_2_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package team-flow@0.22.3 tf state set <change-dir> dp_2_result "approved: <summary>"
+npx --yes --package team-flow@0.22.3 tf state set <change-dir> dp_2_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 
 ## Handoff Rule

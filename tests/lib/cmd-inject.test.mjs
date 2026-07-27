@@ -48,7 +48,7 @@ describe('cmd-inject: generatePhaseGuard()', () => {
   it('generates bridging phase with contract operations', () => {
     const result = generatePhaseGuard({ state: 'bridging', change_name: 'test' });
     assert.ok(result.includes('execution-contract.md'));
-    assert.ok(result.includes('ssf validate'));
+    assert.ok(result.includes('tf validate'));
   });
 
   it('generates approved-for-build phase', () => {
@@ -104,7 +104,7 @@ describe('cmd-inject: toCursorMdc()', () => {
     const result = toCursorMdc(base);
 
     assert.ok(result.includes('---'), 'Should have frontmatter delimiter');
-    assert.ok(result.includes('description: spec-superflow phase guard'));
+    assert.ok(result.includes('description: team-flow phase guard'));
     assert.ok(result.includes('alwaysApply: true'));
     assert.ok(result.includes('test-change'));
   });
@@ -138,7 +138,7 @@ describe('cmd-inject: platform resolution', () => {
   });
 
   it('detects Cursor from .cursor marker', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'ssf-inject-cursor-'));
+    const dir = mkdtempSync(join(tmpdir(), 'tf-inject-cursor-'));
     try {
       mkdirSync(join(dir, '.cursor'), { recursive: true });
       assert.deepEqual(detectProjectPlatforms(dir), ['cursor']);
@@ -149,7 +149,7 @@ describe('cmd-inject: platform resolution', () => {
   });
 
   it('rejects omitted platforms when no marker exists', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'ssf-inject-none-'));
+    const dir = mkdtempSync(join(tmpdir(), 'tf-inject-none-'));
     try {
       const result = resolvePlatforms(undefined, dir);
       assert.equal(result.ok, false);
@@ -160,7 +160,7 @@ describe('cmd-inject: platform resolution', () => {
   });
 
   it('rejects omitted platforms when multiple markers exist', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'ssf-inject-multi-'));
+    const dir = mkdtempSync(join(tmpdir(), 'tf-inject-multi-'));
     try {
       mkdirSync(join(dir, '.cursor'), { recursive: true });
       mkdirSync(join(dir, '.claude'), { recursive: true });
@@ -174,7 +174,7 @@ describe('cmd-inject: platform resolution', () => {
 });
 
 describe('cmd-inject: CLI writes', () => {
-  const CLI = join(process.cwd(), 'scripts/spec-superflow.mjs');
+  const CLI = join(process.cwd(), 'scripts/team-flow.mjs');
 
   function runInject(cwd, changeDir, extraArgs = []) {
     try {
@@ -186,11 +186,11 @@ describe('cmd-inject: CLI writes', () => {
   }
 
   it('cursor-only injection does not write GEMINI.md', () => {
-    const root = mkdtempSync(join(tmpdir(), 'ssf-inject-cli-cursor-'));
+    const root = mkdtempSync(join(tmpdir(), 'tf-inject-cli-cursor-'));
     try {
       const change = join(root, 'change');
       mkdirSync(change, { recursive: true });
-      writeFileSync(join(change, '.spec-superflow.yaml'), 'state: exploring\nworkflow: full\nchange_name: inject-test\n');
+      writeFileSync(join(change, '.team-flow.yaml'), 'state: exploring\nworkflow: full\nchange_name: inject-test\n');
       const result = runInject(root, change, ['--platforms', 'cursor']);
       assert.equal(result.exitCode, 0, result.stdout + result.stderr);
       assert.equal(existsSync(join(root, '.cursor', 'rules', 'phase-guard.mdc')), true);
@@ -201,11 +201,11 @@ describe('cmd-inject: CLI writes', () => {
   });
 
   it('omitted ambiguous platform exits before writing files', () => {
-    const root = mkdtempSync(join(tmpdir(), 'ssf-inject-cli-none-'));
+    const root = mkdtempSync(join(tmpdir(), 'tf-inject-cli-none-'));
     try {
       const change = join(root, 'change');
       mkdirSync(change, { recursive: true });
-      writeFileSync(join(change, '.spec-superflow.yaml'), 'state: exploring\nworkflow: full\nchange_name: inject-test\n');
+      writeFileSync(join(change, '.team-flow.yaml'), 'state: exploring\nworkflow: full\nchange_name: inject-test\n');
       const result = runInject(root, change);
       assert.equal(result.exitCode, 2);
       assert.match(result.stderr || result.stdout, /--platforms/);

@@ -1,6 +1,6 @@
 # State Machine
 
-`spec-superflow` treats workflow progression as explicit state transitions.
+`team-flow` treats workflow progression as explicit state transitions.
 
 ## States
 
@@ -41,10 +41,10 @@
 
 ## Execution Plan Control Plane
 
-For full/hotfix, DP-4 is the persisted execution plan created by `ssf execution
+For full/hotfix, DP-4 is the persisted execution plan created by `tf execution
 plan` at `<change>/.superpowers/sdd/execution-plan.json`, not an arbitrary
 state value or content stored in `execution-contract.md`. Before planning, run
-`ssf execution recommend`; it lists applicable `inline`, `batch-inline`, and
+`tf execution recommend`; it lists applicable `inline`, `batch-inline`, and
 `sdd` modes with evidence and one recommendation, and persists a receipt at
 `<change>/.superpowers/sdd/execution-recommendation.json`. `plan` and `revise`
 accept only a receipt whose artifacts, contract, and waves still match. The user must record the
@@ -54,14 +54,14 @@ substitute for parallel execution.
 `tweak` is exempt from execution-plan and review-receipt requirements.
 
 The plan names ordered execution waves, dependencies, and parallel/serial
-strategy. `ssf execution show <change-dir> --json` reports which current waves
+strategy. `tf execution show <change-dir> --json` reports which current waves
 are eligible. Each completed wave must have a current
-`pass` review receipt, recorded with `ssf execution review`, before a dependent
-wave or `closing` can proceed. `ssf execution revise` retains or upgrades an
+`pass` review receipt, recorded with `tf execution review`, before a dependent
+wave or `closing` can proceed. `tf execution revise` retains or upgrades an
 existing plan as `sdd`; that new revision requires a fresh confirmation (and
 acknowledgement when it differs from the new recommendation), invalidates old
 review receipts, and does not permit a downgrade. #47 recovery/switch/save
-slash commands are not implemented; do not assume `/ssf:*` commands exist.
+slash commands are not implemented; do not assume `/tf:*` commands exist.
 
 ### `debugging`
 
@@ -96,9 +96,9 @@ Checkpoints, handoffs, and prototypes are durable overlays, not workflow states.
 They do not add transitions to the state machine or change the meaning of the
 eight core states.
 
-- `ssf checkpoint save <change-dir> --task <id> --next <text>` records task-level
+- `tf checkpoint save <change-dir> --task <id> --next <text>` records task-level
   recovery context under `.superpowers/sdd/checkpoints/`.
-- `ssf handoff create <change-dir> --type <type> ...` creates explicit side-work
+- `tf handoff create <change-dir> --type <type> ...` creates explicit side-work
   contracts under `.superpowers/sdd/handoffs/`.
 - `workflow-start` lists overlays before normal routing. `result-ready` handoffs
   require explicit review and resolution before affected work resumes; stale

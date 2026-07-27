@@ -10,7 +10,7 @@ import { execFileSync } from 'node:child_process';
 let tempDir;
 let gitRefs;
 const GUARD_PATH = join(process.cwd(), 'scripts/guard/guard.mjs');
-const CLI_PATH = join(process.cwd(), 'scripts/spec-superflow.mjs');
+const CLI_PATH = join(process.cwd(), 'scripts/team-flow.mjs');
 
 function runNodeScript(scriptPath, args) {
   return execFileSync(process.execPath, [scriptPath, ...args], {
@@ -38,7 +38,7 @@ function initializeGitRepository(directory) {
 
 describe('guard: transition matrix', () => {
   before(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-guard-test-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-guard-test-'));
     // Create minimal artifacts so artifact checks can pass
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nThis is a test proposal for guard testing purposes. The system needs to support feature X which will enable users to accomplish their goals more efficiently.\n## What Changes\n- Add feature X');
     mkdirSync(join(tempDir, 'specs', 'test'), { recursive: true });
@@ -130,7 +130,7 @@ describe('guard: transition matrix', () => {
 
 describe('guard: workflow mode behavior', () => {
   before(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-guard-mode-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-guard-mode-'));
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nTest for mode skipping\n## What Changes\n- Add Y');
   });
 
@@ -180,8 +180,8 @@ describe('guard: hotfix minimal contract', () => {
   let dir;
 
   before(() => {
-    dir = mkdtempSync(join(tmpdir(), 'ssf-hotfix-guard-'));
-    writeFileSync(join(dir, '.spec-superflow.yaml'), 'state: exploring\nworkflow: hotfix\nchange_name: hotfix-test\n');
+    dir = mkdtempSync(join(tmpdir(), 'tf-hotfix-guard-'));
+    writeFileSync(join(dir, '.team-flow.yaml'), 'state: exploring\nworkflow: hotfix\nchange_name: hotfix-test\n');
   });
 
   after(() => {
@@ -260,7 +260,7 @@ describe('guard: execution control records', () => {
   let dir;
 
   before(() => {
-    dir = mkdtempSync(join(tmpdir(), 'ssf-guard-control-records-'));
+    dir = mkdtempSync(join(tmpdir(), 'tf-guard-control-records-'));
   });
 
   after(() => {
@@ -288,7 +288,7 @@ describe('guard: execution control records', () => {
     writeFileSync(join(dir, 'tasks.md'), '# Tasks\n\n- [x] 1.1 First task\n- [x] 1.2 Second task\n');
     writeFileSync(join(dir, 'specs', 'execution', 'spec.md'), '## ADDED Requirements\n\n### Requirement: Execution control records\nThe system SHALL require current execution control records.\n\n#### Scenario: Guard transition\n- **WHEN** execution starts\n- **THEN** the guard verifies control records.\n');
     writeFileSync(join(dir, 'execution-contract.md'), '# Execution Contract\n\n## Intent Lock\n\nGuard control records.\n');
-    writeFileSync(join(dir, '.spec-superflow.yaml'), 'state: approved-for-build\nworkflow: full\n');
+    writeFileSync(join(dir, '.team-flow.yaml'), 'state: approved-for-build\nworkflow: full\n');
     runNodeScript(CLI_PATH, ['state', 'init', dir]);
     gitRefs = initializeGitRepository(dir);
   }
@@ -304,7 +304,7 @@ describe('guard: execution control records', () => {
   }
 
   function setStateField(field, value) {
-    const statePath = join(dir, '.spec-superflow.yaml');
+    const statePath = join(dir, '.team-flow.yaml');
     const current = readFileSync(statePath, 'utf8');
     writeFileSync(statePath, current.replace(new RegExp(`^${field}:.*$`, 'm'), `${field}: ${value}`));
   }
@@ -580,7 +580,7 @@ describe('guard: execution control records', () => {
 
 describe('guard: artifacts-exist check', () => {
   before(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-guard-artifacts-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-guard-artifacts-'));
   });
 
   after(() => {

@@ -1,4 +1,4 @@
-// ssf install-qoder — deploy spec-superflow for Qoder. Delegates to scripts/install-qoder.mjs
+// tf install-qoder — deploy team-flow for Qoder. Delegates to scripts/install-qoder.mjs
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

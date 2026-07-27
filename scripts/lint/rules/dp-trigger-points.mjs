@@ -24,7 +24,7 @@ export default {
       // Check 1: Is DP referenced by name/number?
       const dpReferenced = content.includes(dp);
 
-      // Check 2: Is there a record command (ssf state set ... dp_N_*)?
+      // Check 2: Is there a record command (tf state set ... dp_N_*)?
       const dpNum = dp.slice(-1);
       const hasRecordCommand = new RegExp(`dp_${dpNum}_(result|timestamp|confirmed)`).test(content);
 
@@ -49,7 +49,7 @@ export default {
         if (!hasRecordCommand) {
           issues.push({
             severity: 'warning',
-            message: `${dp} has no ssf state set dp_${dpNum}_* record command`,
+            message: `${dp} has no tf state set dp_${dpNum}_* record command`,
           });
         }
       }

@@ -1,13 +1,13 @@
 # Install
 
-`spec-superflow` 是一个自包含插件，**不需要**在运行时安装 OpenSpec 或 Superpowers。
+`team-flow` 是一个自包含插件，**不需要**在运行时安装 OpenSpec 或 Superpowers。
 
 源码血缘：
 
 - [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec) — 规划引擎（Schema 验证、Delta Spec、工件解析）
 - [obra/superpowers](https://github.com/obra/superpowers) — 执行纪律（TDD 铁律、SDD、系统化调试、代码审查）
 
-当前发布版本：**v0.22.2**。
+当前发布版本：**v0.22.3**。
 
 ---
 
@@ -22,17 +22,17 @@
 | GitHub Copilot CLI | marketplace | `copilot plugin update` | `copilot plugin uninstall` |
 | Gemini CLI | `gemini extensions install` | `gemini extensions update` | `gemini extensions uninstall` |
 | OpenCode | plugin entry / skills 目录 | `git pull` | 删除 plugin/skills |
-| WorkBuddy | `ssf install-workbuddy` | 重新运行安装器 | 删除 marketplace 插件并禁用 |
+| WorkBuddy | `tf install-workbuddy` | 重新运行安装器 | 删除 marketplace 插件并禁用 |
 | Trae IDE / TRAE Work | `.trae/skills` / 上传 zip 或 .skill / marketplace | `git pull` + 重新导入 | UI 卸载或删除技能目录 |
-| Cline | `ssf install-cline` | 重新运行脚本 | 删除 `.cline/skills/`、`.clinerules/` |
-| Kiro | `ssf install-kiro` | 重新运行脚本 | 删除 `.kiro/skills/`、`.kiro/steering/` |
-| Windsurf | `ssf install-windsurf` | 重新运行脚本 | 删除 `.windsurf/skills/`、`.windsurf/rules/` |
-| Qwen Code | `ssf install-qwen` | 重新运行脚本 | 删除 `.qwen/skills/`、`.qwen/rules/` |
-| Amazon Q Developer | `ssf install-amazon-q` | 重新运行脚本 | 删除 `.amazonq/skills/`、`.amazonq/rules/` |
-| Roo Code | `ssf install-roocode` | 重新运行脚本 | 删除 `.roo/skills/`、`.roo/rules/` |
-| Continue | `ssf install-continue` | 重新运行脚本 | 删除 `.continue/skills/`、`.continue/rules/` |
-| Pi | `ssf install-pi` | 重新运行脚本 | 删除 `.pi/skills/` |
-| ZCODE | `ssf install-zcode` | 重新运行脚本 | 删除 `.zcode/skills/`、`.zcode/rules/` |
+| Cline | `tf install-cline` | 重新运行脚本 | 删除 `.cline/skills/`、`.clinerules/` |
+| Kiro | `tf install-kiro` | 重新运行脚本 | 删除 `.kiro/skills/`、`.kiro/steering/` |
+| Windsurf | `tf install-windsurf` | 重新运行脚本 | 删除 `.windsurf/skills/`、`.windsurf/rules/` |
+| Qwen Code | `tf install-qwen` | 重新运行脚本 | 删除 `.qwen/skills/`、`.qwen/rules/` |
+| Amazon Q Developer | `tf install-amazon-q` | 重新运行脚本 | 删除 `.amazonq/skills/`、`.amazonq/rules/` |
+| Roo Code | `tf install-roocode` | 重新运行脚本 | 删除 `.roo/skills/`、`.roo/rules/` |
+| Continue | `tf install-continue` | 重新运行脚本 | 删除 `.continue/skills/`、`.continue/rules/` |
+| Pi | `tf install-pi` | 重新运行脚本 | 删除 `.pi/skills/` |
+| ZCODE | `tf install-zcode` | 重新运行脚本 | 删除 `.zcode/skills/`、`.zcode/rules/` |
 
 ---
 
@@ -41,8 +41,8 @@
 ### 安装（推荐：Marketplace）
 
 ```bash
-/plugin marketplace add MageByte-Zero/spec-superflow
-/plugin install spec-superflow@spec-superflow
+/plugin marketplace add MageByte-Zero/team-flow
+/plugin install team-flow@team-flow
 ```
 
 两行命令搞定。零拷贝、零配置。安装后自动加载 `hooks/hooks.json`，每次新会话自动注入上下文。
@@ -50,7 +50,7 @@
 ### 升级
 
 ```bash
-/plugin update spec-superflow@spec-superflow
+/plugin update team-flow@team-flow
 ```
 
 另外，每次启动 workflow 时，`workflow-start` 也会检查版本并提示是否需要升级。
@@ -58,16 +58,16 @@
 ### 卸载
 
 ```bash
-/plugin uninstall spec-superflow@spec-superflow
+/plugin uninstall team-flow@team-flow
 ```
 
 ### 本地安装（开发 / 离线）
 
 ```bash
-git clone https://github.com/MageByte-Zero/spec-superflow.git
+git clone https://github.com/MageByte-Zero/team-flow.git
 
 # 在 Claude Code 中执行：
-/plugin install file:/absolute/path/to/spec-superflow
+/plugin install file:/absolute/path/to/team-flow
 ```
 
 ---
@@ -79,7 +79,7 @@ Cursor 原生发现 `.cursor/skills/`、`.agents/skills/`、`~/.cursor/skills/`�
 ### 安装（推荐：一键脚本）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MageByte-Zero/spec-superflow/main/scripts/install-cursor.mjs | node -
+curl -fsSL https://raw.githubusercontent.com/MageByte-Zero/team-flow/main/scripts/install-cursor.mjs | node -
 ```
 
 脚本会自动从 GitHub latest release 拉取最新版。
@@ -89,7 +89,7 @@ curl -fsSL https://raw.githubusercontent.com/MageByte-Zero/spec-superflow/main/s
 重新运行安装命令即可（自动覆盖旧文件）：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MageByte-Zero/spec-superflow/main/scripts/install-cursor.mjs | node -
+curl -fsSL https://raw.githubusercontent.com/MageByte-Zero/team-flow/main/scripts/install-cursor.mjs | node -
 ```
 
 ### 卸载
@@ -104,17 +104,17 @@ rm -f .cursor/rules/phase-guard.mdc
 ### 从本地仓库部署（开发 / 测试）
 
 ```bash
-git clone https://github.com/MageByte-Zero/spec-superflow.git
+git clone https://github.com/MageByte-Zero/team-flow.git
 cd your-project
-node /absolute/path/to/spec-superflow/scripts/install-cursor.mjs --local /absolute/path/to/spec-superflow
+node /absolute/path/to/team-flow/scripts/install-cursor.mjs --local /absolute/path/to/team-flow
 ```
 
 ### 手动部署
 
 ```bash
-git clone https://github.com/MageByte-Zero/spec-superflow.git
+git clone https://github.com/MageByte-Zero/team-flow.git
 mkdir -p .cursor/skills
-cp -R /absolute/path/to/spec-superflow/skills/* .cursor/skills/
+cp -R /absolute/path/to/team-flow/skills/* .cursor/skills/
 mkdir -p .cursor/rules
 # 手动创建 phase-guard.mdc，内容参考 scripts/install-cursor.mjs
 ```
@@ -124,7 +124,7 @@ mkdir -p .cursor/rules
 安装脚本会自动把 `hooks/hooks-cursor.json` 写入 `.cursor/hooks.json`。如果手动部署，需要自行复制：
 
 ```bash
-cp /path/to/spec-superflow/hooks/hooks-cursor.json .cursor/hooks.json
+cp /path/to/team-flow/hooks/hooks-cursor.json .cursor/hooks.json
 ```
 
 ### GitHub 导入
@@ -154,13 +154,13 @@ codex
 /plugins
 ```
 
-在插件目录中切换到相应 marketplace，选择 `spec-superflow` 并安装。
+在插件目录中切换到相应 marketplace，选择 `team-flow` 并安装。
 
 ### 安装（命令行 marketplace）
 
 ```bash
 codex plugin marketplace add hashgraph-online/awesome-codex-plugins
-codex plugin add spec-superflow@awesome-codex-plugins
+codex plugin add team-flow@awesome-codex-plugins
 ```
 
 ### 直接安装指定 release tag
@@ -168,8 +168,8 @@ codex plugin add spec-superflow@awesome-codex-plugins
 当社区 marketplace 镜像尚未同步时，可直接指定本仓库的 release tag：
 
 ```bash
-codex plugin marketplace add MageByte-Zero/spec-superflow --ref v0.9.0
-codex plugin add spec-superflow@spec-superflow
+codex plugin marketplace add MageByte-Zero/team-flow --ref v0.9.0
+codex plugin add team-flow@team-flow
 ```
 
 这条路径绕过社区镜像延迟。
@@ -178,20 +178,20 @@ codex plugin add spec-superflow@spec-superflow
 
 ```bash
 codex plugin marketplace upgrade awesome-codex-plugins
-codex plugin add spec-superflow@awesome-codex-plugins
-codex plugin list | rg spec-superflow
+codex plugin add team-flow@awesome-codex-plugins
+codex plugin list | rg team-flow
 ```
 
 ### 卸载
 
 ```bash
-codex plugin remove spec-superflow@awesome-codex-plugins
+codex plugin remove team-flow@awesome-codex-plugins
 ```
 
 ### 验证
 
 ```bash
-codex plugin list | rg spec-superflow
+codex plugin list | rg team-flow
 ```
 
 ---
@@ -202,7 +202,7 @@ Codex App 的主流方式是 **Plugins** 面板。仓库已提供 `.codex-plugin
 
 ### 安装（推荐：App 面板）
 
-打开 **Plugins**，搜索或切换到对应 marketplace，选择 `spec-superflow`，点击 **Add to Codex** / install。
+打开 **Plugins**，搜索或切换到对应 marketplace，选择 `team-flow`，点击 **Add to Codex** / install。
 
 ### 安装（CLI 预装）
 
@@ -210,17 +210,17 @@ Codex App 的主流方式是 **Plugins** 面板。仓库已提供 `.codex-plugin
 
 ```bash
 codex plugin marketplace add hashgraph-online/awesome-codex-plugins
-codex plugin add spec-superflow@awesome-codex-plugins
+codex plugin add team-flow@awesome-codex-plugins
 ```
 
-然后**重启 Codex App**，在 **Plugins** 面板中启用 `spec-superflow`。
+然后**重启 Codex App**，在 **Plugins** 面板中启用 `team-flow`。
 
 ### 升级
 
 ```bash
 codex plugin marketplace upgrade awesome-codex-plugins
-codex plugin add spec-superflow@awesome-codex-plugins
-codex plugin list | rg spec-superflow
+codex plugin add team-flow@awesome-codex-plugins
+codex plugin list | rg team-flow
 ```
 
 更新后重启 Codex App 并新开会话；旧会话不会热加载 skills。
@@ -230,7 +230,7 @@ codex plugin list | rg spec-superflow
 在 Codex App 的 **Plugins** 面板中禁用即可。也可以 CLI 移除：
 
 ```bash
-codex plugin remove spec-superflow
+codex plugin remove team-flow
 ```
 
 ---
@@ -242,20 +242,20 @@ Copilot CLI 的主流方式是 marketplace。仓库已提供根目录 `plugin.js
 ### 安装
 
 ```bash
-copilot plugin marketplace add MageByte-Zero/spec-superflow
-copilot plugin install spec-superflow@spec-superflow
+copilot plugin marketplace add MageByte-Zero/team-flow
+copilot plugin install team-flow@team-flow
 ```
 
 ### 升级
 
 ```bash
-copilot plugin update spec-superflow
+copilot plugin update team-flow
 ```
 
 ### 卸载
 
 ```bash
-copilot plugin uninstall spec-superflow
+copilot plugin uninstall team-flow
 ```
 
 > 如果安装失败，请检查根目录 `plugin.json` 的 `author` 字段是否为对象格式（`{ "name": "..." }`），而非字符串。
@@ -267,37 +267,37 @@ copilot plugin uninstall spec-superflow
 ### 安装
 
 ```bash
-gemini extensions install https://github.com/MageByte-Zero/spec-superflow
+gemini extensions install https://github.com/MageByte-Zero/team-flow
 ```
 
 ### 升级
 
 ```bash
-gemini extensions update spec-superflow
+gemini extensions update team-flow
 ```
 
 ### 卸载
 
 ```bash
-gemini extensions uninstall spec-superflow
+gemini extensions uninstall team-flow
 ```
 
 ---
 
 ## OpenCode
 
-OpenCode 支持本地 plugin 文件和 Agent Skills 目录。仓库已提供 `.opencode/plugins/spec-superflow.js` 插件入口，以及 `.agents/skills -> ../skills` 兼容入口。
+OpenCode 支持本地 plugin 文件和 Agent Skills 目录。仓库已提供 `.opencode/plugins/team-flow.js` 插件入口，以及 `.agents/skills -> ../skills` 兼容入口。
 
 ### 安装（推荐：Plugin Mode）
 
 ```bash
-git clone https://github.com/MageByte-Zero/spec-superflow.git
+git clone https://github.com/MageByte-Zero/team-flow.git
 ```
 
 在 OpenCode 的插件配置或 UI 中指向仓库内的插件文件：
 
 ```text
-/absolute/path/to/spec-superflow/.opencode/plugins/spec-superflow.js
+/absolute/path/to/team-flow/.opencode/plugins/team-flow.js
 ```
 
 不要只复制这个 `.js` 文件到另一个项目；它会按相对路径读取仓库里的 `skills/` 和 `GEMINI.md`。如果希望项目内零配置，使用下面的 skills symlink 方式。
@@ -305,22 +305,22 @@ git clone https://github.com/MageByte-Zero/spec-superflow.git
 ### 安装（Skills Symlink）
 
 ```bash
-git clone https://github.com/MageByte-Zero/spec-superflow.git
+git clone https://github.com/MageByte-Zero/team-flow.git
 mkdir -p your-project/.agents
-ln -s /absolute/path/to/spec-superflow/skills your-project/.agents/skills
+ln -s /absolute/path/to/team-flow/skills your-project/.agents/skills
 ```
 
 如果 symlink 不方便，直接复制：
 
 ```bash
 mkdir -p your-project/.agents
-cp -R /absolute/path/to/spec-superflow/skills your-project/.agents/skills
+cp -R /absolute/path/to/team-flow/skills your-project/.agents/skills
 ```
 
 ### 升级
 
 ```bash
-cd /path/to/spec-superflow && git pull
+cd /path/to/team-flow && git pull
 ```
 
 如果用的是复制而非 symlink，升级后需要重新复制。
@@ -337,30 +337,30 @@ rm -rf your-project/.agents/skills
 
 ## WorkBuddy
 
-WorkBuddy 把 Skill 作为 marketplace 插件管理。安装器把 spec-superflow 部署为单个插件，包含 9 个 skill、运行时依赖（scripts/docs/templates/dist/hooks）、phase-guard 规则和 `.codebuddy-plugin/plugin.json` 清单，写入 `~/.workbuddy/plugins/marketplaces/<marketplace>/plugins/spec-superflow/`。
+WorkBuddy 把 Skill 作为 marketplace 插件管理。安装器把 team-flow 部署为单个插件，包含 9 个 skill、运行时依赖（scripts/docs/templates/dist/hooks）、phase-guard 规则和 `.codebuddy-plugin/plugin.json` 清单，写入 `~/.workbuddy/plugins/marketplaces/<marketplace>/plugins/team-flow/`。
 
 ### 安装（推荐：一键脚本）
 
 ```bash
-npx spec-superflow@latest install-workbuddy
+npx team-flow@latest install-workbuddy
 ```
 
 本地仓库调试：
 
 ```bash
-node /absolute/path/to/spec-superflow/scripts/spec-superflow.mjs install-workbuddy --local /absolute/path/to/spec-superflow
+node /absolute/path/to/team-flow/scripts/team-flow.mjs install-workbuddy --local /absolute/path/to/team-flow
 ```
 
 `--dry-run` 预览部署计划：
 
 ```bash
-ssf install-workbuddy --dry-run
+tf install-workbuddy --dry-run
 ```
 
 ### 部署结构
 
 ```text
-~/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/spec-superflow/
+~/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/team-flow/
 ├── .codebuddy-plugin/plugin.json   ← 插件清单（name, version, skills[]）
 ├── skills/                         ← 9 个 skill（${CLAUDE_PLUGIN_ROOT} 已重写）
 ├── rules/phase-guard.md            ← phase-guard 规则（WorkBuddy 自动加载）
@@ -368,7 +368,7 @@ ssf install-workbuddy --dry-run
 ├── dist/  hooks/
 ```
 
-`~/.workbuddy/settings.json` 中启用键为 `spec-superflow@cb_teams_marketplace`（单个键，非每 skill 一个）。
+`~/.workbuddy/settings.json` 中启用键为 `team-flow@cb_teams_marketplace`（单个键，非每 skill 一个）。
 
 ### 升级
 
@@ -377,17 +377,17 @@ ssf install-workbuddy --dry-run
 ### 卸载
 
 ```bash
-rm -rf ~/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/spec-superflow
+rm -rf ~/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/team-flow
 ```
 
-然后从 `~/.workbuddy/settings.json` 的 `enabledPlugins` 中移除 `spec-superflow@cb_teams_marketplace`。
+然后从 `~/.workbuddy/settings.json` 的 `enabledPlugins` 中移除 `team-flow@cb_teams_marketplace`。
 
 ### 验证
 
 ```bash
-ls ~/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/spec-superflow/skills   # 应有 9 个 skill 目录
-cat ~/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/spec-superflow/rules/phase-guard.md
-cat ~/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/spec-superflow/.codebuddy-plugin/plugin.json
+ls ~/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/team-flow/skills   # 应有 9 个 skill 目录
+cat ~/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/team-flow/rules/phase-guard.md
+cat ~/.workbuddy/plugins/marketplaces/cb_teams_marketplace/plugins/team-flow/.codebuddy-plugin/plugin.json
 ```
 
 重启 WorkBuddy 后，在对话中输入「用 workflow-start 开始」即可启动工作流。
@@ -401,22 +401,22 @@ Trae IDE / TRAE Work 原生支持 `SKILL.md`。项目技能目录是 `.trae/skil
 ### 安装（本地目录）
 
 ```bash
-git clone https://github.com/MageByte-Zero/spec-superflow.git
+git clone https://github.com/MageByte-Zero/team-flow.git
 mkdir -p .trae/skills
-cp -R spec-superflow/skills/* .trae/skills/
+cp -R team-flow/skills/* .trae/skills/
 ```
 
 全局安装：
 
 ```bash
 mkdir -p ~/.trae/skills
-cp -R spec-superflow/skills/* ~/.trae/skills/
+cp -R team-flow/skills/* ~/.trae/skills/
 ```
 
 ### 升级
 
 ```bash
-cd /path/to/spec-superflow && git pull
+cd /path/to/team-flow && git pull
 cp -R skills/* ~/.trae/skills/
 ```
 
@@ -431,30 +431,30 @@ rm -rf ~/.trae/skills/
 
 ## Qoder
 
-Qoder 读取 `.qoder/rules/*.md` 作为常驻上下文。安装脚本部署 skills 到 `.qoder/skills/`、运行时依赖到 `.qoder/spec-superflow/`、phase-guard 规则到 `.qoder/rules/phase-guard.md`（Qoder 自动加载，无需手动引用）。
+Qoder 读取 `.qoder/rules/*.md` 作为常驻上下文。安装脚本部署 skills 到 `.qoder/skills/`、运行时依赖到 `.qoder/team-flow/`、phase-guard 规则到 `.qoder/rules/phase-guard.md`（Qoder 自动加载，无需手动引用）。
 
 ### 安装
 
 ```bash
-npx spec-superflow@latest install-qoder
+npx team-flow@latest install-qoder
 ```
 
 或从本地仓库（开发 / 离线）：
 
 ```bash
-node scripts/install-qoder.mjs --local /path/to/spec-superflow
+node scripts/install-qoder.mjs --local /path/to/team-flow
 ```
 
 ### 升级
 
 ```bash
-npx spec-superflow@latest install-qoder
+npx team-flow@latest install-qoder
 ```
 
 ### 卸载
 
 ```bash
-rm -rf .qoder/skills .qoder/spec-superflow .qoder/rules/phase-guard.md
+rm -rf .qoder/skills .qoder/team-flow .qoder/rules/phase-guard.md
 ```
 
 ### 验证
@@ -473,7 +473,7 @@ cat .qoder/rules/phase-guard.md
 ### 安装
 
 ```bash
-git clone https://github.com/MageByte-Zero/spec-superflow.git
+git clone https://github.com/MageByte-Zero/team-flow.git
 ```
 
 然后配置客户端从以下路径加载技能：
@@ -484,43 +484,43 @@ git clone https://github.com/MageByte-Zero/spec-superflow.git
 ### 升级
 
 ```bash
-cd /path/to/spec-superflow && git pull
+cd /path/to/team-flow && git pull
 ```
 
 如果用的是复制方式，升级后需要重新复制到客户端技能目录。
 
 ### 卸载
 
-删除客户端技能目录中的 spec-superflow 技能即可。
+删除客户端技能目录中的 team-flow 技能即可。
 
 ---
 
 ## Cline
 
-Cline 原生读取 `.clinerules/*.md` 作为常驻上下文。安装脚本部署 skills 到 `.cline/skills/`、运行时依赖到 `.cline/spec-superflow/`、phase-guard 规则到 `.clinerules/phase-guard.md`（Cline 自动加载，无需手动引用）。
+Cline 原生读取 `.clinerules/*.md` 作为常驻上下文。安装脚本部署 skills 到 `.cline/skills/`、运行时依赖到 `.cline/team-flow/`、phase-guard 规则到 `.clinerules/phase-guard.md`（Cline 自动加载，无需手动引用）。
 
 ### 安装
 
 ```bash
-npx spec-superflow@latest install-cline
+npx team-flow@latest install-cline
 ```
 
 或从本地仓库（开发 / 离线）：
 
 ```bash
-node scripts/install-cline.mjs --local /path/to/spec-superflow
+node scripts/install-cline.mjs --local /path/to/team-flow
 ```
 
 ### 升级
 
 ```bash
-npx spec-superflow@latest install-cline
+npx team-flow@latest install-cline
 ```
 
 ### 卸载
 
 ```bash
-rm -rf .cline/skills .cline/spec-superflow .clinerules/phase-guard.md
+rm -rf .cline/skills .cline/team-flow .clinerules/phase-guard.md
 ```
 
 ### 验证
@@ -534,24 +534,24 @@ cat .clinerules/phase-guard.md
 
 ## Kiro
 
-AWS Kiro IDE 读取 `.kiro/steering/*.md` 作为 steering 规则。安装脚本部署 skills 到 `.kiro/skills/`、运行时依赖到 `.kiro/spec-superflow/`、phase-guard 规则到 `.kiro/steering/phase-guard.md`。
+AWS Kiro IDE 读取 `.kiro/steering/*.md` 作为 steering 规则。安装脚本部署 skills 到 `.kiro/skills/`、运行时依赖到 `.kiro/team-flow/`、phase-guard 规则到 `.kiro/steering/phase-guard.md`。
 
 ### 安装
 
 ```bash
-npx spec-superflow@latest install-kiro
+npx team-flow@latest install-kiro
 ```
 
 ### 升级
 
 ```bash
-npx spec-superflow@latest install-kiro
+npx team-flow@latest install-kiro
 ```
 
 ### 卸载
 
 ```bash
-rm -rf .kiro/skills .kiro/spec-superflow .kiro/steering/phase-guard.md
+rm -rf .kiro/skills .kiro/team-flow .kiro/steering/phase-guard.md
 ```
 
 ### 验证
@@ -565,21 +565,21 @@ cat .kiro/steering/phase-guard.md
 
 ## Windsurf
 
-Codeium Windsurf 读取 `.windsurf/rules/*.md` 作为规则。安装脚本部署 skills 到 `.windsurf/skills/`、运行时依赖到 `.windsurf/spec-superflow/`、phase-guard 规则到 `.windsurf/rules/phase-guard.md`。
+Codeium Windsurf 读取 `.windsurf/rules/*.md` 作为规则。安装脚本部署 skills 到 `.windsurf/skills/`、运行时依赖到 `.windsurf/team-flow/`、phase-guard 规则到 `.windsurf/rules/phase-guard.md`。
 
 ### 安装
 
 ```bash
-npx spec-superflow@latest install-windsurf
+npx team-flow@latest install-windsurf
 ```
 
 ### 升级 / 卸载 / 验证
 
 ```bash
 # 升级
-npx spec-superflow@latest install-windsurf
+npx team-flow@latest install-windsurf
 # 卸载
-rm -rf .windsurf/skills .windsurf/spec-superflow .windsurf/rules/phase-guard.md
+rm -rf .windsurf/skills .windsurf/team-flow .windsurf/rules/phase-guard.md
 # 验证
 ls .windsurf/skills && cat .windsurf/rules/phase-guard.md
 ```
@@ -588,19 +588,19 @@ ls .windsurf/skills && cat .windsurf/rules/phase-guard.md
 
 ## Qwen Code
 
-Qwen Code CLI（Gemini CLI fork）读取 `.qwen/rules/*.md` 作为规则。安装脚本部署 skills 到 `.qwen/skills/`、运行时依赖到 `.qwen/spec-superflow/`、phase-guard 规则到 `.qwen/rules/phase-guard.md`。
+Qwen Code CLI（Gemini CLI fork）读取 `.qwen/rules/*.md` 作为规则。安装脚本部署 skills 到 `.qwen/skills/`、运行时依赖到 `.qwen/team-flow/`、phase-guard 规则到 `.qwen/rules/phase-guard.md`。
 
 ### 安装
 
 ```bash
-npx spec-superflow@latest install-qwen
+npx team-flow@latest install-qwen
 ```
 
 ### 升级 / 卸载 / 验证
 
 ```bash
-npx spec-superflow@latest install-qwen
-rm -rf .qwen/skills .qwen/spec-superflow .qwen/rules/phase-guard.md
+npx team-flow@latest install-qwen
+rm -rf .qwen/skills .qwen/team-flow .qwen/rules/phase-guard.md
 ls .qwen/skills && cat .qwen/rules/phase-guard.md
 ```
 
@@ -608,19 +608,19 @@ ls .qwen/skills && cat .qwen/rules/phase-guard.md
 
 ## Amazon Q Developer
 
-Amazon Q Developer CLI 读取 `.amazonq/rules/*.md` 作为规则。安装脚本部署 skills 到 `.amazonq/skills/`、运行时依赖到 `.amazonq/spec-superflow/`、phase-guard 规则到 `.amazonq/rules/phase-guard.md`。
+Amazon Q Developer CLI 读取 `.amazonq/rules/*.md` 作为规则。安装脚本部署 skills 到 `.amazonq/skills/`、运行时依赖到 `.amazonq/team-flow/`、phase-guard 规则到 `.amazonq/rules/phase-guard.md`。
 
 ### 安装
 
 ```bash
-npx spec-superflow@latest install-amazon-q
+npx team-flow@latest install-amazon-q
 ```
 
 ### 升级 / 卸载 / 验证
 
 ```bash
-npx spec-superflow@latest install-amazon-q
-rm -rf .amazonq/skills .amazonq/spec-superflow .amazonq/rules/phase-guard.md
+npx team-flow@latest install-amazon-q
+rm -rf .amazonq/skills .amazonq/team-flow .amazonq/rules/phase-guard.md
 ls .amazonq/skills && cat .amazonq/rules/phase-guard.md
 ```
 
@@ -628,19 +628,19 @@ ls .amazonq/skills && cat .amazonq/rules/phase-guard.md
 
 ## Roo Code
 
-Roo Code（Roo Cline）读取 `.roo/rules/*.md` 作为规则。安装脚本部署 skills 到 `.roo/skills/`、运行时依赖到 `.roo/spec-superflow/`、phase-guard 规则到 `.roo/rules/phase-guard.md`。
+Roo Code（Roo Cline）读取 `.roo/rules/*.md` 作为规则。安装脚本部署 skills 到 `.roo/skills/`、运行时依赖到 `.roo/team-flow/`、phase-guard 规则到 `.roo/rules/phase-guard.md`。
 
 ### 安装
 
 ```bash
-npx spec-superflow@latest install-roocode
+npx team-flow@latest install-roocode
 ```
 
 ### 升级 / 卸载 / 验证
 
 ```bash
-npx spec-superflow@latest install-roocode
-rm -rf .roo/skills .roo/spec-superflow .roo/rules/phase-guard.md
+npx team-flow@latest install-roocode
+rm -rf .roo/skills .roo/team-flow .roo/rules/phase-guard.md
 ls .roo/skills && cat .roo/rules/phase-guard.md
 ```
 
@@ -648,19 +648,19 @@ ls .roo/skills && cat .roo/rules/phase-guard.md
 
 ## Continue
 
-Continue（VS Code 扩展）读取 `.continue/rules/*.md` 作为规则。安装脚本部署 skills 到 `.continue/skills/`、运行时依赖到 `.continue/spec-superflow/`、phase-guard 规则到 `.continue/rules/phase-guard.md`。
+Continue（VS Code 扩展）读取 `.continue/rules/*.md` 作为规则。安装脚本部署 skills 到 `.continue/skills/`、运行时依赖到 `.continue/team-flow/`、phase-guard 规则到 `.continue/rules/phase-guard.md`。
 
 ### 安装
 
 ```bash
-npx spec-superflow@latest install-continue
+npx team-flow@latest install-continue
 ```
 
 ### 升级 / 卸载 / 验证
 
 ```bash
-npx spec-superflow@latest install-continue
-rm -rf .continue/skills .continue/spec-superflow .continue/rules/phase-guard.md
+npx team-flow@latest install-continue
+rm -rf .continue/skills .continue/team-flow .continue/rules/phase-guard.md
 ls .continue/skills && cat .continue/rules/phase-guard.md
 ```
 
@@ -668,19 +668,19 @@ ls .continue/skills && cat .continue/rules/phase-guard.md
 
 ## Pi
 
-Pi agent 从 `.pi/skills/`（全局 `.pi/agent/skills/`）读取技能。Pi 没有规则目录，安装脚本只部署 skills 到 `.pi/skills/`、运行时依赖到 `.pi/spec-superflow/`；启动工作流时需手动调用 `/workflow-start`。
+Pi agent 从 `.pi/skills/`（全局 `.pi/agent/skills/`）读取技能。Pi 没有规则目录，安装脚本只部署 skills 到 `.pi/skills/`、运行时依赖到 `.pi/team-flow/`；启动工作流时需手动调用 `/workflow-start`。
 
 ### 安装
 
 ```bash
-npx spec-superflow@latest install-pi
+npx team-flow@latest install-pi
 ```
 
 ### 升级 / 卸载 / 验证
 
 ```bash
-npx spec-superflow@latest install-pi
-rm -rf .pi/skills .pi/spec-superflow
+npx team-flow@latest install-pi
+rm -rf .pi/skills .pi/team-flow
 ls .pi/skills   # 应有 9 个 skill 目录
 ```
 
@@ -725,7 +725,7 @@ changes/<change-name>/
 
 full/hotfix 在 DP-4 必须保存 current execution plan 到
 `<change>/.superpowers/sdd/execution-plan.json`；它不属于 `execution-contract.md`。
-先运行 `ssf execution recommend`：它按任务量和 wave 策略列出 `inline`、
+先运行 `tf execution recommend`：它按任务量和 wave 策略列出 `inline`、
 `batch-inline`、`sdd` 并给出推荐，并保存当前 wave 的推荐凭据到
 `<change>/.superpowers/sdd/execution-recommendation.json`。Agent 展示候选项和理由后，
 `plan` 与 `revise` 必须消费匹配当前 artifact、contract 和 wave 的凭据；用户用 `--confirm`
@@ -734,21 +734,21 @@ Inline 始终串行，不会表示并行。`tweak`
 免除 execution plan 与 review receipt gate。
 
 ```bash
-ssf execution recommend changes/my-change \
+tf execution recommend changes/my-change \
   --wave foundation:parallel:1.1,1.2 \
   --wave integration:serial:2.1:foundation --json
-ssf execution plan changes/my-change --mode sdd --confirm --reason "independent work" \
+tf execution plan changes/my-change --mode sdd --confirm --reason "independent work" \
   --wave foundation:parallel:1.1,1.2 \
   --wave integration:serial:2.1:foundation
-ssf execution show changes/my-change --json
+tf execution show changes/my-change --json
 # 可将已有 inline/batch-inline 计划升级为 sdd，或重规划已有 sdd 的 wave/依赖；不能降级。
-ssf execution recommend changes/my-change \
+tf execution recommend changes/my-change \
   --wave foundation:parallel:1.1,1.2 \
   --wave integration:serial:2.1:foundation --json
-ssf execution revise changes/my-change --mode sdd --confirm --reason "need parallel work" \
+tf execution revise changes/my-change --mode sdd --confirm --reason "need parallel work" \
   --wave foundation:parallel:1.1,1.2 \
   --wave integration:serial:2.1:foundation
-ssf execution review changes/my-change --wave foundation --base <sha> --head <sha> \
+tf execution review changes/my-change --wave foundation --base <sha> --head <sha> \
   --report .superpowers/sdd/reviews/foundation.md --verdict pass
 ```
 
@@ -760,15 +760,15 @@ report 本身必须为普通、非空、非符号链接文件。
 
 每一个 wave 均须有当前 `pass` review receipt，才可启动依赖 wave 或进入 closing；
 修订计划会废止旧 receipt。#47 所提出的恢复、切换与手动保存 slash command 尚未实现，
-不能假定有 `/ssf:*` 命令。
+不能假定有 `/tf:*` 命令。
 
 Delta spec 的规范路径是 `specs/<capability>/spec.md`。扁平的 `specs/<capability>.md` 和根级 `specs/spec.md` 都不会被当作合法规范静默通过。
 
-### `ssf inject` 用法
+### `tf inject` 用法
 
 ```bash
-ssf inject changes/my-change --platforms cursor
-ssf inject changes/my-change --platforms all
+tf inject changes/my-change --platforms cursor
+tf inject changes/my-change --platforms all
 ```
 
 省略 `--platforms` 时，只有在项目里**恰好检测到一个**平台标记时才会自动注入；如果检测到多个平台，必须显式传 `--platforms <platform>` 或 `--platforms all`。
@@ -776,13 +776,13 @@ ssf inject changes/my-change --platforms all
 ### 会话恢复与可选 prototype
 
 ```bash
-ssf checkpoint save changes/my-change --task 1.1 --next "Run focused tests"
-ssf checkpoint list changes/my-change
-ssf checkpoint show changes/my-change 1.1
-ssf handoff create changes/my-change --type research --objective "Compare approaches" --expected-output "Recommendation" --acceptance "Evidence recorded"
-ssf handoff list changes/my-change
-ssf handoff finish changes/my-change <handoff-id>
-ssf handoff resolve changes/my-change <handoff-id> --decision accept
+tf checkpoint save changes/my-change --task 1.1 --next "Run focused tests"
+tf checkpoint list changes/my-change
+tf checkpoint show changes/my-change 1.1
+tf handoff create changes/my-change --type research --objective "Compare approaches" --expected-output "Recommendation" --acceptance "Evidence recorded"
+tf handoff list changes/my-change
+tf handoff finish changes/my-change <handoff-id>
+tf handoff resolve changes/my-change <handoff-id> --decision accept
 ```
 
 Checkpoint 是任务级恢复上下文。`result-ready` handoff 在继续受影响的工作前必须显式审阅并 resolve。Prototype 只在用户明确确认后创建；后端、CLI、配置和内部重构不会自动进入 prototype 流程。handoff 结果不会自动修改 `design.md` 或 `tasks.md`。

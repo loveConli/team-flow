@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for considering a contribution to `spec-superflow`.
+Thanks for considering a contribution to `team-flow`.
 
 This repository is not just a collection of prompt files. It is a workflow system.
 
@@ -40,7 +40,7 @@ If your change affects workflow behavior, also read:
 
 ### 1. Preserve self-contained ownership
 
-Do not turn `spec-superflow` into a runtime wrapper that depends on separately installed OpenSpec or Superpowers packages.
+Do not turn `team-flow` into a runtime wrapper that depends on separately installed OpenSpec or Superpowers packages.
 
 It can learn from those systems, but this repository should remain self-contained.
 

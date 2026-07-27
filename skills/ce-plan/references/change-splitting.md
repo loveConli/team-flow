@@ -2,7 +2,7 @@
 
 ## Overview (v0.5, v0.9 重写：所有权自包含判据)
 
-Break the work into logical **changes** (spec-superflow change units). Each change represents one meaningful scope that can be independently implemented through the spec-superflow 8-state workflow.
+Break the work into logical **changes** (team-flow change units). Each change represents one meaningful scope that can be independently implemented through the team-flow 8-state workflow.
 
 **v0.5 关键变化**：ce-plan 不再产出文件级 Implementation Units（Files/Approach/Test scenarios）。这些由 spec-writer 在每个 change 内产出。ce-plan 只定"做什么、什么顺序"。
 
@@ -36,7 +36,7 @@ Avoid:
 - **跨无关节所有权单元**（Critical）：一个 change 的 scope 横跨多个互不相关的限界上下文，导致一次 architecture-design 无法聚焦
 - **细到无所有权单元**（Critical）：scope 是单接口/单文件/单方法/单 SQL/单 task → 无设计单元可识别，属变更级实现组织
 - Changes so large that spec-writer cannot produce a coherent spec
-- Changes so small that the spec-superflow ceremony overhead exceeds the work
+- Changes so small that the team-flow ceremony overhead exceeds the work
 
 > change-split-auditor D5 检查上述前三条（所有权粒度合规）。
 

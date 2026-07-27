@@ -1,4 +1,4 @@
-// scripts/lib/cmd-inject.mjs — ssf inject: generate phase-guard artifacts for multiple platforms
+// scripts/lib/cmd-inject.mjs — tf inject: generate phase-guard artifacts for multiple platforms
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -45,7 +45,7 @@ const PHASE_TEMPLATES = {
 
 ## ✅ 允许操作
 - 生成/修改 execution-contract.md
-- 运行 ssf validate 验证工件
+- 运行 tf validate 验证工件
 
 ## ⛔ 禁止操作
 - 执行实现代码
@@ -59,10 +59,10 @@ const PHASE_TEMPLATES = {
 **当前阶段**: {{state}} | **工作流**: {{workflow}}
 
 ## ✅ 允许操作
-- 运行 ssf execution recommend <change-dir> [--wave ...]，完成 DP-4 执行模式选择，列出可用模式与推荐并写入当前推荐凭据
+- 运行 tf execution recommend <change-dir> [--wave ...]，完成 DP-4 执行模式选择，列出可用模式与推荐并写入当前推荐凭据
 - 向用户展示候选项、项目事实与推荐，取得明确选择
-- 运行 ssf execution plan <change-dir> --mode <mode> --confirm ... 生成 execution plan；它必须使用匹配当前 artifact、contract 和 wave 的推荐凭据，非推荐选择需 --acknowledge-recommendation
-- 运行 ssf execution show <change-dir> --json 核对 current、revision、mode、waves[].eligible 和 receipts
+- 运行 tf execution plan <change-dir> --mode <mode> --confirm ... 生成 execution plan；它必须使用匹配当前 artifact、contract 和 wave 的推荐凭据，非推荐选择需 --acknowledge-recommendation
+- 运行 tf execution show <change-dir> --json 核对 current、revision、mode、waves[].eligible 和 receipts
 - 准备执行环境
 
 ## ⛔ 禁止操作
@@ -136,8 +136,8 @@ const PHASE_TEMPLATES = {
 
 const SUPPORTED_PLATFORMS = ['claude', 'cursor', 'copilot', 'gemini'];
 const PHASE_GUARD_MARKERS = {
-  start: '\n\n<!-- spec-superflow-phase-guard-start -->\n',
-  end: '<!-- spec-superflow-phase-guard-end -->\n',
+  start: '\n\n<!-- team-flow-phase-guard-start -->\n',
+  end: '<!-- team-flow-phase-guard-end -->\n',
 };
 
 function unique(values) {
@@ -154,7 +154,7 @@ function generatePhaseGuard(state) {
 
 function toCursorMdc(base) {
   return `---
-description: spec-superflow phase guard
+description: team-flow phase guard
 alwaysApply: true
 ---
 
@@ -269,7 +269,7 @@ export async function run(args) {
 
   const changeDir = positionals[0];
   if (!changeDir) {
-    console.error('Usage: ssf inject <change-dir> [--platforms claude,cursor,copilot,gemini|all] [--json]');
+    console.error('Usage: tf inject <change-dir> [--platforms claude,cursor,copilot,gemini|all] [--json]');
     process.exit(2);
   }
 
@@ -282,9 +282,9 @@ export async function run(args) {
   const requested = resolved.platforms;
 
   // Read state (graceful fallback if missing)
-  const stateFile = join(changeDir, '.spec-superflow.yaml');
+  const stateFile = join(changeDir, '.team-flow.yaml');
   if (!existsSync(stateFile)) {
-    if (!values.json) console.log(`⚠️ No .spec-superflow.yaml found in ${changeDir}, using defaults`);
+    if (!values.json) console.log(`⚠️ No .team-flow.yaml found in ${changeDir}, using defaults`);
   }
   const state = readState(changeDir);
 

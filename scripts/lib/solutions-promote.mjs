@@ -3,7 +3,7 @@
  * solutions-promote — 检查 change 内经验的晋升条件，执行 change→product 晋升
  *
  * v0.5 复利贯穿机制脚本
- * 用法：ssf solutions promote <change-dir> [--dir <solutions-dir>]
+ * 用法：tf solutions promote <change-dir> [--dir <solutions-dir>]
  *
  * 功能：
  * 1. 读取 specs/<cap>/learnings.md
@@ -51,7 +51,7 @@ export function run(args = {}) {
   const solutionsDir = args.dir || 'docs/solutions';
 
   if (!changeDir) {
-    console.error('Usage: ssf solutions promote <change-dir>');
+    console.error('Usage: tf solutions promote <change-dir>');
     process.exit(1);
   }
 

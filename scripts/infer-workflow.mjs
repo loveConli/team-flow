@@ -54,7 +54,7 @@ function inferMode(changeDir) {
       return {
         mode: state.workflow,
         explicit: true,
-        reason: `workflow explicitly set to '${state.workflow}' in .spec-superflow.yaml; skipping auto-detection`,
+        reason: `workflow explicitly set to '${state.workflow}' in .team-flow.yaml; skipping auto-detection`,
       };
     }
   }

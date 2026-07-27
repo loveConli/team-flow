@@ -5,11 +5,11 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-const CLI = join(process.cwd(), 'scripts/spec-superflow.mjs');
+const CLI = join(process.cwd(), 'scripts/team-flow.mjs');
 let tempDir;
 
 before(() => {
-  tempDir = mkdtempSync(join(tmpdir(), 'ssf-cmd-config-test-'));
+  tempDir = mkdtempSync(join(tmpdir(), 'tf-cmd-config-test-'));
 });
 
 after(() => {
@@ -17,7 +17,7 @@ after(() => {
 });
 
 function writeConfig(config) {
-  writeFileSync(join(tempDir, 'spec-superflow.config.json'), JSON.stringify(config));
+  writeFileSync(join(tempDir, 'team-flow.config.json'), JSON.stringify(config));
 }
 
 function runSsf(args) {
@@ -37,7 +37,7 @@ function runSsf(args) {
   }
 }
 
-describe('ssf config --resolve-model', () => {
+describe('tf config --resolve-model', () => {
   it('documents model profile resolution in CLI help', () => {
     const result = runSsf(['--help']);
     assert.equal(result.exitCode, 0, result.stderr);

@@ -3,7 +3,7 @@
  * solutions-capture — 写入一条经验到 INDEX.md + 对应目录
  *
  * v0.5 复利贯穿机制脚本
- * 用法：ssf solutions capture --phase <p> --domain <d> --type <t> --severity <s> --summary "<text>"
+ * 用法：tf solutions capture --phase <p> --domain <d> --type <t> --severity <s> --summary "<text>"
  *
  * 功能：
  * 1. 在对应阶段目录下创建经验文件
@@ -82,7 +82,7 @@ ${summary}
   const indexContent = readFileSync(indexPath, 'utf-8');
   const dataLines = indexContent.split('\n').filter(l => l.startsWith('|') && !l.startsWith('| date') && !l.startsWith('|--'));
   if (dataLines.length > MAX_INDEX_LINES) {
-    console.log(`INDEX.md exceeded ${MAX_INDEX_LINES} lines, consider running: ssf solutions index-gen`);
+    console.log(`INDEX.md exceeded ${MAX_INDEX_LINES} lines, consider running: tf solutions index-gen`);
   }
 
   console.log(`Captured: ${phase}/${fileName} (${severity}/${type})`);

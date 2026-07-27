@@ -42,7 +42,7 @@
 
 ##### 3.1.1.2 流程概要说明：
 
-team-flow 插件包含 17 个 skill，覆盖产品研发全流程。四套独立体系（spec-superflow 9 个 skill、compound-engineering 6 个 skill、architecture-design 1 个 skill、prototype 1 个 skill）已拼合到一个 plugin.json 中，但 skill 之间的协作依赖隐式约定，缺少统一协作协议层。本次迭代旨在建立 Schema 声明式协议 + Handoff 模板的混合协作机制。
+team-flow 插件包含 17 个 skill，覆盖产品研发全流程。四套独立体系（team-flow 9 个 skill、compound-engineering 6 个 skill、architecture-design 1 个 skill、prototype 1 个 skill）已拼合到一个 plugin.json 中，但 skill 之间的协作依赖隐式约定，缺少统一协作协议层。本次迭代旨在建立 Schema 声明式协议 + Handoff 模板的混合协作机制。
 
 ##### 3.1.1.3 流程步骤说明：
 
@@ -68,7 +68,7 @@ team-flow 插件包含 17 个 skill，覆盖产品研发全流程。四套独立
 
 | TF-COLLAB-001-S2_四套子系统衔接 |
 |---|
-| compound-engineering (ce-brainstorm/ce-plan/ce-compound/ce-ideate/ce-proof/ce-strategy) ↔ bridge: ce-plan → spec-writer ↔ spec-superflow (spec-writer/spec-merger/build-executor/code-reviewer/workflow-start/contract-builder/e2e/bug-investigator/release-archivist) ↔ bridge: architecture-design → build-executor ↔ architecture-design (architecture-design) ↔ bridge: prototype → execution-contract ↔ prototype (prototype) |
+| compound-engineering (ce-brainstorm/ce-plan/ce-compound/ce-ideate/ce-proof/ce-strategy) ↔ bridge: ce-plan → spec-writer ↔ team-flow (spec-writer/spec-merger/build-executor/code-reviewer/workflow-start/contract-builder/e2e/bug-investigator/release-archivist) ↔ bridge: architecture-design → build-executor ↔ architecture-design (architecture-design) ↔ bridge: prototype → execution-contract ↔ prototype (prototype) |
 
 ##### 3.1.2.2 流程概要说明：
 
@@ -158,10 +158,10 @@ team-flow 插件包含 17 个 skill，覆盖产品研发全流程。四套独立
 | 1 | Schema 声明式协议 | 每个 skill 在 SKILL.md frontmatter 中声明其消费和产出的工件列表及结构约束的协议机制 | 名词 | 工件契约、IO Schema | team-flow 设计 | 2026/07/20 | |
 | 2 | Handoff 模板 | skill 完成时生成的标准化交接文件（handoff.yaml），包含 from_skill、to_skill、artifacts、context_summary 等字段 | 名词 | 交接文件、handoff 文件 | team-flow 设计 | 2026/07/20 | |
 | 3 | DP (Decision Point) | 决策点，产品工作流中的门禁节点，共 8 个（DP-0 到 DP-7），用于在关键阶段进行人工决策确认 | 名词 | 决策门禁 | team-flow 设计 | 2026/07/20 | |
-| 4 | 状态机 (8态) | team-flow 工作流的 8 个核心状态：exploring → specifying → bridging → approved-for-build → executing → debugging → closing → abandoned | 名词 | 工作流状态 | spec-superflow | 2026/07/20 | 状态定义不变 |
+| 4 | 状态机 (8态) | team-flow 工作流的 8 个核心状态：exploring → specifying → bridging → approved-for-build → executing → debugging → closing → abandoned | 名词 | 工作流状态 | team-flow | 2026/07/20 | 状态定义不变 |
 | 5 | bridge_type | handoff 文件中标识四套子系统间衔接类型的字段，用于区分不同衔接点的交接协议 | 名词 | 衔接类型 | team-flow 设计 | 2026/07/20 | |
 | 6 | dp_digest | handoff 文件中包含的决策点摘要字段，供下游 DP 触发 skill 自动提取精炼信息 | 名词 | 决策摘要 | team-flow 设计 | 2026/07/20 | |
-| 7 | spec-superflow | team-flow 的核心变更链路子系统，包含 9 个 skill（spec-writer, spec-merger, build-executor, code-reviewer, workflow-start, contract-builder, e2e, bug-investigator, release-archivist） | 名词 | 变更链路、spec 体系 | spec-superflow | 2026/07/20 | |
+| 7 | team-flow | team-flow 的核心变更链路子系统，包含 9 个 skill（spec-writer, spec-merger, build-executor, code-reviewer, workflow-start, contract-builder, e2e, bug-investigator, release-archivist） | 名词 | 变更链路、spec 体系 | team-flow | 2026/07/20 | |
 | 8 | compound-engineering | team-flow 的头脑风暴→PRD→复利子系统，包含 6 个 skill（ce-brainstorm, ce-plan, ce-compound, ce-ideate, ce-proof, ce-strategy） | 名词 | 复合工程、ce 体系 | compound-engineering | 2026/07/20 | |
 
 ### 6.2 业务术语字典台账（台账建议新建文档保存）
@@ -326,7 +326,7 @@ team-flow 插件包含 17 个 skill，覆盖产品研发全流程。四套独立
 
 | 编号 | 系统功能 | 原型/UI | 关联活动 | 信息结构 | 画面说明 |
 |---|---|---|---|---|---|
-| TF-F001 | PRD 模板可配置 | N/A（配置文件） | TF-COLLAB-001-S1_A1 | 配置字段：prd.template → 模板文件路径 | ce-brainstorm 通过 `ssf runtime config --get prd.template` 读取配置 |
+| TF-F001 | PRD 模板可配置 | N/A（配置文件） | TF-COLLAB-001-S1_A1 | 配置字段：prd.template → 模板文件路径 | ce-brainstorm 通过 `tf runtime config --get prd.template` 读取配置 |
 
 ##### 8.4.1.2 PRD 输出路径标准化
 

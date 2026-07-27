@@ -1,4 +1,4 @@
-// ssf list — scan changes/ and report status
+// tf list — scan changes/ and report status
 import { readdirSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadConfig } from './config-loader.mjs';
@@ -6,9 +6,9 @@ import { readState } from './state-loader.mjs';
 
 function detectChangeStatus(changeDir) {
   // Prefer the state file over file-existence heuristics.
-  // The state file is maintained by ssf state transition and is the
+  // The state file is maintained by tf state transition and is the
   // authoritative source for the current workflow phase.
-  const stateFile = join(changeDir, '.spec-superflow.yaml');
+  const stateFile = join(changeDir, '.team-flow.yaml');
   if (existsSync(stateFile)) {
     const state = readState(changeDir);
     const st = state.state || 'exploring';
@@ -38,7 +38,7 @@ function detectChangeStatus(changeDir) {
   if (hasAbandonment) return { status: 'ABANDONED', detail: 'Change was abandoned' };
   if (!hasProposal) return { status: 'INCOMPLETE', detail: 'Missing proposal.md' };
   if (!hasContract) return { status: 'SPECIFYING', detail: 'Planning in progress (no state file)' };
-  return { status: 'UNKNOWN', detail: 'Has artifacts but no state file — run ssf state init' };
+  return { status: 'UNKNOWN', detail: 'Has artifacts but no state file — run tf state init' };
 }
 
 export { detectChangeStatus };

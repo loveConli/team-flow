@@ -20,17 +20,17 @@
 各 skill 在阶段转换点通过 CLI 调用（无需交互）：
 
 ```bash
-ssf solutions capture --phase <p> --domain <d> --type <t> --severity <s> --summary "<text>"
+tf solutions capture --phase <p> --domain <d> --type <t> --severity <s> --summary "<text>"
 ```
 
 ## 索引重建
 
 ```bash
-ssf solutions index-gen    # 重建复利索引
+tf solutions index-gen    # 重建复利索引
 ```
 
 ## 阶段感知注入
 
 ```bash
-ssf solutions inject --phase <p> --domain <d>   # 阶段感知注入（top-5）
+tf solutions inject --phase <p> --domain <d>   # 阶段感知注入（top-5）
 ```

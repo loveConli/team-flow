@@ -13,13 +13,13 @@
 
 | 来源 | 并入范围 | skill 数 |
 |---|---|---|
-| **spec-superflow**（底座，v0.10.0） | 全部 9 个 spec 驱动开发 skill | 9 |
+| **team-flow**（底座，v0.10.0） | 全部 9 个 spec 驱动开发 skill | 9 |
 | **compound-engineering 核心子集（C 方案）** | ce-brainstorm / ce-plan / ce-compound / ce-strategy / ce-ideate / ce-proof | 6 |
 | **architecture-design**（4A+DDD 增量设计） | 整个 skill | 1 |
 | **prototype**（本地 HTML 原型，新建） | 整个 skill（含脚手架） | 1 |
 | **合计** | | **17** |
 
-- 零运行时外部依赖（spec-superflow 底座自包含）。
+- 零运行时外部依赖（team-flow 底座自包含）。
 - prototype 额外**零外部依赖、可离线**（自包含 HTML + 页面内 Tweaks 控件，无 CDN）。
 - 插件保持通用：所有风格由项目 `design-system.md` / `prd.template` 注入，不固化任何公司/产品风格。
 - 支持 9 安装面：Claude Code、Cursor、OpenAI Codex CLI/App、GitHub Copilot CLI、Gemini CLI、OpenCode、WorkBuddy、Trae、ima-copilot。
@@ -29,18 +29,18 @@
 ## 1. 当前状态
 
 ### ✅ 已完成
-- [x] 以 `spec-superflow` 工程为底座复制出 `team-flow/`（目录、`.claude-plugin/`、scripts、dist、hooks 等齐全）。
+- [x] 以 `team-flow` 工程为底座复制出 `team-flow/`（目录、`.claude-plugin/`、scripts、dist、hooks 等齐全）。
 - [x] **统一插件名 `team-flow`**：所有插件清单（顶层 `plugin.json`、`.claude-plugin/`、`marketplace.json`、`.cursor-plugin/`、`gemini-extension.json`、`.github/plugin/marketplace.json`、`.agents/plugins/marketplace.json`）的 `name` 已改为 `team-flow`，作者改为 `LT`，homepage/repository 指向 `https://github.com/LT/team-flow`。
 - [x] **compound 核心子集（C 方案 6 个）** 已复制到 `team-flow/skills/`，architecture-design 一并复制（排除 ima 嵌套冗余副本）。
 - [x] **新建 `prototype` skill**：`skills/prototype/SKILL.md` + `references/prototype-scaffold/`（6 文件：index.html / design-system.md / flow.md / assets/design-tokens.css / components/button.html / pages/index.html）。
-- [x] **统一 `AGENTS.md`**：合并 spec-superflow 8 态机 + compound 核心 6 skill + architecture-design（4A/DDD）+ prototype 四套机制、全局产物结构、SOP、配置注入、关键约束。
+- [x] **统一 `AGENTS.md`**：合并 team-flow 8 态机 + compound 核心 6 skill + architecture-design（4A/DDD）+ prototype 四套机制、全局产物结构、SOP、配置注入、关键约束。
 - [x] `README.md` / `INSTALL.md` 已改写为 team-flow 顶层说明。
 - [x] **版本一致性检查通过**：`node scripts/check-version-consistency.mjs` → ✅ all files at 0.10.0。
 - [x] 两份权威设计文档已归入 `docs/`（`architecture-api-db-design-enhancement-v0.3.md`、`prototype-design-research.md`）。
 
 ### ⏳ 待办（详见 §6）
-- 品牌重命名残留（package.json name、GEMINI.md/phase-guard 头部、INSTALL.md marketplace URL、`npx spec-superflow@0.10.0` 调用、CHANGELOG）。
-- 实测 `ssf runtime config --get prototype.designSystem`（v0.3 修正 A）。
+- 品牌重命名残留（package.json name、GEMINI.md/phase-guard 头部、INSTALL.md marketplace URL、`npx team-flow@0.10.0` 调用、CHANGELOG）。
+- 实测 `tf runtime config --get prototype.designSystem`（v0.3 修正 A）。
 - 跑通 `npm test` / `npm run validate`（开发期尚未执行）。
 - 验证 17 个 skill 在 Claude Code/各宿主被正确加载。
 
@@ -59,16 +59,16 @@ team-flow/
 │                             # 各宿主安装面清单（均已统一为 team-flow）
 ├── AGENTS.md                  # 插件级机制说明（四套合一 + SOP + 配置注入）
 ├── README.md / INSTALL.md     # 顶层说明 / 9 安装面安装指南
-├── package.json               # npm 包（name 仍为 spec-superflow，见 §6 品牌残留）
-├── scripts/                   # ssf 运行时 + 各宿主安装器 + 版本一致性检查
+├── package.json               # npm 包（name 仍为 team-flow，见 §6 品牌残留）
+├── scripts/                   # tf 运行时 + 各宿主安装器 + 版本一致性检查
 │   └── check-version-consistency.mjs   # CI 守卫：所有 manifest 版本须=package.json
-├── src/ dist/                 # spec-superflow TypeScript 底座（schema/parsing/validation）
+├── src/ dist/                 # team-flow TypeScript 底座（schema/parsing/validation）
 ├── skills/                    # ★ 17 个 skill（开发重点目录）
-│   ├── workflow-start … bug-investigator   # spec-superflow 9 个
+│   ├── workflow-start … bug-investigator   # team-flow 9 个
 │   ├── ce-brainstorm … ce-proof            # compound 核心 6 个（含 references/agents/*）
 │   ├── architecture-design                 # 4A+DDD 增量设计
 │   └── prototype                            # 本地 HTML 原型（新建）
-├── docs/                      # 设计文档 + 上游 spec-superflow 文档
+├── docs/                      # 设计文档 + 上游 team-flow 文档
 │   ├── architecture-api-db-design-enhancement-v0.3.md  # ★ 权威设计规格（含原型章）
 │   ├── prototype-design-research.md                    # 原型方案调研
 │   ├── state-machine.md / artifact-contract.md / decision-points.md …
@@ -86,11 +86,11 @@ team-flow/
 1. **插件名 = `team-flow`**（用户拍板）。
 2. **compound 范围 = 核心子集（C 方案，6 个）**，非全量 33。理由：避免 27 个嵌套 agent 全部并入导致膨胀；6 个核心已覆盖「头脑风暴→PRD→全局复利→策略→创意→验证」主链路。
 3. **compound 的 agent 随所属 skill 自动并入**：~27 个 agent 全部嵌套在各 skill 内部的 `skills/<name>/references/agents/*.md`，作为运行时子代理/研究员参考，**非独立顶层 agents**，复制 skill 目录即带入，无需单独注册。6 个核心 skill 携带 agents 数：ce-plan 15 / ce-compound 7 / ce-ideate 4 / ce-brainstorm 1 / ce-strategy 0 / ce-proof 0。
-4. **版本保持 `0.10.0`**（对齐 spec-superflow base），不擅自 bump。理由：① `check-version-consistency.mjs` 强制所有 manifest 版本=package.json；② 运行时 `ssf` 与 `npx spec-superflow@0.10.0` 仍指向 spec-superflow base，bump 需先发布 team-flow 到 npm。见 §6。
-5. **配置扩展字段为插件层（非 spec-superflow 原生 schema）**：原生仅 `artifacts.order` / `artifacts.skip`；`prd.template` / `prototype.designSystem` / `prototype.entry` 是我们在 `spec-superflow.config.json` 上扩展的字段，由插件层自读（`ssf runtime config --get <key>`）。
+4. **版本保持 `0.10.0`**（对齐 team-flow base），不擅自 bump。理由：① `check-version-consistency.mjs` 强制所有 manifest 版本=package.json；② 运行时 `tf` 与 `npx team-flow@0.10.0` 仍指向 team-flow base，bump 需先发布 team-flow 到 npm。见 §6。
+5. **配置扩展字段为插件层（非 team-flow 原生 schema）**：原生仅 `artifacts.order` / `artifacts.skip`；`prd.template` / `prototype.designSystem` / `prototype.entry` 是我们在 `team-flow.config.json` 上扩展的字段，由插件层自读（`tf runtime config --get <key>`）。
 
 ### v0.3 三条专家评审修正（已采纳）
-- **修正 A（§15.4）**：明确上述扩展字段非原生 schema，需实测 `ssf runtime config --get prototype.designSystem` 是否真能读。
+- **修正 A（§15.4）**：明确上述扩展字段非原生 schema，需实测 `tf runtime config --get prototype.designSystem` 是否真能读。
 - **修正 B（§11）**：`arch-merge` → `prototype-sync` **顺序提交**（同一 change closing 内）。
 - **修正 C（§15.3）**：原型膨胀防控（components/ 复用 design-system，禁内联漂移）+ 分支约定（原型随 PRD 当前版本分支维护）。
 
@@ -111,7 +111,7 @@ git clone <your-repo> && cd team-flow && claude
 > Claude Code 实际读取 `.claude-plugin/plugin.json`（已统一为 team-flow）。安装后自动加载 `hooks/hooks.json`，新会话注入上下文。
 
 ### 4.2 项目级配置注入
-项目根 `spec-superflow.config.json`（注意：文件名仍沿用 spec-superflow，因为 `ssf` 运行时只读此名，见 §6）：
+项目根 `team-flow.config.json`（注意：文件名仍沿用 team-flow，因为 `tf` 运行时只读此名，见 §6）：
 ```json
 {
   "artifacts": { "order": ["proposal","specs","design","tasks"], "skip": [] },
@@ -122,7 +122,7 @@ git clone <your-repo> && cd team-flow && claude
   }
 }
 ```
-读取：`ssf runtime config --get prototype.designSystem`（插件层自读，字段命名避开原生 key 冲突）。
+读取：`tf runtime config --get prototype.designSystem`（插件层自读，字段命名避开原生 key 冲突）。
 
 ### 4.3 初始化本地原型（首次）
 ```bash
@@ -157,7 +157,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 模糊需求
   → [ce-brainstorm → ce-plan 就地 enrich] → prd/vN
   → 拆 change（一份 PRD 可拆多 change）
-  → spec-superflow: exploring → … → closing
+  → team-flow: exploring → … → closing
        每 change：引用全局 prototype/ 作 UI 契约（进 execution-contract.md）
                  architecture-design 增量（As-Is 冻结 → To-Be → 复利回写）
                  api.md 经 execution-contract.md 被 build-executor 硬消费
@@ -171,7 +171,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 - **膨胀防控**：`prototype/components/` 必须复用 `design-system.md`，禁止页面内联样式漂移；新增组件先沉淀进 design-system 再引用。
 - **分支约定**：原型随 PRD 当前版本分支维护；change 引用其所在 PRD 版本分支的 `prototype/`。
 
-### 5.4 spec-superflow 8 态状态机
+### 5.4 team-flow 8 态状态机
 `exploring → specifying → bridging → approved-for-build → executing → closing`（另有 `onboarding` / `archived`）。
 `workflow-start` 做内容级状态检测与非法跳变拦截；详见 `docs/state-machine.md`。
 
@@ -180,21 +180,21 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 ## 6. 剩余待办 / 已知项（按优先级）
 
 ### P0 —— 不影响安装，但建议尽快收口
-- [ ] **品牌重命名残留**（当前仅 manifest 的 `name` 改了，以下仍写 `spec-superflow`）：
-  - `package.json` 的 `"name": "spec-superflow"`（npm 包名；bin 暴露 `ssf` 与 `spec-superflow`）。建议保留 bin `ssf`，包名可改 `team-flow`。
-  - `GEMINI.md` 第 1/3/5 行、`llms.txt` 第 1/3-5 行、`.claude/always/phase-guard.md` 第 1 行头部 `# spec-superflow v0.10.0 |`（**注意**：`check-version-consistency.mjs` 的 GEMINI/phase-guard 版本正则硬编码了 `spec-superflow`，若改头部须同步改该脚本的正则，否则一致性检查会失败）。
-  - `INSTALL.md` 的 marketplace 命令 `MageByte-Zero/spec-superflow`、`/plugin install spec-superflow@spec-superflow`（第 44-45、53 行等）—— 要发布到 Claude Code marketplace 前必须替换。
-  - 各 spec-superflow skill 内 `npx --yes --package spec-superflow@0.10.0 ssf`（由 `check-version-consistency.mjs` 的 RUNTIME_FILES 校验，必须保持 `spec-superflow@0.10.0` 直到 team-flow 发布到 npm）。
-- [ ] **实测 v0.3 修正 A**：验证 `ssf runtime config --get prototype.designSystem` 真能读到扩展字段（当前未跑，是设计假设）。
+- [ ] **品牌重命名残留**（当前仅 manifest 的 `name` 改了，以下仍写 `team-flow`）：
+  - `package.json` 的 `"name": "team-flow"`（npm 包名；bin 暴露 `tf` 与 `team-flow`）。建议保留 bin `tf`，包名可改 `team-flow`。
+  - `GEMINI.md` 第 1/3/5 行、`llms.txt` 第 1/3-5 行、`.claude/always/phase-guard.md` 第 1 行头部 `# team-flow v0.10.0 |`（**注意**：`check-version-consistency.mjs` 的 GEMINI/phase-guard 版本正则硬编码了 `team-flow`，若改头部须同步改该脚本的正则，否则一致性检查会失败）。
+  - `INSTALL.md` 的 marketplace 命令 `MageByte-Zero/team-flow`、`/plugin install team-flow@team-flow`（第 44-45、53 行等）—— 要发布到 Claude Code marketplace 前必须替换。
+  - 各 team-flow skill 内 `npx --yes --package team-flow@0.10.0 tf`（由 `check-version-consistency.mjs` 的 RUNTIME_FILES 校验，必须保持 `team-flow@0.10.0` 直到 team-flow 发布到 npm）。
+- [ ] **实测 v0.3 修正 A**：验证 `tf runtime config --get prototype.designSystem` 真能读到扩展字段（当前未跑，是设计假设）。
 
 ### P1 —— 质量与发布
 - [ ] 跑通 `npm test` 与 `npm run validate`（开发期尚未执行，确认底座未因复制/改名损坏）。
 - [ ] 验证 17 个 skill 被 Claude Code 与各宿主正确发现加载（`.claude-plugin/plugin.json` 的 `skills: "./skills/"` 路径）。
-- [ ] 更新 `CHANGELOG.md`（当前仍为 spec-superflow 历史）。
+- [ ] 更新 `CHANGELOG.md`（当前仍为 team-flow 历史）。
 - [ ] 补一张团队 flow 图（可选）。
 
 ### P2 —— 语义与发布决策
-- [ ] **版本语义**：当前 0.10.0 对齐 base。要 bump 到 team-flow 自有 semver（如 0.1.0）时，须：① `npm run version <x.y.z>`（会跑 `ssf version` + `check-version-consistency` + 改所有 manifest + 文本戳）；② 同步改 README/INSTALL/`docs/README_en.md`/`hooks/session-start`/`llms.txt`/GEMINI.md/phase-guard.md 里的版本戳；③ 把 `npx spec-superflow@` 改 `npx team-flow@`（需先 `npm publish`）。
+- [ ] **版本语义**：当前 0.10.0 对齐 base。要 bump 到 team-flow 自有 semver（如 0.1.0）时，须：① `npm run version <x.y.z>`（会跑 `tf version` + `check-version-consistency` + 改所有 manifest + 文本戳）；② 同步改 README/INSTALL/`docs/README_en.md`/`hooks/session-start`/`llms.txt`/GEMINI.md/phase-guard.md 里的版本戳；③ 把 `npx team-flow@` 改 `npx team-flow@`（需先 `npm publish`）。
 - [ ] **注册到平台**：`ima_skill_create` 仅注册单个 skill（非插件）；team-flow 作为 plugin.json 插件通过宿主 `/plugin add` 安装，不通过 ima 平台注册。不要在未明需求时调用 `ima_skill_create`。
 
 ---
@@ -214,6 +214,6 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 
 - `team-flow/` —— 统一插件工程（本 handoff 的载体）。
 - `architecture-api-db-design-enhancement-v0.3.md` / `prototype-design-research.md` —— 权威设计文档（已复制进 `team-flow/docs/`）。
-- `spec-superflow/`、`compound-engineering/`、`spec-superflow-main/`、`compound-engineering-plugin-main/` —— 上游源工程（参考/溯源用）。
-- `ce.zip` / `spec-superflow.zip` —— 上游源 zip（溯源用）。
+- `team-flow/`、`compound-engineering/`、`team-flow-main/`、`compound-engineering-plugin-main/` —— 上游源工程（参考/溯源用）。
+- `ce.zip` / `team-flow.zip` —— 上游源 zip（溯源用）。
 - `skills/architecture-design/`、`architecture-design-source/` —— 蒸馏源（已并入 team-flow/skills/architecture-design）。

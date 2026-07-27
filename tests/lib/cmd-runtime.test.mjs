@@ -8,7 +8,7 @@ import { join, delimiter } from 'node:path';
 import { tmpdir } from 'node:os';
 
 const ROOT = process.cwd();
-const CLI = join(ROOT, 'scripts', 'spec-superflow.mjs');
+const CLI = join(ROOT, 'scripts', 'team-flow.mjs');
 const tempDirs = [];
 
 afterEach(() => {
@@ -25,7 +25,7 @@ function runRuntime(args, options = {}) {
   });
 }
 
-describe('ssf runtime', () => {
+describe('tf runtime', () => {
   it('reads approved assets from the package root without a plugin-root environment variable', () => {
     const result = runRuntime(['asset', 'read', 'templates/execution-contract.md'], {
       env: { CLAUDE_PLUGIN_ROOT: '', PLUGIN_ROOT: '' },
@@ -43,7 +43,7 @@ describe('ssf runtime', () => {
   });
 
   it('dispatches infer and guard while preserving their established output', () => {
-    const infer = runRuntime(['infer', '/tmp/ssf-runtime-missing-change']);
+    const infer = runRuntime(['infer', '/tmp/tf-runtime-missing-change']);
     const guard = runRuntime(['guard', 'check', 'docs/examples/add-dark-mode', 'exploring', 'specifying', '--json']);
 
     assert.equal(infer.status, 0, infer.stderr);
@@ -53,7 +53,7 @@ describe('ssf runtime', () => {
   });
 
   it('provides read-only config and rejects config writes', () => {
-    const tempDir = mkdtempSync(join(tmpdir(), 'ssf-runtime-config-'));
+    const tempDir = mkdtempSync(join(tmpdir(), 'tf-runtime-config-'));
     tempDirs.push(tempDir);
     const read = runRuntime(['config', '--get', 'execution.inlineThreshold'], { cwd: tempDir });
     const write = runRuntime(['config', '--set', 'execution.inlineThreshold=99'], { cwd: tempDir });
@@ -64,8 +64,8 @@ describe('ssf runtime', () => {
     assert.match(write.stderr, /read-only|--set/i);
   });
 
-  it('uses the existing update-check result without requiring a global ssf command', () => {
-    const tempDir = mkdtempSync(join(tmpdir(), 'ssf-runtime-update-'));
+  it('uses the existing update-check result without requiring a global tf command', () => {
+    const tempDir = mkdtempSync(join(tmpdir(), 'tf-runtime-update-'));
     tempDirs.push(tempDir);
     const binDir = join(tempDir, 'bin');
     const fakeNpm = join(binDir, 'npm');

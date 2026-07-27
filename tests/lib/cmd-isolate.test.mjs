@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
 const ROOT = process.cwd();
-const CLI = join(ROOT, 'scripts', 'spec-superflow.mjs');
+const CLI = join(ROOT, 'scripts', 'team-flow.mjs');
 const ENSURE = join(ROOT, 'scripts', 'ensure-branch.mjs');
 const tempDirs = [];
 
@@ -19,7 +19,7 @@ afterEach(() => {
 });
 
 function runIsolate(args) {
-  const tempDir = mkdtempSync(join(tmpdir(), 'ssf-cmd-isolate-'));
+  const tempDir = mkdtempSync(join(tmpdir(), 'tf-cmd-isolate-'));
   tempDirs.push(tempDir);
   const binDir = join(tempDir, 'bin');
   const capture = join(tempDir, 'argv.txt');

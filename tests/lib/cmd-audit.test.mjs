@@ -12,7 +12,7 @@ describe('cmd-audit: generateReport()', () => {
   let generateReport, DP_NAMES;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-audit-test-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-audit-test-'));
     const modulePath = join(process.cwd(), 'scripts/lib/cmd-audit.mjs');
     const mod = await import(modulePath);
     generateReport = mod.generateReport;

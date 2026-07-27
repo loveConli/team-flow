@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // check-version-consistency.mjs — CI guard: fail if any file has a version
-// that doesn't match package.json. Prevents doc/code drift after ssf version.
+// that doesn't match package.json. Prevents doc/code drift after tf version.
 //
 // Usage:
 //   node scripts/check-version-consistency.mjs          # check only (exit 1 on mismatch)
@@ -69,8 +69,8 @@ const TEXT_CHECKS = [
   { file: 'docs/README_en.md',      extract: /Current: `v(\d+\.\d+\.\d+)`/ },
   { file: 'hooks/session-start',    extract: /# v(\d+\.\d+\.\d+): conditional injection/ },
   { file: 'llms.txt',               extract: /Current version: v(\d+\.\d+\.\d+)\./ },
-  { file: '.claude/always/phase-guard.md', extract: /# spec-superflow v(\d+\.\d+\.\d+) \|/ },
-  { file: 'GEMINI.md',              extract: /# spec-superflow v(\d+\.\d+\.\d+) \|/ },
+  { file: '.claude/always/phase-guard.md', extract: /# team-flow v(\d+\.\d+\.\d+) \|/ },
+  { file: 'GEMINI.md',              extract: /# team-flow v(\d+\.\d+\.\d+) \|/ },
 ];
 
 for (const check of TEXT_CHECKS) {
@@ -102,7 +102,7 @@ for (const file of RUNTIME_FILES) {
     errors.push({ file, found: 'FILE_NOT_FOUND', expected: CANONICAL });
     continue;
   }
-  const versions = [...readFileSync(fp, 'utf8').matchAll(/npx --yes --package spec-superflow@(\d+\.\d+\.\d+) ssf/g)]
+  const versions = [...readFileSync(fp, 'utf8').matchAll(/npx --yes --package team-flow@(\d+\.\d+\.\d+) tf/g)]
     .map(match => match[1]);
   if (versions.length === 0) {
     errors.push({ file, found: 'RUNTIME_PREFIX_NOT_FOUND', expected: CANONICAL });
@@ -183,7 +183,7 @@ for (const check of SKILL_COUNT_TEXT_CHECKS) {
 }
 
 // ── npx version reference consistency ──
-// Scan every skills/*/SKILL.md for `spec-superflow@X.Y.Z` references and ensure
+// Scan every skills/*/SKILL.md for `team-flow@X.Y.Z` references and ensure
 // each one matches the canonical version. Catches stale npx pins in any skill —
 // broader than RUNTIME_FILES above, which only covers the known runtime set.
 const SKILL_MD_FILES = skillDirs
@@ -219,7 +219,7 @@ for (const file of ALL_SCANNABLE_FILES) {
   if (!existsSync(fp)) continue;
 
   const content = readFileSync(fp, 'utf-8');
-  const versions = [...content.matchAll(/spec-superflow@(\d+\.\d+\.\d+)/g)]
+  const versions = [...content.matchAll(/team-flow@(\d+\.\d+\.\d+)/g)]
     .map(match => match[1]);
   const stale = [...new Set(versions)].filter(version => version !== CANONICAL);
 
@@ -228,7 +228,7 @@ for (const file of ALL_SCANNABLE_FILES) {
       // Auto-fix: update all stale npx references
       let newContent = content;
       for (const oldVer of stale) {
-        newContent = newContent.replaceAll(`spec-superflow@${oldVer}`, `spec-superflow@${CANONICAL}`);
+        newContent = newContent.replaceAll(`team-flow@${oldVer}`, `team-flow@${CANONICAL}`);
       }
       writeFileSync(fp, newContent, 'utf-8');
       fixes.push(`${file}: ${stale.join(', ')} → ${CANONICAL}`);

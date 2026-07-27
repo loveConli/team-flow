@@ -5,7 +5,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-const CLI = join(process.cwd(), 'scripts/spec-superflow.mjs');
+const CLI = join(process.cwd(), 'scripts/team-flow.mjs');
 const LEGACY = join(process.cwd(), 'scripts/validate-artifacts');
 let tempRoot;
 
@@ -30,14 +30,14 @@ function writeValidSpec(file) {
 
 describe('validate commands: spec paths', () => {
   before(() => {
-    tempRoot = mkdtempSync(join(tmpdir(), 'ssf-validate-paths-'));
+    tempRoot = mkdtempSync(join(tmpdir(), 'tf-validate-paths-'));
   });
 
   after(() => {
     if (tempRoot) rmSync(tempRoot, { recursive: true, force: true });
   });
 
-  it('ssf validate rejects flat specs/<capability>.md', () => {
+  it('tf validate rejects flat specs/<capability>.md', () => {
     const dir = mkdtempSync(join(tempRoot, 'flat-'));
     writeBaseChange(dir);
     mkdirSync(join(dir, 'specs'), { recursive: true });
@@ -59,7 +59,7 @@ describe('validate commands: spec paths', () => {
     assert.match(result.stdout + result.stderr, /No canonical spec files found/);
   });
 
-  it('ssf validate rejects a change with no specs/ directory', () => {
+  it('tf validate rejects a change with no specs/ directory', () => {
     const dir = mkdtempSync(join(tempRoot, 'missing-specs-cli-'));
     writeBaseChange(dir);
 
@@ -77,7 +77,7 @@ describe('validate commands: spec paths', () => {
     assert.match(result.stdout + result.stderr, /No canonical spec files found/);
   });
 
-  it('ssf validate accepts canonical specs/<capability>/spec.md', () => {
+  it('tf validate accepts canonical specs/<capability>/spec.md', () => {
     const dir = mkdtempSync(join(tempRoot, 'canonical-'));
     writeBaseChange(dir);
     mkdirSync(join(dir, 'specs', 'ui-theme'), { recursive: true });

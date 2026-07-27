@@ -1,6 +1,6 @@
 # Artifact Contract
 
-`spec-superflow` uses five primary artifacts in each change:
+`team-flow` uses five primary artifacts in each change:
 
 1. `proposal.md`
 2. `specs/`
@@ -57,27 +57,27 @@ Defines:
 - review gates and their review receipts
 - escalation rules
 
-For full/hotfix, `ssf execution recommend` lists applicable execution modes and
+For full/hotfix, `tf execution recommend` lists applicable execution modes and
 recommends one from task count and wave strategy, and persists a recommendation
 receipt at `<change>/.superpowers/sdd/execution-recommendation.json`. `plan`
 and `revise` require the receipt to match the current artifacts, contract, and
 waves. The user confirms the selected mode with `--confirm`; a non-recommended mode additionally requires
 `--acknowledge-recommendation`. Batch Inline remains serial. After approval,
-`ssf execution plan` writes
+`tf execution plan` writes
 the persisted execution plan to `<change>/.superpowers/sdd/execution-plan.json`.
 That JSON records each wave's dependencies and parallel/serial strategy; it is
 not stored in `execution-contract.md`. A current `pass` review receipt is
 required for every wave before dependent work or closing proceeds. `tweak` is
-exempt from execution-plan and review-receipt gates. `ssf execution revise`
+exempt from execution-plan and review-receipt gates. `tf execution revise`
 retains or upgrades an existing plan as `sdd`, requires fresh confirmation,
 creates a new revision, and
 clears prior review receipts; it never permits a downgrade. #47 slash commands for recovery,
-switching, and manual save are not implemented, so `/ssf:*` commands must not
+switching, and manual save are not implemented, so `/tf:*` commands must not
 be claimed.
 
 ## Mapping
 
-`spec-superflow` converts planning artifacts into execution inputs:
+`team-flow` converts planning artifacts into execution inputs:
 
 - `proposal.md` -> intent lock and scope fence
 - `specs/` -> test obligations and acceptance checks
@@ -91,6 +91,6 @@ Implementation starts only after:
 - planning artifacts exist
 - `execution-contract.md` exists
 - the user approves the execution contract
-- full/hotfix have a current `ssf execution plan` with a user-confirmed mode and
+- full/hotfix have a current `tf execution plan` with a user-confirmed mode and
   persisted recommendation evidence
 - every completed wave records a current `pass` review receipt before closing

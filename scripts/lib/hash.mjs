@@ -51,7 +51,7 @@ export function computeContractHash(changeDir) {
 
 // Fast staleness check: compare stored artifacts_hash against current.
 export function isContractFresh(changeDir, stateLoader) {
-  const stateFile = path.join(changeDir, '.spec-superflow.yaml');
+  const stateFile = path.join(changeDir, '.team-flow.yaml');
   if (!fs.existsSync(stateFile)) return false;
 
   const raw = fs.readFileSync(stateFile, 'utf-8');

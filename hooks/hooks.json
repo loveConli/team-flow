@@ -1,5 +1,5 @@
 {
-  "description": "spec-superflow workflow hooks - session-start context injection + pre-tool-use implementation-edit state guard",
+  "description": "team-flow workflow hooks - session-start context injection + pre-tool-use implementation-edit state guard",
   "hooks": {
     "SessionStart": [
       {

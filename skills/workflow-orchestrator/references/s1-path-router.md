@@ -60,7 +60,7 @@ S1 只做编排动作（需求选择、存在性检查、路径判断、阻塞�
 
 ## 「继续执行」状态恢复简报
 
-读取活跃需求的 `orchestrator.yaml` 的 `change_dag`，汇总各 change 状态（从各 change 的 `.spec-superflow.yaml` 同步；计划 v1.0.0 改名为 `.team-flow.yaml`），输出简报后由用户选择下一步（**支持跳过被阻塞的 change**）：
+读取活跃需求的 `orchestrator.yaml` 的 `change_dag`，汇总各 change 状态（从各 change 的 `.team-flow.yaml` 同步；计划 v1.0.0 改名为 `.team-flow.yaml`），输出简报后由用户选择下一步（**支持跳过被阻塞的 change**）：
 
 ```
 状态恢复简报：

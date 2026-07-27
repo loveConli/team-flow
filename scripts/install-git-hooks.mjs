@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// install-git-hooks.mjs — install git hooks for spec-superflow repo
+// install-git-hooks.mjs — install git hooks for team-flow repo
 // Run with: npm run setup-hooks  (or node scripts/install-git-hooks.mjs)
 //
 // Installs a pre-commit hook that checks version consistency.
@@ -21,7 +21,7 @@ const HOOKS_DIR = resolve(ROOT, execFileSync('git', ['rev-parse', '--git-path', 
 const HOOK_PATH = join(HOOKS_DIR, 'pre-commit');
 
 const HOOK_SCRIPT = `#!/bin/sh
-# spec-superflow pre-commit hook — auto-check and fix version consistency
+# team-flow pre-commit hook — auto-check and fix version consistency
 # Installed by: npm run setup-hooks
 # Features:
 #   1. Run check-version-consistency (blocking on version mismatch)
@@ -60,16 +60,16 @@ if (!existsSync(HOOKS_DIR)) {
   process.exit(1);
 }
 
-// Preserve an unrelated hook, but upgrade an older spec-superflow hook.
-const MARKER = '# spec-superflow pre-commit hook';
+// Preserve an unrelated hook, but upgrade an older team-flow hook.
+const MARKER = '# team-flow pre-commit hook';
 if (existsSync(HOOK_PATH)) {
   const existing = readFileSync(HOOK_PATH, 'utf-8');
   if (existing.includes(MARKER)) {
     if (existing === HOOK_SCRIPT) {
-      console.log('✅ Pre-commit hook already installed (spec-superflow).');
+      console.log('✅ Pre-commit hook already installed (team-flow).');
       process.exit(0);
     }
-    console.log('♻️  Updating existing pre-commit hook (spec-superflow).');
+    console.log('♻️  Updating existing pre-commit hook (team-flow).');
   } else {
     console.log('⚠️  Existing pre-commit hook found. Backing up to pre-commit.backup ...');
     writeFileSync(`${HOOK_PATH}.backup`, existing);

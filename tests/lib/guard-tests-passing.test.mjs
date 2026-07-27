@@ -15,10 +15,10 @@ import { dirname } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
 const GUARD = join(ROOT, 'scripts', 'guard', 'guard.mjs');
-const CLI = join(ROOT, 'scripts', 'spec-superflow.mjs');
+const CLI = join(ROOT, 'scripts', 'team-flow.mjs');
 
 function makeChangeDir() {
-  const dir = mkdtempSync(join(tmpdir(), 'ssf-tests-passing-'));
+  const dir = mkdtempSync(join(tmpdir(), 'tf-tests-passing-'));
   mkdirSync(join(dir, 'specs'), { recursive: true });
   writeFileSync(join(dir, 'proposal.md'), '# Test\n\n## Why\nTest.\n\n## What Changes\n- Test.\n');
   writeFileSync(join(dir, 'design.md'), '# Design\n\n## Context\nTest.\n\n## Goals\nTest.\n\n## Decisions\n\n### Decision 1\n- Choice: Test\n- Rationale: Test\n\n## Risks And Trade-Offs\nNone.\n');
@@ -60,7 +60,7 @@ function runClosingGuard(dir, extraState = '') {
     // (The specs-merged dimension is covered separately in
     //  tests/lib/guard-specs-merged.test.mjs.)
     writeFileSync(
-      join(dir, '.spec-superflow.yaml'),
+      join(dir, '.team-flow.yaml'),
       `state: executing\nworkflow: full\nchange_name: test\nspec_merged: true\n${extraState}`,
     );
     rmSync(join(dir, '.superpowers'), { recursive: true, force: true });

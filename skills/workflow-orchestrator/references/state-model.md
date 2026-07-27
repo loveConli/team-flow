@@ -15,7 +15,7 @@
 ```
 
 - **迁移兼容**：检测到旧 `<root>/.workflow-orchestrator.yaml` 存在时，自动迁移到 `.team-flow/requirements/<req-id>/orchestrator.yaml` 并提示用户（一次性）。
-- **变更级状态**：各 change 的状态文件**当前仍为** `<change>/.spec-superflow.yaml`，检测逻辑不动；**计划 v1.0.0（P1-6 第二阶段）改名**为 `.team-flow.yaml`（对齐设计增强方案 v0.8 §18.3）。改名落地前，编排层与变更层一律以 `.spec-superflow.yaml` 为准。
+- **变更级状态**：各 change 的状态文件**当前仍为** `<change>/.team-flow.yaml`，检测逻辑不动；**计划 v1.0.0（P1-6 第二阶段）改名**为 `.team-flow.yaml`（对齐设计增强方案 v0.8 §18.3）。改名落地前，编排层与变更层一律以 `.team-flow.yaml` 为准。
 
 ## registry.yaml Schema
 
@@ -48,11 +48,11 @@ replan_log:                           # 重规划履历
 change_dag:                           # change 依赖图（S4 后填充）
   - id: change-1
     change_dir: changes/change-1/                      # 项目根 changes/<change-name>/（非 specs/，非 .team-flow/）
-    state_file: changes/change-1/.spec-superflow.yaml   # 变更级状态文件（P1-6 第二阶段 v1.0.0 改名为 .team-flow.yaml）
+    state_file: changes/change-1/.team-flow.yaml   # 变更级状态文件（P1-6 第二阶段 v1.0.0 改名为 .team-flow.yaml）
     depends_on: []
     priority: 1
     parallel_group: A                 # 同组可并行
-    status: executing                 # 从 .spec-superflow.yaml 同步（计划 v1.0.0 改名 .team-flow.yaml）
+    status: executing                 # 从 .team-flow.yaml 同步（计划 v1.0.0 改名 .team-flow.yaml）
   - id: change-2
     depends_on: [change-1]
     status: pending
@@ -96,7 +96,7 @@ S4 后填充。每个节点字段：
 - `depends_on`：依赖的 change id 列表（构成 DAG）
 - `priority`：优先级数值
 - `parallel_group`：同组可并行（如 A、B）
-- `status`：从该 change 的 `.spec-superflow.yaml` 同步（变更级状态文件，P1-6 第二阶段改名 `.team-flow.yaml`）
+- `status`：从该 change 的 `.team-flow.yaml` 同步（变更级状态文件，P1-6 第二阶段改名 `.team-flow.yaml`）
 
 ## yaml 定位与并发约束
 
@@ -104,7 +104,7 @@ S4 后填充。每个节点字段：
 - **幂等恢复**：S1「继续执行」入口通过 yaml + 制品实际存在性双重校验重建状态
 - **多需求隔离（v0.15.0）**：每个需求的 `orchestrator.yaml` 只由该需求的 orchestrator 实例单写——多需求并行时**天然隔离，无写冲突**（原「单写者」约束自动成立）。
 - **registry 写入**：`registry.yaml` 只在需求创建/切换/状态快照时由 orchestrator 写，频率低。
-- **变更级单写者**：各 change 只写自己的状态文件（当前 `.spec-superflow.yaml`，P1-6 第二阶段改名 `.team-flow.yaml`），避免并发写冲突。
+- **变更级单写者**：各 change 只写自己的状态文件（当前 `.team-flow.yaml`，P1-6 第二阶段改名 `.team-flow.yaml`），避免并发写冲突。
 
 ---
 

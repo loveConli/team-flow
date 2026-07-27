@@ -22,7 +22,7 @@ beforeEach(() => {
   writeFileSync(join(changeDir, 'tasks.md'), '# Tasks\n\n- [ ] 1.1 Original task text\n');
   writeFileSync(join(changeDir, 'proposal.md'), '# Proposal\n\nA valid proposal.\n');
   writeFileSync(join(changeDir, 'design.md'), '# Design\n\nA valid design.\n');
-  writeFileSync(join(changeDir, '.spec-superflow.yaml'), 'state: executing\nworkflow: auto\n');
+  writeFileSync(join(changeDir, '.team-flow.yaml'), 'state: executing\nworkflow: auto\n');
 });
 
 afterEach(() => {

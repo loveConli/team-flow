@@ -20,7 +20,7 @@
 
 ### 1. 进度跟踪
 
-通过各 change 的 `.spec-superflow.yaml` 状态同步到 `.team-flow/requirements/<req-id>/orchestrator.yaml` 的 `change_dag[].status`。
+通过各 change 的 `.team-flow.yaml` 状态同步到 `.team-flow/requirements/<req-id>/orchestrator.yaml` 的 `change_dag[].status`。
 
 ### 2. 跨 change 一致性检测
 
@@ -34,7 +34,7 @@
 change closing 时检查经验晋升（change 内经验 → 产品级经验）：
 
 ```bash
-npx --yes --package spec-superflow@0.22.2 ssf solutions promote <change-dir>
+npx --yes --package team-flow@0.22.3 tf solutions promote <change-dir>
 ```
 
 ### 4. 动态重规划触发

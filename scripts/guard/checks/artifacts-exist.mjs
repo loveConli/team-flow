@@ -7,7 +7,7 @@ import { validateSpecPathLayout } from '../../lib/spec-paths.mjs';
 /**
  * Check that required planning artifacts exist and are non-empty,
  * and that the specs/ directory has at least one spec file.
- * Honors artifacts.skip from spec-superflow.config.json.
+ * Honors artifacts.skip from team-flow.config.json.
  */
 export function checkArtifactsExist(changeDir) {
   const failures = [];

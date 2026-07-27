@@ -1,28 +1,28 @@
 ---
 name: workflow-start
-description: Primary entry point for the spec-superflow state-machine workflow. Invoke when the user is inside an active spec-superflow change directory (look for .spec-superflow.yaml, changes/<name>/, proposal.md, specs/, design.md, tasks.md, or execution-contract.md) and asks to start, continue, resume, implement, plan, or figure out the next workflow step. Also invoke when the user explicitly asks to start a new spec-superflow change or route through the spec-superflow workflow. Do not invoke for unrelated coding tasks that happen to use words like start, continue, implement, or plan.
+description: Primary entry point for the team-flow state-machine workflow. Invoke when the user is inside an active team-flow change directory (look for .team-flow.yaml, changes/<name>/, proposal.md, specs/, design.md, tasks.md, or execution-contract.md) and asks to start, continue, resume, implement, plan, or figure out the next workflow step. Also invoke when the user explicitly asks to start a new team-flow change or route through the team-flow workflow. Do not invoke for unrelated coding tasks that happen to use words like start, continue, implement, or plan.
 ---
 
 # Workflow Start
 
-Primary entry point for `spec-superflow`. Jobs: inspect change context, check for updates, confirm DP-0, determine state, route to correct skill, block invalid transitions.
+Primary entry point for `team-flow`. Jobs: inspect change context, check for updates, confirm DP-0, determine state, route to correct skill, block invalid transitions.
 
 ## Use This Skill When
 
-Only invoke when spec-superflow context is present: `.spec-superflow.yaml` exists, artifacts like `proposal.md`/`specs/`/`design.md`/`tasks.md`/`execution-contract.md` are present, or user explicitly invokes spec-superflow by name. When in doubt, check for `.spec-superflow.yaml` first.
+Only invoke when team-flow context is present: `.team-flow.yaml` exists, artifacts like `proposal.md`/`specs/`/`design.md`/`tasks.md`/`execution-contract.md` are present, or user explicitly invokes team-flow by name. When in doubt, check for `.team-flow.yaml` first.
 
-Do NOT invoke for: general coding tasks outside spec-superflow changes, casual questions, unrelated work.
+Do NOT invoke for: general coding tasks outside team-flow changes, casual questions, unrelated work.
 
 ## States
 
-`exploring` → `specifying` → `bridging` → `approved-for-build` → `executing` → `closing`, with `debugging` side-path from `executing`, and `abandoned` as terminal. If a transition is ambiguous, run `npx --yes --package spec-superflow@0.22.2 ssf runtime asset read docs/state-machine.md`.
+`exploring` → `specifying` → `bridging` → `approved-for-build` → `executing` → `closing`, with `debugging` side-path from `executing`, and `abandoned` as terminal. If a transition is ambiguous, run `npx --yes --package team-flow@0.22.3 tf runtime asset read docs/state-machine.md`.
 
 ## Initialization
 
-1. **Update check**: Run `npx --yes --package spec-superflow@0.22.2 ssf runtime check-update`. Exit 0 → continue. Exit 1 → non-blocking upgrade reminder. Exit 2 → skip.
+1. **Update check**: Run `npx --yes --package team-flow@0.22.3 tf runtime check-update`. Exit 0 → continue. Exit 1 → non-blocking upgrade reminder. Exit 2 → skip.
 2. **Inspect change folder**: Check for `proposal.md`, `specs/`, `design.md`, `tasks.md`, `execution-contract.md`. Answer: Is the change fuzzy? Artifacts missing/unstable? Contract exist? User approved contract? Execution in progress or blocked? In verification/wrap-up?
-3. **Overlay recovery scan**: Run `npx --yes --package spec-superflow@0.22.2 ssf handoff list <change-dir> --json` and `npx --yes --package spec-superflow@0.22.2 ssf checkpoint list <change-dir> --json`. A `result-ready` handoff requires explicit review and `npx --yes --package spec-superflow@0.22.2 ssf handoff resolve` before resuming the affected work. An `active` handoff is non-blocking side work. Show a non-stale checkpoint as recovery context; show a stale checkpoint only as historical evidence.
-4. **Execution-control recovery scan**: For `approved-for-build`, `executing`, `debugging`, or `closing`, run `npx --yes --package spec-superflow@0.22.2 ssf execution show <change-dir> --json`. Treat only `current: true` plus `waves[].eligible: true` as permission to start a wave; report plan revision, mode, next eligible wave, and every wave's receipt/blockers. A missing, invalid, or stale plan blocks implementation and routes to `build-executor`; do not infer progress from chat history.
+3. **Overlay recovery scan**: Run `npx --yes --package team-flow@0.22.3 tf handoff list <change-dir> --json` and `npx --yes --package team-flow@0.22.3 tf checkpoint list <change-dir> --json`. A `result-ready` handoff requires explicit review and `npx --yes --package team-flow@0.22.3 tf handoff resolve` before resuming the affected work. An `active` handoff is non-blocking side work. Show a non-stale checkpoint as recovery context; show a stale checkpoint only as historical evidence.
+4. **Execution-control recovery scan**: For `approved-for-build`, `executing`, `debugging`, or `closing`, run `npx --yes --package team-flow@0.22.3 tf execution show <change-dir> --json`. Treat only `current: true` plus `waves[].eligible: true` as permission to start a wave; report plan revision, mode, next eligible wave, and every wave's receipt/blockers. A missing, invalid, or stale plan blocks implementation and routes to `build-executor`; do not infer progress from chat history.
 
 ## DP-0: User Confirmation Gate
 
@@ -36,17 +36,17 @@ Ask (manual path): change name + one-sentence intent, known constraints, related
 
 After confirmation:
 ```bash
-npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_0_decisions "<summary>"
-npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_0_result confirmed
-npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_0_confirmed true
-npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package team-flow@0.22.3 tf state set <change-dir> dp_0_decisions "<summary>"
+npx --yes --package team-flow@0.22.3 tf state set <change-dir> dp_0_result confirmed
+npx --yes --package team-flow@0.22.3 tf state set <change-dir> dp_0_confirmed true
+npx --yes --package team-flow@0.22.3 tf state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 
 Config-aware routing: check `artifacts.order` and `artifacts.skip` from project config.
 
 ## Mode Detection
 
-If workflow is `auto`/`null`/unset: run `npx --yes --package spec-superflow@0.22.2 ssf runtime infer <change-dir>`. Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **tweak** (≤4 tasks, config/doc only), **full** (anything larger). Persist with `npx --yes --package spec-superflow@0.22.2 ssf state set <dir> workflow <mode>`.
+If workflow is `auto`/`null`/unset: run `npx --yes --package team-flow@0.22.3 tf runtime infer <change-dir>`. Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **tweak** (≤4 tasks, config/doc only), **full** (anything larger). Persist with `npx --yes --package team-flow@0.22.3 tf state set <dir> workflow <mode>`.
 
 Validate mode against artifact content. If hotfix/tweak criteria not met → upgrade to `full` and output reason. Don't overwrite explicit mode unless user asks.
 
@@ -56,22 +56,22 @@ Validate mode against artifact content. If hotfix/tweak criteria not met → upg
 Change is fuzzy, scope unclear, comparing options, no stable change name.
 
 ### Route to architecture-design (v0.9 §26)
-Guard: `arch_design_decision` in `.spec-superflow.yaml` is `null` → must run before spec-writer. Dispatch `architecture-design` as sub-agent; after return, run reasonableness check and write yaml. Full protocol in `references/routing-rules.md`「Route to architecture-design」.
+Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before spec-writer. Dispatch `architecture-design` as sub-agent; after return, run reasonableness check and write yaml. Full protocol in `references/routing-rules.md`「Route to architecture-design」.
 
 ### Route to spec-writer
-Guard: `npx --yes --package spec-superflow@0.22.2 ssf runtime guard check <dir> exploring specifying --json` → fail = BLOCK. **arch_design_decision must not be null** → fail = BLOCK (v0.9 §26). User knows what they want, artifacts missing/incomplete.
+Guard: `npx --yes --package team-flow@0.22.3 tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK. **arch_design_decision must not be null** → fail = BLOCK (v0.9 §26). User knows what they want, artifacts missing/incomplete.
 
 ### Route to contract-builder
 Guard: `... check <dir> specifying bridging --json` → fail = BLOCK. Artifacts exist, implementation requested, contract missing/stale. Include `DP-3: 契约批准`.
 
 ### Route to build-executor
-Contract exists and approved, contract matches artifacts. Include `DP-4: 执行模式选择`: propose waves, run `npx --yes --package spec-superflow@0.22.2 ssf execution recommend <change-dir> [--wave ...]`, show the user every available mode plus evidence and the recommendation, then obtain a clear selection. The command saves a current receipt; before the first implementation edit, `build-executor` must run `npx --yes --package spec-superflow@0.22.2 ssf execution plan <change-dir> --mode <selected> --confirm ...` (and `--acknowledge-recommendation` when the selected mode differs from the recommendation) using matching artifacts, contract, and waves, then `npx --yes --package spec-superflow@0.22.2 ssf execution show <change-dir> --json`; report the saved revision, selected mode, recommendation alignment, ordered waves, and actual concurrent-dispatch capability. A revision must repeat recommend and confirmation. Do not transition to `executing` until `show` reports `current: true`; then run `... check <dir> approved-for-build executing --json` → fail = BLOCK.
+Contract exists and approved, contract matches artifacts. Include `DP-4: 执行模式选择`: propose waves, run `npx --yes --package team-flow@0.22.3 tf execution recommend <change-dir> [--wave ...]`, show the user every available mode plus evidence and the recommendation, then obtain a clear selection. The command saves a current receipt; before the first implementation edit, `build-executor` must run `npx --yes --package team-flow@0.22.3 tf execution plan <change-dir> --mode <selected> --confirm ...` (and `--acknowledge-recommendation` when the selected mode differs from the recommendation) using matching artifacts, contract, and waves, then `npx --yes --package team-flow@0.22.3 tf execution show <change-dir> --json`; report the saved revision, selected mode, recommendation alignment, ordered waves, and actual concurrent-dispatch capability. A revision must repeat recommend and confirmation. Do not transition to `executing` until `show` reports `current: true`; then run `... check <dir> approved-for-build executing --json` → fail = BLOCK.
 
 ### Route to bug-investigator
 Execution hit blockage: test failure, unexpected behavior, build error, task cannot proceed. After debugging, route back to build-executor.
 
 ### Route to code-reviewer
-The current planned wave is implemented and ready for spec-compliance + code-quality verification. A reviewer must write an `npx --yes --package spec-superflow@0.22.2 ssf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>` receipt before any dependent wave or closing transition.
+The current planned wave is implemented and ready for spec-compliance + code-quality verification. A reviewer must write an `npx --yes --package team-flow@0.22.3 tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>` receipt before any dependent wave or closing transition.
 
 ### Route to release-archivist
 Guard: `... check <dir> executing closing --json` → fail = BLOCK. Implementation complete, verification complete/nearly complete. Include `DP-7: 归档确认`.
@@ -90,21 +90,21 @@ uncertainty. Do not create a prototype handoff or enter a prototype worktree
 until the user confirms. After confirmation:
 
 ```bash
-npx --yes --package spec-superflow@0.22.2 ssf handoff create <change-dir> \
+npx --yes --package team-flow@0.22.3 tf handoff create <change-dir> \
   --type prototype --objective "<confirmed objective>" \
   --expected-output "<expected evidence>" --acceptance "<completion criterion>"
-npx --yes --package spec-superflow@0.22.2 ssf isolate <change-dir> prototype-<handoff-id>
+npx --yes --package team-flow@0.22.3 tf isolate <change-dir> prototype-<handoff-id>
 ```
 
 Never suggest or enter this route automatically for backend, CLI, configuration,
-or internal-refactor work. Never pass `--force` to `ssf isolate` for prototype
+or internal-refactor work. Never pass `--force` to `tf isolate` for prototype
 work.
 
 ### Fast-Path Routing
 - **Hotfix**: Route to contract-builder (minimal), skip need-explorer + spec-writer, guard check `exploring bridging --workflow hotfix`, then `bridging -> approved-for-build`, after DP-3 → build-executor (recommend, show, and confirm an execution mode), after → release-archivist (lightweight). Hotfix may skip `proposal.md`, `design.md`, `tasks.md`, and `specs/`, but it still requires a fresh minimal `execution-contract.md`, DP-3 approval, and a current execution plan before build. **architecture-design 不豁免**（v0.9 §26）：同样过 architecture-design 子代理判断门，快速判定是否涉及架构变更（hotfix 可能正是架构缺陷导致）
 - **Tweak**: Route to build-executor (direct edit), skip need-explorer + spec-writer + contract-builder, guard check `exploring approved-for-build --workflow tweak`, after → release-archivist (lightweight). **architecture-design 不豁免**（v0.9 §26）：同样过 architecture-design 子代理判断门
 
-Post-transition: 💡 `npx --yes --package spec-superflow@0.22.2 ssf inject <change-dir>` to update phase-guard artifacts.
+Post-transition: 💡 `npx --yes --package team-flow@0.22.3 tf inject <change-dir>` to update phase-guard artifacts.
 
 ## Staleness Detection
 
@@ -116,12 +116,12 @@ Use content inspection, not timestamps.
 
 **Stale tasks**: requirement in specs has no corresponding task → stale tasks.
 
-**Brief drift (advisory, v0.9, 不阻断)**: change-brief.md 是上游输入（非 spec-superflow 产物），**不**混入上述三条产物互查、**不**进入 `artifacts_hash`。当 brief 的 `plan_hash` 与当前 `prd/vN/plan.md` 不一致，或 brief AC 列表与 PRD 功能清单明显出入 → 提示"产品层已变更，brief 可能过期，建议回 orchestrator 重新分发（S4→S3 环路）"，**不**触发产物重审。
+**Brief drift (advisory, v0.9, 不阻断)**: change-brief.md 是上游输入（非 team-flow 产物），**不**混入上述三条产物互查、**不**进入 `artifacts_hash`。当 brief 的 `plan_hash` 与当前 `prd/vN/plan.md` 不一致，或 brief AC 列表与 PRD 功能清单明显出入 → 提示"产品层已变更，brief 可能过期，建议回 orchestrator 重新分发（S4→S3 环路）"，**不**触发产物重审。
 
 ## Guardrails
 
 - No implementation before planning artifacts or contract exist
-- No implementation for full/hotfix without a current `npx --yes --package spec-superflow@0.22.2 ssf execution plan`; no state transition based on an unverified DP-4 string
+- No implementation for full/hotfix without a current `npx --yes --package team-flow@0.22.3 tf execution plan`; no state transition based on an unverified DP-4 string
 - No "continue" without state inspection
 - No implementation past stale contract
 - No implementation past bug without investigation
@@ -142,6 +142,6 @@ Decision point references when routing:
 
 ## Exception Handling
 
-- **Parse failures**: Fall back to content-level detection if `.spec-superflow.yaml` is malformed
+- **Parse failures**: Fall back to content-level detection if `.team-flow.yaml` is malformed
 - **Missing files**: Route to the skill that generates the missing files
 - **User interruption**: Re-inspect change directory content (not cached state) on resume

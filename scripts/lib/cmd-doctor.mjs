@@ -1,4 +1,4 @@
-// ssf doctor — health check for spec-superflow installation and project
+// tf doctor — health check for team-flow installation and project
 import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadConfig } from './config-loader.mjs';
@@ -102,9 +102,9 @@ function checkSkills(root) {
 }
 
 function localRuntimePaths(content) {
-  const doubleQuoted = [...content.matchAll(/node\s+"([^"]+\/scripts\/spec-superflow\.mjs)"/g)]
+  const doubleQuoted = [...content.matchAll(/node\s+"([^"]+\/scripts\/team-flow\.mjs)"/g)]
     .map(match => match[1]);
-  const singleQuoted = [...content.matchAll(/node\s+'(.+\/scripts\/spec-superflow\.mjs)'/g)]
+  const singleQuoted = [...content.matchAll(/node\s+'(.+\/scripts\/team-flow\.mjs)'/g)]
     .map(match => match[1].split("'\\''").join("'"));
   return [...doubleQuoted, ...singleQuoted];
 }
@@ -113,10 +113,10 @@ function checkRuntimeDistribution(root) {
   const pkg = readJsonIfExists(join(root, 'package.json'));
   const skillsDir = join(root, 'skills');
   if (!pkg?.version || !existsSync(skillsDir)) {
-    return { pass: false, message: 'runtime distribution cannot be checked: package.json or skills/ is missing; reinstall spec-superflow' };
+    return { pass: false, message: 'runtime distribution cannot be checked: package.json or skills/ is missing; reinstall team-flow' };
   }
 
-  const canonicalPrefix = `npx --yes --package spec-superflow@${pkg.version} ssf`;
+  const canonicalPrefix = `npx --yes --package team-flow@${pkg.version} tf`;
   const issues = [];
   for (const name of readdirSync(skillsDir)) {
     if (!RUNTIME_SKILLS.has(name)) continue;
@@ -138,7 +138,7 @@ function checkRuntimeDistribution(root) {
   }
 
   if (issues.length > 0) {
-    return { pass: false, message: `${issues.join('; ')}; reinstall or upgrade spec-superflow instead of editing skill files manually` };
+    return { pass: false, message: `${issues.join('; ')}; reinstall or upgrade team-flow instead of editing skill files manually` };
   }
   return { pass: true, message: `${PLATFORM_RUNTIME_INVENTORY.length} platforms inventoried; canonical skills and local runtime are resolvable` };
 }
@@ -224,7 +224,7 @@ export async function run(args) {
   const root = process.cwd();
   const config = loadConfig(root);
 
-  console.log('spec-superflow doctor:\n');
+  console.log('team-flow doctor:\n');
 
   const checks = [
     ['Version', checkVersionConsistency(root)],
@@ -239,7 +239,7 @@ export async function run(args) {
   ];
 
   // Config check
-  const configPath = join(root, 'spec-superflow.config.json');
+  const configPath = join(root, 'team-flow.config.json');
   if (existsSync(configPath)) {
     try {
       JSON.parse(readFileSync(configPath, 'utf-8'));

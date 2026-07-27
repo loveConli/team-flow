@@ -3,7 +3,7 @@
  * solutions-index-gen — 扫描 docs/solutions/<phase>/ 各阶段目录，重建 INDEX.md
  *
  * v0.5 复利贯穿机制脚本
- * 用法：ssf solutions index-gen [--dir <solutions-dir>]
+ * 用法：tf solutions index-gen [--dir <solutions-dir>]
  *
  * 功能：
  * 1. 扫描 docs/solutions/ 下所有子目录中的 .md 文件

@@ -1,10 +1,34 @@
 # Changelog
 
-All notable changes to `spec-superflow` will be documented in this file.
+All notable changes to `team-flow` will be documented in this file.
 
 The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
+
+## [0.22.3] - 2026-07-27
+
+### Changed（身份统一 spec-superflow → team-flow，P1-6 第二阶段）
+
+- **npm 包名**：`spec-superflow` → `team-flow`（package.json `name` 字段）
+- **CLI 前缀**：`ssf` → `tf`（package.json `bin` 字段，移除旧别名）
+- **状态文件**：`.spec-superflow.yaml` → `.team-flow.yaml`（全局替换）
+- **配置文件**：`spec-superflow.config.json` → `team-flow.config.json`
+- **CLI 脚本**：`scripts/spec-superflow.mjs` → `scripts/team-flow.mjs`（git mv）
+- **npx 引用**：99 处 `npx --yes --package spec-superflow@x.y.z ssf` → `npx --yes --package team-flow@x.y.z tf`
+- **全量引用迁移**：721+ 处跨 skills/、scripts/、tests/、docs/、README、INSTALL、AGENTS、templates/、plugin manifests 等完成 spec-superflow → team-flow 和 ssf → tf 的文本替换
+- **check-version-consistency.mjs**：RUNTIME_FILES 正则更新为匹配 `tf` 命令
+- **install 脚本（install-cursor/zcode/workbuddy）**：npx 替换正则同步更新
+- **dist/validation/tokenizer.js + src/validation/tokenizer.ts**：注释更新
+
+### Verified
+
+- check-version-consistency：✅ PASS（全部 0.22.3）
+- npm test：✅ 421/421 通过
+- Skill 计数一致性：✅ 23 skills（manifest 与实际目录匹配）
+- spec-superflow/ssf 残留扫描：✅ 零残留（排除 CHANGELOG 历史记录和 package-lock.json）
+
+---
 
 ## [0.22.2] - 2026-07-27
 
@@ -69,7 +93,7 @@ The format loosely follows Keep a Changelog.
 
 ### Added（会话交接 + 工作流反馈）
 
-- **session-handoff skill（设计增强方案 v0.8 §21.1）**：上下文腐化时将当前会话压缩为结构化交接文档（10 节），供新会话无缝继续。自动检测 `.team-flow/` 状态文件构建工作流快照；无状态文件时降级为通用 handoff。输出到 `.team-flow/handoffs/`（.gitignore，临时性质）。区别于 change 级 `ssf handoff`（任务委派）和 `.team-flow/` yaml（结构化状态自动恢复）。含 3 个 references（交接文档模板 / 上下文萃取规则 / skill 推荐矩阵）。
+- **session-handoff skill（设计增强方案 v0.8 §21.1）**：上下文腐化时将当前会话压缩为结构化交接文档（10 节），供新会话无缝继续。自动检测 `.team-flow/` 状态文件构建工作流快照；无状态文件时降级为通用 handoff。输出到 `.team-flow/handoffs/`（.gitignore，临时性质）。区别于 change 级 `tf handoff`（任务委派）和 `.team-flow/` yaml（结构化状态自动恢复）。含 3 个 references（交接文档模板 / 上下文萃取规则 / skill 推荐矩阵）。
 - **workflow-feedback skill（设计增强方案 v0.8 §21.2）**：工作流使用问题结构化记录（10 类分类），转化为可追踪的改进项。与 ce-compound 互补——ce-compound 是"经验沉淀端"，workflow-feedback 是"问题发现端"。输出到 `.team-flow/feedback/`（git 跟踪，改进输入持久化）。含 3 个 references（问题记录模板 / 分类指南 / 回顾模式信号识别）。
 - **release-archivist 收尾联动**：change 收尾时建议触发 workflow-feedback 回顾工作流问题。
 - **产物目录**：`.team-flow/handoffs/`（.gitignore）+ `.team-flow/feedback/`（git 跟踪）。
@@ -97,7 +121,7 @@ The format loosely follows Keep a Changelog.
 
 - **ce-plan 收窄**：模式强制询问（pipeline 下 orchestrator 问定后显式传 `plan_mode`，禁止隐式默认一人公司）；一人公司模式收窄到「高阶技术设计」，**删除接口清单段**（接口/字段/签名属各 change 的 spec-writer）；SKILL.md 顶部新增产品级/变更级作用边界硬声明。
 - **workflow-bootstrap B1 重构**：主代理只编排，先跑 `recon-probe.sh` 脚本再并行派发侦察子代理；SKILL.md 瘦身至 ≤150 行（细节进 `references/b1-reconnaissance.md`）。
-- **状态文件治理（P1-6 第一阶段）**：产品级编排状态迁入 `.team-flow/`（变更级 `.spec-superflow.yaml`→`.team-flow.yaml` 改名归 P1-6 第二阶段 v1.0.0，与 npm 包名/CLI 同批）。
+- **状态文件治理（P1-6 第一阶段）**：产品级编排状态迁入 `.team-flow/`（变更级 `.team-flow.yaml`→`.team-flow.yaml` 改名归 P1-6 第二阶段 v1.0.0，与 npm 包名/CLI 同批）。
 
 ### Fixed
 
@@ -107,28 +131,28 @@ The format loosely follows Keep a Changelog.
 
 ### Added
 
-- **#60 — Qoder 平台支持**：新增 `ssf install-qoder` 一键安装命令，部署 skills 到 `.qoder/skills/`、运行时依赖到 `.qoder/spec-superflow/`、phase-guard 规则到 `.qoder/rules/phase-guard.md`。采用共享库安装器模式（Pattern A），与 Cline/Kiro/Windsurf 等平台一致。平台支持数从 17 增至 18。
+- **#60 — Qoder 平台支持**：新增 `tf install-qoder` 一键安装命令，部署 skills 到 `.qoder/skills/`、运行时依赖到 `.qoder/team-flow/`、phase-guard 规则到 `.qoder/rules/phase-guard.md`。采用共享库安装器模式（Pattern A），与 Cline/Kiro/Windsurf 等平台一致。平台支持数从 17 增至 18。
 
 ## [0.9.1] - 2026-07-15
 
 ### Changed
 
-- **#52 — isolate optional name**: `ssf isolate <change-dir>` no longer forwards an absent optional name as the literal string `undefined`; explicit names and `--force` retain their existing behavior.
+- **#52 — isolate optional name**: `tf isolate <change-dir>` no longer forwards an absent optional name as the literal string `undefined`; explicit names and `--force` retain their existing behavior.
 - **#43 — portable skill runtime**: all nine canonical skills no longer require `${CLAUDE_PLUGIN_ROOT}`. Raw marketplace, cache, copy, and symlink loading use a semver-pinned package CLI; local installers rewrite that prefix to their bundled runtime tree.
-- **Cross-platform runtime diagnostics**: `ssf doctor` now detects stale root placeholders and missing runtime trees, while version sync and CI consistency checks include all nine canonical skill prefixes.
-- **Linked-worktree version hook**: `npm run setup-hooks` now locates Git's shared hooks directory, upgrades stale spec-superflow hooks, and validates the worktree being committed rather than a sibling checkout.
-- **#45 — Execution-mode recommendation**: DP-4 now runs `ssf execution recommend` to list Inline, Batch Inline, and SDD from task and wave evidence, with a recommendation. Every persisted plan at `<change>/.superpowers/sdd/execution-plan.json` requires explicit `--confirm`; a non-recommended selection records `--acknowledge-recommendation` instead of treating Inline as an override. Named waves, dependencies, and review receipts remain mandatory.
+- **Cross-platform runtime diagnostics**: `tf doctor` now detects stale root placeholders and missing runtime trees, while version sync and CI consistency checks include all nine canonical skill prefixes.
+- **Linked-worktree version hook**: `npm run setup-hooks` now locates Git's shared hooks directory, upgrades stale team-flow hooks, and validates the worktree being committed rather than a sibling checkout.
+- **#45 — Execution-mode recommendation**: DP-4 now runs `tf execution recommend` to list Inline, Batch Inline, and SDD from task and wave evidence, with a recommendation. Every persisted plan at `<change>/.superpowers/sdd/execution-plan.json` requires explicit `--confirm`; a non-recommended selection records `--acknowledge-recommendation` instead of treating Inline as an override. Named waves, dependencies, and review receipts remain mandatory.
 
 ### Added
 
 - Runtime distribution inventory for all 17 documented platforms plus the ZCODE compatibility installer path.
-- `npm run test:raw-mode` packages the current source and proves the canonical runtime works without plugin-root variables or a global `ssf` command.
+- `npm run test:raw-mode` packages the current source and proves the canonical runtime works without plugin-root variables or a global `tf` command.
 
 ## [0.9.0] - 2026-07-11
 
 ### Added
 
-- **#37 — Model profiles**：可在 `spec-superflow.config.json` 中为 `mechanical`、`standard`、`strong`、`review` 配置平台模型 ID，并用 `ssf config --resolve-model <profile>` 只读解析；不执行跨平台自动模型切换，也不新增 runtime dependency。
+- **#37 — Model profiles**：可在 `team-flow.config.json` 中为 `mechanical`、`standard`、`strong`、`review` 配置平台模型 ID，并用 `tf config --resolve-model <profile>` 只读解析；不执行跨平台自动模型切换，也不新增 runtime dependency。
 - **#38 — Minimality discipline**：code-reviewer 现要求用任务依据审查无请求的依赖、配置、抽象与无关重构；保留 TDD、验证、安全和错误处理，不引入 Ponytail 或任何 runtime dependency。
 
 ## [0.8.17] - 2026-07-10
@@ -136,7 +160,7 @@ The format loosely follows Keep a Changelog.
 ### Fixed
 
 - Fixed canonical delta spec paths: validation, guard checks, hashing, sync, examples, and docs now use `specs/<capability>/spec.md`.
-- Fixed `ssf inject` default behavior so ambiguous projects require `--platforms` instead of writing every platform file.
+- Fixed `tf inject` default behavior so ambiguous projects require `--platforms` instead of writing every platform file.
 - Fixed hotfix fast-path guards so hotfix can skip full planning artifacts while still requiring a fresh minimal contract and DP-3 approval.
 
 ## [0.8.16] - 2026-07-07
@@ -151,11 +175,11 @@ The format loosely follows Keep a Changelog.
 
 ### Fixed
 
-- **BUG-A（致命）— `executing→closing` 收口跳转永久失败**：`release-archivist` 从不写 `test_result: pass`，而 `tests-passing` 守卫强制要求它，导致 `ssf state transition closing` 永远 `exit(1)`。现守卫同时接受 `dp_6_result` 以 `pass` 开头，且 `release-archivist` 在 DP-6 后显式执行 `ssf state set <change-dir> test_result pass`。
-- **BUG-B — 状态漂移**：`cmd-state` 非 init 子命令在 `.spec-superflow.yaml` 缺失时静默返回默认态、会幽灵式创建状态文件。现缺失即报错退出；`state-loader` 增加 `spec_merged: false` 默认值并持久化。
+- **BUG-A（致命）— `executing→closing` 收口跳转永久失败**：`release-archivist` 从不写 `test_result: pass`，而 `tests-passing` 守卫强制要求它，导致 `tf state transition closing` 永远 `exit(1)`。现守卫同时接受 `dp_6_result` 以 `pass` 开头，且 `release-archivist` 在 DP-6 后显式执行 `tf state set <change-dir> test_result pass`。
+- **BUG-B — 状态漂移**：`cmd-state` 非 init 子命令在 `.team-flow.yaml` 缺失时静默返回默认态、会幽灵式创建状态文件。现缺失即报错退出；`state-loader` 增加 `spec_merged: false` 默认值并持久化。
 - **#28 — `executing→closing` 缺「spec 已合并」闸门**：新增 `specs-merged` 守卫，残留未合并的 delta spec 会阻断收口；`spec-merger` 同步后置 `spec_merged: true`。
-- **#15 — git 隔离仅为建议性、无强制**：新增 `ensure-branch.mjs` + `cmd-isolate.mjs`，拒绝在 `main`/`master` 上直接提交（除非 `--force`）；`build-executor` 的 `ssf isolate` 改为强制 pre-flight。
-- **#26 / #27.2 — skill 依赖 PATH 解析的裸 `ssf`**：所有 `skills/**/SKILL.md` 改为安装时重写的绝对路径 `node "${CLAUDE_PLUGIN_ROOT}/scripts/spec-superflow.mjs"`，修复 cursor / marketplace 用户必失败的问题。
+- **#15 — git 隔离仅为建议性、无强制**：新增 `ensure-branch.mjs` + `cmd-isolate.mjs`，拒绝在 `main`/`master` 上直接提交（除非 `--force`）；`build-executor` 的 `tf isolate` 改为强制 pre-flight。
+- **#26 / #27.2 — skill 依赖 PATH 解析的裸 `tf`**：所有 `skills/**/SKILL.md` 改为安装时重写的绝对路径 `node "${CLAUDE_PLUGIN_ROOT}/scripts/team-flow.mjs"`，修复 cursor / marketplace 用户必失败的问题。
 
 ### Added
 
@@ -165,10 +189,10 @@ The format loosely follows Keep a Changelog.
 
 ### Fixed
 
-- **WorkBuddy 安装器重构** — `ssf install-workbuddy` 现在部署为标准 marketplace 插件，修复了 v0.8.13 中存在的三个缺陷：
+- **WorkBuddy 安装器重构** — `tf install-workbuddy` 现在部署为标准 marketplace 插件，修复了 v0.8.13 中存在的三个缺陷：
   - **运行时依赖缺失** — 旧安装器不复制 `scripts/`、`docs/`、`templates/`、`dist/`、`hooks/`，导致 skill 中引用的脚本和模板无法解析。现在全部复制到插件根目录。
   - **`${CLAUDE_PLUGIN_ROOT}` 未重写** — 旧安装器直接复制 SKILL.md 而不重写路径变量，导致所有脚本引用断裂。现在重写为 marketplace 插件绝对路径。
-  - **插件结构错误** — 旧安装器为每个 skill 创建独立的 marketplace 插件目录（9 个插件 × 9 个 enabledPlugins 键）。现在部署为单个 `spec-superflow` 插件，包含 `skills/` 子目录、`.codebuddy-plugin/plugin.json` 清单、`rules/phase-guard.md` 规则，settings.json 中仅需 `spec-superflow@cb_teams_marketplace` 单个启用键。旧安装产生的 per-skill 键会在升级时自动清理。
+  - **插件结构错误** — 旧安装器为每个 skill 创建独立的 marketplace 插件目录（9 个插件 × 9 个 enabledPlugins 键）。现在部署为单个 `team-flow` 插件，包含 `skills/` 子目录、`.codebuddy-plugin/plugin.json` 清单、`rules/phase-guard.md` 规则，settings.json 中仅需 `team-flow@cb_teams_marketplace` 单个启用键。旧安装产生的 per-skill 键会在升级时自动清理。
 
 ### Added
 
@@ -180,17 +204,17 @@ The format loosely follows Keep a Changelog.
 ### Added
 
 - **跨平台安装支持扩展至 17 个平台** — 新增 8 个 AI 编程平台的一键安装器，平台覆盖面对齐 comet：
-  - `ssf install-cline` — Cline（`.cline/skills/` + `.clinerules/phase-guard.md`）
-  - `ssf install-kiro` — Kiro（`.kiro/skills/` + `.kiro/steering/phase-guard.md`）
-  - `ssf install-windsurf` — Windsurf（`.windsurf/skills/` + `.windsurf/rules/phase-guard.md`）
-  - `ssf install-qwen` — Qwen Code（`.qwen/skills/` + `.qwen/rules/phase-guard.md`）
-  - `ssf install-amazon-q` — Amazon Q Developer（`.amazonq/skills/` + `.amazonq/rules/phase-guard.md`）
-  - `ssf install-roocode` — Roo Code（`.roo/skills/` + `.roo/rules/phase-guard.md`）
-  - `ssf install-continue` — Continue（`.continue/skills/` + `.continue/rules/phase-guard.md`）
-  - `ssf install-pi` — Pi（`.pi/skills/`，无规则目录，手动 `/workflow-start`）
+  - `tf install-cline` — Cline（`.cline/skills/` + `.clinerules/phase-guard.md`）
+  - `tf install-kiro` — Kiro（`.kiro/skills/` + `.kiro/steering/phase-guard.md`）
+  - `tf install-windsurf` — Windsurf（`.windsurf/skills/` + `.windsurf/rules/phase-guard.md`）
+  - `tf install-qwen` — Qwen Code（`.qwen/skills/` + `.qwen/rules/phase-guard.md`）
+  - `tf install-amazon-q` — Amazon Q Developer（`.amazonq/skills/` + `.amazonq/rules/phase-guard.md`）
+  - `tf install-roocode` — Roo Code（`.roo/skills/` + `.roo/rules/phase-guard.md`）
+  - `tf install-continue` — Continue（`.continue/skills/` + `.continue/rules/phase-guard.md`）
+  - `tf install-pi` — Pi（`.pi/skills/`，无规则目录，手动 `/workflow-start`）
 - **共享安装器架构** — 新增 `scripts/lib/platforms.mjs`（平台注册表）与 `scripts/lib/install.mjs`（共享安装器），8 个 `install-<id>.mjs` 为薄壳调用，路径全部与 comet `src/core/platforms.ts` 交叉核实。`install-cursor.mjs` / `install-workbuddy` 保持原样。
 - **平台支持矩阵文档** — 新增 `docs/platform-matrix.md`，17 平台 × Skills/Rules/Hooks 三层接入透明化。
-- **CLI 命令** — `ssf` 注册 8 个 `install-<id>` 子命令，`npx spec-superflow@latest install-<id>` 一键部署。
+- **CLI 命令** — `tf` 注册 8 个 `install-<id>` 子命令，`npx team-flow@latest install-<id>` 一键部署。
 
 ### Changed
 
@@ -199,7 +223,7 @@ The format loosely follows Keep a Changelog.
 
 ### Notes
 
-- Kiro / Windsurf / Qwen / Amazon Q 原生支持 hooks，但 spec-superflow 的 SessionStart 钩子在这些平台的可用性未逐一验证，v0.8.13 暂不写入 hook 配置；上下文注入由 phase-guard 规则（平台自动加载）承担，后续版本验证后补齐。
+- Kiro / Windsurf / Qwen / Amazon Q 原生支持 hooks，但 team-flow 的 SessionStart 钩子在这些平台的可用性未逐一验证，v0.8.13 暂不写入 hook 配置；上下文注入由 phase-guard 规则（平台自动加载）承担，后续版本验证后补齐。
 - 剩余 14 个 comet 平台（Junie / Bob / ForgeCode / Crush / iFlow / CoStrict / Factory / KiloCode / Auggie / Lingma / KimiCode / Antigravity ×2 等）留待 v0.8.14+ 分批跟进。
 
 ## [0.8.12] - 2026-07-06
@@ -212,21 +236,21 @@ The format loosely follows Keep a Changelog.
 
 ### Fixed
 
-- **DP-0 audit consistency** — `ssf audit` now treats existing `dp_0_confirmed: true` state as a recorded DP-0 confirmation, and `dp_0_result` is now persisted by the state loader instead of being dropped after `ssf state set`.
+- **DP-0 audit consistency** — `tf audit` now treats existing `dp_0_confirmed: true` state as a recorded DP-0 confirmation, and `dp_0_result` is now persisted by the state loader instead of being dropped after `tf state set`.
 
 ## [0.8.10] - 2026-07-06
 
 ### Fixed
 
 - **Guard fast-path gating** — `exploring -> bridging` now requires `hotfix` or `tweak`, and `exploring -> approved-for-build` now requires `tweak`; `full`/`auto` workflows no longer skip `contract-builder` and approval gates.
-- **State transition safety** — `ssf state transition` now fails closed when guard execution fails, returns malformed output, reports non-boolean `pass`, or exits unsuccessfully, preventing state writes after unreliable guard checks.
+- **State transition safety** — `tf state transition` now fails closed when guard execution fails, returns malformed output, reports non-boolean `pass`, or exits unsuccessfully, preventing state writes after unreliable guard checks.
 - **Execution branch isolation** — `build-executor` now requires branch/worktree preflight before implementation and stops for explicit approval before editing `main` or `master`.
 
 ## [0.8.9] - 2026-07-04
 
 ### Added
 
-- **WorkBuddy installer** — New `ssf install-workbuddy` command deploys all 9 skills into WorkBuddy's marketplace plugin directory and enables them in `~/.workbuddy/settings.json`.
+- **WorkBuddy installer** — New `tf install-workbuddy` command deploys all 9 skills into WorkBuddy's marketplace plugin directory and enables them in `~/.workbuddy/settings.json`.
 - **WorkBuddy installer tests** — Covers target path planning, skill copy behavior, settings preservation, and package-root resolution for `npx` usage.
 
 ### Changed
@@ -236,7 +260,7 @@ The format loosely follows Keep a Changelog.
 
 ### Fixed
 
-- **Doctor manifest coverage** — `ssf doctor` now checks `.cursor-plugin/marketplace.json` and `.github/plugin/marketplace.json`, and correctly handles multiple version fields in the same manifest file.
+- **Doctor manifest coverage** — `tf doctor` now checks `.cursor-plugin/marketplace.json` and `.github/plugin/marketplace.json`, and correctly handles multiple version fields in the same manifest file.
 
 ## [0.8.8] - 2026-07-03
 
@@ -267,7 +291,7 @@ The format loosely follows Keep a Changelog.
 ### Fixed (Bug)
 
 - **Parser bilingual support**: `parseChangeMarkdown` now correctly extracts sections from bilingual headings (e.g., `## 背景（Why）`). Previously it used English-only exact matching, silently returning empty strings.
-- **Guard workflow normalization**: `ssf state transition` no longer silently skips guard checks when workflow is `auto`. The `auto` mode is now normalized to `full` before guard invocation.
+- **Guard workflow normalization**: `tf state transition` no longer silently skips guard checks when workflow is `auto`. The `auto` mode is now normalized to `full` before guard invocation.
 - **Guard error handling**: Terminal states (`abandoned`, `closing`) now correctly reject further transitions instead of allowing them through.
 
 ### Changed
@@ -298,10 +322,10 @@ The format loosely follows Keep a Changelog.
 
 ### Added
 
-- **`ssf install-cursor` CLI command**: Deploys spec-superflow to `.cursor/` directory.
+- **`tf install-cursor` CLI command**: Deploys team-flow to `.cursor/` directory.
 - **Multi-platform marketplace support**:
   - `.cursor-plugin/marketplace.json` — Cursor marketplace submission
-  - `.opencode/plugins/spec-superflow.js` — OpenCode plugin entry
+  - `.opencode/plugins/team-flow.js` — OpenCode plugin entry
   - `.codex-plugin/plugin.json` — `composerIcon` for Codex
   - `gemini-extension.json` — Gemini CLI verified install
 - **Codex scanner**: `SECURITY.md`, `assets/icon.svg`, `.codexignore`, `.github/dependabot.yml`, `hol-plugin-scanner.yml` CI workflow. Scanner score: 92/130.
@@ -319,7 +343,7 @@ The format loosely follows Keep a Changelog.
 - **Critical: C-2** — Guard dead transition `bridging:approved` fixed to `bridging:approved-for-build` (matching canonical state name).
 - **Critical: C-3** — Cursor workflow-orchestrator guard call fixed to use `approved-for-build` instead of `approved`, preventing "Unknown transition" errors.
 - **High: H-1** — Guard transition matrix extended with 6 missing rewind transitions (`specifying:exploring`, `bridging:specifying`, `approved-for-build:bridging`, `executing:specifying`, `executing:bridging`, `closing:specifying`).
-- **High: H-2** — `ssf state transition` now runs guard checks before writing state. Guard is no longer bypassable via direct CLI.
+- **High: H-2** — `tf state transition` now runs guard checks before writing state. Guard is no longer bypassable via direct CLI.
 - **High: H-3** — `tasks-complete.mjs` now matches both `[x]` and `[X]` (case-insensitive) and supports indented/nested tasks (`[ \t]*` prefix).
 - **High: H-4** — `build-executor` SKILL.md: 3 script paths fixed to use `${CLAUDE_PLUGIN_ROOT}` prefix, preventing breakage after worktree `cd`.
 - **High: H-5** — `spec-merger` SKILL.md: removed non-existent `workflow/` path prefix from 7 spec locations.
@@ -335,7 +359,7 @@ The format loosely follows Keep a Changelog.
 - **Medium: M-9** — `cmd-state.mjs` SETTABLE_FIELDS extended with 25 missing fields (`batches_completed`, `dp_0_result`, `dp_N_decisions`, `dp_N_confirmed` for DP-1 through DP-7).
 - **Medium: M-10** — `bug-investigator` SKILL.md: added DP-5 (调试升级) reference near 3+ failure escalation rule.
 - **Low: L-1** — `CLAUDE.md` ASCII state diagram: `approved` → `approved-for-build`.
-- **Low: L-2** — `spec-superflow.mjs` CLI help: example uses `approved-for-build` instead of `approved`.
+- **Low: L-2** — `team-flow.mjs` CLI help: example uses `approved-for-build` instead of `approved`.
 - **Low: L-3** — `cmd-state.mjs` get: blocks prototype property reads (`__proto__`, `constructor`, etc.).
 - **Low: L-4** — `cmd-state.mjs` init: auto-creates change directory if missing.
 - **Low: L-7** — `docs/state-machine.md`: added fast-path transitions (`exploring→bridging`, `exploring→approved-for-build`).
@@ -380,12 +404,12 @@ The format loosely follows Keep a Changelog.
 - **SessionStart token overhead (issue #5)** — `hooks/session-start` now injects a ~50 token lightweight pointer instead of the full 360-line `workflow-start` SKILL.md, reducing per-session context-window usage by ~2,200 words.
 - **tweak fast-path deadlock** — `guard.mjs` now skips `artifacts-exist` checks for tweak workflow, and `build-executor` accepts tweak mode without requiring `execution-contract.md`. The advertised tweak path now actually works.
 - **State name inconsistency** — `approved` and `approved-for-build` standardized to `approved-for-build` across `guard.mjs`, `cmd-inject.mjs`, `workflow-start`, and `state-machine.md`. Removed duplicate `approved` phase-guard template.
-- **`ssf list` false CLOSED** — `detectChangeStatus` now reads `.spec-superflow.yaml` state instead of inferring closure from file existence. Previously reported BRIDGED changes as CLOSED.
-- **`ssf audit` missing DP-0** — DP-0 (user confirmation gate) now included in audit reports alongside DP-1–DP-7.
-- **Guard `artifacts-exist` config-aware** — now respects `artifacts.skip` from `spec-superflow.config.json`, allowing projects to exclude optional planning artifacts.
+- **`tf list` false CLOSED** — `detectChangeStatus` now reads `.team-flow.yaml` state instead of inferring closure from file existence. Previously reported BRIDGED changes as CLOSED.
+- **`tf audit` missing DP-0** — DP-0 (user confirmation gate) now included in audit reports alongside DP-1–DP-7.
+- **Guard `artifacts-exist` config-aware** — now respects `artifacts.skip` from `team-flow.config.json`, allowing projects to exclude optional planning artifacts.
 - **Old skill names in guard scripts** — `contract-fresh.mjs` and `tests-passing.mjs` error messages updated to reference `contract-builder` and `release-archivist`.
 - **Sub-prompt path resolution** — `build-executor` and `code-reviewer` now use `${CLAUDE_PLUGIN_ROOT}/skills/<name>/` paths for sub-prompt templates instead of bare filenames.
-- **`ssf validate` coverage** — now validates all 4 planning artifacts (`design.md` and `tasks.md` basic structural checks added).
+- **`tf validate` coverage** — now validates all 4 planning artifacts (`design.md` and `tasks.md` basic structural checks added).
 - **Config default artifact order** — `execution-contract` removed from `artifacts.order` default (it's `contract-builder`'s output, not `spec-writer`'s).
 - **README state count** — corrected from 7 to 8 states (includes `abandoned`).
 
@@ -402,7 +426,7 @@ The format loosely follows Keep a Changelog.
 
 ### Changed
 
-- **INSTALL.md** now documents `/plugin update spec-superflow@spec-superflow` as the Claude Code upgrade path and provides a curl one-liner for Cursor auto-deployment.
+- **INSTALL.md** now documents `/plugin update team-flow@team-flow` as the Claude Code upgrade path and provides a curl one-liner for Cursor auto-deployment.
 
 ## [0.8.0] - 2026-07-01
 
@@ -416,7 +440,7 @@ The format loosely follows Keep a Changelog.
 ### Changed
 
 - **Documentation sync** — `README.md`, `INSTALL.md`, `CLAUDE.md`, `docs/state-machine.md`, `docs/decision-points.md`, `GEMINI.md`, main `specs/`, `templates/`, and plugin manifests updated to use the new skill names and v0.8.0 install instructions.
-- **Version sync** — `ssf version` now also updates `.codex-plugin/plugin.json`; `ssf doctor` checks all 7 manifests.
+- **Version sync** — `tf version` now also updates `.codex-plugin/plugin.json`; `tf doctor` checks all 7 manifests.
 
 ## [0.7.1] - 2026-06-30
 
@@ -428,16 +452,16 @@ The format loosely follows Keep a Changelog.
 
 ### Added
 
-- **Multi-platform phase-guard injection** — `ssf inject` now generates phase-guard artifacts for Claude Code (`.claude/always/phase-guard.md`), Cursor (`.cursor/rules/phase-guard.mdc`), Copilot (`.github/copilot-instructions.md`), and Gemini (`GEMINI.md`). New `--platforms` flag limits output to a subset.
-- **Auto workflow-mode detection** — `workflow-orchestrator` infers `hotfix`/`tweak`/`full` from artifact content when `.spec-superflow.yaml` workflow is `auto`. Added `scripts/infer-workflow.mjs` helper. Explicit workflow values are preserved.
-- **Decision-point audit report** — New `ssf audit <change-dir>` command reads `.spec-superflow.yaml` DP fields and generates `decision-point-audit.md` with a summary table and per-DP interpretation.
+- **Multi-platform phase-guard injection** — `tf inject` now generates phase-guard artifacts for Claude Code (`.claude/always/phase-guard.md`), Cursor (`.cursor/rules/phase-guard.mdc`), Copilot (`.github/copilot-instructions.md`), and Gemini (`GEMINI.md`). New `--platforms` flag limits output to a subset.
+- **Auto workflow-mode detection** — `workflow-orchestrator` infers `hotfix`/`tweak`/`full` from artifact content when `.team-flow.yaml` workflow is `auto`. Added `scripts/infer-workflow.mjs` helper. Explicit workflow values are preserved.
+- **Decision-point audit report** — New `tf audit <change-dir>` command reads `.team-flow.yaml` DP fields and generates `decision-point-audit.md` with a summary table and per-DP interpretation.
 - **Cursor local deploy** — New `scripts/install-cursor.mjs` copies skills to `.cursor/skills/` and creates `.cursor/rules/phase-guard.mdc` for Cursor Agent.
 - **Template localization** — All planning templates under `templates/` are now in Chinese while keeping required parsing markers intact.
 
 ### Fixed
 
 - **Copilot CLI plugin manifest** — Root `plugin.json` `author` is now an object (`{ "name": "..." }`) to satisfy Copilot CLI strict validation.
-- **`ssf doctor` author check** — Added validation for root `plugin.json` `author` format.
+- **`tf doctor` author check** — Added validation for root `plugin.json` `author` format.
 - **INSTALL.md accuracy** — Cursor and Copilot CLI install instructions now describe the actual working mechanisms.
 
 ## [0.6.0] - 2026-06-29
@@ -445,10 +469,10 @@ The format loosely follows Keep a Changelog.
 ### Added
 
 - **Fast-path workflow modes** — hotfix and tweak modes skip full planning for small changes. Hotfix: ≤2 files, no new modules, minimal contract. Tweak: ≤4 files, config/doc only, direct edit. Auto-upgrade to full when thresholds exceeded.
-- **Phase-drift prevention** — `ssf inject` command generates `rules/phase-guard.md` and installs to `.claude/always/` for per-turn Agent context injection. 9 state templates with allowed/forbidden operations. Forms a soft+hard dual defense with guard.mjs.
+- **Phase-drift prevention** — `tf inject` command generates `rules/phase-guard.md` and installs to `.claude/always/` for per-turn Agent context injection. 9 state templates with allowed/forbidden operations. Forms a soft+hard dual defense with guard.mjs.
 - **Decision point protocol** — `docs/decision-points.md` defines 7 standard decision points (DP-1 through DP-7) with triggers, inputs, outputs, and associated skills. All 4 affected skills reference DP numbers.
 - **Guard mode awareness** — `guard.mjs` accepts `--workflow` parameter (full/hotfix/tweak) for mode-specific check skipping. 2 new transitions: `exploring→bridging`, `exploring→approved`.
-- **State set command** — `ssf state set <dir> <field> <value>` with SETTABLE_FIELDS whitelist. 14 new decision point audit fields (dp_N_result + dp_N_timestamp).
+- **State set command** — `tf state set <dir> <field> <value>` with SETTABLE_FIELDS whitelist. 14 new decision point audit fields (dp_N_result + dp_N_timestamp).
 
 ### Changed
 
@@ -465,37 +489,37 @@ The format loosely follows Keep a Changelog.
   - `contract-fresh` — compares stored artifacts hash against current artifacts for staleness detection
   - `tasks-complete` — verifies all tasks.md items are checked off
   - `tests-passing` — confirms test_result: pass is recorded in state file
-- **Lightweight state file** — `.spec-superflow.yaml` as a derived cache (12 fields) for fast context recovery. Always rebuildable from artifacts via `ssf state rebuild`. Artifacts are the source of truth; state file is a performance optimization.
+- **Lightweight state file** — `.team-flow.yaml` as a derived cache (12 fields) for fast context recovery. Always rebuildable from artifacts via `tf state rebuild`. Artifacts are the source of truth; state file is a performance optimization.
 - **SHA256 hash acceleration** — `scripts/lib/hash.mjs` computes artifact hashes for O(1) staleness detection. Reduces staleness detection from ~3500 tokens (full content read) to ~50 tokens (single script call).
 - **ssf state CLI** — New `state` subcommand with 5 operations: `init`, `check`, `transition`, `get`, `rebuild`.
 
 ### Changed
 
 - **workflow-orchestrator** — Each routing rule now includes a guard script invocation step before allowing transitions.
-- **bridge-contract** — Automatically runs `ssf state init` after contract generation.
-- **closure-archivist** — Runs `ssf state transition` after verification completes.
+- **bridge-contract** — Automatically runs `tf state init` after contract generation.
+- **closure-archivist** — Runs `tf state transition` after verification completes.
 - **execution-governor** — Updates `batches_completed` in state file after each batch.
 
 ## [0.4.0] - 2026-06-29
 
 ### Added
 
-- **CLI toolchain** — `ssf` command with 6 subcommands: `list` (scan changes and report status), `validate` (artifact validation via Validator), `doctor` (health check: version sync, hooks, skills, dist, node, docs, config), `version` (one-command version sync to all manifests), `sync` (delta spec merge with conflict detection), `config` (display/modify configuration). Zero dependencies via `node:util.parseArgs`.
-- **Configuration system** — Optional `spec-superflow.config.json` for customizing artifact order, skip list, execution thresholds, and verification language. Absence = v0.3.0 defaults. Deep-merge with built-in defaults. Skills query config at runtime via `scripts/get-config` bash helper.
+- **CLI toolchain** — `tf` command with 6 subcommands: `list` (scan changes and report status), `validate` (artifact validation via Validator), `doctor` (health check: version sync, hooks, skills, dist, node, docs, config), `version` (one-command version sync to all manifests), `sync` (delta spec merge with conflict detection), `config` (display/modify configuration). Zero dependencies via `node:util.parseArgs`.
+- **Configuration system** — Optional `team-flow.config.json` for customizing artifact order, skip list, execution thresholds, and verification language. Absence = v0.3.0 defaults. Deep-merge with built-in defaults. Skills query config at runtime via `scripts/get-config` bash helper.
 - **Multi-language tokenizer** — `src/validation/tokenizer.ts` with English stemmer (extracted from validator) + Chinese CJK tokenizer (Unicode ranges + 2-5 char sliding window + stop words). Auto-detection based on CJK character ratio. Mixed mode runs both tokenizers and unions results.
-- **Conflict detection** — `Validator.detectSyncConflicts()` detects when multiple changes modify the same requirement across unsynced delta specs. Integrated into `ssf sync` command and `spec-syncer` skill pre-flight check.
+- **Conflict detection** — `Validator.detectSyncConflicts()` detects when multiple changes modify the same requirement across unsynced delta specs. Integrated into `tf sync` command and `spec-syncer` skill pre-flight check.
 - **git worktree isolation** — execution-governor now recommends worktree creation when executing on main/master branch. Pure SKILL.md guidance, no code changes.
 
 ### Changed
 
-- **package.json** — Added `bin` field exposing `ssf` and `spec-superflow` commands.
+- **package.json** — Added `bin` field exposing `tf` and `team-flow` commands.
 - **validateImplementation()** — Refactored to use `tokenize()` instead of inline `stem()`. Added optional `config` parameter for language override (`'auto' | 'en' | 'zh'`). Backward compatible — existing callers work unchanged.
 - **Tokenizer refinements** — CJK sliding window extended to 2-5 chars (covers compound words like "令牌桶算法"). English min token length lowered to 3 (preserves short tokens like "jwt"). Added "based"/"using"/"used" to English stop words.
 - **Version manifests** — `.cursor-plugin/plugin.json` and `gemini-extension.json` now tracked in version sync (previously lagging at 0.2.0 and 0.1.0).
 
 ### Fixed
 
-- **Version consistency** — `ssf version` command ensures all 5 manifest files stay in sync. `ssf doctor` reports inconsistencies as warnings.
+- **Version consistency** — `tf version` command ensures all 5 manifest files stay in sync. `tf doctor` reports inconsistencies as warnings.
 
 ## [0.3.0] - 2026-06-27
 
@@ -566,7 +590,7 @@ The format loosely follows Keep a Changelog.
 
 ### Added
 
-- Initial self-contained `spec-superflow` plugin structure
+- Initial self-contained `team-flow` plugin structure
 - Plugin metadata in `.claude-plugin/plugin.json`
 - Six workflow skills:
   - `workflow-orchestrator`
@@ -594,5 +618,5 @@ The format loosely follows Keep a Changelog.
 ### Notes
 
 - First release targets Claude Code and Trae style local skill loading
-- Runtime ownership remains inside `spec-superflow`
+- Runtime ownership remains inside `team-flow`
 - OpenSpec and Superpowers are reference influences, not runtime dependencies

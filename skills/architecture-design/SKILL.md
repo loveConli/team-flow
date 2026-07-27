@@ -1,11 +1,11 @@
 ---
 name: architecture-design
-description: 基于 4A 企业架构 + DDD 领域驱动设计的架构/API/DB 设计 skill。当用户需要做架构设计、识别聚合与限界上下文、划分写/读模型(CQRS)、设计 API 指令映射，或在 spec-superflow / compound-engineering 工作流中做每变更架构增量设计与全局复利回写时使用。在 workflow-start 编排中作为子代理调用，承担判断+执行一体化职责（五项检查判定是否涉及架构变更，涉及则执行完整增量设计，不涉及则返回 skip）。不适用于：纯业务逻辑编码、与架构无关的需求分析、非 DDD 语境的数据库建模。
+description: 基于 4A 企业架构 + DDD 领域驱动设计的架构/API/DB 设计 skill。当用户需要做架构设计、识别聚合与限界上下文、划分写/读模型(CQRS)、设计 API 指令映射，或在 team-flow / compound-engineering 工作流中做每变更架构增量设计与全局复利回写时使用。在 workflow-start 编排中作为子代理调用，承担判断+执行一体化职责（五项检查判定是否涉及架构变更，涉及则执行完整增量设计，不涉及则返回 skip）。不适用于：纯业务逻辑编码、与架构无关的需求分析、非 DDD 语境的数据库建模。
 ---
 
 # Architecture Design (4A + DDD)
 
-把企业架构(4A)与领域驱动设计(DDD)的 crystallized 方法，转化为每变更可执行的架构/API/DB 设计动作，并与 spec-superflow(开发过程) + compound-engineering(全局复利) 衔接。
+把企业架构(4A)与领域驱动设计(DDD)的 crystallized 方法，转化为每变更可执行的架构/API/DB 设计动作，并与 team-flow(开发过程) + compound-engineering(全局复利) 衔接。
 
 ## Core Frameworks
 
@@ -39,7 +39,7 @@ description: 基于 4A 企业架构 + DDD 领域驱动设计的架构/API/DB 设
 - ch03-architecture-outputs — 架构产出三层 + 治理三支柱
 - ch04-entity-to-aggregate — 业务实体→聚合→限界上下文
 - ch05-cqrs — 写/读模型、指令分流、三维判定
-- ch06-integration — 与 spec-superflow / compound-engineering 的集成
+- ch06-integration — 与 team-flow / compound-engineering 的集成
 
 ## Topic Index
 - 4A / BA / IA / AA / TA → ch01
@@ -137,4 +137,4 @@ changes/<name>/
 除 workflow-start 编排调用外，本 skill 仍支持用户显式独立调用（`/team-flow:architecture-design`），此时不走五项检查判定门，直接执行完整 4A+DDD 设计。
 
 ## Scope & Limits
-本 skill 覆盖 4A+DDD 架构设计方法及其与 spec-superflow/compound-engineering 的衔接。落地实现结合项目具体工具；超出本范围见相关 skill 或直接问 agent。
+本 skill 覆盖 4A+DDD 架构设计方法及其与 team-flow/compound-engineering 的衔接。落地实现结合项目具体工具；超出本范围见相关 skill 或直接问 agent。

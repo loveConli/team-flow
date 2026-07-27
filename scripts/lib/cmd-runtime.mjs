@@ -1,4 +1,4 @@
-// ssf runtime — portable, root-independent operations used by canonical skills.
+// tf runtime — portable, root-independent operations used by canonical skills.
 import { readFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
@@ -52,7 +52,7 @@ function runScript(relativeScript, args) {
 
 async function runReadOnlyConfig(args) {
   if (args.includes('--set')) {
-    return usage('runtime config is read-only; use the main ssf config command to change configuration');
+    return usage('runtime config is read-only; use the main tf config command to change configuration');
   }
   const { run: runConfig } = await import('./cmd-config.mjs');
   await runConfig(args);
@@ -60,7 +60,7 @@ async function runReadOnlyConfig(args) {
 
 function readAsset(args) {
   if (args[0] !== 'read' || args.length !== 2) {
-    return usage('Usage: ssf runtime asset read <allowed-relative-path>');
+    return usage('Usage: tf runtime asset read <allowed-relative-path>');
   }
 
   const assetPath = args[1];
@@ -74,11 +74,11 @@ function readAsset(args) {
 function usage(message) {
   console.error(message);
   console.error(`Usage:
-  ssf runtime check-update
-  ssf runtime infer <change-dir>
-  ssf runtime guard check <change-dir> <from-state> <to-state> [--json]
-  ssf runtime config [--get <path>|--resolve-model <profile>]
-  ssf runtime asset read <allowed-relative-path>`);
+  tf runtime check-update
+  tf runtime infer <change-dir>
+  tf runtime guard check <change-dir> <from-state> <to-state> [--json]
+  tf runtime config [--get <path>|--resolve-model <profile>]
+  tf runtime asset read <allowed-relative-path>`);
   process.exitCode = 2;
 }
 

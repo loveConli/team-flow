@@ -1,5 +1,5 @@
-// Config loader for spec-superflow
-// Loads spec-superflow.config.json and merges with built-in defaults.
+// Config loader for team-flow
+// Loads team-flow.config.json and merges with built-in defaults.
 // Lookup order: (1) projectRoot, (2) git root, (3) home directory.
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -66,7 +66,7 @@ function deepMerge(target, source) {
 
 function findConfigFile(startDir) {
   // 1. Check startDir
-  const direct = join(startDir, 'spec-superflow.config.json');
+  const direct = join(startDir, 'team-flow.config.json');
   if (existsSync(direct)) return direct;
 
   // 2. Check git root
@@ -76,14 +76,14 @@ function findConfigFile(startDir) {
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],
     }).trim();
-    const gitPath = join(gitRoot, 'spec-superflow.config.json');
+    const gitPath = join(gitRoot, 'team-flow.config.json');
     if (existsSync(gitPath)) return gitPath;
   } catch {
     // Not a git repo — skip
   }
 
   // 3. Check home directory
-  const homePath = join(process.env.HOME || '', 'spec-superflow.config.json');
+  const homePath = join(process.env.HOME || '', 'team-flow.config.json');
   if (existsSync(homePath)) return homePath;
 
   return null;

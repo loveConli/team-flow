@@ -1,4 +1,4 @@
-// ssf install-qwen — deploy spec-superflow for Qwen Code. Delegates to scripts/install-qwen.mjs
+// tf install-qwen — deploy team-flow for Qwen Code. Delegates to scripts/install-qwen.mjs
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

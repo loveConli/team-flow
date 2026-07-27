@@ -1,6 +1,6 @@
 # refactor-auth-boundary Example
 
-This example demonstrates how `spec-superflow` handles a brownfield backend refactor instead of a net-new UI feature.
+This example demonstrates how `team-flow` handles a brownfield backend refactor instead of a net-new UI feature.
 
 The scenario is a codebase where authentication checks have drifted across controllers, services, and helpers.
 

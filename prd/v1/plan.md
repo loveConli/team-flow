@@ -30,7 +30,7 @@ origin: prd/v1/prd.md
 
 ### Summary
 
-team-flow 插件包含 17 个 skill，覆盖四套子系统（spec-superflow 9 个、compound-engineering 6 个、architecture-design 1 个、prototype 1 个），已拼合到 `plugin.json`。当前 skill 之间的协作依赖隐式约定，缺少统一协作协议。本计划实施 Schema 声明式协议 + Handoff 模板的混合协作机制。
+team-flow 插件包含 17 个 skill，覆盖四套子系统（team-flow 9 个、compound-engineering 6 个、architecture-design 1 个、prototype 1 个），已拼合到 `plugin.json`。当前 skill 之间的协作依赖隐式约定，缺少统一协作协议。本计划实施 Schema 声明式协议 + Handoff 模板的混合协作机制。
 
 ### Problem Frame
 
@@ -118,7 +118,7 @@ flowchart TB
         CS[ce-strategy]
     end
 
-    subgraph SS["spec-superflow (9 skills)"]
+    subgraph SS["team-flow (9 skills)"]
         SW[spec-writer]
         SM[spec-merger]
         BE[build-executor]
@@ -191,7 +191,7 @@ sequenceDiagram
 ### Assumptions
 
 - 现有 SKILL.md 的 frontmatter 格式为标准 YAML，可直接扩展新字段
-- `ssf runtime config` 命令可读取 `prd.template` 配置字段（已在 spec-superflow 中实现）
+- `tf runtime config` 命令可读取 `prd.template` 配置字段（已在 team-flow 中实现）
 - `.superpowers/sdd/handoffs/` 目录结构已存在或可安全创建
 - PRD 模板的 11 章结构在后续迭代中不会大幅调整
 
@@ -381,7 +381,7 @@ sequenceDiagram
 | Schema 声明格式 | YAML frontmatter 扩展 | 与现有 SKILL.md 惯例一致，自包含 | 独立 schema 配置文件 |
 | JSON Schema 版本 | JSON Schema draft-07 | 广泛兼容、工具链成熟 | draft-2020-12 |
 | Handoff 文件格式 | YAML | 人类可读、易于手写和解析 | JSON、TOML |
-| 配置管理 | config.local.yaml | 继承 spec-superflow 现有配置机制 | 环境变量、独立配置文件 |
+| 配置管理 | config.local.yaml | 继承 team-flow 现有配置机制 | 环境变量、独立配置文件 |
 
 ### 5.2 架构设计概要
 
@@ -437,7 +437,7 @@ sequenceDiagram
 
 ## 待定事项
 
-- [ ] 确认 `ssf runtime config --get prd.template` 是否已在 spec-superflow 中实现
+- [ ] 确认 `tf runtime config --get prd.template` 是否已在 team-flow 中实现
 - [ ] 确认 `.superpowers/sdd/handoffs/` 目录是否已在现有框架中创建
 - [ ] 确认 17 个 skill 的完整列表是否与本文档一致（需对照 `plugin.json` 校验）
 - [ ] DP-0 到 DP-7 的完整映射关系（哪个 skill 对应哪个 DP）需与实际状态机对照确认

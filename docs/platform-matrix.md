@@ -1,6 +1,6 @@
 # 平台支持矩阵
 
-spec-superflow 共支持 **18 个** AI 编程平台。每个平台按三层接入：
+team-flow 共支持 **18 个** AI 编程平台。每个平台按三层接入：
 
 - **Skills** — 9 个 skill 部署到平台技能目录（`${CLAUDE_PLUGIN_ROOT}` 重写为绝对路径）。
 - **Rules** — phase-guard 规则文件部署到平台规则目录，被平台自动加载为常驻上下文（守卫机制）。
@@ -29,16 +29,16 @@ spec-superflow 共支持 **18 个** AI 编程平台。每个平台按三层接�
 | 17 | Pi | ✅ | —（无规则目录） | — |
 | 18 | Qoder | ✅ | `.qoder/rules/` · md | — |
 
-> ¹ Kiro / Windsurf / Qwen / Amazon Q 平台原生支持 hooks（comet 源码确认 hookFormat 分别为 kiro / windsurf / qwen / claude-code），但 spec-superflow 的 SessionStart 钩子在这些平台的可用性尚未逐一验证，故 v0.8.13 暂不写入 hook 配置，避免塞入失效配置。上下文注入由 phase-guard 规则（平台自动加载）承担。后续版本将逐平台验证后补齐。
+> ¹ Kiro / Windsurf / Qwen / Amazon Q 平台原生支持 hooks（comet 源码确认 hookFormat 分别为 kiro / windsurf / qwen / claude-code），但 team-flow 的 SessionStart 钩子在这些平台的可用性尚未逐一验证，故 v0.8.13 暂不写入 hook 配置，避免塞入失效配置。上下文注入由 phase-guard 规则（平台自动加载）承担。后续版本将逐平台验证后补齐。
 
 ## 路径来源
 
-所有 `skillsDir` / `rulesDir` / `rulesFormat` / `hookFormat` 均与 [comet](https://github.com/rpamis/comet) 的 `src/core/platforms.ts` 交叉核实，并对照各平台官方约定。spec-superflow 的守卫机制是 **phase-guard 规则文件**（平台自动加载），而非 comet 的 PreToolUse 钩子——这是两层架构的根本区别。
+所有 `skillsDir` / `rulesDir` / `rulesFormat` / `hookFormat` 均与 [comet](https://github.com/rpamis/comet) 的 `src/core/platforms.ts` 交叉核实，并对照各平台官方约定。team-flow 的守卫机制是 **phase-guard 规则文件**（平台自动加载），而非 comet 的 PreToolUse 钩子——这是两层架构的根本区别。
 
 ## 安装命令速查
 
 ```bash
-npx spec-superflow@latest install-<id>
+npx team-flow@latest install-<id>
 # <id> ∈ {cline, kiro, windsurf, qwen, amazon-q, roocode, continue, pi, qoder, cursor, workbuddy}
 ```
 

@@ -17,7 +17,7 @@ beforeEach(() => {
   changeDir = mkdtempSync(join(tmpdir(), 'execution-plan-'));
   writeFileSync(join(changeDir, 'tasks.md'), '# Tasks\n\n- [ ] 1.1 First task\n- [ ] 1.2 Second task\n');
   writeFileSync(join(changeDir, 'execution-contract.md'), '# Execution Contract\n\nCurrent contract.\n');
-  writeFileSync(join(changeDir, '.spec-superflow.yaml'), 'state: approved-for-build\nworkflow: full\nrevision: 2\n');
+  writeFileSync(join(changeDir, '.team-flow.yaml'), 'state: approved-for-build\nworkflow: full\nrevision: 2\n');
   gitRefs = initializeGitRepository(changeDir);
 });
 
@@ -173,7 +173,7 @@ describe('execution plan data contract', () => {
       waves: [{ id: 'wave-1', strategy: 'parallel', tasks: ['1.1', '1.2'], depends_on: [] }],
     });
     writePlan(changeDir, first);
-    writeFileSync(join(changeDir, '.spec-superflow.yaml'), readFileSync(join(changeDir, '.spec-superflow.yaml'), 'utf8')
+    writeFileSync(join(changeDir, '.team-flow.yaml'), readFileSync(join(changeDir, '.team-flow.yaml'), 'utf8')
       .replace(/^revision:.*$/m, 'revision: 4'));
     const receipt = createRecommendationReceipt(changeDir, first.waves);
     const revised = createRawPlan(changeDir, {
@@ -290,7 +290,7 @@ describe('execution plan data contract', () => {
       waves: [{ id: 'wave-1', strategy: 'serial', tasks: ['1.1'], depends_on: [] }],
     });
     writePlan(changeDir, plan);
-    writeFileSync(join(changeDir, '.spec-superflow.yaml'), [
+    writeFileSync(join(changeDir, '.team-flow.yaml'), [
       'state: approved-for-build',
       'workflow: full',
       'revision: 3',
@@ -342,7 +342,7 @@ describe('execution plan data contract', () => {
     ];
 
     for (const state of stateVariants) {
-      writeFileSync(join(changeDir, '.spec-superflow.yaml'), `${state.join('\n')}\n`);
+      writeFileSync(join(changeDir, '.team-flow.yaml'), `${state.join('\n')}\n`);
       const result = validatePlan(changeDir, readPlan(changeDir));
       assert.equal(result.valid, false);
       assert.ok(result.failures.includes('execution plan revision does not match state'));

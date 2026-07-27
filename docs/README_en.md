@@ -1,4 +1,4 @@
-<h1 align="center">spec-superflow</h1>
+<h1 align="center">team-flow</h1>
 
 <p align="center">
   <strong>A self-contained AI coding workflow plugin fusing OpenSpec planning + Superpowers execution discipline</strong>
@@ -6,8 +6,8 @@
 
 <p align="center">
   <a href="../LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
-  <a href="https://github.com/MageByte-Zero/spec-superflow/stargazers"><img src="https://img.shields.io/github/stars/MageByte-Zero/spec-superflow" alt="GitHub Stars"></a>
-  <a href="https://www.npmjs.com/package/spec-superflow"><img src="https://img.shields.io/npm/v/spec-superflow" alt="npm version"></a>
+  <a href="https://github.com/MageByte-Zero/team-flow/stargazers"><img src="https://img.shields.io/github/stars/MageByte-Zero/team-flow" alt="GitHub Stars"></a>
+  <a href="https://www.npmjs.com/package/team-flow"><img src="https://img.shields.io/npm/v/team-flow" alt="npm version"></a>
 </p>
 
 <p align="center">
@@ -44,18 +44,18 @@ The agent inspects your current artifacts, performs **content-level detection** 
 Claude Code's primary installation path is the plugin marketplace:
 
 ```bash
-/plugin marketplace add MageByte-Zero/spec-superflow
-/plugin install spec-superflow@spec-superflow
-/plugin update spec-superflow@spec-superflow   # upgrade
+/plugin marketplace add MageByte-Zero/team-flow
+/plugin install team-flow@team-flow
+/plugin update team-flow@team-flow   # upgrade
 ```
 
 ### Cursor (Skills directories / GitHub import)
 
 ```bash
-npx spec-superflow@latest install-cursor
+npx team-flow@latest install-cursor
 
 # Or run the installer directly:
-curl -fsSL https://raw.githubusercontent.com/MageByte-Zero/spec-superflow/main/scripts/install-cursor.mjs | node -
+curl -fsSL https://raw.githubusercontent.com/MageByte-Zero/team-flow/main/scripts/install-cursor.mjs | node -
 ```
 
 Cursor discovers `.cursor/skills/`, `.agents/skills/`, `~/.cursor/skills/`, and compatible Claude/Codex skill directories. You can also import a GitHub repo from Customize → Rules → Remote Rule (Github).
@@ -70,31 +70,31 @@ codex
 
 # Or add the community marketplace and install:
 codex plugin marketplace add hashgraph-online/awesome-codex-plugins
-codex plugin add spec-superflow@spec-superflow
+codex plugin add team-flow@team-flow
 ```
 
-In the Codex app, open **Plugins** and install or enable `spec-superflow`. If installed from the CLI, restart the app and enable it in the Plugins panel.
+In the Codex app, open **Plugins** and install or enable `team-flow`. If installed from the CLI, restart the app and enable it in the Plugins panel.
 
 ### GitHub Copilot CLI
 
 ```bash
-copilot plugin marketplace add MageByte-Zero/spec-superflow
-copilot plugin install spec-superflow@spec-superflow
+copilot plugin marketplace add MageByte-Zero/team-flow
+copilot plugin install team-flow@team-flow
 ```
 
 ### Gemini CLI
 
 ```bash
-gemini extensions install https://github.com/MageByte-Zero/spec-superflow
-gemini extensions update spec-superflow   # upgrade
+gemini extensions install https://github.com/MageByte-Zero/team-flow
+gemini extensions update team-flow   # upgrade
 ```
 
 ### OpenCode / WorkBuddy / Trae
 
 | Platform | Method | Status |
 |----------|--------|--------|
-| **OpenCode** | `.opencode/plugins/spec-superflow.js` or `.agents/skills -> skills/` | Entry provided |
-| **WorkBuddy** | `npx spec-superflow@latest install-workbuddy` | Installer provided |
+| **OpenCode** | `.opencode/plugins/team-flow.js` or `.agents/skills -> skills/` | Entry provided |
+| **WorkBuddy** | `npx team-flow@latest install-workbuddy` | Installer provided |
 | **Trae IDE / TRAE Work** | `.trae/skills/`, `~/.trae/skills/`, or zip/.skill upload | Manual/import |
 
 > Full installation guide: [INSTALL.md](../INSTALL.md)
@@ -102,41 +102,41 @@ gemini extensions update spec-superflow   # upgrade
 ### CLI Toolchain
 
 ```bash
-npm install -g spec-superflow
+npm install -g team-flow
 ```
 
 | Command | Purpose |
 |---------|---------|
-| `ssf list` | List all changes and status |
-| `ssf validate <dir>` | Validate artifact completeness |
-| `ssf doctor` | Health check (versions, hooks, skills, docs) |
-| `ssf version <semver>` | Sync version across all manifests |
-| `ssf state <sub> <dir>` | Manage `.spec-superflow.yaml` state file |
-| `ssf inject <dir>` | Generate phase-guard artifacts; omit `--platforms` only when exactly one platform marker is detected |
-| `ssf audit <dir>` | Generate decision-point audit report |
-| `ssf checkpoint save <dir> --task <id> --next <text>` | Save a task-level recovery checkpoint |
-| `ssf checkpoint list <dir>` | List checkpoints and stale status |
-| `ssf checkpoint show <dir> <id>` | Show one recovery checkpoint |
-| `ssf handoff create <dir> --type <type> ...` | Create a prototype/research/experiment handoff |
-| `ssf handoff list <dir>` | List handoff lifecycle status |
-| `ssf handoff finish <dir> <id>` | Validate a handoff result |
-| `ssf handoff resolve <dir> <id> --decision <decision>` | Record an explicit handoff decision |
-| `ssf install-cursor` | Deploy to `.cursor/` directory |
-| `ssf install-workbuddy` | Deploy to WorkBuddy marketplace and enable skills |
+| `tf list` | List all changes and status |
+| `tf validate <dir>` | Validate artifact completeness |
+| `tf doctor` | Health check (versions, hooks, skills, docs) |
+| `tf version <semver>` | Sync version across all manifests |
+| `tf state <sub> <dir>` | Manage `.team-flow.yaml` state file |
+| `tf inject <dir>` | Generate phase-guard artifacts; omit `--platforms` only when exactly one platform marker is detected |
+| `tf audit <dir>` | Generate decision-point audit report |
+| `tf checkpoint save <dir> --task <id> --next <text>` | Save a task-level recovery checkpoint |
+| `tf checkpoint list <dir>` | List checkpoints and stale status |
+| `tf checkpoint show <dir> <id>` | Show one recovery checkpoint |
+| `tf handoff create <dir> --type <type> ...` | Create a prototype/research/experiment handoff |
+| `tf handoff list <dir>` | List handoff lifecycle status |
+| `tf handoff finish <dir> <id>` | Validate a handoff result |
+| `tf handoff resolve <dir> <id> --decision <decision>` | Record an explicit handoff decision |
+| `tf install-cursor` | Deploy to `.cursor/` directory |
+| `tf install-workbuddy` | Deploy to WorkBuddy marketplace and enable skills |
 
 ### Version
 
-- Current: `v0.22.2`
+- Current: `v0.22.3`
 - v0.9.1 highlights: DP-4 execution-mode recommendations, a portable runtime across 17 platforms, and a raw-package smoke with no plugin-root variable.
 - Self-contained — no OpenSpec or Superpowers runtime required
 - Upstream: [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec), [obra/superpowers](https://github.com/obra/superpowers)
 - Changelog: [CHANGELOG.md](../CHANGELOG.md)
 
-`ssf inject` examples:
+`tf inject` examples:
 
 ```bash
-ssf inject changes/my-change --platforms cursor
-ssf inject changes/my-change --platforms all
+tf inject changes/my-change --platforms cursor
+tf inject changes/my-change --platforms all
 ```
 
 If `--platforms` is omitted, injection only proceeds when exactly one project marker is detected. Ambiguous projects must use `--platforms <platform>` or `--platforms all`.
@@ -144,9 +144,9 @@ If `--platforms` is omitted, injection only proceeds when exactly one project ma
 Session recovery and optional prototypes:
 
 ```bash
-ssf checkpoint save changes/my-change --task 1.1 --next "Run focused tests"
-ssf checkpoint list changes/my-change
-ssf handoff create changes/my-change --type research --objective "Compare approaches" --expected-output "Recommendation" --acceptance "Evidence recorded"
+tf checkpoint save changes/my-change --task 1.1 --next "Run focused tests"
+tf checkpoint list changes/my-change
+tf handoff create changes/my-change --type research --objective "Compare approaches" --expected-output "Recommendation" --acceptance "Evidence recorded"
 ```
 
 Prototype work starts only after explicit user confirmation. Backend, CLI,
@@ -165,7 +165,7 @@ AI coding sessions fail in one of two ways:
 
 - **The plan is solid, but execution drifts.** The proposal, specs, and design are written, but nobody enforces testing, nobody gates reviews, and by merge time the behavior doesn't match.
 
-**spec-superflow builds a hard wall between these two failure points:** intent exploration → formal artifacts (Schema-validated) → execution contract bridge → TDD + SDD + Review Gate enforcement → verified closure → delta spec sync to prevent spec rot.
+**team-flow builds a hard wall between these two failure points:** intent exploration → formal artifacts (Schema-validated) → execution contract bridge → TDD + SDD + Review Gate enforcement → verified closure → delta spec sync to prevent spec rot.
 
 | Principle | Meaning |
 |---|---|
@@ -235,7 +235,7 @@ You: "add authorization to the API"
 
 For full/hotfix, DP-4 is a persisted, current execution plan at
 `<change>/.superpowers/sdd/execution-plan.json`, rather than an arbitrary text
-field or content stored in `execution-contract.md`. Run `ssf execution recommend`
+field or content stored in `execution-contract.md`. Run `tf execution recommend`
 first: it lists `inline`, `batch-inline`, and `sdd` from task count and wave
 strategy, with auditable reasons, and saves a recommendation receipt at
 `<change>/.superpowers/sdd/execution-recommendation.json`. The agent presents that recommendation and the
@@ -246,22 +246,22 @@ parallel work.
 `tweak` is exempt from this execution-plan and review-receipt gate.
 
 ```bash
-ssf execution recommend changes/my-change \
+tf execution recommend changes/my-change \
   --wave foundation:parallel:1.1,1.2 \
   --wave integration:serial:2.1:foundation --json
-ssf execution plan changes/my-change --mode sdd --confirm --reason "independent work" \
+tf execution plan changes/my-change --mode sdd --confirm --reason "independent work" \
   --wave foundation:parallel:1.1,1.2 \
   --wave integration:serial:2.1:foundation
-ssf execution show changes/my-change --json
+tf execution show changes/my-change --json
 # Retains/upgrades an existing plan as sdd; it can replan waves and dependencies,
 # creates a new revision, and clears old review receipts. Downgrades are rejected.
-ssf execution recommend changes/my-change \
+tf execution recommend changes/my-change \
   --wave foundation:parallel:1.1,1.2 \
   --wave integration:serial:2.1:foundation --json
-ssf execution revise changes/my-change --mode sdd --confirm --reason "need parallel work" \
+tf execution revise changes/my-change --mode sdd --confirm --reason "need parallel work" \
   --wave foundation:parallel:1.1,1.2 \
   --wave integration:serial:2.1:foundation
-ssf execution review changes/my-change --wave foundation --base <sha> --head <sha> \
+tf execution review changes/my-change --wave foundation --base <sha> --head <sha> \
   --report .superpowers/sdd/reviews/foundation.md --verdict pass
 ```
 
@@ -275,7 +275,7 @@ non-symlink file.
 Every planned wave needs a current `pass` review receipt before dependent
 waves or closing may proceed; revising a plan invalidates earlier receipts.
 The recovery, switching, and manual-save slash commands proposed in #47 are
-not implemented, so this documentation does not claim `/ssf:*` commands.
+not implemented, so this documentation does not claim `/tf:*` commands.
 
 ### Fast Paths (hotfix / tweak)
 
@@ -286,7 +286,7 @@ not implemented, so this documentation does not claim `/ssf:*` commands.
 
 ## Model Profiles (Optional Configuration)
 
-Configure platform model IDs for execution roles in the project-root `spec-superflow.config.json`:
+Configure platform model IDs for execution roles in the project-root `team-flow.config.json`:
 
 ```json
 {
@@ -309,7 +309,7 @@ Configure platform model IDs for execution roles in the project-root `spec-super
 Resolve a profile in read-only mode:
 
 ```bash
-ssf config --resolve-model mechanical
+tf config --resolve-model mechanical
 ```
 
 This command only resolves local configuration, does not call platform APIs, and does not switch models in the current session. The controller explicitly passes the returned model ID only to platforms whose dispatch supports a `model` field. A `configured: false` result means automatic selection is unavailable: never invent a provider model and continue to meet the existing explicit `model` requirement.
@@ -321,7 +321,7 @@ This command only resolves local configuration, does not call platform APIs, and
 <details>
 <summary><strong>How is this different from OpenSpec or Superpowers?</strong></summary>
 
-spec-superflow is a source-level fusion, not side-by-side installation. It absorbs OpenSpec's Schema/validation/parsing engine and Superpowers' TDD/SDD/debugging/review discipline, while adding a unique contract-builder bridge layer and 8-state routing. Self-contained — no upstream runtimes needed.
+team-flow is a source-level fusion, not side-by-side installation. It absorbs OpenSpec's Schema/validation/parsing engine and Superpowers' TDD/SDD/debugging/review discipline, while adding a unique contract-builder bridge layer and 8-state routing. Self-contained — no upstream runtimes needed.
 
 </details>
 
@@ -342,7 +342,7 @@ Content-level detection, not timestamps: proposal scope changed, approved spec b
 <details>
 <summary><strong>How does SDD (Subagent-Driven Development) work?</strong></summary>
 
-For full/hotfix, `ssf execution recommend` first presents Inline, Batch Inline,
+For full/hotfix, `tf execution recommend` first presents Inline, Batch Inline,
 and SDD with evidence from the change, then recommends one. The user confirms a
 selection with `--confirm`; a different selection requires
 `--acknowledge-recommendation`. The saved execution plan at

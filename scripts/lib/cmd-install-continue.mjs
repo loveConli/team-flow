@@ -1,4 +1,4 @@
-// ssf install-continue — deploy spec-superflow for Continue. Delegates to scripts/install-continue.mjs
+// tf install-continue — deploy team-flow for Continue. Delegates to scripts/install-continue.mjs
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

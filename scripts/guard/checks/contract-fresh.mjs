@@ -2,7 +2,7 @@
 import { isContractFresh } from '../../lib/hash.mjs';
 
 /**
- * Compare stored artifacts_hash in .spec-superflow.yaml against current artifact hashes.
+ * Compare stored artifacts_hash in .team-flow.yaml against current artifact hashes.
  * Returns { pass, failures[] }.
  */
 export function checkContractFresh(changeDir) {

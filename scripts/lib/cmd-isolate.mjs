@@ -1,4 +1,4 @@
-// scripts/lib/cmd-isolate.mjs — `ssf isolate` CLI wrapper around ensure-branch.mjs
+// scripts/lib/cmd-isolate.mjs — `tf isolate` CLI wrapper around ensure-branch.mjs
 import { execFileSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { dirname, join } from 'node:path';
@@ -16,7 +16,7 @@ export async function run(args) {
   const changeDir = positionals[0];
   const changeName = positionals[1];
   if (!changeDir) {
-    console.error('Usage: ssf isolate <change-dir> [change-name] [--force]');
+    console.error('Usage: tf isolate <change-dir> [change-name] [--force]');
     process.exit(2);
   }
   const extra = values.force ? ['--force'] : [];

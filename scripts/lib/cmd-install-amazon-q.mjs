@@ -1,4 +1,4 @@
-// ssf install-amazon-q — deploy spec-superflow for Amazon Q Developer. Delegates to scripts/install-amazon-q.mjs
+// tf install-amazon-q — deploy team-flow for Amazon Q Developer. Delegates to scripts/install-amazon-q.mjs
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

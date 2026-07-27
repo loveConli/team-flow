@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/install-amazon-q.mjs — deploy spec-superflow for Amazon Q Developer CLI
+// scripts/install-amazon-q.mjs — deploy team-flow for Amazon Q Developer CLI
 // Skills → .amazonq/skills/, phase-guard rule → .amazonq/rules/phase-guard.md
 import { installPlatform } from './lib/install.mjs';
 

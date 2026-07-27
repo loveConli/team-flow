@@ -1,5 +1,5 @@
 /**
- * Multi-language tokenizer for spec-superflow keyword extraction.
+ * Multi-language tokenizer for team-flow keyword extraction.
  * Supports English (stemming + stop words) and Chinese (CJK sliding window).
  * Zero external dependencies.
  */

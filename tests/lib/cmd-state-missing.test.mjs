@@ -1,6 +1,6 @@
 // tests/lib/cmd-state-missing.test.mjs
-// Regression for BUG-B: `ssf state` subcommands must error (not silently drift)
-// when the .spec-superflow.yaml does not exist. Previously `set` would create a
+// Regression for BUG-B: `tf state` subcommands must error (not silently drift)
+// when the .team-flow.yaml does not exist. Previously `set` would create a
 // phantom state file in the wrong directory.
 
 import { describe, it, before, after } from 'node:test';
@@ -14,11 +14,11 @@ import { dirname } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
-const CLI = join(ROOT, 'scripts', 'spec-superflow.mjs');
+const CLI = join(ROOT, 'scripts', 'team-flow.mjs');
 
 function makeEmptyDir() {
-  // A directory with NO .spec-superflow.yaml on purpose.
-  return mkdtempSync(join(tmpdir(), 'ssf-state-missing-'));
+  // A directory with NO .team-flow.yaml on purpose.
+  return mkdtempSync(join(tmpdir(), 'tf-state-missing-'));
 }
 
 function cleanup(dir) {
@@ -35,7 +35,7 @@ function run(args) {
   }
 }
 
-describe('BUG-B: ssf state errors on missing state file (no phantom drift)', () => {
+describe('BUG-B: tf state errors on missing state file (no phantom drift)', () => {
   let dir;
   before(() => { dir = makeEmptyDir(); });
   after(() => { cleanup(dir); });
@@ -57,9 +57,9 @@ describe('BUG-B: ssf state errors on missing state file (no phantom drift)', () 
     assert.equal(r.ok, false, 'set must fail without a state file');
     assert.match(r.out, /No state file/i);
     assert.equal(
-      existsSync(join(dir, '.spec-superflow.yaml')),
+      existsSync(join(dir, '.team-flow.yaml')),
       false,
-      'set must NOT create a phantom .spec-superflow.yaml in a missing-state directory',
+      'set must NOT create a phantom .team-flow.yaml in a missing-state directory',
     );
   });
 });

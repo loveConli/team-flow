@@ -29,9 +29,9 @@ describe('execution control plane instructions', () => {
 
     assert.match(read('templates/execution-contract.md'), /Execution Waves/);
     assert.match(read('CHANGELOG.md'), /#45/);
-    assert.doesNotMatch(read('README.md'), /\/ssf:resume/);
-    assert.doesNotMatch(read('docs/README_en.md'), /\/ssf:resume/);
-    assert.doesNotMatch(read('INSTALL.md'), /\/ssf:resume/);
+    assert.doesNotMatch(read('README.md'), /\/tf:resume/);
+    assert.doesNotMatch(read('docs/README_en.md'), /\/tf:resume/);
+    assert.doesNotMatch(read('INSTALL.md'), /\/tf:resume/);
 
     for (const path of documents) {
       assert.doesNotMatch(read(path), /automatic(?:ally)?\s+(?:defaults?\s+to\s+)?Batch Inline/i,
@@ -67,7 +67,7 @@ describe('execution control plane instructions', () => {
       assert.match(content, /downgrade|降级/i, `${path} keeps SDD downgrade rejection explicit`);
     }
 
-    assert.match(read('scripts/spec-superflow.mjs'), /upgrade inline\/batch.*replan existing sdd.*new revision/is,
+    assert.match(read('scripts/team-flow.mjs'), /upgrade inline\/batch.*replan existing sdd.*new revision/is,
       'CLI help describes SDD replanning instead of only inline upgrades');
   });
 

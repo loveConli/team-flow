@@ -19,13 +19,13 @@ export function checkContractCurrent(changeDir) {
   if (!state.contract_hash || state.contract_hash === 'null') {
     return {
       pass: false,
-      failures: ['execution-contract.md is not recorded in state. Run ssf state init <change-dir> after contract generation.'],
+      failures: ['execution-contract.md is not recorded in state. Run tf state init <change-dir> after contract generation.'],
     };
   }
   if (state.contract_hash !== current) {
     return {
       pass: false,
-      failures: ['execution-contract.md is stale: contract hash mismatch. Re-run contract-builder or ssf state rebuild.'],
+      failures: ['execution-contract.md is stale: contract hash mismatch. Re-run contract-builder or tf state rebuild.'],
     };
   }
 

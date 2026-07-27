@@ -2,7 +2,7 @@
 import { readState } from '../../lib/state-loader.mjs';
 
 /**
- * Check that .spec-superflow.yaml records a passing verification outcome.
+ * Check that .team-flow.yaml records a passing verification outcome.
  *
  * Historically only `test_result: pass` was accepted, but release-archivist
  * records the verification result in `dp_6_result` (e.g. "pass: ..."). The

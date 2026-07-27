@@ -12,7 +12,7 @@ describe('install-git-hooks', () => {
     assert.doesNotMatch(source, /REPO_ROOT="\$\(cd "\$\(dirname "\$0"\)\/\.\.\/\.\." && pwd\)"/);
   });
 
-  it('upgrades an existing spec-superflow hook when its generated content is stale', () => {
+  it('upgrades an existing team-flow hook when its generated content is stale', () => {
     assert.match(source, /existing === HOOK_SCRIPT/);
     assert.match(source, /Updating existing pre-commit hook/);
     assert.doesNotMatch(source, /if \(existing\.includes\(MARKER\)\) \{\s*console\.log\([^\n]+\);\s*process\.exit\(0\);/s);

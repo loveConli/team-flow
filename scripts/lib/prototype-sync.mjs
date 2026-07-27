@@ -3,7 +3,7 @@
  * prototype-sync — change 完成后将 UX 增量合并回全局 prototype/ + design-system.md
  *
  * v0.3 定义，v0.5 实现为 CLI 子命令
- * 用法：ssf prototype-sync <change-dir> --source <ux-delta-path>
+ * 用法：tf prototype-sync <change-dir> --source <ux-delta-path>
  *
  * 功能：
  * 1. 读取 change 的 UX 增量（从 execution-contract.md 或指定 --source 路径）
@@ -38,7 +38,7 @@ function parseArgv(argv) {
 
 /**
  * 执行 prototype-sync 合并
- * @param {string[]|object} args - CLI 参数数组（从 ssf 框架传入）或已解析的对象
+ * @param {string[]|object} args - CLI 参数数组（从 tf 框架传入）或已解析的对象
  * @returns {{ synced: boolean, pages?: number, components?: number, designSystem?: boolean, conflicts?: string[], reason?: string }}
  */
 export function run(args = {}) {
@@ -52,7 +52,7 @@ export function run(args = {}) {
   const prototypeDir = args.prototypeDir || 'prototype';
 
   if (!changeDir) {
-    console.error('Usage: ssf prototype-sync <change-dir> [--source <ux-delta-path>] [--prototype-dir <path>]');
+    console.error('Usage: tf prototype-sync <change-dir> [--source <ux-delta-path>] [--prototype-dir <path>]');
     process.exit(1);
   }
 

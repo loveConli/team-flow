@@ -58,8 +58,8 @@ describe('Node 20 compatibility contract', () => {
     assert.match(build, /- run: npm run build/);
     assert.match(build, /- run: npm test/);
     assert.match(build, /run: node scripts\/check-version-consistency\.mjs/);
-    assert.match(build, /node scripts\/spec-superflow\.mjs doctor/);
-    assert.match(build, /node scripts\/spec-superflow\.mjs --version/);
+    assert.match(build, /node scripts\/team-flow\.mjs doctor/);
+    assert.match(build, /node scripts\/team-flow\.mjs --version/);
     assert.match(build, /config --get execution\.inlineThreshold/);
     assert.match(release, /node-version: 22\n          registry-url:/);
   });

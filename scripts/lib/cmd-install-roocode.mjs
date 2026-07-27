@@ -1,4 +1,4 @@
-// ssf install-roocode — deploy spec-superflow for Roo Code. Delegates to scripts/install-roocode.mjs
+// tf install-roocode — deploy team-flow for Roo Code. Delegates to scripts/install-roocode.mjs
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

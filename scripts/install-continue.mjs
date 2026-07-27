@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/install-continue.mjs — deploy spec-superflow for Continue
+// scripts/install-continue.mjs — deploy team-flow for Continue
 // Skills → .continue/skills/, phase-guard rule → .continue/rules/phase-guard.md
 import { installPlatform } from './lib/install.mjs';
 

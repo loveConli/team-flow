@@ -52,7 +52,7 @@ argument-hint: "[问题简述] [--category <分类>] [--severity <P0-P3>]"
 | `artifact-quality` | 产物格式/内容/校验问题 | 对应 skill + 制品契约 |
 | `state-management` | 状态文件不一致、恢复失败 | state-model + CLI |
 | `agent-quality` | subagent 产出质量问题 | agent 定义 + §18.1 |
-| `cli-command` | ssf CLI 命令问题 | scripts/ |
+| `cli-command` | tf CLI 命令问题 | scripts/ |
 | `ux-interaction` | 交互不流畅、确认过多/过少 | skill 工作流设计 |
 | `performance` | token 消耗过大、响应慢 | skill 拆分/渐进式披露 |
 | `cross-platform` | 跨平台兼容性问题 | 多安装面配置 |
@@ -80,7 +80,7 @@ argument-hint: "[问题简述] [--category <分类>] [--severity <P0-P3>]"
 
 自动检测并关联：
 - 当前 SOP 阶段（`.team-flow/` yaml）
-- 状态机状态（`.spec-superflow.yaml`）
+- 状态机状态（`.team-flow.yaml`）
 - 涉及的 skill / agent / CLI 命令
 - 涉及的产物路径
 

@@ -11,7 +11,7 @@ let planInstall, installWorkBuddy;
 
 describe('cmd-install-workbuddy', () => {
   beforeEach(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-workbuddy-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-workbuddy-'));
     const mod = await import(join(process.cwd(), 'scripts/lib/cmd-install-workbuddy.mjs'));
     planInstall = mod.planInstall;
     installWorkBuddy = mod.installWorkBuddy;
@@ -22,7 +22,7 @@ describe('cmd-install-workbuddy', () => {
   });
 
   function makePluginRoot() {
-    const pluginRoot = join(tempDir, 'spec-superflow');
+    const pluginRoot = join(tempDir, 'team-flow');
     const skillsDir = join(pluginRoot, 'skills');
     mkdirSync(join(skillsDir, 'workflow-start'), { recursive: true });
     mkdirSync(join(skillsDir, 'need-explorer'), { recursive: true });
@@ -46,9 +46,9 @@ describe('cmd-install-workbuddy', () => {
       join(tempDir, 'home', '.workbuddy', 'plugins', 'marketplaces', 'cb_teams_marketplace', 'plugins'),
     );
     // Single plugin key, not per-skill.
-    assert.equal(plan.enabledPluginKey, 'spec-superflow@cb_teams_marketplace');
-    // Plugin dir targets spec-superflow, not per-skill.
-    assert.equal(plan.targetPluginDir, join(plan.pluginsDir, 'spec-superflow'));
+    assert.equal(plan.enabledPluginKey, 'team-flow@cb_teams_marketplace');
+    // Plugin dir targets team-flow, not per-skill.
+    assert.equal(plan.targetPluginDir, join(plan.pluginsDir, 'team-flow'));
     assert.equal(plan.targetSkills, join(plan.targetPluginDir, 'skills'));
     assert.equal(plan.targetRules, join(plan.targetPluginDir, 'rules'));
   });
@@ -70,16 +70,16 @@ describe('cmd-install-workbuddy', () => {
     const result = await installWorkBuddy({ pluginRoot, homeDir, marketplaceName: 'cb_teams_marketplace' });
     assert.equal(result.skillNames.length, 2);
 
-    // Settings: existing key preserved, single spec-superflow key added.
+    // Settings: existing key preserved, single team-flow key added.
     const settings = JSON.parse(readFileSync(join(settingsDir, 'settings.json'), 'utf-8'));
     assert.equal(settings.enabledPlugins['existing@codebuddy-plugins-official'], true);
-    assert.equal(settings.enabledPlugins['spec-superflow@cb_teams_marketplace'], true);
+    assert.equal(settings.enabledPlugins['team-flow@cb_teams_marketplace'], true);
     // Old per-skill keys should NOT exist.
     assert.equal(settings.enabledPlugins['workflow-start@cb_teams_marketplace'], undefined);
     assert.equal(settings.enabledPlugins['need-explorer@cb_teams_marketplace'], undefined);
 
     // Skills deployed under <plugin>/skills/<name>/SKILL.md
-    const pluginDir = join(homeDir, '.workbuddy', 'plugins', 'marketplaces', 'cb_teams_marketplace', 'plugins', 'spec-superflow');
+    const pluginDir = join(homeDir, '.workbuddy', 'plugins', 'marketplaces', 'cb_teams_marketplace', 'plugins', 'team-flow');
     assert.match(
       readFileSync(join(pluginDir, 'skills', 'workflow-start', 'SKILL.md'), 'utf-8'),
       /workflow-start/,
@@ -93,7 +93,7 @@ describe('cmd-install-workbuddy', () => {
 
     // Plugin manifest deployed.
     const manifest = JSON.parse(readFileSync(join(pluginDir, '.codebuddy-plugin', 'plugin.json'), 'utf-8'));
-    assert.equal(manifest.name, 'spec-superflow');
+    assert.equal(manifest.name, 'team-flow');
     assert.equal(manifest.skills.length, 2);
   });
 

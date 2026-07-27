@@ -1,5 +1,5 @@
 {
-  "_comment": "Token baseline for spec-superflow v0.8.7 post token-efficiency compression. Estimation: English ~4 chars/token, Chinese ~1.5 chars/token. Pre-compression: ~24,387 tokens / 2,536 lines. Post-compression: ~9,669 tokens / 793 lines (-60.3%).",
+  "_comment": "Token baseline for team-flow v0.8.7 post token-efficiency compression. Estimation: English ~4 chars/token, Chinese ~1.5 chars/token. Pre-compression: ~24,387 tokens / 2,536 lines. Post-compression: ~9,669 tokens / 793 lines (-60.3%).",
   "timestamp": "2026-07-03T14:50:36.427Z",
   "components": [
     {

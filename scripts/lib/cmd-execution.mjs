@@ -35,7 +35,7 @@ export async function run(args) {
     return;
   }
   if (!SUBCOMMANDS.includes(subcommand)) usage(`Unknown execution subcommand: ${subcommand}`);
-  if (!changeDir) usage('Usage: ssf execution <subcommand> <change-dir> [options]');
+  if (!changeDir) usage('Usage: tf execution <subcommand> <change-dir> [options]');
 
   switch (subcommand) {
     case 'recommend':
@@ -63,7 +63,7 @@ function createAndPrintPlan(changeDir, values, revise) {
       throw new Error('Execution plan revisions must retain or upgrade to sdd; execution-plan downgrades are not allowed');
     }
   } else if (existing) {
-    throw new Error('An execution plan already exists; use "ssf execution revise" to create a new SDD revision');
+    throw new Error('An execution plan already exists; use "tf execution revise" to create a new SDD revision');
   }
   const recommendationReceipt = readCurrentRecommendationReceipt(changeDir, waves, revise ? existing.revision : null);
   const recommendation = recommendationReceipt.recommendation;
@@ -72,7 +72,7 @@ function createAndPrintPlan(changeDir, values, revise) {
   }
 
   if (!values.confirm) {
-    throw new Error('Execution mode selection requires --confirm after reviewing "ssf execution recommend" output');
+    throw new Error('Execution mode selection requires --confirm after reviewing "tf execution recommend" output');
   }
   const followedRecommendation = values.mode === recommendation.recommendation.mode;
   if (!followedRecommendation && !values['acknowledge-recommendation']) {
@@ -198,9 +198,9 @@ function print(json, value, message) {
 
 function printHelp() {
   console.log(`Usage:
-  ssf execution recommend <dir> [--wave <id>:<strategy>:<task,...>[:<depends-on,...>]] [--json]
-  ssf execution plan <dir> --mode <mode> --confirm --reason <text> --wave <id>:<strategy>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]
-  ssf execution show <dir> [--json]
-  ssf execution revise <dir> --mode sdd --confirm --reason <text> --wave <id>:<strategy>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]
-  ssf execution review <dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict pass|fail`);
+  tf execution recommend <dir> [--wave <id>:<strategy>:<task,...>[:<depends-on,...>]] [--json]
+  tf execution plan <dir> --mode <mode> --confirm --reason <text> --wave <id>:<strategy>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]
+  tf execution show <dir> [--json]
+  tf execution revise <dir> --mode sdd --confirm --reason <text> --wave <id>:<strategy>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]
+  tf execution review <dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict pass|fail`);
 }

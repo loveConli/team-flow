@@ -1,6 +1,6 @@
 # add-dark-mode Example
 
-This example demonstrates a complete `spec-superflow` change set for a dark mode feature.
+This example demonstrates a complete `team-flow` change set for a dark mode feature.
 
 Included artifacts:
 

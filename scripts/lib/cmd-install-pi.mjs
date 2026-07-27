@@ -1,4 +1,4 @@
-// ssf install-pi — deploy spec-superflow for Pi agent. Delegates to scripts/install-pi.mjs
+// tf install-pi — deploy team-flow for Pi agent. Delegates to scripts/install-pi.mjs
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -32,8 +32,8 @@ function git(dir, ...args) {
 describe('BUG/#15: ensure-branch enforces isolation', () => {
   let plainDir, repoDir;
   before(() => {
-    plainDir = mkdtempSync(join(tmpdir(), 'ssf-ensure-plain-'));
-    repoDir = mkdtempSync(join(tmpdir(), 'ssf-ensure-repo-'));
+    plainDir = mkdtempSync(join(tmpdir(), 'tf-ensure-plain-'));
+    repoDir = mkdtempSync(join(tmpdir(), 'tf-ensure-repo-'));
     mkdirSync(join(repoDir, 'specs'), { recursive: true });
     writeFileSync(join(repoDir, 'README.md'), 'x');
     git(repoDir, 'init', '-q');

@@ -1,4 +1,4 @@
-// ssf validate <dir> — validate artifacts in a change directory
+// tf validate <dir> — validate artifacts in a change directory
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { loadConfig } from './config-loader.mjs';
@@ -24,7 +24,7 @@ function printReport(label, report) {
 
 export async function run(args) {
   if (args.length < 1) {
-    console.error('Usage: ssf validate <change-dir>');
+    console.error('Usage: tf validate <change-dir>');
     process.exit(2);
   }
 

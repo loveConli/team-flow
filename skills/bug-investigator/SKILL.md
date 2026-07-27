@@ -1,6 +1,6 @@
 ---
 name: bug-investigator
-description: Use when encountering any bug, test failure, or unexpected behavior during spec-superflow execution, before proposing fixes. Invoked automatically when build-executor hits a blockage.
+description: Use when encountering any bug, test failure, or unexpected behavior during team-flow execution, before proposing fixes. Invoked automatically when build-executor hits a blockage.
 ---
 
 # Bug Investigator
@@ -49,7 +49,7 @@ Scientific method: form a single hypothesis ("I think X is the root cause becaus
 
 ### DP-5: Debug Escalation (3+ Failures)
 
-3+ failed fixes = architectural problem. Each fix revealing new problems elsewhere = wrong architecture. Record: `npx --yes --package spec-superflow@0.22.2 ssf state set <change-dir> dp_5_result <decision>`. Discuss with user before attempting more fixes.
+3+ failed fixes = architectural problem. Each fix revealing new problems elsewhere = wrong architecture. Record: `npx --yes --package team-flow@0.22.3 tf state set <change-dir> dp_5_result <decision>`. Discuss with user before attempting more fixes.
 
 ## Red Flags — Return to Phase 1
 

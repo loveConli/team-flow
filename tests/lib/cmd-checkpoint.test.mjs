@@ -1,5 +1,5 @@
 // tests/lib/cmd-checkpoint.test.mjs
-// Dispatcher-level tests for ssf checkpoint.
+// Dispatcher-level tests for tf checkpoint.
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -7,7 +7,7 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const CLI = join(process.cwd(), 'scripts/spec-superflow.mjs');
+const CLI = join(process.cwd(), 'scripts/team-flow.mjs');
 let changeDir;
 
 function runSsf(args) {
@@ -26,7 +26,7 @@ function runSsf(args) {
 }
 
 beforeEach(() => {
-  changeDir = mkdtempSync(join(tmpdir(), 'ssf-checkpoint-'));
+  changeDir = mkdtempSync(join(tmpdir(), 'tf-checkpoint-'));
   writeFileSync(join(changeDir, 'tasks.md'), '# Tasks\n\n- [ ] 1.1 Original task text\n');
 });
 
@@ -34,7 +34,7 @@ afterEach(() => {
   rmSync(changeDir, { recursive: true, force: true });
 });
 
-describe('ssf checkpoint', () => {
+describe('tf checkpoint', () => {
   it('advertises checkpoint and handoff syntax in --help', () => {
     const result = runSsf(['--help']);
     assert.equal(result.exitCode, 0, result.stderr);

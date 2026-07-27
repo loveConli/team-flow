@@ -88,7 +88,7 @@ Resolution steps:
 
 **Resolve the format here; load the rendering reference at Phase 3, not now.** The format-rendering reference (`references/markdown-rendering.md` for `md`, `references/html-rendering.md` for `html`) is consumed only when the doc is composed — loading it during Phase 0 would carry 200+ lines through the entire dialogue. Phase 3 names the load. Section content is the same in either format; presentation differs.
 
-**Resolve PRD template.** Read `prd.template` config via `ssf runtime config --get prd.template`. If configured, use that template path. If not configured or reading fails, use the default template at `templates/prd.md` (relative to the skill's base directory). Store as `PRD_TEMPLATE_PATH`.
+**Resolve PRD template.** Read `prd.template` config via `tf runtime config --get prd.template`. If configured, use that template path. If not configured or reading fails, use the default template at `templates/prd.md` (relative to the skill's base directory). Store as `PRD_TEMPLATE_PATH`.
 
 The `output:` preference does NOT auto-propagate to `ce-plan` on handoff — ce-plan re-resolves its own `plan_output` config independently. Because both skills now operate on the same PRD artifact, an explicit conversion by `ce-plan` must report the old path and new canonical path; pipeline mode may force markdown by writing the canonical markdown PRD path and leaving any HTML sibling untouched as non-canonical for automated discovery.
 
@@ -371,7 +371,7 @@ PRD 文档写入后、Handoff 之前，执行原型内循环。原型是 PRD 的
 
 如果需要原型：
 1. 读取 PRD 草稿中的功能点清单（§7 系统功能清单）
-2. 读取项目 `design-system.md`（通过 `ssf runtime config --get prototype.designSystem` 获取路径）
+2. 读取项目 `design-system.md`（通过 `tf runtime config --get prototype.designSystem` 获取路径）
 3. 调用 `/prototype` skill 产出原型页面
 4. 产出 `prototype/` 目录（index.html + pages/ + components/ + flow.md）
 
@@ -390,7 +390,7 @@ PRD 文档写入后、Handoff 之前，执行原型内循环。原型是 PRD 的
 - **遗漏** → 回到 Phase 1.3 对话，补充 PRD 功能点 → 更新原型 → 回 3.5.3
 - **矛盾** → 回到 Phase 1.3 对话，解决矛盾 → 更新原型 → 回 3.5.3
 - **最多循环 3 次**，超过则标记为"需人工介入"，在 PRD 中记录未解决项
-- 每次修正触发复利捕获：`ssf solutions capture --phase prd --domain <domain> --type pitfall --severity medium --summary "<修正原因>"`
+- 每次修正触发复利捕获：`tf solutions capture --phase prd --domain <domain> --type pitfall --severity medium --summary "<修正原因>"`
 
 #### 3.5.5 PRD 完整性评审（v0.8 新增，冻结前门禁）
 

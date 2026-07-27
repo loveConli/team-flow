@@ -10,8 +10,8 @@
 #   消费本脚本 JSON 输出的侦察子代理（codebase-recon-analyst）完成。
 #
 # 映射
-#   本脚本是未来 `ssf recon` CLI 的底层实现雏形：
-#       ssf recon [--root <path>] [--out <json>]
+#   本脚本是未来 `tf recon` CLI 的底层实现雏形：
+#       tf recon [--root <path>] [--out <json>]
 #   现阶段以独立 bash 脚本形态供 workflow-bootstrap 调用，后续原样并入 CLI。
 #
 # 用法
@@ -266,7 +266,7 @@ if [ -d "$ROOT_ABS/docs" ]; then DOCS_DIR=true; else DOCS_DIR=false; fi
 {
   printf '{\n'
   printf '  "schema_version": 1,\n'
-  printf '  "tool": "recon-probe.sh (future: ssf recon)",\n'
+  printf '  "tool": "recon-probe.sh (future: tf recon)",\n'
   printf '  "root": "%s",\n' "$(json_escape "$ROOT_ABS")"
   printf '  "generated_at": "%s",\n' "$GENERATED_AT"
   # ① 目录树

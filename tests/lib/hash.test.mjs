@@ -13,7 +13,7 @@ describe('hash: computeArtifactsHash()', () => {
   let hashMod;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-hash-test-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-hash-test-'));
     const modulePath = join(process.cwd(), 'scripts/lib/hash.mjs');
     hashMod = await import(modulePath);
   });
@@ -104,7 +104,7 @@ describe('hash: computeContractHash()', () => {
   let hashMod;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-hash-contract-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-hash-contract-'));
     const modulePath = join(process.cwd(), 'scripts/lib/hash.mjs');
     hashMod = await import(modulePath);
   });

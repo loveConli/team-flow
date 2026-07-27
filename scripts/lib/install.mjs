@@ -1,17 +1,17 @@
 // scripts/lib/install.mjs
-// Shared installer for spec-superflow cross-platform deployment.
+// Shared installer for team-flow cross-platform deployment.
 //
 // Mirrors the proven logic of scripts/install-cursor.mjs, parameterized by a
 // PlatformConfig from ./platforms.mjs. For each platform it:
 //   1. Resolves the plugin source (latest GitHub release or --local <path>).
 //   2. Copies RUNTIME_DIRS (scripts/docs/templates/dist/hooks) to
-//      <skillsDir>/spec-superflow/ so local runtime commands resolve.
+//      <skillsDir>/team-flow/ so local runtime commands resolve.
 //   3. Copies skills/ to <skillsDir>/skills/ with portable package commands
 //      rewritten to the bundled runtime.
 //   4. Writes a phase-guard rule file to the platform's rules directory
 //      (when the platform has one) so the workflow entry rule is auto-included.
 //
-// spec-superflow's guard is the phase-guard RULE (auto-included by the
+// team-flow's guard is the phase-guard RULE (auto-included by the
 // platform), not a PreToolUse hook; no hook configs are written here.
 
 import { existsSync, mkdirSync, readdirSync, statSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
@@ -26,7 +26,7 @@ import { shellQuote } from './shell-quote.mjs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const defaultPluginRoot = resolve(__dirname, '..', '..'); // repo root when run from clone
 
-const GITHUB_REPO = 'MageByte-Zero/spec-superflow';
+const GITHUB_REPO = 'MageByte-Zero/team-flow';
 const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
 // Directories needed by local installer-rewritten runtime commands.
@@ -49,7 +49,7 @@ async function fetchLatestTag() {
 }
 
 async function cloneRelease(tag) {
-  const tmpDir = await mkdtemp(join('/tmp', 'spec-superflow-'));
+  const tmpDir = await mkdtemp(join('/tmp', 'team-flow-'));
   const url = `https://github.com/${GITHUB_REPO}.git`;
   console.log(`📥 Cloning ${tag} into ${tmpDir} ...`);
   execFileSync('git', ['clone', '--depth', '1', '--branch', tag, url, tmpDir], {
@@ -104,8 +104,8 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
       content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, pluginRootAbs);
     }
     content = content.replace(
-      /npx --yes --package spec-superflow@\d+\.\d+\.\d+ ssf/g,
-      `node ${shellQuote(join(pluginRootAbs, 'scripts', 'spec-superflow.mjs'))}`,
+      /npx --yes --package team-flow@\d+\.\d+\.\d+ tf/g,
+      `node ${shellQuote(join(pluginRootAbs, 'scripts', 'team-flow.mjs'))}`,
     );
     writeFileSync(filePath, content, 'utf-8');
   }
@@ -125,17 +125,17 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
 
 /** Phase-guard rule content. `mdc` gets Cursor frontmatter; `md`/`copilot` stay plain. */
 function phaseGuardContent(rulesFormat, platformId) {
-  const body = `# Phase Guard — spec-superflow (${platformId})
+  const body = `# Phase Guard — team-flow (${platformId})
 
 ## 入口规则
 
 - 所有工作必须从 "/workflow-start" 入口开始。
-- 在 .spec-superflow.yaml 中确认当前 state 和 workflow 模式之前，不要开始写代码。
+- 在 .team-flow.yaml 中确认当前 state 和 workflow 模式之前，不要开始写代码。
 
 ## 全局禁止
 
 - 没有 execution-contract.md 或未经用户明确批准，不得进入实现。
-- full/hotfix 必须先运行 ssf execution plan <change-dir> ...；没有 current execution plan 不得开始实现。
+- full/hotfix 必须先运行 tf execution plan <change-dir> ...；没有 current execution plan 不得开始实现。
 - 只有 all pass review receipts 后才可 closing；不得把未审查的 wave 当作完成。
 - 上述 plan/receipt gates 仅适用于 full/hotfix；tweak 免除这些 gates (tweak exempt)。
 - 执行过程中如果发现需求/范围变化，必须回退到 specifying 或 bridging，而不是直接改代码。
@@ -147,17 +147,17 @@ function phaseGuardContent(rulesFormat, platformId) {
 - DP-1：需求确认
 - DP-2：工件审查
 - DP-3：是否批准 execution contract？
-- DP-4：先运行 ssf execution recommend，展示可用模式与推荐；用户用 --confirm 确认，非推荐选择额外使用 --acknowledge-recommendation
+- DP-4：先运行 tf execution recommend，展示可用模式与推荐；用户用 --confirm 确认，非推荐选择额外使用 --acknowledge-recommendation
 - DP-5：调试升级
 - DP-6：验证失败
 - DP-7：是否收口归档？
 
-> 本文件由 spec-superflow 安装脚本生成（platform: ${platformId}）；
-> 对具体变更的 guard 内容请运行 \`ssf inject <change-dir>\` 更新。
+> 本文件由 team-flow 安装脚本生成（platform: ${platformId}）；
+> 对具体变更的 guard 内容请运行 \`tf inject <change-dir>\` 更新。
 `;
   if (rulesFormat === 'mdc') {
     return `---
-description: spec-superflow phase guard — 防止阶段漂移和未授权实现
+description: team-flow phase guard — 防止阶段漂移和未授权实现
 alwaysApply: true
 ---
 
@@ -167,7 +167,7 @@ ${body}`;
 }
 
 /**
- * Install spec-superflow for a platform.
+ * Install team-flow for a platform.
  *
  * @param {string} platformId - one of NEW_PLATFORM_IDS
  * @param {Object} [opts]
@@ -199,7 +199,7 @@ export async function installPlatform(platformId, opts = {}) {
     console.log(`📁 Using local repo: ${pluginRoot}`);
   } else {
     installedTag = tag || await fetchLatestTag();
-    console.log(`⬆️  Installing spec-superflow ${installedTag} for ${platform.name} ...`);
+    console.log(`⬆️  Installing team-flow ${installedTag} for ${platform.name} ...`);
     pluginRoot = await cloneRelease(installedTag);
     isTemp = true;
   }
@@ -212,12 +212,12 @@ export async function installPlatform(platformId, opts = {}) {
   }
 
   // Target paths (project-local scope).
-  const targetPluginDir = join(targetRoot, platform.skillsDir, 'spec-superflow');
+  const targetPluginDir = join(targetRoot, platform.skillsDir, 'team-flow');
   const targetSkills = join(targetRoot, platform.skillsDir, 'skills');
   const pluginRootAbs = resolve(targetPluginDir);
 
   try {
-    // 1. Copy runtime dependencies to <skillsDir>/spec-superflow/
+    // 1. Copy runtime dependencies to <skillsDir>/team-flow/
     console.log('📋 Copying runtime dependencies...');
     for (const dir of RUNTIME_DIRS) {
       const src = join(pluginRoot, dir);

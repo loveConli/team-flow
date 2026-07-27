@@ -1,5 +1,5 @@
 // Raw-package smoke: canonical skills must work without host plugin-root variables
-// or a globally installed `ssf` binary.
+// or a globally installed `tf` binary.
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -16,11 +16,11 @@ function run(command, args, options) {
 }
 
 describe('raw-package runtime smoke', () => {
-  it('runs a packed canonical runtime with no plugin-root variables or global ssf', () => {
+  it('runs a packed canonical runtime with no plugin-root variables or global tf', () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
     assert.equal(pkg.scripts['test:raw-mode'], 'node --test tests/lib/raw-mode-smoke.test.mjs');
 
-    const tempRoot = mkdtempSync(join(tmpdir(), 'ssf-raw-mode-'));
+    const tempRoot = mkdtempSync(join(tmpdir(), 'tf-raw-mode-'));
     try {
       const packJson = run('npm', ['pack', '--json', '--pack-destination', tempRoot], { cwd: ROOT });
       const [{ filename }] = JSON.parse(packJson);
@@ -30,7 +30,7 @@ describe('raw-package runtime smoke', () => {
       delete env.CODEX_HOME;
 
       const output = run('npx', [
-        '--yes', '--package', join(tempRoot, filename), 'ssf',
+        '--yes', '--package', join(tempRoot, filename), 'tf',
         'runtime', 'asset', 'read', 'docs/state-machine.md',
       ], { cwd: tempRoot, env });
 

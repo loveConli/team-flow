@@ -1,4 +1,4 @@
-// scripts/lib/cmd-state.mjs — ssf state subcommand handler
+// scripts/lib/cmd-state.mjs — tf state subcommand handler
 import { parseArgs } from 'node:util';
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync } from 'node:fs';
@@ -39,7 +39,7 @@ export async function run(args) {
   const arg = positionals[2];  // <to-state> for transition, <field> for get
 
   if (!changeDir) {
-    console.error('Usage: ssf state <subcommand> <change-dir> [arg]');
+    console.error('Usage: tf state <subcommand> <change-dir> [arg]');
     console.error('Subcommands: init, check, transition, get, rebuild, set');
     process.exit(2);
   }
@@ -55,11 +55,11 @@ export async function run(args) {
 
   // BUG-B: every subcommand except `init` requires an existing state file.
   // Without this check, readState silently returns defaults and `set` would
-  // create a phantom .spec-superflow.yaml in the wrong directory (state drift).
+  // create a phantom .team-flow.yaml in the wrong directory (state drift).
   if (sub !== 'init') {
-    const STATE_FILE = '.spec-superflow.yaml';
+    const STATE_FILE = '.team-flow.yaml';
     if (!existsSync(join(changeDir, STATE_FILE))) {
-      console.error(`No state file at ${join(changeDir, STATE_FILE)}. Run 'ssf state init <change-dir>' first.`);
+      console.error(`No state file at ${join(changeDir, STATE_FILE)}. Run 'tf state init <change-dir>' first.`);
       process.exit(1);
     }
   }
@@ -109,7 +109,7 @@ export async function run(args) {
     case 'transition': {
       const toState = arg;
       if (!toState) {
-        console.error('Usage: ssf state transition <change-dir> <to-state>');
+        console.error('Usage: tf state transition <change-dir> <to-state>');
         process.exit(2);
       }
 
@@ -179,7 +179,7 @@ export async function run(args) {
     case 'get': {
       const field = arg;
       if (!field) {
-        console.error('Usage: ssf state get <change-dir> <field>');
+        console.error('Usage: tf state get <change-dir> <field>');
         process.exit(2);
       }
       const state = readState(changeDir);
@@ -205,11 +205,11 @@ export async function run(args) {
       break;
     }
     case 'set': {
-      // ssf state set <change-dir> <field> <value>
+      // tf state set <change-dir> <field> <value>
       const field = arg;
       const value = positionals[3];
       if (!field || value === undefined) {
-        console.error('Usage: ssf state set <change-dir> <field> <value>');
+        console.error('Usage: tf state set <change-dir> <field> <value>');
         process.exit(2);
       }
       if (!SETTABLE_FIELDS.includes(field)) {

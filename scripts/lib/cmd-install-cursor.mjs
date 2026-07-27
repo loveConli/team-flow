@@ -1,4 +1,4 @@
-// ssf install-cursor — deploy spec-superflow skills/rules/scripts for Cursor Agent
+// tf install-cursor — deploy team-flow skills/rules/scripts for Cursor Agent
 // Delegates to scripts/install-cursor.mjs
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';

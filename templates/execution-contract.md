@@ -22,11 +22,11 @@
 
 ## Execution Plan
 
-full/hotfix 先运行 `ssf execution recommend`，按任务量和 wave 策略列出可用方式并
+full/hotfix 先运行 `tf execution recommend`，按任务量和 wave 策略列出可用方式并
 推荐一种，同时保存匹配当前 wave 的 recommendation receipt。Agent 展示候选项和理由，
 `plan` 和 `revise` 均只接受仍匹配 artifact、contract 和 wave 的凭据；用户通过 `--confirm` 明确确认；选择非推荐方式时
 还必须记录 `--acknowledge-recommendation`。Batch Inline 是串行模式，不得描述为并行。批准后，
-`ssf execution plan` 会把当前执行计划保存到
+`tf execution plan` 会把当前执行计划保存到
 `<change>/.superpowers/sdd/execution-plan.json`；该 JSON 是计划的持久化控制面，
 不是本 execution contract 的一部分。
 
@@ -68,12 +68,12 @@ wave 才可以开始。`parallel` 只表示允许在宿主支持并发派发时�
 
 ## Execution Mode
 
-- **可用方式与推荐**：`ssf execution recommend <change-dir> [--wave <id>:<parallel|serial>:<task,...>[:<depends-on,...>]]`
+- **可用方式与推荐**：`tf execution recommend <change-dir> [--wave <id>:<parallel|serial>:<task,...>[:<depends-on,...>]]`
 - **用户确认的模式**：`sdd` | `inline` | `batch-inline`
 - **推荐理由 / 项目事实**：
 - **非推荐选择的风险确认**：`--acknowledge-recommendation`（若适用）
-- **执行计划命令**：`ssf execution plan <change-dir> --mode <mode> --confirm --reason <text> --wave <id>:<parallel|serial>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]`
-- **允许的修订**：将已有计划保留/升级为 `sdd`；先重新 recommend，并以 `--confirm` 生成新 revision 和清除旧 receipt；不允许降级：`ssf execution revise <change-dir> --mode sdd --confirm --reason <text> --wave <id>:<parallel|serial>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]`
+- **执行计划命令**：`tf execution plan <change-dir> --mode <mode> --confirm --reason <text> --wave <id>:<parallel|serial>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]`
+- **允许的修订**：将已有计划保留/升级为 `sdd`；先重新 recommend，并以 `--confirm` 生成新 revision 和清除旧 receipt；不允许降级：`tf execution revise <change-dir> --mode sdd --confirm --reason <text> --wave <id>:<parallel|serial>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]`
 - **计划 revision / artifact hash**：
 
 ## Verification Dimensions
@@ -88,7 +88,7 @@ wave 才可以开始。`parallel` 只表示允许在宿主支持并发派发时�
 
 ## Review Gates
 
-- **强制审查点**：每个 Execution Wave 完成后记录 `ssf execution review` 的 review receipt
+- **强制审查点**：每个 Execution Wave 完成后记录 `tf execution review` 的 review receipt
 - **阻塞类别**：依赖未通过、review receipt 为 `fail`、缺失或过期
 - **收口条件**：所有当前 wave 都有 `pass` review receipt
 

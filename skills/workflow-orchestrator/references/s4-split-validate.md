@@ -8,7 +8,7 @@
 | 编排层（orchestrator 自己做） | 执行层（委托） |
 |------------------------------|---------------|
 | 读 plan change 列表 | 拆分质量审计（`change-split-auditor` agent） |
-| verdict 路由 | change 脚手架（`ssf change scaffold`，建议新增 CLI） |
+| verdict 路由 | change 脚手架（`tf change scaffold`，建议新增 CLI） |
 | 告知用户 | — |
 
 ## 步骤
@@ -38,14 +38,14 @@ verdict = FAIL → 必须回退 S3 调整拆分后重新审计，不可绕过直
 
 ```bash
 mkdir -p changes/<change-name>
-npx --yes --package spec-superflow@0.22.2 ssf state init changes/<change-name>
+npx --yes --package team-flow@0.22.3 tf state init changes/<change-name>
 ```
 
 > ⚠️ **路径约束**：change 脚手架目录固定为项目根 `changes/<change-name>/`。
 > 不要与 `specs/<cap>/`（change 内部行为规格目录）或 `architecture/`（change 内部架构设计目录）混淆。
 > 不要放入 `.team-flow/`（仅存产品级编排状态）。
 
-> 建议新增 `ssf change scaffold` CLI 一次性完成目录创建 + state init + change_dag 写入（确定性脚本，无需 LLM 判断）。（规划中，尚未实现——v0.17.0 时仍用上方手动步骤）
+> 建议新增 `tf change scaffold` CLI 一次性完成目录创建 + state init + change_dag 写入（确定性脚本，无需 LLM 判断）。（规划中，尚未实现——v0.17.0 时仍用上方手动步骤）
 
 ### 3.5 落盘 change-brief.md（v0.9 新增，产品级→变更级交接物）
 
@@ -82,7 +82,7 @@ plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层�
 - Plan: prd/vN/plan.md ### <C-ID>
 ```
 
-**hash 豁免（重要）**：change-brief.md 放在 change 根目录，**不**属于 spec-superflow 五产物（proposal/specs/design/tasks/execution-contract），因此天然**不进入 `artifacts_hash`**（`hash.mjs` 只统计前四类）。空 change 的 `artifacts_hash` 仍为 null，状态机的"无产物"判定不受污染——**绝不**让 brief 入 hash。
+**hash 豁免（重要）**：change-brief.md 放在 change 根目录，**不**属于 team-flow 五产物（proposal/specs/design/tasks/execution-contract），因此天然**不进入 `artifacts_hash`**（`hash.mjs` 只统计前四类）。空 change 的 `artifacts_hash` 仍为 null，状态机的"无产物"判定不受污染——**绝不**让 brief 入 hash。
 
 **双源权威规则**：scope/技术方向以 `prd/vN/plan.md` 为准、AC 以 PRD 功能清单为准；**brief 只是 S4 时刻的投影快照**，不是第二真相源。若变更层发现 brief 与 plan.md 冲突，以 plan.md 为准并触发 Brief drift 提示（见 workflow-start「Staleness Detection」）。
 
@@ -102,7 +102,7 @@ Change C1 已就绪，运行 /workflow-start 进入变更级流程。
 ## 完成条件
 
 - change-split-auditor 审计 verdict = PASS（必选门禁已通过，含 v0.9 D5 拆分维度合规）
-- 所有 change 目录已创建在项目根 `changes/` 下（非 `specs/` 或 `.team-flow/`），`.spec-superflow.yaml` 已初始化
+- 所有 change 目录已创建在项目根 `changes/` 下（非 `specs/` 或 `.team-flow/`），`.team-flow.yaml` 已初始化
 - 每个 change 目录已落盘 `change-brief.md`（v0.9 交接物，含 scope/AC/技术方向/frontmatter）
 - `.team-flow/requirements/<req-id>/orchestrator.yaml` 的 `change_dag` 已填充
 - S4 状态 = completed，已告知用户执行顺序

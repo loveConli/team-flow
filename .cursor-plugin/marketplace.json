@@ -4,14 +4,14 @@
     "name": "LT"
   },
   "metadata": {
-    "description": "Unified workflow plugin marketplace for Cursor (team-flow: spec-superflow + compound + architecture-design + prototype).",
-    "version": "0.22.2"
+    "description": "Unified workflow plugin marketplace for Cursor (team-flow: team-flow + compound + architecture-design + prototype).",
+    "version": "0.22.3"
   },
   "plugins": [
     {
       "name": "team-flow",
       "source": ".",
-      "description": "Unified workflow plugin: spec-superflow + compound-engineering core subset + architecture-design + prototype. 17 collaborative skills."
+      "description": "Unified workflow plugin: team-flow + compound-engineering core subset + architecture-design + prototype. 17 collaborative skills."
     }
   ]
 }

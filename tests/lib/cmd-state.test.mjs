@@ -7,10 +7,10 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execSync } from 'node:child_process';
 
-const CLI_PATH = join(process.cwd(), 'scripts/spec-superflow.mjs');
+const CLI_PATH = join(process.cwd(), 'scripts/team-flow.mjs');
 let tempDir;
 
-function ssf(args, options = {}) {
+function tf(args, options = {}) {
   try {
     const result = execSync(
       `${shellQuote(process.execPath)} ${shellQuote(CLI_PATH)} ${args}`,
@@ -28,7 +28,7 @@ function shellQuote(value) {
 
 describe('cmd-state: init', () => {
   before(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-state-cmd-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-state-cmd-'));
     // Create minimal artifacts for hash computation
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nTest proposal for state command testing, needs to be long enough for validation rules\n## What Changes\n- Add feature X');
   });
@@ -37,21 +37,21 @@ describe('cmd-state: init', () => {
     if (tempDir) rmSync(tempDir, { recursive: true, force: true });
   });
 
-  it('creates .spec-superflow.yaml with hashes', () => {
-    const result = ssf(`state init ${tempDir}`);
+  it('creates .team-flow.yaml with hashes', () => {
+    const result = tf(`state init ${tempDir}`);
     assert.equal(result.exitCode, 0, `Expected exit 0 but got ${result.exitCode}: ${result.stderr}`);
 
-    const stateFile = join(tempDir, '.spec-superflow.yaml');
+    const stateFile = join(tempDir, '.team-flow.yaml');
     assert.ok(existsSync(stateFile));
   });
 
   it('reports artifacts_hash in init output', () => {
-    const result = ssf(`state init ${tempDir}`);
+    const result = tf(`state init ${tempDir}`);
     assert.ok(result.stdout.includes('artifacts_hash'));
   });
 
   it('--json flag outputs JSON with ok: true', () => {
-    const result = ssf(`state init ${tempDir} --json`);
+    const result = tf(`state init ${tempDir} --json`);
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.ok, true);
     assert.ok(parsed.artifacts_hash.startsWith('sha256:'));
@@ -60,7 +60,7 @@ describe('cmd-state: init', () => {
 
 describe('cmd-state: check', () => {
   before(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-state-check-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-state-check-'));
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nTest proposal for state checking with enough chars to pass validation rules.\n## What Changes\n- Feature X');
   });
 
@@ -69,24 +69,24 @@ describe('cmd-state: check', () => {
   });
 
   it('reports consistent after init', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state check ${tempDir}`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state check ${tempDir}`);
     assert.equal(result.exitCode, 0);
     assert.ok(result.stdout.includes('consistent'));
   });
 
   it('reports inconsistent after artifact change', () => {
-    ssf(`state init ${tempDir}`);
+    tf(`state init ${tempDir}`);
     // Modify an artifact
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nModified proposal with different content for inconsistency testing.\n## What Changes\n- Modified feature');
-    const result = ssf(`state check ${tempDir}`);
+    const result = tf(`state check ${tempDir}`);
     assert.equal(result.exitCode, 1);
     assert.ok(result.stdout.includes('INCONSISTENT'));
   });
 
   it('--json outputs structured data', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state check ${tempDir} --json`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state check ${tempDir} --json`);
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.consistent, true);
     assert.ok(parsed.stored_hash);
@@ -97,7 +97,7 @@ describe('cmd-state: check', () => {
 
 describe('cmd-state: transition', () => {
   before(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-state-trans-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-state-trans-'));
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nTest proposal for state transition validation, meeting the minimum length requirement.\n## What Changes\n- Add feature');
     writeFileSync(join(tempDir, 'design.md'), '# Design\n## Context\nTest.\n## Goals\nTest.\n## Decisions\n### D1\n- Choice: Test\n- Rationale: Test\n\n## Risks And Trade-Offs\nNone.');
     writeFileSync(join(tempDir, 'tasks.md'), '# Tasks\n- [x] Task 1');
@@ -110,18 +110,18 @@ describe('cmd-state: transition', () => {
   });
 
   it('transitions from exploring to specifying', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state transition ${tempDir} specifying`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state transition ${tempDir} specifying`);
     assert.equal(result.exitCode, 0);
     assert.ok(result.stdout.includes('exploring -> specifying'));
   });
 
   it('--json outputs from/to', () => {
     // Re-init to ensure we start from exploring
-    rmSync(join(tempDir, '.spec-superflow.yaml'), { force: true });
-    ssf(`state init ${tempDir}`);
+    rmSync(join(tempDir, '.team-flow.yaml'), { force: true });
+    tf(`state init ${tempDir}`);
     // exploring→specifying is the next legal mainline transition
-    const result = ssf(`state transition ${tempDir} specifying --json`);
+    const result = tf(`state transition ${tempDir} specifying --json`);
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.ok, true);
     assert.equal(parsed.from, 'exploring');
@@ -129,65 +129,65 @@ describe('cmd-state: transition', () => {
   });
 
   it('persists state across invocations', () => {
-    ssf(`state init ${tempDir}`);
+    tf(`state init ${tempDir}`);
     // Legal transition: exploring → specifying
-    ssf(`state transition ${tempDir} specifying`);
+    tf(`state transition ${tempDir} specifying`);
 
     // Check state persisted
-    const result = ssf(`state check ${tempDir} --json`);
+    const result = tf(`state check ${tempDir} --json`);
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.state, 'specifying');
   });
 
   it('rejects exploring to approved-for-build when workflow is auto', () => {
-    rmSync(join(tempDir, '.spec-superflow.yaml'), { force: true });
-    ssf(`state init ${tempDir}`);
+    rmSync(join(tempDir, '.team-flow.yaml'), { force: true });
+    tf(`state init ${tempDir}`);
 
-    const result = ssf(`state transition ${tempDir} approved-for-build`);
+    const result = tf(`state transition ${tempDir} approved-for-build`);
     assert.equal(result.exitCode, 1);
     const output = result.stderr || result.stdout;
     assert.match(output, /workflow-mode/i);
     assert.match(output, /fast-path/i);
     assert.match(output, /tweak/i);
 
-    const check = ssf(`state get ${tempDir} state`);
+    const check = tf(`state get ${tempDir} state`);
     assert.equal(check.stdout.trim(), 'exploring');
   });
 
   it('rejects exploring to bridging when workflow is full', () => {
-    rmSync(join(tempDir, '.spec-superflow.yaml'), { force: true });
-    ssf(`state init ${tempDir}`);
-    ssf(`state set ${tempDir} workflow full`);
+    rmSync(join(tempDir, '.team-flow.yaml'), { force: true });
+    tf(`state init ${tempDir}`);
+    tf(`state set ${tempDir} workflow full`);
 
-    const result = ssf(`state transition ${tempDir} bridging`);
+    const result = tf(`state transition ${tempDir} bridging`);
     assert.equal(result.exitCode, 1);
     const output = result.stderr || result.stdout;
     assert.match(output, /workflow-mode/i);
     assert.match(output, /fast-path/i);
     assert.match(output, /hotfix/i);
 
-    const check = ssf(`state get ${tempDir} state`);
+    const check = tf(`state get ${tempDir} state`);
     assert.equal(check.stdout.trim(), 'exploring');
   });
 
   it('rejects transition when guard output is not valid JSON', () => {
-    rmSync(join(tempDir, '.spec-superflow.yaml'), { force: true });
-    ssf(`state init ${tempDir}`);
-    ssf(`state set ${tempDir} workflow invalid-mode`);
+    rmSync(join(tempDir, '.team-flow.yaml'), { force: true });
+    tf(`state init ${tempDir}`);
+    tf(`state set ${tempDir} workflow invalid-mode`);
 
-    const result = ssf(`state transition ${tempDir} specifying`);
+    const result = tf(`state transition ${tempDir} specifying`);
     assert.equal(result.exitCode, 1);
     assert.match(result.stderr || result.stdout, /valid JSON|Invalid workflow|guard-error/i);
 
-    const check = ssf(`state get ${tempDir} state`);
+    const check = tf(`state get ${tempDir} state`);
     assert.equal(check.stdout.trim(), 'exploring');
   });
 
   it('rejects transition when guard pass is a truthy non-boolean value', () => {
-    rmSync(join(tempDir, '.spec-superflow.yaml'), { force: true });
-    ssf(`state init ${tempDir}`);
+    rmSync(join(tempDir, '.team-flow.yaml'), { force: true });
+    tf(`state init ${tempDir}`);
 
-    const shimDir = mkdtempSync(join(tmpdir(), 'ssf-node-shim-'));
+    const shimDir = mkdtempSync(join(tmpdir(), 'tf-node-shim-'));
     const nodeShim = join(shimDir, 'node');
     writeFileSync(nodeShim, [
       '#!/bin/sh',
@@ -203,13 +203,13 @@ describe('cmd-state: transition', () => {
     chmodSync(nodeShim, 0o755);
 
     try {
-      const result = ssf(`state transition ${tempDir} specifying`, {
+      const result = tf(`state transition ${tempDir} specifying`, {
         env: { ...process.env, PATH: `${shimDir}:${process.env.PATH}` },
       });
       assert.equal(result.exitCode, 1);
       assert.match(result.stderr || result.stdout, /guard-error|Guard check failed/i);
 
-      const check = ssf(`state get ${tempDir} state`);
+      const check = tf(`state get ${tempDir} state`);
       assert.equal(check.stdout.trim(), 'exploring');
     } finally {
       rmSync(shimDir, { recursive: true, force: true });
@@ -217,10 +217,10 @@ describe('cmd-state: transition', () => {
   });
 
   it('reports guard spawn errors without changing state', () => {
-    rmSync(join(tempDir, '.spec-superflow.yaml'), { force: true });
-    ssf(`state init ${tempDir}`);
+    rmSync(join(tempDir, '.team-flow.yaml'), { force: true });
+    tf(`state init ${tempDir}`);
 
-    const result = ssf(`state transition ${tempDir} specifying`, {
+    const result = tf(`state transition ${tempDir} specifying`, {
       env: { ...process.env, PATH: '' },
     });
     assert.equal(result.exitCode, 1);
@@ -228,14 +228,14 @@ describe('cmd-state: transition', () => {
     assert.match(output, /guard-error|spawn|ENOENT/i);
     assert.doesNotMatch(output, /TypeError/i);
 
-    const check = ssf(`state get ${tempDir} state`);
+    const check = tf(`state get ${tempDir} state`);
     assert.equal(check.stdout.trim(), 'exploring');
   });
 });
 
 describe('cmd-state: get', () => {
   before(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-state-get-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-state-get-'));
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nTest proposal for get command, needs to be long enough.\n## What Changes\n- Feature');
   });
 
@@ -244,35 +244,35 @@ describe('cmd-state: get', () => {
   });
 
   it('gets a field value', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state get ${tempDir} state`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state get ${tempDir} state`);
     assert.equal(result.exitCode, 0);
     assert.equal(result.stdout.trim(), 'exploring');
   });
 
   it('returns null for unset fields', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state get ${tempDir} dp_5_result`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state get ${tempDir} dp_5_result`);
     assert.ok(result.stdout.includes('null'));
   });
 
   it('--json returns structured output', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state get ${tempDir} state --json`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state get ${tempDir} state --json`);
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.field, 'state');
     assert.equal(parsed.value, 'exploring');
   });
 
   it('errors without field argument', () => {
-    const result = ssf(`state get ${tempDir}`);
+    const result = tf(`state get ${tempDir}`);
     assert.equal(result.exitCode, 2);
   });
 });
 
 describe('cmd-state: set', () => {
   before(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-state-set-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-state-set-'));
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nTest proposal for the set subcommand validation.\n## What Changes\n- Test feature');
   });
 
@@ -281,22 +281,22 @@ describe('cmd-state: set', () => {
   });
 
   it('sets a settable field', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state set ${tempDir} workflow hotfix`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state set ${tempDir} workflow hotfix`);
     assert.equal(result.exitCode, 0);
     assert.ok(result.stdout.includes('hotfix'));
   });
 
   it('sets a DP field', () => {
-    ssf(`state init ${tempDir}`);
-    ssf(`state set ${tempDir} dp_1_result "confirmed: csv export"`);
-    const get = ssf(`state get ${tempDir} dp_1_result`);
+    tf(`state init ${tempDir}`);
+    tf(`state set ${tempDir} dp_1_result "confirmed: csv export"`);
+    const get = tf(`state get ${tempDir} dp_1_result`);
     assert.ok(get.stdout.includes('confirmed: csv export'));
   });
 
   it('rejects non-settable fields', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state set ${tempDir} state executing`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state set ${tempDir} state executing`);
     assert.equal(result.exitCode, 1);
     // Error goes to stderr for console.error
     assert.ok(result.stderr.includes('not settable') || result.stdout.includes('not settable'),
@@ -304,21 +304,21 @@ describe('cmd-state: set', () => {
   });
 
   it('rejects manual edits to execution DP-4 fields', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state set ${tempDir} dp_4_result "forged execution approval"`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state set ${tempDir} dp_4_result "forged execution approval"`);
     assert.equal(result.exitCode, 1);
     assert.match(result.stderr || result.stdout, /not settable/);
   });
 
   it('rejects unknown fields', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state set ${tempDir} nonexistent_field value`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state set ${tempDir} nonexistent_field value`);
     assert.equal(result.exitCode, 1);
   });
 
   it('--json outputs structured result', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state set ${tempDir} test_result pass --json`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state set ${tempDir} test_result pass --json`);
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.ok, true);
     assert.equal(parsed.field, 'test_result');
@@ -328,7 +328,7 @@ describe('cmd-state: set', () => {
 
 describe('cmd-state: rebuild', () => {
   before(() => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-state-rebuild-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-state-rebuild-'));
     writeFileSync(join(tempDir, 'proposal.md'), '## Why\nRebuild test proposal with sufficient content length.\n## What Changes\n- Rebuild feature');
   });
 
@@ -337,15 +337,15 @@ describe('cmd-state: rebuild', () => {
   });
 
   it('rebuilds state from artifacts', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state rebuild ${tempDir}`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state rebuild ${tempDir}`);
     assert.equal(result.exitCode, 0);
     assert.ok(result.stdout.includes('rebuilt'));
   });
 
   it('--json returns ok with state', () => {
-    ssf(`state init ${tempDir}`);
-    const result = ssf(`state rebuild ${tempDir} --json`);
+    tf(`state init ${tempDir}`);
+    const result = tf(`state rebuild ${tempDir} --json`);
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.ok, true);
     assert.equal(parsed.state, 'exploring');
@@ -354,12 +354,12 @@ describe('cmd-state: rebuild', () => {
 
 describe('cmd-state: error handling', () => {
   it('errors when no change-dir provided', () => {
-    const result = ssf('state init');
+    const result = tf('state init');
     assert.equal(result.exitCode, 2);
   });
 
   it('errors on unknown subcommand', () => {
-    const result = ssf('state invalid-subcommand /tmp');
+    const result = tf('state invalid-subcommand /tmp');
     assert.equal(result.exitCode, 2);
   });
 });

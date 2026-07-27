@@ -1,10 +1,10 @@
-// ssf handoff contract lifecycle commands.
+// tf handoff contract lifecycle commands.
 import { parseArgs } from 'node:util';
 import {
   HANDOFF_DECISIONS, HANDOFF_TYPES, createHandoff, finishHandoff, listHandoffs, resolveHandoff,
 } from './sdd-overlay.mjs';
 
-const USAGE = 'Usage: ssf handoff <create|list|finish|resolve> <change-dir> [options]';
+const USAGE = 'Usage: tf handoff <create|list|finish|resolve> <change-dir> [options]';
 
 export async function run(args) {
   const { positionals, values } = parseArgs({
@@ -31,7 +31,7 @@ export async function run(args) {
   if (subcommand === 'create') {
     if (!hasText(values.type) || !hasText(values.objective)
       || !hasText(values['expected-output']) || !hasText(values.acceptance)) {
-      usage('Usage: ssf handoff create <change-dir> --type <type> --objective <text> --expected-output <text> --acceptance <text>');
+      usage('Usage: tf handoff create <change-dir> --type <type> --objective <text> --expected-output <text> --acceptance <text>');
     }
     if (!HANDOFF_TYPES.has(values.type)) {
       throw new Error(`Unsupported handoff type '${values.type}'`);
@@ -57,7 +57,7 @@ export async function run(args) {
   }
 
   const id = positionals[2];
-  if (!hasText(id)) usage(`Usage: ssf handoff ${subcommand} <change-dir> <id>${subcommand === 'resolve' ? ' --decision <accept|reject|defer>' : ''}`);
+  if (!hasText(id)) usage(`Usage: tf handoff ${subcommand} <change-dir> <id>${subcommand === 'resolve' ? ' --decision <accept|reject|defer>' : ''}`);
 
   if (subcommand === 'finish') {
     const handoff = finishHandoff(changeDir, id);
@@ -66,7 +66,7 @@ export async function run(args) {
   }
 
   if (!hasText(values.decision)) {
-    usage('Usage: ssf handoff resolve <change-dir> <id> --decision <accept|reject|defer>');
+    usage('Usage: tf handoff resolve <change-dir> <id> --decision <accept|reject|defer>');
   }
   if (!HANDOFF_DECISIONS.has(values.decision)) {
     throw new Error(`Unsupported handoff decision '${values.decision}'`);

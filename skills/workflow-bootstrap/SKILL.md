@@ -29,7 +29,7 @@ workflow-bootstrap（一次性，手动触发）
 Do NOT invoke for:
 - 全新项目（无代码库）→ 直接用 `/workflow-orchestrator`
 - 已建立基线的项目（`docs/architecture/baseline.md` 已存在）→ 提示用户"基线已建立"
-- 已在 spec-superflow change 内 → 用 `/workflow-start`
+- 已在 team-flow change 内 → 用 `/workflow-start`
 - 纯架构设计 → 用 `/architecture-design`
 
 ## Pre-check

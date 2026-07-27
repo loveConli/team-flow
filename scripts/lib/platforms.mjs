@@ -1,9 +1,9 @@
 // scripts/lib/platforms.mjs
-// Platform registry for spec-superflow cross-platform installers.
+// Platform registry for team-flow cross-platform installers.
 //
 // All paths verified against comet (https://github.com/rpamis/comet)
 // src/core/platforms.ts and each platform's documented conventions.
-// spec-superflow's guard mechanism is the phase-guard RULE file (auto-included
+// team-flow's guard mechanism is the phase-guard RULE file (auto-included
 // by the platform), not a PreToolUse hook; therefore `supportsHooks`/
 // `hookFormat` are recorded for documentation accuracy only — the shared
 // installer does not write hook configs for these platforms (SessionStart
@@ -158,7 +158,7 @@ export function rulesTargetDir(platform, targetRoot) {
 export function phaseGuardFileName(rulesFormat) {
   switch (rulesFormat) {
     case 'mdc': return 'phase-guard.mdc';
-    case 'copilot': return 'spec-superflow.instructions.md';
+    case 'copilot': return 'team-flow.instructions.md';
     case 'md':
     default: return 'phase-guard.md';
   }

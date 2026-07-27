@@ -113,11 +113,11 @@ export function readRecommendationReceipt(changeDir) {
 export function readCurrentRecommendationReceipt(changeDir, waves = [], expectedPlanRevision = null) {
   const receipt = readRecommendationReceipt(changeDir);
   if (!receipt) {
-    throw new Error('Run "ssf execution recommend" for these waves before confirming an execution plan');
+    throw new Error('Run "tf execution recommend" for these waves before confirming an execution plan');
   }
   const failures = validateRecommendationReceipt(changeDir, receipt, waves, expectedPlanRevision);
   if (failures.length > 0) {
-    throw new Error(`Run "ssf execution recommend" again before confirming an execution plan: ${failures.join('; ')}`);
+    throw new Error(`Run "tf execution recommend" again before confirming an execution plan: ${failures.join('; ')}`);
   }
   return receipt;
 }

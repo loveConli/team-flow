@@ -28,9 +28,9 @@ jobs:
         run: node scripts/check-version-consistency.mjs
       - name: CLI smoke
         run: |
-          node scripts/spec-superflow.mjs doctor
-          node scripts/spec-superflow.mjs --version
-          node scripts/spec-superflow.mjs config --get execution.inlineThreshold
+          node scripts/team-flow.mjs doctor
+          node scripts/team-flow.mjs --version
+          node scripts/team-flow.mjs config --get execution.inlineThreshold
       - name: Token efficiency lint (warning only)
         run: node scripts/lint/lint-skills.mjs --include token
         continue-on-error: true

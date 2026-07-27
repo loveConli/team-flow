@@ -1,6 +1,6 @@
 # Release Checklist
 
-Use this checklist before publishing a new version of `spec-superflow`.
+Use this checklist before publishing a new version of `team-flow`.
 
 ## Repository Shape
 
@@ -9,9 +9,9 @@ Use this checklist before publishing a new version of `spec-superflow`.
 - `INSTALL.md` matches the supported installation story
 - `CHANGELOG.md` contains the new release entry
 - `LICENSE` is present
-- `ssf version <semver>` covers all manifests (JSON) + documentation (Markdown/shell)
+- `tf version <semver>` covers all manifests (JSON) + documentation (Markdown/shell)
 - `node scripts/check-version-consistency.mjs` passes (also runs in CI)
-- Verify all nine runtime-dependent canonical skills use the exact release version, and local installer output rewrites them to its bundled `scripts/spec-superflow.mjs`.
+- Verify all nine runtime-dependent canonical skills use the exact release version, and local installer output rewrites them to its bundled `scripts/team-flow.mjs`.
 - Verify `.github/plugin/marketplace.json` and `.claude-plugin/marketplace.json` versions match
 
 ## Workflow Integrity
@@ -42,14 +42,14 @@ For each example in `docs/examples/`:
 
 ## CLI And Config
 
-- `node scripts/spec-superflow.mjs doctor` — all checks pass
-- `node scripts/spec-superflow.mjs version <version> --dry-run` — reports all files in sync
+- `node scripts/team-flow.mjs doctor` — all checks pass
+- `node scripts/team-flow.mjs version <version> --dry-run` — reports all files in sync
 - `node scripts/check-version-consistency.mjs` — exits 0
-- `node scripts/spec-superflow.mjs --help` — all subcommands listed
-- `node scripts/spec-superflow.mjs install-workbuddy --dry-run` — finds all 9 skills and target paths
-- `npm run test:raw-mode` — packs the current source and runs a canonical runtime in an empty directory with no plugin-root variables or global `ssf`.
+- `node scripts/team-flow.mjs --help` — all subcommands listed
+- `node scripts/team-flow.mjs install-workbuddy --dry-run` — finds all 9 skills and target paths
+- `npm run test:raw-mode` — packs the current source and runs a canonical runtime in an empty directory with no plugin-root variables or global `tf`.
 - Run a representative local-installer smoke test.
-- `spec-superflow.config.json` absence still works (backward compatible defaults)
+- `team-flow.config.json` absence still works (backward compatible defaults)
 - `package.json` `bin` field points to correct entry script
 
 ## AI Agent Marketplace Delivery
@@ -59,7 +59,7 @@ For each example in `docs/examples/`:
 
   ```bash
   node scripts/verify-marketplace-release.mjs \
-    --manifest-url https://raw.githubusercontent.com/hashgraph-online/awesome-codex-plugins/main/plugins/MageByte-Zero/spec-superflow/.codex-plugin/plugin.json \
+    --manifest-url https://raw.githubusercontent.com/hashgraph-online/awesome-codex-plugins/main/plugins/MageByte-Zero/team-flow/.codex-plugin/plugin.json \
     --expected-version <semver>
   ```
 
@@ -69,8 +69,8 @@ For each example in `docs/examples/`:
   CODEX_HOME="$(mktemp -d)"
   export CODEX_HOME
   codex plugin marketplace add hashgraph-online/awesome-codex-plugins
-  codex plugin add spec-superflow@awesome-codex-plugins
-  codex plugin list | rg spec-superflow
+  codex plugin add team-flow@awesome-codex-plugins
+  codex plugin list | rg team-flow
   ```
 
 - If the remote marketplace version lags, submit and track the 同步 PR; wait for maintainers to merge and the generator to finish, then rerun the delivery verification and clean-Codex installation check.

@@ -1,4 +1,4 @@
-// Dispatcher-level tests for ssf handoff.
+// Dispatcher-level tests for tf handoff.
 import { afterEach, beforeEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -6,7 +6,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const CLI = join(process.cwd(), 'scripts/spec-superflow.mjs');
+const CLI = join(process.cwd(), 'scripts/team-flow.mjs');
 let changeDir;
 
 function runSsf(args) {
@@ -25,18 +25,18 @@ function runSsf(args) {
 }
 
 beforeEach(() => {
-  changeDir = mkdtempSync(join(tmpdir(), 'ssf-handoff-'));
+  changeDir = mkdtempSync(join(tmpdir(), 'tf-handoff-'));
   writeFileSync(join(changeDir, 'proposal.md'), '# Proposal\n\nA valid proposal.\n');
   writeFileSync(join(changeDir, 'design.md'), '# Design\n\nA valid design.\n');
   writeFileSync(join(changeDir, 'tasks.md'), '# Tasks\n\n- [ ] 1.1 Original task text\n');
-  writeFileSync(join(changeDir, '.spec-superflow.yaml'), 'state: executing\nworkflow: auto\n');
+  writeFileSync(join(changeDir, '.team-flow.yaml'), 'state: executing\nworkflow: auto\n');
 });
 
 afterEach(() => {
   rmSync(changeDir, { recursive: true, force: true });
 });
 
-describe('ssf handoff', () => {
+describe('tf handoff', () => {
   it('creates, finishes, and resolves a prototype contract without mutating planning files', () => {
     const designBefore = readFileSync(join(changeDir, 'design.md'));
     const tasksBefore = readFileSync(join(changeDir, 'tasks.md'));

@@ -61,7 +61,7 @@ If no relevant PRD source exists, planning may proceed from the user's request d
 
 Write the plan following the template structure:
 
-- **业务模式**: Fill sections 一~四 (需求摘要, 任务拆分, 验收标准, 风险与约束). Leave section 五 (技术方案) empty with a note: "由 spec-superflow 变更链在具体 change 中设计".
+- **业务模式**: Fill sections 一~四 (需求摘要, 任务拆分, 验收标准, 风险与约束). Leave section 五 (技术方案) empty with a note: "由 team-flow 变更链在具体 change 中设计".
 - **一人公司模式**: Fill all sections 一~七, including section 五 (技术方案) with tech stack, architecture, data model, and **high-level technical design**（模块边界 + 技术选型 + 数据流方向 + 关键聚合/上下文划分）. **禁止输出「接口清单」段**——接口签名/字段/请求响应 schema 属各 change 的 spec-writer / architecture-design（见 SKILL.md「作用边界」）。
 - Both modes: Include section 六 (里程碑计划) and section 七 (待定事项) when applicable.
 - Include a metadata block at the top: `mode` (业务模式 or 一人公司模式), `prd_reference` (path to PRD), `iteration_version`, `date`.

@@ -1,4 +1,4 @@
-// ssf version <semver> — sync version to all manifest and documentation files
+// tf version <semver> — sync version to all manifest and documentation files
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -24,20 +24,20 @@ const TEXT_FILES = [
   { file: 'docs/README_en.md',      pattern: /(Current: `v)0\.\d+\.\d+(`)/g,                     replacement: '$10.%MINOR%.%PATCH%$2' },
   { file: 'hooks/session-start',    pattern: /(# v)0\.\d+\.\d+(: conditional injection)/g,       replacement: '$10.%MINOR%.%PATCH%$2' },
   { file: 'llms.txt',               pattern: /(Current version: v)0\.\d+\.\d+(\.)/g,             replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: '.claude/always/phase-guard.md', pattern: /(# spec-superflow v)0\.\d+\.\d+( \|)/g,      replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'GEMINI.md',              pattern: /(# spec-superflow v)0\.\d+\.\d+( \|)/g,              replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/workflow-start/SKILL.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/need-explorer/SKILL.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/spec-writer/SKILL.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/contract-builder/SKILL.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/build-executor/SKILL.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/build-executor/implementer-prompt.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/build-executor/task-reviewer-prompt.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/code-reviewer/SKILL.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/code-reviewer/code-reviewer-prompt.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/bug-investigator/SKILL.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/release-archivist/SKILL.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/spec-merger/SKILL.md', pattern: /(npx --yes --package spec-superflow@)0\.\d+\.\d+( ssf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: '.claude/always/phase-guard.md', pattern: /(# team-flow v)0\.\d+\.\d+( \|)/g,      replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'GEMINI.md',              pattern: /(# team-flow v)0\.\d+\.\d+( \|)/g,              replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/workflow-start/SKILL.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/need-explorer/SKILL.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/spec-writer/SKILL.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/contract-builder/SKILL.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/build-executor/SKILL.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/build-executor/implementer-prompt.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/build-executor/task-reviewer-prompt.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/code-reviewer/SKILL.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/code-reviewer/code-reviewer-prompt.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/bug-investigator/SKILL.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/release-archivist/SKILL.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'skills/spec-merger/SKILL.md', pattern: /(npx --yes --package team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
 ];
 
 function getNestedValue(obj, pathParts) {
@@ -62,7 +62,7 @@ export async function run(args) {
   const semverArgs = args.filter(a => a !== '--dry-run');
 
   if (semverArgs.length < 1) {
-    console.error('Usage: ssf version <semver> [--dry-run]');
+    console.error('Usage: tf version <semver> [--dry-run]');
     process.exit(2);
   }
 

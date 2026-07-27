@@ -76,8 +76,8 @@ prototype/
 - **可选开启**：由项目 config 驱动（如 `prototype.e2e: true` 时强制）。
 
 ## 配置驱动（插件通用 + 项目注入）
-- 项目 `spec-superflow.config.json` 注入（插件层扩展字段）：`prototype.designSystem`（`.team-flow/design-system/<variant>.md` 路径）、`prototype.designSystemBase`（`.team-flow/design-system/base.md`）、`prototype.entry`（默认 `prototype/index.html`）。
-- 插件层用 `ssf runtime config --get <key>` 自读；插件保持通用，不固化任何公司/产品风格。
+- 项目 `team-flow.config.json` 注入（插件层扩展字段）：`prototype.designSystem`（`.team-flow/design-system/<variant>.md` 路径）、`prototype.designSystemBase`（`.team-flow/design-system/base.md`）、`prototype.entry`（默认 `prototype/index.html`）。
+- 插件层用 `tf runtime config --get <key>` 自读；插件保持通用，不固化任何公司/产品风格。
 
 ## 膨胀防控
 - `components/` 必须复用 `design-system.md` 组件，**禁止页面内联样式漂移**。

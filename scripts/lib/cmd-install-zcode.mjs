@@ -1,4 +1,4 @@
-// ssf install-zcode — deploy spec-superflow skills/rules/scripts for ZCODE
+// tf install-zcode — deploy team-flow skills/rules/scripts for ZCODE
 // Delegates to scripts/install-zcode.mjs
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';

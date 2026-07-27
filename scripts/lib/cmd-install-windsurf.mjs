@@ -1,4 +1,4 @@
-// ssf install-windsurf — deploy spec-superflow for Windsurf. Delegates to scripts/install-windsurf.mjs
+// tf install-windsurf — deploy team-flow for Windsurf. Delegates to scripts/install-windsurf.mjs
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';

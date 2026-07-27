@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { deriveCapabilityDir } from '../../scripts/lib/cmd-sync.mjs';
 
-const CLI = join(process.cwd(), 'scripts/spec-superflow.mjs');
+const CLI = join(process.cwd(), 'scripts/team-flow.mjs');
 let tempRoot;
 
 function runSync(cwd, changeDir) {
@@ -32,7 +32,7 @@ function writeSpec(path) {
 
 describe('cmd-sync: canonical spec paths', () => {
   before(() => {
-    tempRoot = mkdtempSync(join(tmpdir(), 'ssf-sync-paths-'));
+    tempRoot = mkdtempSync(join(tmpdir(), 'tf-sync-paths-'));
   });
 
   after(() => {

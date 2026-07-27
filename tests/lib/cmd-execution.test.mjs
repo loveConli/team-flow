@@ -5,7 +5,7 @@ import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, symlinkSync, 
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-const CLI = join(process.cwd(), 'scripts/spec-superflow.mjs');
+const CLI = join(process.cwd(), 'scripts/team-flow.mjs');
 let changeDir;
 let gitRefs;
 
@@ -71,7 +71,7 @@ function writeChangeDirectory(directory, workflow = 'full', revision = null) {
   writeFileSync(join(directory, 'execution-contract.md'), '# Execution Contract\n');
   mkdirSync(join(directory, 'specs', 'execution'), { recursive: true });
   writeFileSync(join(directory, 'specs', 'execution', 'spec.md'), '## ADDED Requirements\n### Requirement: Guarded execution\nThe system SHALL guard execution.\n#### Scenario: Create plan\n- **WHEN** a plan is created\n- **THEN** it is persisted.\n');
-  writeFileSync(join(directory, '.spec-superflow.yaml'), [
+  writeFileSync(join(directory, '.team-flow.yaml'), [
     'state: approved-for-build',
     `workflow: ${workflow}`,
     revision === null ? null : `revision: ${revision}`,
@@ -104,7 +104,7 @@ function initializeGitRepository(directory) {
 }
 
 beforeEach(() => {
-  changeDir = mkdtempSync(join(tmpdir(), 'ssf-execution-cmd-'));
+  changeDir = mkdtempSync(join(tmpdir(), 'tf-execution-cmd-'));
   writeChangeDirectory(changeDir);
   gitRefs = initializeGitRepository(changeDir);
 });
@@ -113,7 +113,7 @@ afterEach(() => {
   rmSync(changeDir, { recursive: true, force: true });
 });
 
-describe('ssf execution', () => {
+describe('tf execution', () => {
   it('records DP-4 and state summary after a user-confirmed recommended SDD plan', () => {
     const result = runSsf(['execution', 'plan', changeDir, '--mode', 'sdd',
       '--reason', 'full workflow default', '--wave', 'wave-1:parallel:1.1,1.2', '--json']);
@@ -204,7 +204,7 @@ describe('ssf execution', () => {
   });
 
   it('rejects multiline and control-character reasons before mutating the plan or state', () => {
-    const statePath = join(changeDir, '.spec-superflow.yaml');
+    const statePath = join(changeDir, '.team-flow.yaml');
     const planPath = join(changeDir, '.superpowers', 'sdd', 'execution-plan.json');
     const originalState = readFileSync(statePath, 'utf8');
 
@@ -246,8 +246,8 @@ describe('ssf execution', () => {
       '--wave', 'wave-1:serial:1.1']);
     assert.equal(planned.exitCode, 0, planned.stderr);
     writeReviewReport('wave-1.md');
-    const reviewCwd = mkdtempSync(join(tmpdir(), 'ssf-review-cwd-'));
-    const showCwd = mkdtempSync(join(tmpdir(), 'ssf-show-cwd-'));
+    const reviewCwd = mkdtempSync(join(tmpdir(), 'tf-review-cwd-'));
+    const showCwd = mkdtempSync(join(tmpdir(), 'tf-show-cwd-'));
 
     try {
       const reviewed = runSsf(['execution', 'review', changeDir, '--wave', 'wave-1',
@@ -303,7 +303,7 @@ describe('ssf execution', () => {
     const planned = runSsf(['execution', 'plan', changeDir, '--mode', 'sdd', '--reason', 'full workflow default',
       '--wave', 'wave-1:serial:1.1']);
     assert.equal(planned.exitCode, 0, planned.stderr);
-    const outsideReviewsDir = mkdtempSync(join(tmpdir(), 'ssf-external-reviews-'));
+    const outsideReviewsDir = mkdtempSync(join(tmpdir(), 'tf-external-reviews-'));
     const reviewsDir = join(changeDir, '.superpowers', 'sdd', 'reviews');
 
     try {
@@ -427,7 +427,7 @@ describe('ssf execution', () => {
   it('rejects a plan when state mode differs from the frozen plan mode', () => {
     runSsf(['execution', 'plan', changeDir, '--mode', 'sdd', '--reason', 'full workflow default',
       '--wave', 'wave-1:parallel:1.1,1.2']);
-    const statePath = join(changeDir, '.spec-superflow.yaml');
+    const statePath = join(changeDir, '.team-flow.yaml');
     writeFileSync(statePath, readFileSync(statePath, 'utf8').replace('execution_mode: sdd', 'execution_mode: inline'));
 
     const result = runSsf(['execution', 'show', changeDir, '--json']);

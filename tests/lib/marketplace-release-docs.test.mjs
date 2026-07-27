@@ -8,8 +8,8 @@ const read = file => readFileSync(join(process.cwd(), file), 'utf8');
 describe('marketplace release documentation', () => {
   it('uses the real Codex selectors and upgrade flow', () => {
     for (const text of [read('README.md'), read('INSTALL.md')]) {
-      assert.match(text, /spec-superflow@awesome-codex-plugins/);
-      assert.match(text, /spec-superflow@spec-superflow/);
+      assert.match(text, /team-flow@awesome-codex-plugins/);
+      assert.match(text, /team-flow@team-flow/);
       assert.match(text, /codex plugin marketplace upgrade awesome-codex-plugins/);
       assert.doesNotMatch(text, /codex plugin update/);
       assert.match(text, /codex plugin list/);

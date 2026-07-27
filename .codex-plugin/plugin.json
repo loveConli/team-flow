@@ -1,13 +1,13 @@
 {
-  "name": "spec-superflow",
-  "version": "0.22.2",
+  "name": "team-flow",
+  "version": "0.22.3",
   "description": "Spec-first workflow that bridges OpenSpec-style planning and Superpowers-style execution discipline.",
   "author": {
     "name": "MageByte",
     "url": "https://github.com/MageByte-Zero"
   },
-  "homepage": "https://github.com/MageByte-Zero/spec-superflow",
-  "repository": "https://github.com/MageByte-Zero/spec-superflow",
+  "homepage": "https://github.com/MageByte-Zero/team-flow",
+  "repository": "https://github.com/MageByte-Zero/team-flow",
   "license": "MIT",
   "keywords": [
     "workflow",
@@ -24,7 +24,7 @@
   "skills": "./skills/",
   "hooks": {},
   "interface": {
-    "displayName": "spec-superflow",
+    "displayName": "team-flow",
     "shortDescription": "Spec-first workflow with guarded execution.",
     "longDescription": "A self-contained Codex workflow plugin with nine skills for intent exploration, planning artifacts, execution contracts, TDD execution, review gates, systematic debugging, closure, and delta spec sync.",
     "developerName": "MageByte",
@@ -34,10 +34,10 @@
       "Write",
       "Review"
     ],
-    "websiteURL": "https://github.com/MageByte-Zero/spec-superflow",
+    "websiteURL": "https://github.com/MageByte-Zero/team-flow",
     "defaultPrompt": [
       "Use workflow-start to start a new change.",
-      "Review the current spec-superflow stage.",
+      "Review the current team-flow stage.",
       "Bridge the approved plan into an execution contract."
     ],
     "brandColor": "#2563EB"

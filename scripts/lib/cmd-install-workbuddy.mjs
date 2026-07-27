@@ -1,4 +1,4 @@
-// ssf install-workbuddy — deploy spec-superflow as a WorkBuddy marketplace plugin.
+// tf install-workbuddy — deploy team-flow as a WorkBuddy marketplace plugin.
 //
 // WorkBuddy's marketplace plugin model (verified from existing plugins like
 // `finance` and `modern-webapp` in cb_teams_marketplace):
@@ -29,8 +29,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const defaultPluginRoot = resolve(__dirname, '..', '..'); // repo root when run from clone
 
 const DEFAULT_MARKETPLACE = 'cb_teams_marketplace';
-const PLUGIN_NAME = 'spec-superflow';
-const GITHUB_REPO = 'MageByte-Zero/spec-superflow';
+const PLUGIN_NAME = 'team-flow';
+const GITHUB_REPO = 'MageByte-Zero/team-flow';
 const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 const RUNTIME_DIRS = ['scripts', 'docs', 'templates', 'dist', 'hooks'];
 
@@ -98,8 +98,8 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
       content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, pluginRootAbs);
     }
     content = content.replace(
-      /npx --yes --package spec-superflow@\d+\.\d+\.\d+ ssf/g,
-      `node ${shellQuote(join(pluginRootAbs, 'scripts', 'spec-superflow.mjs'))}`,
+      /npx --yes --package team-flow@\d+\.\d+\.\d+ tf/g,
+      `node ${shellQuote(join(pluginRootAbs, 'scripts', 'team-flow.mjs'))}`,
     );
     writeFileSync(filePath, content, 'utf-8');
   }
@@ -119,17 +119,17 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
 
 /** Phase-guard rule content for WorkBuddy (md format). */
 function phaseGuardContent() {
-  return `# Phase Guard — spec-superflow (workbuddy)
+  return `# Phase Guard — team-flow (workbuddy)
 
 ## 入口规则
 
 - 所有工作必须从 "/workflow-start" 入口开始。
-- 在 .spec-superflow.yaml 中确认当前 state 和 workflow 模式之前，不要开始写代码。
+- 在 .team-flow.yaml 中确认当前 state 和 workflow 模式之前，不要开始写代码。
 
 ## 全局禁止
 
 - 没有 execution-contract.md 或未经用户明确批准，不得进入实现。
-- full/hotfix 必须先运行 ssf execution plan <change-dir> ...；没有 current execution plan 不得开始实现。
+- full/hotfix 必须先运行 tf execution plan <change-dir> ...；没有 current execution plan 不得开始实现。
 - 只有 all pass review receipts 后才可 closing；不得把未审查的 wave 当作完成。
 - 上述 plan/receipt gates 仅适用于 full/hotfix；tweak 免除这些 gates (tweak exempt)。
 - 执行过程中如果发现需求/范围变化，必须回退到 specifying 或 bridging，而不是直接改代码。
@@ -141,13 +141,13 @@ function phaseGuardContent() {
 - DP-1：需求确认
 - DP-2：工件审查
 - DP-3：是否批准 execution contract？
-- DP-4：先运行 ssf execution recommend，展示可用模式与推荐；用户用 --confirm 确认，非推荐选择额外使用 --acknowledge-recommendation
+- DP-4：先运行 tf execution recommend，展示可用模式与推荐；用户用 --confirm 确认，非推荐选择额外使用 --acknowledge-recommendation
 - DP-5：调试升级
 - DP-6：验证失败
 - DP-7：是否收口归档？
 
-> 本文件由 spec-superflow 安装脚本生成（platform: workbuddy）；
-> 对具体变更的 guard 内容请运行 \`ssf inject <change-dir>\` 更新。
+> 本文件由 team-flow 安装脚本生成（platform: workbuddy）；
+> 对具体变更的 guard 内容请运行 \`tf inject <change-dir>\` 更新。
 `;
 }
 
@@ -175,7 +175,7 @@ async function fetchLatestTag() {
 }
 
 async function cloneRelease(tag) {
-  const tmpDir = await mkdtemp(join('/tmp', 'spec-superflow-'));
+  const tmpDir = await mkdtemp(join('/tmp', 'team-flow-'));
   const url = `https://github.com/${GITHUB_REPO}.git`;
   console.log(`📥 Cloning ${tag} into ${tmpDir} ...`);
   execFileSync('git', ['clone', '--depth', '1', '--branch', tag, url, tmpDir], {
@@ -327,7 +327,7 @@ export async function run(args) {
     console.log(`📁 Using local repo: ${pluginRoot}`);
   } else {
     installedTag = values.tag || await fetchLatestTag();
-    console.log(`⬆️  Installing spec-superflow ${installedTag} for WorkBuddy ...`);
+    console.log(`⬆️  Installing team-flow ${installedTag} for WorkBuddy ...`);
     pluginRoot = await cloneRelease(installedTag);
     isTemp = true;
   }

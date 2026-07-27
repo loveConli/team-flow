@@ -5,7 +5,7 @@
 release-archivist 归档时调用：
 
 ```bash
-ssf solutions promote <change-dir>
+tf solutions promote <change-dir>
 ```
 
 ## 晋升来源

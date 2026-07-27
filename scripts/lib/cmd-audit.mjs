@@ -1,4 +1,4 @@
-// scripts/lib/cmd-audit.mjs — ssf audit: generate decision-point audit report
+// scripts/lib/cmd-audit.mjs — tf audit: generate decision-point audit report
 import { existsSync } from 'node:fs';
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -77,7 +77,7 @@ function generateReport(changeDir, state) {
   }
 
   md += `---\n\n`;
-  md += `*本报告由 \`ssf audit\` 自动生成，仅供审计与归档参考。*\n`;
+  md += `*本报告由 \`tf audit\` 自动生成，仅供审计与归档参考。*\n`;
 
   return md;
 }
@@ -101,13 +101,13 @@ export async function run(args) {
 
   const changeDir = positionals[0];
   if (!changeDir) {
-    console.error('Usage: ssf audit <change-dir> [--output <file>] [--json]');
+    console.error('Usage: tf audit <change-dir> [--output <file>] [--json]');
     process.exit(2);
   }
 
-  const stateFile = join(changeDir, '.spec-superflow.yaml');
+  const stateFile = join(changeDir, '.team-flow.yaml');
   if (!existsSync(stateFile)) {
-    console.error(`No .spec-superflow.yaml found in ${changeDir}`);
+    console.error(`No .team-flow.yaml found in ${changeDir}`);
     process.exit(1);
   }
 

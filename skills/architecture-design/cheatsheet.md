@@ -48,4 +48,4 @@
 - ✗ As-Is 用活引用全局章节（会漂移 → 必须冻结复制）
 - ✗ 把支撑流程的 Query 误归数据服务（阻断测试判）
 - ✗ 直接改 design.md 回写原型（必须 handoff→delta 闭环）
-- ✗ 全局回写进 spec-superflow 硬 guard（破零依赖 → 软 overlay）
+- ✗ 全局回写进 team-flow 硬 guard（破零依赖 → 软 overlay）

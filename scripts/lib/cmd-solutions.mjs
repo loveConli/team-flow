@@ -1,4 +1,4 @@
-// scripts/lib/cmd-solutions.mjs - ssf solutions 复利贯穿机制命令组（v0.5）
+// scripts/lib/cmd-solutions.mjs - tf solutions 复利贯穿机制命令组（v0.5）
 //
 // 设计说明（v0.5 / 2026-07-21）：
 // - 与 checkpoint / handoff / execution 一致，采用「单 COMMANDS key + 内部子命令分发」模式。
@@ -7,7 +7,7 @@
 //   完成 数组 → 对象 的桥接。
 import { parseArgs } from 'node:util';
 
-const USAGE = 'Usage: ssf solutions <index-gen|inject|capture|promote> [options]';
+const USAGE = 'Usage: tf solutions <index-gen|inject|capture|promote> [options]';
 
 export async function run(args) {
   const { positionals, values } = parseArgs({
@@ -55,7 +55,7 @@ export async function run(args) {
 
   if (subcommand === 'promote') {
     const changeDir = positionals[1];
-    if (!changeDir) usage('Usage: ssf solutions promote <change-dir> [--dir <solutions-dir>]');
+    if (!changeDir) usage('Usage: tf solutions promote <change-dir> [--dir <solutions-dir>]');
     const mod = await import('./solutions-promote.mjs');
     mod.run({ _: [changeDir], changeDir, dir: values.dir });
     return;

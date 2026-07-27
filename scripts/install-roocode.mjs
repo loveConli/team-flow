@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/install-roocode.mjs — deploy spec-superflow for Roo Code
+// scripts/install-roocode.mjs — deploy team-flow for Roo Code
 // Skills → .roo/skills/, phase-guard rule → .roo/rules/phase-guard.md
 import { installPlatform } from './lib/install.mjs';
 

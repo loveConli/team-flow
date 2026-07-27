@@ -1,8 +1,8 @@
-// scripts/lib/cmd-checkpoint.mjs - ssf checkpoint recovery records
+// scripts/lib/cmd-checkpoint.mjs - tf checkpoint recovery records
 import { parseArgs } from 'node:util';
 import { getCheckpoint, listCheckpoints, saveCheckpoint } from './sdd-overlay.mjs';
 
-const USAGE = 'Usage: ssf checkpoint <save|list|show> <change-dir> [options]';
+const USAGE = 'Usage: tf checkpoint <save|list|show> <change-dir> [options]';
 
 export async function run(args) {
   const { positionals, values } = parseArgs({
@@ -27,7 +27,7 @@ export async function run(args) {
 
   if (subcommand === 'save') {
     if (!hasText(values.task) || !hasText(values.next)) {
-      console.error('Usage: ssf checkpoint save <change-dir> --task <id> --next <text>');
+      console.error('Usage: tf checkpoint save <change-dir> --task <id> --next <text>');
       process.exit(2);
     }
 
@@ -64,7 +64,7 @@ export async function run(args) {
   }
 
   const taskId = positionals[2];
-  if (!taskId) usage('Usage: ssf checkpoint show <change-dir> <id>');
+  if (!taskId) usage('Usage: tf checkpoint show <change-dir> <id>');
   const checkpoint = getCheckpoint(changeDir, taskId);
   if (!checkpoint) {
     console.error(`Checkpoint '${taskId}' was not found`);

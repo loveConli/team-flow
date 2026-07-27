@@ -106,7 +106,7 @@ describe('config-loader: loadConfig()', () => {
   let configLoader;
 
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-config-test-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-config-test-'));
     const modulePath = join(process.cwd(), 'scripts/lib/config-loader.mjs');
     configLoader = await import(modulePath);
   });
@@ -131,7 +131,7 @@ describe('config-loader: loadConfig()', () => {
         inlineThreshold: 5,
       },
     };
-    writeFileSync(join(tempDir, 'spec-superflow.config.json'), JSON.stringify(userConfig));
+    writeFileSync(join(tempDir, 'team-flow.config.json'), JSON.stringify(userConfig));
 
     const config = configLoader.loadConfig(tempDir);
 
@@ -147,14 +147,14 @@ describe('config-loader: loadConfig()', () => {
 
   it('handles partial user config without crashing', () => {
     // Clean up previous config
-    rmSync(join(tempDir, 'spec-superflow.config.json'), { force: true });
+    rmSync(join(tempDir, 'team-flow.config.json'), { force: true });
 
     const userConfig = {
       execution: {
         inlineThreshold: 10,
       },
     };
-    writeFileSync(join(tempDir, 'spec-superflow.config.json'), JSON.stringify(userConfig));
+    writeFileSync(join(tempDir, 'team-flow.config.json'), JSON.stringify(userConfig));
 
     const config = configLoader.loadConfig(tempDir);
 
@@ -164,7 +164,7 @@ describe('config-loader: loadConfig()', () => {
   });
 
   it('handles invalid JSON gracefully, returning defaults', () => {
-    writeFileSync(join(tempDir, 'spec-superflow.config.json'), 'not valid json {{{');
+    writeFileSync(join(tempDir, 'team-flow.config.json'), 'not valid json {{{');
 
     const config = configLoader.loadConfig(tempDir);
 

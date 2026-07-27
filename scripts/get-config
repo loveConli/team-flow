@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Read a config field from spec-superflow.config.json
+# Read a config field from team-flow.config.json
 # Usage: get-config <field-path>
 # Example: get-config execution.inlineThreshold → outputs "3"
 set -euo pipefail

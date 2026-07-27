@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// validate-artifacts - Validate spec-superflow artifacts
+// validate-artifacts - Validate team-flow artifacts
 // Usage: node scripts/validate-artifacts <change-dir>
 //
 // Reads a change directory and validates all artifacts found:

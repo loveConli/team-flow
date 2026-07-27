@@ -9,7 +9,7 @@ let tempDir;
 
 describe('spec-paths', () => {
   before(async () => {
-    tempDir = mkdtempSync(join(tmpdir(), 'ssf-spec-paths-'));
+    tempDir = mkdtempSync(join(tmpdir(), 'tf-spec-paths-'));
     mod = await import(join(process.cwd(), 'scripts/lib/spec-paths.mjs'));
   });
 

@@ -58,7 +58,7 @@ const ILLEGAL_TRANSITIONS = [
 ];
 
 function makeChangeDir() {
-  const dir = mkdtempSync(join(tmpdir(), 'ssf-guard-test-'));
+  const dir = mkdtempSync(join(tmpdir(), 'tf-guard-test-'));
   mkdirSync(join(dir, 'specs', 'test'), { recursive: true });
   return dir;
 }
@@ -69,8 +69,8 @@ function cleanup(dir) {
 
 function runGuard(from, to, dir, workflow = 'full') {
   try {
-    // Write a minimal .spec-superflow.yaml so guard can read state
-    const stateFile = join(dir, '.spec-superflow.yaml');
+    // Write a minimal .team-flow.yaml so guard can read state
+    const stateFile = join(dir, '.team-flow.yaml');
     writeFileSync(stateFile, `state: ${from}\nworkflow: ${workflow}\nchange_name: test\n`);
 
     // Also need a minimal proposal.md for artifacts-exist check

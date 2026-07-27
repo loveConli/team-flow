@@ -1,4 +1,4 @@
-// ssf config — display or modify configuration
+// tf config — display or modify configuration
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadConfig, getDefaults, resolveModelProfile } from './config-loader.mjs';
@@ -15,7 +15,7 @@ export async function run(args) {
 
   if (args[0] === '--resolve-model') {
     if (!args[1]) {
-      console.error('Usage: ssf config --resolve-model <profile>');
+      console.error('Usage: tf config --resolve-model <profile>');
       process.exit(2);
     }
     try {
@@ -48,7 +48,7 @@ export async function run(args) {
   if (args[0] === '--set' && args[1]) {
     const eqIdx = args[1].indexOf('=');
     if (eqIdx === -1) {
-      console.error('Usage: ssf config [--get <path>] [--set <path>=<value>] [--resolve-model <profile>]');
+      console.error('Usage: tf config [--get <path>] [--set <path>=<value>] [--resolve-model <profile>]');
       process.exit(2);
     }
     const path = args[1].slice(0, eqIdx);
@@ -61,7 +61,7 @@ export async function run(args) {
     else value = rawValue;
 
     // Load existing config file or start from empty
-    const configPath = join(process.cwd(), 'spec-superflow.config.json');
+    const configPath = join(process.cwd(), 'team-flow.config.json');
     let fileConfig = {};
     if (existsSync(configPath)) {
       fileConfig = JSON.parse(readFileSync(configPath, 'utf-8'));
@@ -83,6 +83,6 @@ export async function run(args) {
     return;
   }
 
-  console.error('Usage: ssf config [--get <path>] [--set <path>=<value>] [--resolve-model <profile>]');
+  console.error('Usage: tf config [--get <path>] [--set <path>=<value>] [--resolve-model <profile>]');
   process.exit(2);
 }

@@ -1,8 +1,8 @@
-// scripts/lib/state-loader.mjs — lightweight .spec-superflow.yaml state file reader/writer
+// scripts/lib/state-loader.mjs — lightweight .team-flow.yaml state file reader/writer
 import fs from 'node:fs';
 import path from 'node:path';
 
-const STATE_FILE = '.spec-superflow.yaml';
+const STATE_FILE = '.team-flow.yaml';
 
 const BUILTIN_DEFAULTS = {
   state: 'exploring',
@@ -56,12 +56,12 @@ export function readState(changeDir) {
 }
 
 /**
- * Write state object to .spec-superflow.yaml.
+ * Write state object to .team-flow.yaml.
  */
 export function writeState(changeDir, state) {
   const filePath = path.join(changeDir, STATE_FILE);
   const lines = [];
-  lines.push('# .spec-superflow.yaml — lightweight state machine');
+  lines.push('# .team-flow.yaml — lightweight state machine');
   lines.push('# Derived data. Always rebuildable from artifacts. Lost/corrupt → fall back to content-level detection.');
   lines.push('');
   lines.push('# === Core state ===');

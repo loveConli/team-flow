@@ -4,7 +4,7 @@ description: >
   将当前会话的工作上下文压缩为结构化交接文档，供新会话无缝继续。
   当长时间对话导致上下文腐化、产出质量下降时使用；
   也可在切换设备、交接给其他开发者时使用。
-  不适用于：change 级任务委派（用 ssf handoff）、
+  不适用于：change 级任务委派（用 tf handoff）、
   产品级状态恢复（已由 .team-flow/ yaml 自动处理）、
   subagent 进程内交接（已由 §18.1 交接协议覆盖）。
 argument-hint: "[下一个会话的关注点描述]"
@@ -24,7 +24,7 @@ argument-hint: "[下一个会话的关注点描述]"
 - 模型检测到上下文腐化迹象时**建议**用户触发（不强制）
 
 **Do NOT use when**：
-- change 级任务委派 → `ssf handoff`（prototype/research/experiment）
+- change 级任务委派 → `tf handoff`（prototype/research/experiment）
 - 产品级状态恢复 → 已由 `.team-flow/` yaml 自动处理
 - subagent 进程内交接 → 已由 §18.1 交接协议覆盖
 
@@ -52,7 +52,7 @@ argument-hint: "[下一个会话的关注点描述]"
 |---------|------|---------|
 | 需求注册表 | `.team-flow/registry.yaml` | 活跃需求、需求列表 |
 | 编排状态 | `.team-flow/requirements/<req-id>/orchestrator.yaml` | SOP 阶段（S1-S5） |
-| 变更级状态 | `<change>/.spec-superflow.yaml` | 状态机 8 态中的当前态 |
+| 变更级状态 | `<change>/.team-flow.yaml` | 状态机 8 态中的当前态 |
 | PRD 版本 | `prd/vN/prd.md` frontmatter | 迭代版本、冻结状态 |
 
 **降级规则**：上述文件均不存在 → 通用 handoff 模式（跳过工作流状态节）。

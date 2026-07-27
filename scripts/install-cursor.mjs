@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// scripts/install-cursor.mjs — deploy spec-superflow for Cursor Agent
+// scripts/install-cursor.mjs — deploy team-flow for Cursor Agent
 //
 // Copies the full plugin tree (skills + scripts + docs + templates + dist + hooks)
-// to .cursor/spec-superflow/ so that skill instructions referencing
+// to .cursor/team-flow/ so that skill instructions referencing
 // ${CLAUDE_PLUGIN_ROOT}/scripts/... and ${CLAUDE_PLUGIN_ROOT}/docs/... resolve
 // correctly. Also copies skills to .cursor/skills/ (where Cursor reads them).
 //
@@ -19,7 +19,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const defaultPluginRoot = dirname(__dirname); // repository root when running from clone
 const targetRoot = process.cwd();
 
-const GITHUB_REPO = 'MageByte-Zero/spec-superflow';
+const GITHUB_REPO = 'MageByte-Zero/team-flow';
 const GITHUB_API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
 // Directories needed by local installer-rewritten runtime commands.
@@ -42,7 +42,7 @@ async function fetchLatestTag() {
 }
 
 async function cloneRelease(tag) {
-  const tmpDir = await mkdtemp(join('/tmp', 'spec-superflow-'));
+  const tmpDir = await mkdtemp(join('/tmp', 'team-flow-'));
   const url = `https://github.com/${GITHUB_REPO}.git`;
   console.log(`📥 Cloning ${tag} into ${tmpDir} ...`);
   execFileSync('git', ['clone', '--depth', '1', '--branch', tag, url, tmpDir], {
@@ -105,8 +105,8 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
         content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, pluginRootAbs);
       }
       content = content.replace(
-        /npx --yes --package spec-superflow@\d+\.\d+\.\d+ ssf/g,
-        `node ${shellQuote(join(pluginRootAbs, 'scripts', 'spec-superflow.mjs'))}`,
+        /npx --yes --package team-flow@\d+\.\d+\.\d+ tf/g,
+        `node ${shellQuote(join(pluginRootAbs, 'scripts', 'team-flow.mjs'))}`,
       );
       writeFileSync(skillMd, content, 'utf-8');
     }
@@ -119,8 +119,8 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
         content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, pluginRootAbs);
       }
       content = content.replace(
-        /npx --yes --package spec-superflow@\d+\.\d+\.\d+ ssf/g,
-        `node ${shellQuote(join(pluginRootAbs, 'scripts', 'spec-superflow.mjs'))}`,
+        /npx --yes --package team-flow@\d+\.\d+\.\d+ tf/g,
+        `node ${shellQuote(join(pluginRootAbs, 'scripts', 'team-flow.mjs'))}`,
       );
       writeFileSync(subPath, content, 'utf-8');
     }
@@ -132,7 +132,7 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
 async function writePhaseGuard(targetRules) {
   ensureDir(targetRules);
   const content = `---
-description: spec-superflow phase guard — 防止阶段漂移和未授权实现
+description: team-flow phase guard — 防止阶段漂移和未授权实现
 alwaysApply: true
 ---
 
@@ -141,12 +141,12 @@ alwaysApply: true
 ## 入口规则
 
 - 所有工作必须从 "/workflow-start" 入口开始。
-- 在 .spec-superflow.yaml 中确认当前 state 和 workflow 模式之前，不要开始写代码。
+- 在 .team-flow.yaml 中确认当前 state 和 workflow 模式之前，不要开始写代码。
 
 ## 全局禁止
 
 - 没有 execution-contract.md 或未经用户明确批准，不得进入实现。
-- full/hotfix 必须先运行 ssf execution plan <change-dir> ...；没有 current execution plan 不得开始实现。
+- full/hotfix 必须先运行 tf execution plan <change-dir> ...；没有 current execution plan 不得开始实现。
 - 只有 all pass review receipts 后才可 closing；不得把未审查的 wave 当作完成。
 - 上述 plan/receipt gates 仅适用于 full/hotfix；tweak 免除这些 gates (tweak exempt)。
 - 执行过程中如果发现需求/范围变化，必须回退到 specifying 或 bridging，而不是直接改代码。
@@ -158,12 +158,12 @@ alwaysApply: true
 - DP-1：需求确认
 - DP-2：工件审查
 - DP-3：是否批准 execution contract？
-- DP-4：先运行 ssf execution recommend，展示可用模式与推荐；用户用 --confirm 确认，非推荐选择额外使用 --acknowledge-recommendation
+- DP-4：先运行 tf execution recommend，展示可用模式与推荐；用户用 --confirm 确认，非推荐选择额外使用 --acknowledge-recommendation
 - DP-5：调试升级
 - DP-6：验证失败
 - DP-7：是否收口归档？
 
-> 本文件由 scripts/install-cursor.mjs 生成；对具体变更的 guard 内容请运行 ssf inject <change-dir> 更新。
+> 本文件由 scripts/install-cursor.mjs 生成；对具体变更的 guard 内容请运行 tf inject <change-dir> 更新。
 `;
   await writeFile(join(targetRules, 'phase-guard.mdc'), content, 'utf-8');
 }
@@ -202,7 +202,7 @@ async function main() {
     console.log(`📁 Using local repo: ${pluginRoot}`);
   } else {
     installedTag = values.tag || await fetchLatestTag();
-    console.log(`⬆️  Installing spec-superflow ${installedTag} ...`);
+    console.log(`⬆️  Installing team-flow ${installedTag} ...`);
     pluginRoot = await cloneRelease(installedTag);
     isTemp = true;
   }
@@ -215,13 +215,13 @@ async function main() {
   }
 
   // Target paths
-  const targetPluginDir = join(targetRoot, '.cursor', 'spec-superflow');
+  const targetPluginDir = join(targetRoot, '.cursor', 'team-flow');
   const targetSkills = join(targetRoot, '.cursor', 'skills');
   const targetRules = join(targetRoot, '.cursor', 'rules');
   const pluginRootAbs = resolve(targetPluginDir);
 
   try {
-    // 1. Copy runtime dependencies to .cursor/spec-superflow/
+    // 1. Copy runtime dependencies to .cursor/team-flow/
     console.log('📋 Copying runtime dependencies...');
     for (const dir of RUNTIME_DIRS) {
       const src = join(pluginRoot, dir);

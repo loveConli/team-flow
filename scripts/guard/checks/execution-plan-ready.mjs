@@ -12,7 +12,7 @@ export function checkExecutionPlanReady(changeDir) {
   if (!plan) {
     return {
       pass: false,
-      failures: ['execution plan is missing. Record a current plan with "ssf execution plan" before entering executing.'],
+      failures: ['execution plan is missing. Record a current plan with "tf execution plan" before entering executing.'],
     };
   }
 

@@ -1,4 +1,4 @@
-// ssf install-cline — deploy spec-superflow for Cline. Delegates to scripts/install-cline.mjs
+// tf install-cline — deploy team-flow for Cline. Delegates to scripts/install-cline.mjs
 import { execFileSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
