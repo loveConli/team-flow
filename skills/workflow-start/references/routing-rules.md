@@ -6,7 +6,7 @@
 Change is fuzzy, scope unclear, comparing options, no stable change name.
 
 ## Route to spec-writer
-Guard: `npx --yes --package spec-superflow@0.16.0 ssf runtime guard check <dir> exploring specifying --json` → fail = BLOCK.
+Guard: `npx --yes --package spec-superflow@0.21.0 ssf runtime guard check <dir> exploring specifying --json` → fail = BLOCK.
 User knows what they want, artifacts missing/incomplete.
 
 ## Route to contract-builder
@@ -18,12 +18,12 @@ Contract exists and approved, contract matches artifacts. Include DP-4: 执行�
 
 Propose waves, run:
 ```bash
-npx --yes --package spec-superflow@0.16.0 ssf execution recommend <change-dir> [--wave ...]
+npx --yes --package spec-superflow@0.21.0 ssf execution recommend <change-dir> [--wave ...]
 ```
 Show every available mode plus evidence and recommendation, obtain clear selection. Then:
 ```bash
-npx --yes --package spec-superflow@0.16.0 ssf execution plan <change-dir> --mode <selected> --confirm ...
-npx --yes --package spec-superflow@0.16.0 ssf execution show <change-dir> --json
+npx --yes --package spec-superflow@0.21.0 ssf execution plan <change-dir> --mode <selected> --confirm ...
+npx --yes --package spec-superflow@0.21.0 ssf execution show <change-dir> --json
 ```
 Do not transition to `executing` until `show` reports `current: true`.
 Guard: `... check <dir> approved-for-build executing --json` → fail = BLOCK.
@@ -34,7 +34,7 @@ Execution hit blockage: test failure, unexpected behavior, build error. After de
 ## Route to code-reviewer
 Current planned wave implemented and ready for review. Reviewer must write:
 ```bash
-npx --yes --package spec-superflow@0.16.0 ssf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>
+npx --yes --package spec-superflow@0.21.0 ssf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>
 ```
 
 ## Route to release-archivist
@@ -55,10 +55,10 @@ User explicitly requests, bug-investigator escalates after 3+ failures AND user 
 
 When the user's brief explicitly contains UI/screen/interaction/layout/UX uncertainty, ask once whether a prototype would reduce uncertainty. After confirmation:
 ```bash
-npx --yes --package spec-superflow@0.16.0 ssf handoff create <change-dir> \
+npx --yes --package spec-superflow@0.21.0 ssf handoff create <change-dir> \
   --type prototype --objective "<confirmed objective>" \
   --expected-output "<expected evidence>" --acceptance "<completion criterion>"
-npx --yes --package spec-superflow@0.16.0 ssf isolate <change-dir> prototype-<handoff-id>
+npx --yes --package spec-superflow@0.21.0 ssf isolate <change-dir> prototype-<handoff-id>
 ```
 Never suggest for backend/CLI/config/internal-refactor work. Never pass `--force`.
 
@@ -68,17 +68,17 @@ Run when: change folder doesn't exist, planning artifacts missing/empty, or `dp_
 
 After confirmation:
 ```bash
-npx --yes --package spec-superflow@0.16.0 ssf state set <change-dir> dp_0_decisions "<summary>"
-npx --yes --package spec-superflow@0.16.0 ssf state set <change-dir> dp_0_result confirmed
-npx --yes --package spec-superflow@0.16.0 ssf state set <change-dir> dp_0_confirmed true
-npx --yes --package spec-superflow@0.16.0 ssf state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_0_decisions "<summary>"
+npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_0_result confirmed
+npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_0_confirmed true
+npx --yes --package spec-superflow@0.21.0 ssf state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 
 ## Mode Detection
 
 If workflow is `auto`/`null`/unset:
 ```bash
-npx --yes --package spec-superflow@0.16.0 ssf runtime infer <change-dir>
+npx --yes --package spec-superflow@0.21.0 ssf runtime infer <change-dir>
 ```
 Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **tweak** (≤4 tasks, config/doc only), **full** (anything larger).
 
@@ -89,4 +89,4 @@ Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **twe
 - **Stale tasks**: requirement in specs has no corresponding task → stale tasks
 
 ## Post-transition
-💡 `npx --yes --package spec-superflow@0.16.0 ssf inject <change-dir>` to update phase-guard artifacts.
+💡 `npx --yes --package spec-superflow@0.21.0 ssf inject <change-dir>` to update phase-guard artifacts.

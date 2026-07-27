@@ -37,7 +37,7 @@ verdict = FAIL → 必须回退 S3 调整拆分后重新审计，不可绕过直
 
 ```bash
 mkdir -p changes/<change-name>
-npx --yes --package spec-superflow@0.15.0 ssf state init changes/<change-name>
+npx --yes --package spec-superflow@0.21.0 ssf state init changes/<change-name>
 ```
 
 > ⚠️ **路径约束**：change 脚手架目录固定为项目根 `changes/<change-name>/`。

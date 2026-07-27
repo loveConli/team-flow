@@ -34,7 +34,7 @@
 change closing 时检查经验晋升（change 内经验 → 产品级经验）：
 
 ```bash
-npx --yes --package spec-superflow@0.15.0 ssf solutions promote <change-dir>
+npx --yes --package spec-superflow@0.21.0 ssf solutions promote <change-dir>
 ```
 
 ### 4. 动态重规划触发

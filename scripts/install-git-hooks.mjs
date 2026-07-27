@@ -20,26 +20,39 @@ const HOOKS_DIR = resolve(ROOT, execFileSync('git', ['rev-parse', '--git-path', 
 }).trim());
 const HOOK_PATH = join(HOOKS_DIR, 'pre-commit');
 
-const HOOK_SCRIPT = `#!/usr/bin/env bash
-# spec-superflow pre-commit hook — blocks commit if version files are out of sync
+const HOOK_SCRIPT = `#!/bin/sh
+# spec-superflow pre-commit hook — auto-check and fix version consistency
 # Installed by: npm run setup-hooks
+# Features:
+#   1. Run check-version-consistency (blocking on version mismatch)
+#   2. Auto-fix skill count and npx references (--fix mode)
+#   3. Re-stage fixed files so they're included in the commit
 # To bypass: git commit --no-verify
 
-set -euo pipefail
+set -e
+
+echo "🔍 Running pre-commit version consistency check..."
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 
-echo "🔍 spec-superflow: checking version consistency..."
+cd "$REPO_ROOT"
 
-if ! node "$REPO_ROOT/scripts/check-version-consistency.mjs"; then
+# Run check-versions with auto-fix
+if node scripts/check-version-consistency.mjs --fix; then
+  # Check if any files were modified by auto-fix
+  MODIFIED=$(git diff --name-only)
+  if [ -n "$MODIFIED" ]; then
+    echo "📝 Auto-fixed files detected, re-staging..."
+    echo "$MODIFIED" | xargs git add
+    echo "✅ Fixed files staged for commit"
+  fi
+  exit 0
+else
   echo ""
-  echo "❌ Commit blocked: version mismatch detected."
-  echo "   Fix: ssf version <new-version>"
-  echo "   Bypass: git commit --no-verify"
+  echo "❌ Pre-commit check failed: version consistency issues found"
+  echo "   Fix the issues above and try again"
   exit 1
 fi
-
-echo "✅ Version consistency OK"
 `;
 
 if (!existsSync(HOOKS_DIR)) {

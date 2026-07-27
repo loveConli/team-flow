@@ -2,16 +2,20 @@
 // check-version-consistency.mjs — CI guard: fail if any file has a version
 // that doesn't match package.json. Prevents doc/code drift after ssf version.
 //
-// Usage: node scripts/check-version-consistency.mjs
-//   Exit 0: all versions consistent
-//   Exit 1: mismatches found (lists every file and its version)
+// Usage:
+//   node scripts/check-version-consistency.mjs          # check only (exit 1 on mismatch)
+//   node scripts/check-version-consistency.mjs --fix    # auto-fix skill counts & npx refs
+//
+// Exit 0: all versions consistent (or fixed successfully)
+// Exit 1: mismatches found (lists every file and its version)
 
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
+const AUTO_FIX = process.argv.includes('--fix');
 
 // Canonical version from package.json
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf-8'));
@@ -22,6 +26,7 @@ if (!CANONICAL || !/^\d+\.\d+\.\d+$/.test(CANONICAL)) {
 }
 
 const errors = [];
+const fixes = [];
 
 // ── JSON manifests ──
 const JSON_CHECKS = [
@@ -134,7 +139,15 @@ for (const check of SKILL_COUNT_JSON_CHECKS) {
     if (!match) {
       errors.push({ file: `${check.file} [${check.path.join('.')}]`, found: 'PATTERN_NOT_MATCHED', expected: ACTUAL_SKILL_COUNT });
     } else if (Number(match[1]) !== ACTUAL_SKILL_COUNT) {
-      errors.push({ file: `${check.file} [${check.path.join('.')}]`, found: match[1], expected: ACTUAL_SKILL_COUNT });
+      if (AUTO_FIX) {
+        // Auto-fix: update skill count in JSON
+        const newVal = val.replace(check.extract, `${ACTUAL_SKILL_COUNT} skills`);
+        obj[check.path[0]] = newVal;
+        writeFileSync(fp, JSON.stringify(obj, null, 2) + '\n', 'utf-8');
+        fixes.push(`${check.file}: ${match[1]} → ${ACTUAL_SKILL_COUNT}`);
+      } else {
+        errors.push({ file: `${check.file} [${check.path.join('.')}]`, found: match[1], expected: ACTUAL_SKILL_COUNT });
+      }
     }
   } catch (e) {
     errors.push({ file: check.file, found: `PARSE_ERROR: ${e.message}`, expected: ACTUAL_SKILL_COUNT });
@@ -143,8 +156,8 @@ for (const check of SKILL_COUNT_JSON_CHECKS) {
 
 // Text files: extract the documented skill count.
 const SKILL_COUNT_TEXT_CHECKS = [
-  { file: 'README.md', extract: /(\d+) skills/ },
-  { file: 'AGENTS.md', extract: /Skills 索引（(\d+) 个）/ },
+  { file: 'README.md', extract: /(\d+) skills/, replace: (content, count) => content.replace(/(\d+) skills/, `${count} skills`) },
+  { file: 'AGENTS.md', extract: /Skills 索引（(\d+) 个）/, replace: (content, count) => content.replace(/Skills 索引（(\d+) 个）/, `Skills 索引（${count} 个）`) },
 ];
 
 for (const check of SKILL_COUNT_TEXT_CHECKS) {
@@ -158,7 +171,14 @@ for (const check of SKILL_COUNT_TEXT_CHECKS) {
   if (!match) {
     errors.push({ file: check.file, found: 'PATTERN_NOT_MATCHED', expected: ACTUAL_SKILL_COUNT });
   } else if (Number(match[1]) !== ACTUAL_SKILL_COUNT) {
-    errors.push({ file: check.file, found: match[1], expected: ACTUAL_SKILL_COUNT });
+    if (AUTO_FIX) {
+      // Auto-fix: update skill count in text
+      const newContent = check.replace(content, ACTUAL_SKILL_COUNT);
+      writeFileSync(fp, newContent, 'utf-8');
+      fixes.push(`${check.file}: ${match[1]} → ${ACTUAL_SKILL_COUNT}`);
+    } else {
+      errors.push({ file: check.file, found: match[1], expected: ACTUAL_SKILL_COUNT });
+    }
   }
 }
 
@@ -170,18 +190,90 @@ const SKILL_MD_FILES = skillDirs
   .map(entry => `skills/${entry.name}/SKILL.md`)
   .filter(file => existsSync(join(ROOT, file)));
 
-for (const file of SKILL_MD_FILES) {
-  const versions = [...readFileSync(join(ROOT, file), 'utf-8').matchAll(/spec-superflow@(\d+\.\d+\.\d+)/g)]
-    .map(match => match[1]);
-  const stale = [...new Set(versions)].filter(version => version !== CANONICAL);
-  if (stale.length > 0) {
-    errors.push({ file, found: stale.join(', '), expected: CANONICAL });
+// Also scan references/ subdirectories for stale npx refs
+const REFERENCES_FILES = [];
+function scanDir(dir, prefix = '') {
+  const entries = readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+    const relPath = prefix ? `${prefix}/${entry.name}` : entry.name;
+    if (entry.isDirectory()) {
+      scanDir(fullPath, relPath);
+    } else if (entry.name.endsWith('.md')) {
+      REFERENCES_FILES.push(relPath);
+    }
+  }
+}
+const refsDir = join(ROOT, 'skills');
+for (const skillEntry of skillDirs) {
+  const refsPath = join(refsDir, skillEntry.name, 'references');
+  if (existsSync(refsPath)) {
+    scanDir(refsPath, `skills/${skillEntry.name}/references`);
   }
 }
 
+const ALL_SCANNABLE_FILES = [...SKILL_MD_FILES, ...REFERENCES_FILES];
+
+for (const file of ALL_SCANNABLE_FILES) {
+  const fp = join(ROOT, file);
+  if (!existsSync(fp)) continue;
+
+  const content = readFileSync(fp, 'utf-8');
+  const versions = [...content.matchAll(/spec-superflow@(\d+\.\d+\.\d+)/g)]
+    .map(match => match[1]);
+  const stale = [...new Set(versions)].filter(version => version !== CANONICAL);
+
+  if (stale.length > 0) {
+    if (AUTO_FIX) {
+      // Auto-fix: update all stale npx references
+      let newContent = content;
+      for (const oldVer of stale) {
+        newContent = newContent.replaceAll(`spec-superflow@${oldVer}`, `spec-superflow@${CANONICAL}`);
+      }
+      writeFileSync(fp, newContent, 'utf-8');
+      fixes.push(`${file}: ${stale.join(', ')} → ${CANONICAL}`);
+    } else {
+      errors.push({ file, found: stale.join(', '), expected: CANONICAL });
+    }
+  }
+}
+
+// ── Detect new skills not in any manifest ──
+const MANIFEST_SKILLS = new Set();
+// Extract from plugin.json description
+const pluginDesc = pkg.description || '';
+const skillListMatch = pluginDesc.match(/(\d+) skills/);
+// We'll check AGENTS.md for skill list
+const agentsMd = readFileSync(join(ROOT, 'AGENTS.md'), 'utf-8');
+const skillIndexMatch = agentsMd.match(/## Skills 索引[\s\S]*?(?=##|$)/);
+if (skillIndexMatch) {
+  const skillNames = [...skillIndexMatch[0].matchAll(/skills\/([a-z-]+)\//g)].map(m => m[1]);
+  skillNames.forEach(name => MANIFEST_SKILLS.add(name));
+}
+
+const newSkills = skillDirs
+  .map(entry => entry.name)
+  .filter(name => !MANIFEST_SKILLS.has(name));
+
+if (newSkills.length > 0) {
+  console.warn(`⚠️  New skills detected not in AGENTS.md index: ${newSkills.join(', ')}`);
+  console.warn(`   Consider adding them to AGENTS.md Skills 索引`);
+}
+
 // ── Report ──
+if (fixes.length > 0) {
+  console.log(`🔧 Auto-fixed ${fixes.length} issue(s):`);
+  for (const fix of fixes) {
+    console.log(`   ${fix}`);
+  }
+  console.log('');
+}
+
 if (errors.length === 0) {
-  console.log(`✅ Version consistency check passed — all files at ${CANONICAL}`);
+  const msg = fixes.length > 0
+    ? `✅ Version consistency check passed after auto-fix — all files at ${CANONICAL}`
+    : `✅ Version consistency check passed — all files at ${CANONICAL}`;
+  console.log(msg);
   process.exit(0);
 }
 
@@ -192,6 +284,6 @@ for (const e of errors) {
   console.log(`    expected: ${e.expected}`);
   console.log(`    found:    ${e.found}`);
 }
-console.log(`\nRun: ssf version ${CANONICAL}`);
-console.log(`Then manually verify CHANGELOG.md is up to date.`);
+console.log(`\nRun: npm run check-versions -- --fix`);
+console.log(`Then manually verify and commit.`);
 process.exit(1);
