@@ -38,6 +38,11 @@ const BUILTIN_DEFAULTS = {
   dp_6_timestamp: null,
   dp_7_result: null,
   dp_7_timestamp: null,
+  // Architecture design gate (v0.9 §26, v0.22.5 评审修复 F02)
+  arch_design_decision: null,
+  arch_design_reason: null,
+  arch_design_timestamp: null,
+  arch_design_artifacts: null,
 };
 
 /**
@@ -106,6 +111,12 @@ export function writeState(changeDir, state) {
   lines.push(`dp_6_timestamp: ${state.dp_6_timestamp ?? 'null'}`);
   lines.push(`dp_7_result: ${state.dp_7_result ?? 'null'}`);
   lines.push(`dp_7_timestamp: ${state.dp_7_timestamp ?? 'null'}`);
+  lines.push('');
+  lines.push('# === Architecture design gate (v0.9 §26) ===');
+  lines.push(`arch_design_decision: ${state.arch_design_decision ?? 'null'}`);
+  lines.push(`arch_design_reason: ${state.arch_design_reason ?? 'null'}`);
+  lines.push(`arch_design_timestamp: ${state.arch_design_timestamp ?? 'null'}`);
+  lines.push(`arch_design_artifacts: ${state.arch_design_artifacts ?? 'null'}`);
 
   fs.writeFileSync(filePath, lines.join('\n') + '\n', 'utf-8');
 }

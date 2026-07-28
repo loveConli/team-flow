@@ -54,11 +54,17 @@ These rules apply to every brainstorm, including the universal (non-software) fl
 
 Sub-agent dispatch is tiered by task shape, never hardcoded to a model name. When dispatching the Phase 1.1 grounding scout, the Phase 2.6 claim verifier, or the opt-in Slack researcher, read `references/model-tiers.md` for the tier definitions (extraction / generation / ceiling) and the degradation rule for platforms without per-agent model selection or with no subagent primitive at all.
 
+## Optional Inputs
+
+- `docs/ideation/*.md`（可选）：如果 ce-ideate 已产出 ideation artifact，读取作为 brainstorm 的起点。若文件不存在，则从用户提供的 feature description 获取输入。
+
 ## Feature Description
 
 The **feature description** is the input this skill was invoked with — what to explore, present in the current prompt or conversation, whether the user provided it directly or a calling skill passed it.
 
 **If no feature description was provided, ask the user:** "What would you like to explore? Please describe the feature, problem, or improvement you're thinking about."
+
+**If `docs/ideation/*.md` exists**, read it first and use its ranked ideation content as the starting point for the brainstorm.
 
 Do not proceed until you have a feature description from the user.
 

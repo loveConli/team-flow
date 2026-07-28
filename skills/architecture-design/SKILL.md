@@ -112,6 +112,8 @@ artifacts:                       # required 时必填，skipped 时为空
   - architecture/api.md
 ```
 
+**职责边界**：architecture-design 负责**判断+产出**（五项检查判断是否涉及架构变更，涉及则产出架构设计文档），workflow-start 负责**reasonableness check + 状态写入**（确认判断合理性后写入 yaml）。
+
 ### 产出目录
 
 架构设计产出放在 change 目录下的独立 `architecture/` 子目录：

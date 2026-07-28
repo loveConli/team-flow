@@ -2,7 +2,7 @@
   "name": "team-flow",
   "displayName": "team-flow",
   "description": "Unified workflow plugin: team-flow (spec-driven dev: TDD/SDD/code-review/debugging) + compound-engineering core subset (brainstorm/plan/compound/strategy/ideate/proof, global compounding) + architecture-design (4A+DDD incremental design & global compounding) + prototype (local HTML prototype, zero external deps) + e2e (Playwright E2E, AC-driven) + workflow-orchestrator (product-level workflow orchestration) + workflow-bootstrap (existing project onboarding) + session-handoff (context transfer) + workflow-feedback (issue tracking). 23 skills + 8 agents, one install.",
-  "version": "0.22.4",
+  "version": "0.22.5",
   "author": {
     "name": "LT",
     "url": "https://github.com/LT"

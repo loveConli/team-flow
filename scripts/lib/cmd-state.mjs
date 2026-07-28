@@ -23,6 +23,9 @@ const SETTABLE_FIELDS = [
   'dp_5_result', 'dp_5_timestamp', 'dp_5_decisions', 'dp_5_confirmed',
   'dp_6_result', 'dp_6_timestamp', 'dp_6_decisions', 'dp_6_confirmed',
   'dp_7_result', 'dp_7_timestamp', 'dp_7_decisions', 'dp_7_confirmed',
+  // Architecture design gate (v0.9 §26, v0.22.5 评审修复 F02)
+  'arch_design_decision', 'arch_design_reason',
+  'arch_design_timestamp', 'arch_design_artifacts',
 ];
 
 export async function run(args) {

@@ -6,6 +6,31 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.22.5] - 2026-07-28
+
+### Fixed（制品链评审与修复，设计 v0.9 §28）
+
+- **state-loader.mjs**：BUILTIN_DEFAULTS 新增 `arch_design_decision` / `arch_design_reason` / `arch_design_timestamp` / `arch_design_artifacts` 四个字段，writeState() 序列化逻辑同步更新
+- **cmd-state.mjs**：SETTABLE_FIELDS 新增上述四个 arch_design_* 字段，支持 `tf state set` 写入
+- **architecture-design/SKILL.md**：移除错误的"状态写入"章节（职责边界应为"判断+产出"，非"判断+写入"）
+- **workflow-start/SKILL.md**：新增 "State Writes" 章节，明确声明 arch_design_* 的 reasonableness check + 状态写入权责
+- **ce-brainstorm/SKILL.md**：新增 "Optional Inputs" 章节，声明消费 `docs/ideation/*.md`（source: ce-ideate），修复 ideation 制品链断裂
+- **workflow-start/SKILL.md Fast-Path Routing**：新增 DP-0 处理说明（hotfix/tweak 隐式跳过 DP-0，dp_0_confirmed 保持 null）
+
+### Added（模板补全）
+
+- **templates/change-brief.md**：新增变更简报模板，基于 s4-split-validate.md 的 brief_schema（5 个 frontmatter 字段 + 6 个 body sections）
+- **templates/architecture.md**：新增架构设计模板（4A+DDD 增量设计：As-Is 基线冻结 + To-Be 增量 + 变更分叉级联 + 跨域一致性 + 演进日志）
+- **templates/database.md**：新增数据库设计模板（CQRS 增量：写模型/读模型/Schema 变更/实体关系/数据迁移脚本 + 演进日志）
+- **templates/api.md**：新增 API 设计模板（Command/Read/Query 分流 + 端点详细设计 + 跨域一致性检查 + 演进日志）
+
+### Verified
+
+- check-version-consistency：✅ PASS（全部 0.22.5）
+- npm test：✅ 421/421 通过
+
+---
+
 ## [0.22.4] - 2026-07-27
 
 ### Changed（npm 包名 scope 化，发布至 npm）
