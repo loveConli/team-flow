@@ -16,7 +16,7 @@ Two responsibilities: requesting review (dispatching a reviewer subagent) and re
 1. Get SHAs: `BASE_SHA=$(git rev-parse HEAD~1)` and `HEAD_SHA=$(git rev-parse HEAD)`
 2. Dispatch `general-purpose` subagent using template at `skills/code-reviewer/code-reviewer-prompt.md`
 3. Fill placeholders: `[DESCRIPTION]` (what was built), `[PLAN_OR_REQUIREMENTS]` (contract/spec reference), `[BASE_SHA]`, `[HEAD_SHA]`, `[WAVE_ID]`, and a distinct `[REVIEW_REPORT_FILE]`.
-4. Require the reviewer to write a non-empty persisted review report at `[REVIEW_REPORT_FILE]`, then record that exact path in the wave receipt: `npx --yes --package @xulthekl/team-flow@0.22.5 tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <review-report-path> --verdict <pass|fail>`.
+4. Require the reviewer to write a non-empty persisted review report at `[REVIEW_REPORT_FILE]`, then record that exact path in the wave receipt: `npx --yes --package @xulthekl/team-flow@0.23.0 tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <review-report-path> --verdict <pass|fail>`.
 5. Act on feedback: Critical/Important findings require a `fail` receipt, focused repair, re-review, and replacement `pass` receipt before a dependent wave or closing can proceed. Note Minor for later, push back with reasoning if reviewer is wrong.
 
 ### Minimality And Scope
@@ -42,6 +42,10 @@ behavior-neutral redundancy; never score by line count.
 | Critical | Bugs, security, data loss, broken functionality | Fix immediately |
 | Important | Architecture problems, missing features, poor error handling, test gaps | Fix before next batch |
 | Minor | Code style, optimization, documentation polish | Note for later |
+
+### Architecture Cross-Domain Consistency (v0.10 §28-§31)
+
+When `architecture/api.md` exists, verify the implementation against its **cross-domain consistency** section — specifically the API↔data entity alignment (Command/Read/Query routing vs actual DB entity usage). Flag mismatches as Important.
 
 ### Forbidden Responses
 Never: performative agreement ("You're right!", "Great point!"), blind implementation before verification, thanking the reviewer. Instead: restate the requirement, ask clarifying questions, push back with reasoning, or just fix it (actions > words).
@@ -72,7 +76,7 @@ Suggestion breaks existing functionality, reviewer lacks context, violates YAGNI
 | Performative agreement | State requirement or just act |
 | Blind implementation | Verify against codebase first |
 | Batch without testing | One at a time, test each |
-| Proceeding without a wave receipt | Record `pass`/`fail` via `npx --yes --package @xulthekl/team-flow@0.22.5 tf execution review` before the next dependent wave |
+| Proceeding without a wave receipt | Record `pass`/`fail` via `npx --yes --package @xulthekl/team-flow@0.23.0 tf execution review` before the next dependent wave |
 | Assuming reviewer is right | Check if breaks things |
 | Avoiding pushback | Technical correctness > comfort |
 | Partial implementation | Clarify all items first |

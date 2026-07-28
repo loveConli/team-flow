@@ -15,6 +15,17 @@ bash scripts/recon-probe.sh --root <项目根> --out /tmp/recon-<slug>.json
 
 固定采集（不依赖 LLM，两次接入结果一致）：目录树（限深 4 层）、依赖清单（pom/package.json/requirements/go.mod/build.gradle）、LOC 与文件类型分布、测试文件计数（含 `.test.mjs`/`.spec.mjs`）、DB 迁移文件清单、README/docs 探测。输出结构化 JSON 供子代理消费。脚本只做确定性机械采集（§17.8 第四类载体），语义判断交给子代理 LLM。
 
+## B1.1a DDL 提取能力（v0.23.0 新增）
+
+`recon-probe.sh` 需增加 DDL 提取能力，用于 B2 成果物导入阶段的兜底提取：
+
+- **Entity 类解析**：扫描 `@Entity`、`@Table` 注解的 Java 类，或 ORM 模型定义文件，提取表名、字段名、字段类型、索引信息
+- **SHOW CREATE TABLE**：当项目配置了数据库连接时，执行 `SHOW CREATE TABLE` 导出各表 DDL
+- **迁移文件解析**：解析 Flyway / Liquibase / Alembic 等迁移脚本，提取最终态 schema
+- **输出**：将提取结果写入 `docs/architecture/schema-baseline.sql`，格式为标准 DDL（CREATE TABLE 语句）
+
+此能力为 B2 Step 2 兜底提取的前置依赖。当用户无既有 DDL 脚本时，由 recon-probe.sh 自动从代码/数据库中提取 schema 基线。
+
 ## B1.2 并行派发侦察子代理（语义增强）
 
 读 `references/agents/codebase-recon-analyst.md`，把 B1.1 的 JSON 路径作为 `recon_json` 入参，按维度**并行派发**子代理（每个子代理消费 JSON 基底 + 按需补读源码，按 §18.1 返回结构化摘要）：
@@ -65,7 +76,11 @@ bash scripts/recon-probe.sh --root <项目根> --out /tmp/recon-<slug>.json
 - docs/architecture/baseline.md（项目基线画像）
 - docs/architecture/ARCHITECTURE.md（架构锚点，如适用）
 - docs/architecture/DATABASE.md（数据模型，如适用）
-- CONCEPTS.md（领域词汇，N 个术语）
+- docs/architecture/PHYSICAL-MODEL.md（物理模型，v0.23.0）
+- docs/architecture/schema-baseline.sql（DDL 基线脚本，v0.23.0）
+- docs/architecture/API-INDEX.md（API 端点索引，v0.23.0）
+- docs/architecture/INDEX.md（架构文档索引，v0.23.0）
+- docs/architecture/CONCEPTS.md（领域词汇，N 个术语）
 - 目录结构：prd/ prototype/ docs/ changes/
 
 关键发现：

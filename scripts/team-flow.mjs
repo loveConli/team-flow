@@ -33,6 +33,7 @@ const COMMANDS = {
   'install-qoder':    () => import('./lib/cmd-install-qoder.mjs'),
   'install-zcode':     () => import('./lib/cmd-install-zcode.mjs'),
   'prototype-sync':    () => import('./lib/prototype-sync.mjs'),
+  'arch-merge':        () => import('./lib/arch-merge.mjs'),
 };
 
 const HELP = `team-flow (tf) — Unified workflow plugin CLI
@@ -47,6 +48,8 @@ Commands:
   sync <change-dir>     Merge delta specs into main specs
   prototype-sync <change-dir> [--source <path>] [--prototype-dir <path>]
                         Merge UX delta into global prototype/ + design-system.md
+  arch-merge <change-dir> [--project-root <path>] [--dry-run]
+                        Merge architecture delta into global docs/architecture/
   config [options]      Display or modify configuration
   config --resolve-model <profile>  Resolve a configured model profile without switching models
   state <sub> <dir>     Manage .team-flow.yaml state (init|check|transition|get|rebuild)

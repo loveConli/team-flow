@@ -8,6 +8,7 @@ import { checkTestsPassing } from './checks/tests-passing.mjs';
 import { checkContractFresh } from './checks/contract-fresh.mjs';
 import { check as checkDpGate } from './checks/dp-gate-passed.mjs';
 import { checkSpecsMerged } from './checks/specs-merged.mjs';
+import { checkArchDesign } from './checks/arch-design.mjs';
 import { checkContractCurrent } from './checks/contract-current.mjs';
 import { checkDp3Approved } from './checks/dp3-approved.mjs';
 import { checkExecutionPlanReady } from './checks/execution-plan-ready.mjs';
@@ -16,7 +17,7 @@ import { checkExecutionReviewsPassed } from './checks/execution-reviews-passed.m
 // Transition matrix: <from>:<to> → required check dimensions
 const TRANSITION_CHECKS = {
   // Forward transitions
-  'exploring:specifying':           ['artifacts-exist'],
+  'exploring:specifying':           ['artifacts-exist', 'arch-design'],
   'specifying:bridging':            ['artifacts-exist', 'schema-valid'],
   'bridging:approved-for-build':    ['artifacts-exist', 'schema-valid', 'contract-fresh', 'dp-gate-passed'],
   'approved-for-build:executing':   ['artifacts-exist', 'contract-fresh', 'dp-gate-passed', 'execution-plan-ready'],
@@ -163,6 +164,7 @@ async function main() {
     'dp3-approved': (dir) => checkDp3Approved(dir),
     'execution-plan-ready': (dir) => checkExecutionPlanReady(dir),
     'execution-reviews-passed': (dir) => checkExecutionReviewsPassed(dir),
+    'arch-design': (dir) => checkArchDesign(dir),
   };
 
   const checks = [];

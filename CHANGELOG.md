@@ -658,3 +658,31 @@ The format loosely follows Keep a Changelog.
 - First release targets Claude Code and Trae style local skill loading
 - Runtime ownership remains inside `team-flow`
 - OpenSpec and Superpowers are reference influences, not runtime dependencies
+
+## v0.23.0 (2026-07-28) — 架构制品体系可执行化 + 上下文治理
+
+### 新增
+- **`tf arch-merge` CLI 命令**：8 步完整合并脚本，将 change 级架构增量（architecture/*.md + sql/）合并回全局 docs/architecture/（ARCHITECTURE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md）
+- **架构门控（guard.mjs）**：`exploring:specifying` 转换新增 `arch-design` 维度；`arch_design_decision=required` 时必须存在 architecture/*.md，`skipped` 时 reason 非空（advisory）
+- **architecture/*.md 纳入 artifacts_hash**：修改 hash.mjs，三件套变更触发 hash 失效
+- **5 个架构模板**：architecture.md / database.md / api.md / index.md / physical-model.md + change-brief.md
+- **架构上下文加载协议**：INDEX.md 摘要索引 + 物理模型按业务域分段 + 按需加载三层策略，单次执行预算 ~2K tokens
+
+### 修改
+- **database.md 模板**：DDL 从内嵌代码块改为引用 `sql/ddl/` 和 `sql/migration/` 目录
+- **api.md 定位调整**：聚焦 Command/Read/Query 分流归属+端点概要（架构路由表），不重复 Swagger 管理的精确 Schema；frontmatter 须声明 `api_contract_manager: swagger`
+- **Bootstrap B2 新增成果物导入环节**：优先用户提供既有 SQL/物理模型/API 文档，兜底确定性提取（Entity 类解析 / SHOW CREATE TABLE）；新产出 PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md；CONCEPTS.md 路径迁移至 docs/architecture/
+- **architecture-design SKILL.md**：产出目录新增 sql/ 子目录；api.md 架构路由表定位；新增上下文加载协议段；新增 arch-merge 引用
+
+### 下游消费同步
+- **spec-writer**：输入源增加 architecture/sql/ 路径 + api.md 路由表说明
+- **build-executor**：输入源增加 architecture/sql/ddl/*.sql + sql/migration/*.sql
+- **code-reviewer**：新增 Architecture Cross-Domain Consistency 评审维度
+- **release-archivist**：closing 步骤新增 `tf arch-merge`（先于 prototype-sync）
+
+### 设计文档
+- 新增 `docs/architecture-api-db-design-enhancement-v0.10.md`（§28-§31 完整设计决策记录）
+
+### 参考
+- v0.10 设计文档：`docs/architecture-api-db-design-enhancement-v0.10.md`
+- 设计增强方案权威版本：v0.10（承袭 v0.9 全部内容）

@@ -66,9 +66,30 @@ Do NOT invoke for:
 
 **条件**：如果 B1 侦察发现项目有一定复杂度（≥5 个模块或 ≥10 个源文件），执行此阶段。否则跳过。
 
+**B2 成果物导入（v0.23.0 新增）**：
+
+```
+Step 1: 询问用户是否有既有成果物
+  ├── 有 SQL DDL 脚本 → 导入到 docs/architecture/schema-baseline.sql
+  ├── 有物理模型文档 → 转换为 docs/architecture/PHYSICAL-MODEL.md（对齐标准格式）
+  ├── 有 API 文档/Swagger 导出 → 提取端点生成 docs/architecture/API-INDEX.md
+  └── 无既有成果物 → Step 2 兜底
+
+Step 2: 确定性提取（兜底）
+  ├── recon-probe.sh 增加 DDL 提取能力（解析 Entity 类 / SHOW CREATE TABLE）
+  ├── 从 schema-baseline.sql 反向生成 PHYSICAL-MODEL.md
+  └── 扫描 Controller/Router 类 → 生成 API-INDEX.md
+
+优先级原则：用户既有成果物 > 确定性提取 > LLM 推断
+```
+
 产出：
 - `docs/architecture/ARCHITECTURE.md` — 分层、模块边界、技术选型（瘦锚点格式）
 - `docs/architecture/DATABASE.md` — 数据模型（如适用）
+- `docs/architecture/PHYSICAL-MODEL.md` — 物理模型（v0.23.0 新增）
+- `docs/architecture/schema-baseline.sql` — DDL 基线脚本（v0.23.0 新增）
+- `docs/architecture/API-INDEX.md` — API 端点索引（v0.23.0 新增）
+- `docs/architecture/INDEX.md` — 架构文档索引（v0.23.0 新增）
 - `docs/architecture/<bc>/` — 每个有界上下文的目录（如能识别）
 
 **轻量 vs 完整**：
@@ -82,7 +103,9 @@ Do NOT invoke for:
 
 ### B3: Domain Vocabulary Bootstrap（领域词汇种子）
 
-从代码命名中提取领域词汇，创建或更新 `CONCEPTS.md`。
+从代码命名中提取领域词汇，创建或更新 `docs/architecture/CONCEPTS.md`。
+
+> **v0.23.0 变更**：`CONCEPTS.md` 已迁移至 `docs/architecture/CONCEPTS.md`（原根目录位置已弃用）。如根目录存在旧文件，应迁移至新路径。
 
 **提取策略**：
 1. 扫描实体类名、服务类名、模块名
@@ -104,7 +127,7 @@ Do NOT invoke for:
 ```
 
 **已有 CONCEPTS.md 处理**：
-- 如果 `CONCEPTS.md` 已存在（由之前的 ce-compound 运行创建）→ **合并**而非覆盖
+- 如果 `docs/architecture/CONCEPTS.md` 已存在（由之前的 ce-compound 运行创建）→ **合并**而非覆盖
 - 读取已有词汇，补充从代码中新发现的术语
 - 标注来源："workflow-bootstrap B3 补充"
 
@@ -124,7 +147,7 @@ Do NOT invoke for:
 > - C) 我只是想建立架构基线，暂不开发新需求（→ 结束）
 
 **上下文传递**：
-- 将 `docs/architecture/baseline.md` 和 `CONCEPTS.md` 的路径传递给 workflow-orchestrator S1
+- 将 `docs/architecture/baseline.md` 和 `docs/architecture/CONCEPTS.md` 的路径传递给 workflow-orchestrator S1
 - 作为后续流程的架构上下文
 
 ## Guardrails
@@ -140,9 +163,9 @@ Do NOT invoke for:
 
 每次交互结束时说明：
 1. 已完成的阶段（B1-B5）
-2. 已产出的制品（baseline.md / ARCHITECTURE.md / CONCEPTS.md / 目录结构）
+2. 已产出的制品（baseline.md / ARCHITECTURE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / CONCEPTS.md / 目录结构）
 3. 下一步建议（调用哪个 skill）
 
 ## Success Output
 
-接入结束时输出：侦察模式、产出清单（baseline.md / ARCHITECTURE.md / DATABASE.md / CONCEPTS.md / 目录结构）、关键发现（技术栈/模块数/架构模式/测试覆盖）、下一步建议。完整模板见 `references/b1-reconnaissance.md`「Success Output 模板」。
+接入结束时输出：侦察模式、产出清单（baseline.md / ARCHITECTURE.md / DATABASE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / docs/architecture/CONCEPTS.md / 目录结构）、关键发现（技术栈/模块数/架构模式/测试覆盖）、下一步建议。完整模板见 `references/b1-reconnaissance.md`「Success Output 模板」。

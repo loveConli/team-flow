@@ -123,20 +123,57 @@ changes/<name>/
 └── architecture/                # ★ 架构设计独立一等产物
     ├── architecture.md          # DDD 增量（聚合/限界上下文/CQRS/Context Map）
     ├── database.md              # DB 增量（实体/读写模型/schema 变更）
-    └── api.md                   # API 增量（Command/Read/Query 分流 + 端点设计）
+    ├── api.md                   # 架构路由表（Command/Read/Query 分流 + 聚合归属 + 阻断测试结果）
+    └── sql/                     # DDL / Migration 脚本（独立可执行文件，不嵌入 markdown）
+        ├── ddl/                 # 表结构定义脚本
+        └── migration/           # 增量迁移脚本
 ```
 
 **语义分离**：架构设计与行为规格（`specs/`）是不同专业领域，独立目录避免混杂。
 
+**api.md 定位——架构路由表**：
+- 记录内容：Command/Read/Query 分类、聚合归属（哪个聚合拥有该操作）、阻断测试结果（写模型 vs 读模型分流依据）
+- **不**重复 Swagger 管理的内容：请求/响应 schema、错误码定义、参数明细等由 Swagger/OpenAPI 规范承载
+- frontmatter 须声明 `api_contract_manager: swagger`，表明详细契约由 Swagger 工具链管理
+- sql/ 目录中的 DDL 和 migration 脚本为独立可执行 `.sql` 文件，不嵌入 markdown 文档
+
 **下游消费**：
 - `architecture/architecture.md` → spec-writer：design.md Decisions 约束
 - `architecture/database.md` → spec-writer：design.md + tasks.md 数据层约束
-- `architecture/api.md` → spec-writer：tasks.md 接口定义约束
-- 全部 → release-archivist → arch-merge → 全局 `docs/architecture/` 回写
+- `architecture/api.md` → spec-writer：tasks.md 接口路由与分流约束（详细 schema 由 Swagger 提供）
+- `architecture/sql/` → build-executor：直接执行 DDL/migration 脚本
+- 全部 → release-archivist → `tf arch-merge` → 全局 `docs/architecture/` 回写
+
+### 架构制品合并（arch-merge）
+
+change 进入 closing 阶段时，由 release-archivist 调用 `tf arch-merge` CLI 命令，将 `changes/<name>/architecture/` 下的增量制品合并回全局 `docs/architecture/`，完成 As-Is → To-Be 基线更新。architecture-design 本身不执行合并，只负责产出增量制品。
 
 ### 独立调用
 
 除 workflow-start 编排调用外，本 skill 仍支持用户显式独立调用（`/team-flow:architecture-design`），此时不走五项检查判定门，直接执行完整 4A+DDD 设计。
+
+## 上下文加载协议
+
+architecture-design 执行时的上下文组装：
+
+**始终加载**：
+1. `Read docs/architecture/INDEX.md`（~50行摘要）
+2. `Read changes/<name>/change-brief.md`（如有）
+3. `Read changes/<name>/proposal.md`（如有）
+
+**根据五项检查按需加载**：
+4. [聚合变更] → `Read PHYSICAL-MODEL.md` 对应业务域段落 + `Read ARCHITECTURE.md` 对应 BC 段落
+5. [读写模型变更] → `Read PHYSICAL-MODEL.md` 对应域段落
+6. [API 变更] → `Read API-INDEX.md` 对应分流区域
+7. [DB schema 变更] → `Read schema-baseline.sql` 对应表的 DDL
+8. [限界上下文变更] → `Read ARCHITECTURE.md` 全文
+
+**绝不加载**：
+- `baseline.md`（项目全景，arch-design 不需要）
+- 未涉及的业务域段落
+- 历史变更脚本（`changelog/`）
+
+**上下文预算**：单次执行 ~2K tokens（L1 INDEX + 1-2 个 L2 域段 + L3 变更层）
 
 ## Scope & Limits
 本 skill 覆盖 4A+DDD 架构设计方法及其与 team-flow/compound-engineering 的衔接。落地实现结合项目具体工具；超出本范围见相关 skill 或直接问 agent。

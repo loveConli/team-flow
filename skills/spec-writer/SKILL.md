@@ -41,19 +41,21 @@ Read `docs/solutions/INDEX.md` if it exists. Filter entries where `phase = spec 
 若 `architecture/` 目录存在（本 change 经 workflow-start 的 architecture-design 判断门判定为 `required` 并产出了架构设计），读取以下文件作为 design.md / tasks.md 的架构约束输入：
 
 - `architecture/architecture.md` → design.md `## Decisions` 的架构约束（聚合/限界上下文/CQRS 决策）
-- `architecture/database.md` → design.md + tasks.md 的数据层约束（实体/读写模型/schema 变更）
-- `architecture/api.md` → tasks.md 的接口定义约束（端点/方法签名/Command-Read-Query 分流）
+- `architecture/database.md` → design.md + tasks.md 的数据层约束（实体/读写模型/schema 变更）；注意 database.md 引用 `architecture/sql/` 路径而非内嵌 DDL
+- `architecture/api.md` → tasks.md 的接口路由约束（**架构路由表**：Command/Read/Query 分类，非详细 API 规格——详细规格由 Swagger 管理）
+- `architecture/sql/ddl/*.sql` → tasks.md 数据层任务的 DDL 脚本约束（可执行建表/改表脚本）
+- `architecture/sql/migration/*.sql` → tasks.md 数据层任务的数据迁移约束
 
 **约束传递规则**：
 - design.md 的 `## Decisions` 段必须**引用** architecture/ 中的架构决策，不得与之矛盾
-- tasks.md 的接口定义（Interfaces 段）必须与 `architecture/api.md` 的 API 设计对齐
-- tasks.md 的数据层任务必须与 `architecture/database.md` 的 schema 变更对齐
+- tasks.md 的接口定义（Interfaces 段）必须与 `architecture/api.md` 的架构路由表（Command/Read/Query 分类）对齐——详细 API 规格由 Swagger 管理，api.md 不含
+- tasks.md 的数据层任务必须与 `architecture/database.md` 的 schema 变更对齐，并引用 `architecture/sql/ddl/*.sql` 和 `architecture/sql/migration/*.sql` 作为可执行脚本路径
 
 `architecture/` 目录不存在时（判定为 `skipped`）跳过本段。
 
 ## Config Check
 
-Run: `npx --yes --package @xulthekl/team-flow@0.22.5 tf runtime config --get artifacts.order` — generate in configured order (default: proposal → specs → design → tasks). Run with `artifacts.skip` — skip any listed artifacts.
+Run: `npx --yes --package @xulthekl/team-flow@0.23.0 tf runtime config --get artifacts.order` — generate in configured order (default: proposal → specs → design → tasks). Run with `artifacts.skip` — skip any listed artifacts.
 
 ## Artifact Roles
 
@@ -69,7 +71,7 @@ Run: `npx --yes --package @xulthekl/team-flow@0.22.5 tf runtime config --get art
 
 **Honor Brief (v0.9)**: 若 `change-brief.md` 存在，尊重其 scope 边界与 AC 列表（见 Required Inputs「Change Brief」）——不静默丢弃 brief AC、不静默超出 brief scope；与 plan.md 冲突时以 plan.md 为准并注明。
 
-**Honor Architecture (v0.9 §26)**: 若 `architecture/` 目录存在，design.md 的 Decisions 段必须引用其架构决策（聚合/限界上下文/CQRS/API/DB），tasks.md 的接口定义和数据层任务必须与 architecture/ 产出对齐——不得静默忽略或矛盾架构设计产出。
+**Honor Architecture (v0.9 §26, v0.10 §28-§31)**: 若 `architecture/` 目录存在，design.md 的 Decisions 段必须引用其架构决策（聚合/限界上下文/CQRS/API/DB），tasks.md 的接口定义（对齐 api.md 架构路由表）和数据层任务（引用 sql/ddl/ + sql/migration/ 脚本路径）必须与 architecture/ 产出对齐——不得静默忽略或矛盾架构设计产出。
 
 ### proposal.md
 Must state: problem, what changes, capabilities affected, impact areas.
@@ -122,7 +124,7 @@ Generate one at a time. Confirm each before next. This prevents scope drift — 
 
 ### design.md
 - `## Context`, `## Goals`, `## Decisions` (≥1, with Choice+Rationale+Alternatives), `## Risks And Trade-Offs`
-- **Architecture alignment (v0.9 §26)**: 若 `architecture/` 存在，`## Decisions` 必须引用架构设计产出中的关键决策（聚合/限界上下文/CQRS/API/DB）
+- **Architecture alignment (v0.9 §26, v0.10 §28-§31)**: 若 `architecture/` 存在，`## Decisions` 必须引用架构设计产出中的关键决策（聚合/限界上下文/CQRS/API/DB）；tasks.md 数据层任务须引用 `architecture/sql/` 脚本路径，接口定义须对齐 api.md 架构路由表
 
 ### tasks.md
 - `## File Structure`, `## Interfaces`, numbered tasks, exact file paths, TDD phases, ≤5 min steps, no placeholders, every requirement mapped, explicit dependencies
@@ -133,8 +135,8 @@ Generate one at a time. Confirm each before next. This prevents scope drift — 
 
 Present summary of all 4 artifacts (2-3 sentences each). Ask user for adjustments. After approval:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.22.5 tf state set <change-dir> dp_2_result "approved: <summary>"
-npx --yes --package @xulthekl/team-flow@0.22.5 tf state set <change-dir> dp_2_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package @xulthekl/team-flow@0.23.0 tf state set <change-dir> dp_2_result "approved: <summary>"
+npx --yes --package @xulthekl/team-flow@0.23.0 tf state set <change-dir> dp_2_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 
 ## Handoff Rule

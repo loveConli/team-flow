@@ -37,6 +37,24 @@ export function computeArtifactsHash(changeDir) {
     hasContent = true;
   }
 
+  // architecture/*.md (v0.23.0 §30: arch-design artifacts纳入hash)
+  // 三个文件全空则不参与 hash（兼容 arch_design_decision=skipped）
+  // sql/ 目录下的 .sql 文件不纳入 hash——可执行制品由版本控制保证
+  const archDir = path.join(changeDir, 'architecture');
+  if (fs.existsSync(archDir)) {
+    const archFiles = ['architecture.md', 'database.md', 'api.md'];
+    for (const f of archFiles) {
+      const fp = path.join(archDir, f);
+      if (fs.existsSync(fp)) {
+        const content = fs.readFileSync(fp, 'utf-8');
+        if (content.trim().length > 0) {
+          hash.update(content);
+          hasContent = true;
+        }
+      }
+    }
+  }
+
   return hasContent ? `sha256:${hash.digest('hex')}` : null;
 }
 
