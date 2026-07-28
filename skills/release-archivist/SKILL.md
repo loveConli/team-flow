@@ -72,12 +72,12 @@ If an `e2e/` suite exists for the change, fold its report into verification (see
 - Scope added without artifact updates?
 - Unresolved blockers or known risks?
 - Delta specs exist that need merging?
-- Run `npx --yes --package @xulthekl/team-flow@0.24.0 tf audit <change-dir>` — include `decision-point-audit.md` in archive
+- Run `npx --yes --package @xulthekl/team-flow@0.24.1 tf audit <change-dir>` — include `decision-point-audit.md` in archive
 
 ### DP-6 (Verification Outcome)
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> dp_6_result "<pass|conditional|fail>: <summary>"
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> dp_6_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> dp_6_result "<pass|conditional|fail>: <summary>"
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> dp_6_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 If FAIL, do NOT proceed to DP-7. Route back or ask about abandonment.
 
@@ -85,13 +85,13 @@ After recording a PASS outcome, also record it as the verification gate so the
 `executing → closing` transition is allowed (the guard accepts either
 `test_result: pass` or a `dp_6_result` starting with `pass`):
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> test_result pass
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> test_result pass
 ```
 
 ### DP-7 (Archive Confirmation)
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> dp_7_result "confirmed: <archive summary>"
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> dp_7_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> dp_7_result "confirmed: <archive summary>"
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> dp_7_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 Verify DP-0 through DP-6 are recorded before DP-7.
 
@@ -101,14 +101,14 @@ If implementation diverged from the contract, return to `bridging` before closur
 
 ## Post-Verification
 
-Run `npx --yes --package @xulthekl/team-flow@0.24.0 tf state transition <change-dir> closing`. If delta specs exist, route to `spec-merger`.
+Run `npx --yes --package @xulthekl/team-flow@0.24.1 tf state transition <change-dir> closing`. If delta specs exist, route to `spec-merger`.
 
 ### Architecture Merge (v0.10 §28-§31) — MUST run first
 
 Merge change-level architecture artifacts to the global `docs/architecture/` baseline **before** any other post-verification step:
 
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf arch-merge <change-dir>
+npx --yes --package @xulthekl/team-flow@0.24.1 tf arch-merge <change-dir>
 ```
 
 This merges `architecture/{architecture,database,api}.md` and `architecture/sql/` into the global architecture docs. Skip silently when `architecture/` does not exist (architecture-design was `skipped`).
@@ -120,19 +120,21 @@ This merges `architecture/{architecture,database,api}.md` and `architecture/sql/
 After `arch-merge` completes, run prototype-sync to merge UX deltas back to the global prototype:
 
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf prototype-sync <change-dir>
+npx --yes --package @xulthekl/team-flow@0.24.1 tf prototype-sync <change-dir>
 ```
 
 **Write-back order (mandatory)**: `arch-merge` → `prototype-sync` → `compound promotion` must be executed **sequentially** within the same change closing. Do not run them in parallel — the global `docs/architecture/` and `prototype/` must not be in a half-updated state when the next change grounds on them.
 
 If `prototype-sync` reports conflicts, list them in the closing summary and flag for manual resolution. Do not block closing on prototype-sync conflicts (advisory level).
 
+**Execution verification（v0.24.0）**：`prototype-sync` 命令执行后，检查其 stdout 输出确认合并完成（输出含 `merged`/`no UX delta`/`conflicts` 之一）。若命令未执行或执行失败，Step 5 Report 的 `Prototype sync` 行必须标注 `SKIPPED` 或 `FAILED`，并在 closing summary 中说明原因。**禁止在 prototype-sync 未执行时将 Prototype sync 行标注为已完成**。
+
 ### Compound Promotion (v0.5)
 
 During closing, promote change-level learnings to the global solutions library:
 
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf solutions promote <change-dir>
+npx --yes --package @xulthekl/team-flow@0.24.1 tf solutions promote <change-dir>
 ```
 
 This checks `specs/<cap>/learnings.md` for entries meeting promotion criteria:
@@ -152,7 +154,7 @@ Before finalizing the closing, check if this change produced any learnable momen
 
 If any of the above occurred, capture the learning:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf solutions capture \
+npx --yes --package @xulthekl/team-flow@0.24.1 tf solutions capture \
   --phase cross-phase --domain <domain> --type pitfall \
   --severity medium --summary "<what happened and how to prevent it>"
 ```
@@ -174,6 +176,6 @@ Verify files exist and are non-empty, run `node --check` on code files, skip 5-s
 ## Exception Handling
 
 - **Parse failures**: Report exact file and section
-- **Missing files**: If audit can't generate, run `npx --yes --package @xulthekl/team-flow@0.24.0 tf audit` manually
+- **Missing files**: If audit can't generate, run `npx --yes --package @xulthekl/team-flow@0.24.1 tf audit` manually
 - **User interruption**: Re-run verification from the beginning on resume
 - **DP gaps**: Flag missing DPs during DP-6; ask user whether to proceed or return

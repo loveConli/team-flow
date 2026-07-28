@@ -292,6 +292,38 @@ code{ font-family: var(--font-mono); font-size: 0.9em; }
 #tweaks button[aria-pressed="true"]{ background: var(--accent-soft); color: var(--accent); }
 
 /* ============================================================
+   C-CONSUMER EXTENSIONS（v0.24.0 新增）
+   ============================================================ */
+.hero-xl{ padding: calc(var(--section-pad) * 1.5) 0; min-height: 60vh; display: flex; align-items: center; }
+.hero-xl .hero-center h1{ font-size: calc(var(--text-4xl) * 1.2); }
+.social-proof{ text-align: center; }
+.logo-wall{ align-items: center; justify-items: center; }
+.logo-wall .ph-img{ aspect-ratio: 4 / 3; filter: grayscale(1); opacity: 0.7; }
+.pricing-card{
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: var(--space-7);
+  display: flex; flex-direction: column; gap: var(--space-4); position: relative;
+}
+.pricing-card .pill{ position: absolute; top: calc(var(--space-4) * -1); left: 50%; transform: translateX(-50%); }
+.pricing-card h3{ font-size: var(--text-xl); text-align: center; }
+.pricing-card .stat{ text-align: center; }
+.pricing-card ul{ list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--space-3); }
+.pricing-card li{ font-size: var(--text-sm); color: var(--muted); padding-left: var(--space-5); position: relative; }
+.pricing-card li::before{ content: '✓'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+.pricing-card .btn{ margin-top: auto; width: 100%; }
+.faq-item{ border-bottom: 1px solid var(--border); padding: var(--space-4) 0; }
+.faq-item:last-child{ border-bottom: 0; }
+.faq-toggle{
+  font: inherit; font-weight: 600; font-size: var(--text-base);
+  cursor: pointer; color: var(--fg); list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.faq-toggle::after{ content: '+'; font-size: var(--text-xl); color: var(--muted); transition: transform var(--motion-fast); }
+.faq-item[open] .faq-toggle::after{ content: '−'; }
+.faq-item p{ margin-top: var(--space-3); color: var(--muted); font-size: var(--text-sm); }
+.urgency{ font-size: var(--text-sm); color: var(--muted); margin-top: var(--space-4); }
+
+/* ============================================================
    RESPONSIVE: ≤920px 全部栅格塌缩为单列
    ============================================================ */
 @media (max-width: 920px){

@@ -52,7 +52,14 @@ LT 确认后进入 ③。**confirmed_plan 序列化**：将 scout 简报的选�
 
 派发插件 agent `prototype-builder`（有 Write），传入：已确认的原型方案（含选定方向）、`design-system.md` 路径、目标分支/版本、PRD 路径。
 
-**prompt 组装顺序契约（v0.18.0）**：`design-system.md → references/template.html → references/layouts.md → references/checklist.md → references/craft/（按页面类型选择注入）→ PRD`。craft 注入策略：仪表盘→laws-of-ux+state-coverage；表单→state-coverage+accessibility-baseline；列表→typography-hierarchy；通用→anti-ai-slop（始终注入）。
+**prompt 组装顺序契约（v0.18.0, v0.24.0 扩展）**：`design-system.md → references/template.html → references/layouts.md → references/checklist.md → references/craft/（按页面类型选择注入）→ references/interactive-prototype.md（按需）→ references/wireframe.md（按需）→ PRD`。
+
+craft 注入策略：仪表盘→laws-of-ux+state-coverage；表单→state-coverage+accessibility-baseline；列表→typography-hierarchy；通用→anti-ai-slop（始终注入）。
+
+**原型类型注入策略（v0.24.0）**：
+- **线框图模式**（scout 简报标注 `prototype_type: wireframe`）→ 注入 `references/wireframe.md`，跳过 template.html/layouts.md（线框图不用种子骨架）
+- **交互原型模式**（scout 简报标注 `prototype_type: interactive`，PRD 含复杂表单/多步流程/动态反馈）→ 注入 `references/interactive-prototype.md` + `craft/state-coverage.md`（强制）
+- **静态原型模式**（默认）→ 不注入额外文件，按现有流程
 
 prototype-builder **从种子模板组合**（template.html + layouts.md 骨架），先报 section 列表，再填充真实文案，P0/P1/P2 自检后提交。零外部依赖、复用设计系统 token、禁止内联样式漂移。按 §18.1 返回 deliverable = prototype/ 入口绝对路径。
 

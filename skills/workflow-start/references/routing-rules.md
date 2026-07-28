@@ -32,17 +32,17 @@ artifacts:                       # required 时必填
 - `null`（未判定）→ **BLOCK**
 
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> arch_design_decision "<required|skipped>"
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> arch_design_reason "<reason>"
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> arch_design_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> arch_design_decision "<required|skipped>"
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> arch_design_reason "<reason>"
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> arch_design_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 # if required:
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> arch_design_artifacts "architecture/architecture.md,architecture/database.md,architecture/api.md"
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> arch_design_artifacts "architecture/architecture.md,architecture/database.md,architecture/api.md"
 ```
 
 **hotfix / tweak 不豁免**：同样过 architecture-design 子代理判断门。
 
 ## Route to spec-writer
-Guard: `npx --yes --package @xulthekl/team-flow@0.24.0 tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK.
+Guard: `npx --yes --package @xulthekl/team-flow@0.24.1 tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK.
 **arch_design_decision must not be null** → fail = BLOCK（architecture-design gate not passed，v0.9 §26）。
 User knows what they want, artifacts missing/incomplete.
 
@@ -55,12 +55,12 @@ Contract exists and approved, contract matches artifacts. Include DP-4: 执行�
 
 Propose waves, run:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf execution recommend <change-dir> [--wave ...]
+npx --yes --package @xulthekl/team-flow@0.24.1 tf execution recommend <change-dir> [--wave ...]
 ```
 Show every available mode plus evidence and recommendation, obtain clear selection. Then:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf execution plan <change-dir> --mode <selected> --confirm ...
-npx --yes --package @xulthekl/team-flow@0.24.0 tf execution show <change-dir> --json
+npx --yes --package @xulthekl/team-flow@0.24.1 tf execution plan <change-dir> --mode <selected> --confirm ...
+npx --yes --package @xulthekl/team-flow@0.24.1 tf execution show <change-dir> --json
 ```
 Do not transition to `executing` until `show` reports `current: true`.
 Guard: `... check <dir> approved-for-build executing --json` → fail = BLOCK.
@@ -71,7 +71,7 @@ Execution hit blockage: test failure, unexpected behavior, build error. After de
 ## Route to code-reviewer
 Current planned wave implemented and ready for review. Reviewer must write:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>
+npx --yes --package @xulthekl/team-flow@0.24.1 tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>
 ```
 
 ## Route to release-archivist
@@ -93,10 +93,10 @@ User explicitly requests, bug-investigator escalates after 3+ failures AND user 
 
 When the user's brief explicitly contains UI/screen/interaction/layout/UX uncertainty, ask once whether a prototype would reduce uncertainty. After confirmation:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf handoff create <change-dir> \
+npx --yes --package @xulthekl/team-flow@0.24.1 tf handoff create <change-dir> \
   --type prototype --objective "<confirmed objective>" \
   --expected-output "<expected evidence>" --acceptance "<completion criterion>"
-npx --yes --package @xulthekl/team-flow@0.24.0 tf isolate <change-dir> prototype-<handoff-id>
+npx --yes --package @xulthekl/team-flow@0.24.1 tf isolate <change-dir> prototype-<handoff-id>
 ```
 Never suggest for backend/CLI/config/internal-refactor work. Never pass `--force`.
 
@@ -130,17 +130,17 @@ else:
 
 After confirmation:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> dp_0_decisions "<summary>"
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> dp_0_result confirmed
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> dp_0_confirmed true
-npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> dp_0_decisions "<summary>"
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> dp_0_result confirmed
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> dp_0_confirmed true
+npx --yes --package @xulthekl/team-flow@0.24.1 tf state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 
 ## Mode Detection
 
 If workflow is `auto`/`null`/unset:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf runtime infer <change-dir>
+npx --yes --package @xulthekl/team-flow@0.24.1 tf runtime infer <change-dir>
 ```
 Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **tweak** (≤4 tasks, config/doc only), **full** (anything larger).
 
@@ -152,4 +152,4 @@ Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **twe
 - **Brief drift (advisory, v0.9)**: change-brief.md 的 `plan_hash` 与当前 plan.md 不一致 → 提示回 orchestrator 重新分发；**不**阻断、**不**进 artifacts_hash、**不**混入上述三条产物互查
 
 ## Post-transition
-💡 `npx --yes --package @xulthekl/team-flow@0.24.0 tf inject <change-dir>` to update phase-guard artifacts.
+💡 `npx --yes --package @xulthekl/team-flow@0.24.1 tf inject <change-dir>` to update phase-guard artifacts.

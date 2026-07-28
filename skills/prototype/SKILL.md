@@ -1,6 +1,6 @@
 ---
 name: prototype
-description: 本地 HTML 原型设计与维护 skill（零外部依赖、可离线）。产品级需求的原型环节由 workflow-orchestrator S2 内部调用（含 PRD 一致性自动评审循环）；直接调用仅限：独立原型迭代、change 完成回写（prototype-sync）、设计系统(design-system.md)创建/维护。当用户需要基于项目设计系统产出/迭代全局 prototype/（多页面+组件+导航的自包含 HTML 原型系统）时使用。不适用于：依赖 GUI 设计软件(Claude Design/Open Design/Trae)、需要高保真交互动效、非 HTML 原型场景。
+description: 本地 HTML 原型设计与维护 skill（零外部依赖、可离线）。产品级需求的原型环节由 workflow-orchestrator S2 内部调用（含 PRD 一致性自动评审循环）；直接调用仅限：独立原型迭代、change 完成回写（prototype-sync）、设计系统(design-system.md)创建/维护。当用户需要基于项目设计系统产出/迭代全局 prototype/（多页面+组件+导航的自包含 HTML 原型系统）时使用。不适用于：依赖 GUI 设计软件（Claude Design / Open Design 桌面应用 / Trae）、需要高保真交互动效、非 HTML 原型场景。
 ---
 
 # Prototype（本地 HTML 原型 skill）
@@ -48,6 +48,7 @@ description: 本地 HTML 原型设计与维护 skill（零外部依赖、可离�
 - 设计系统渲染：读取项目 `design-system.md`（9 段 schema + 5 方向调色板 + aliases 别名层 + extensions，v0.18.0 token 四层模型），渲染 token 到 `assets/design-tokens.css`。
 - **种子模板 + 骨架库（v0.18.0）**：builder 从 `references/template.html`（种子）+ `references/layouts.md`（8 个 B 端 section 骨架 + 类清单契约）组合，不从零写 CSS。
 - **工艺规则层（v0.18.0）**：`references/checklist.md`（P0/P1/P2）+ `references/craft/`（anti-ai-slop / state-coverage / typography-hierarchy / accessibility-baseline / laws-of-ux），品牌无关，B 端导向。
+- **原型类型方法论（v0.24.0）**：`references/interactive-prototype.md`（交互原型：零依赖状态管理+表单验证+多步导航）+ `references/wireframe.md`（线框图：低保真快速探索+3-5 差异化方案+并排对比），按需加载。
 
 ## 产出结构（全局 prototype/）
 ```
@@ -87,7 +88,12 @@ prototype/
 - 原型随 **PRD 当前版本分支**维护（如 `prd-v2` 分支的 `prototype/` = v2 产品原型）。
 - change 引用其所在 PRD 版本分支的 `prototype/`。
 
-## prototype-sync（change 完成回写，SOP，主代理只编排）
+## prototype-sync（change 完成回写，release-archivist 自动触发，v0.24.0 升级）
+
+> **触发机制（v0.24.0）**：prototype-sync 由 `release-archivist` closing 流程**自动触发**（`arch-merge → prototype-sync → compound promotion` 顺序执行），不再是手动 SOP。release-archivist Step 5 Report 中 `Prototype sync` 行是必填维度，未执行时 closing 报告不完整。
+>
+> **独立调用**：仍可独立调用（如 change 中途需要预同步），但标准路径是 closing 自动触发。
+
 1. 取 change 完成的 UX 增量（来自 `execution-contract.md` / 设计结论）。
 2. **派 `prototype-builder`（修正/演进模式）**把增量合并进全局 `prototype/`（pages/components/assets/flow.md）——主代理不直接写原型 HTML。
 3. 若涉及设计系统迭代，调用 `/team-flow:design-system`（iterate 模式）合并进 `.team-flow/design-system/` 并记变更履历。
@@ -96,3 +102,11 @@ prototype/
 
 ## 脚手架
 新建项目：`cp -r references/prototype-scaffold/ <project>/prototype/`，再按 `.team-flow/design-system/` 的设计系统填 token（缺设计系统先用 `/team-flow:design-system` 创建）。
+
+## 方法论参考与归因
+
+> ⚠️ **命名区分**：本 skill 负向清单中排除的「Open Design 桌面应用」（nexu-io/open-design 出品的 Electron 桌面设计工作台产品）与 `references/craft/anti-ai-slop.md` 借鉴的「nexu-io/open-design 开源设计方法论」**同名不同义**：
+> - **被排除的 GUI 工具**：Open Design 桌面应用——agent-native 设计工作台产品，依赖外部运行时，与本 skill「零依赖自包含 HTML」路线互斥。
+> - **被借鉴的方法论**：nexu-io/open-design 开源项目（Apache-2.0）——其 `craft/` 规则层（anti-ai-slop / typography / state-coverage / accessibility / laws-of-ux）经 B 端企业场景重写后沉淀进 `references/craft/`。
+>
+> Token 四层模型（A1-identity / A1-structure / A2-derived / B-slot）亦参考 open-design token-schema，详见 `references/agents/design-system-architect.md`（已迁移至 design-system skill）。

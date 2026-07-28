@@ -6,6 +6,32 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.24.1] - 2026-07-28
+
+### Fixed（prototype skill 体系补强，5 项）
+
+#### P0: design-system-architect.md 重复维护
+- **prototype/references/agents/design-system-architect.md**: 替换为迁移指针，指向 `design-system skill` 下的权威版本，消除两份文件内容漂移风险
+
+#### P0: Open Design 命名歧义
+- **prototype/SKILL.md**: description 中明确标注 "Open Design 桌面应用"（GUI 工具，互斥项）与 "nexu-io/open-design 开源设计方法论"（craft 规则借鉴源）同名不同义；新增「方法论参考与归因」段
+
+#### P1: prototype-sync 自动触发
+- **prototype/SKILL.md**: prototype-sync 段从 "SOP" 升级为 "release-archivist 自动触发"，明确标准路径是 closing 流程自动触发
+- **release-archivist/SKILL.md**: 新增 prototype-sync 执行校验段，要求检查 stdout 输出，禁止在未执行时标注为已完成
+- **release-archivist/references/closing-procedures.md**: 同步执行校验段和 write-back order 约束
+
+### Added（原型设计能力扩展，2 项）
+
+#### P2-1: 交互原型 + 线框图方法论
+- **prototype/references/interactive-prototype.md**: 新增交互原型方法论（零依赖状态管理、表单验证、多步导航、动态列表）
+- **prototype/references/wireframe.md**: 新增线框图方法论（低保真快速探索、3-5 差异化方案、并排对比）
+- **prototype/references/orchestration-flow.md**: prompt 组装顺序契约新增原型类型注入策略（wireframe / interactive / static）
+
+#### P2-2: C 端骨架扩展
+- **prototype/references/layouts.md**: 新增 §9-§14 C 端骨架（hero-xl / marketing-features / social-proof / pricing-c / faq / cta-c），新增 C 端页面节奏表
+- **prototype/references/template.html**: 新增 C 端扩展 CSS（hero-xl / pricing-card / faq-item / urgency 等）
+
 ## [0.24.0] - 2026-07-28
 
 ### Fixed（复利工程强制化补强，5 项）

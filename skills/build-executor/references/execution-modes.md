@@ -7,14 +7,14 @@
 For `full`/`hotfix`, generate proposed waves from the approved contract, then use the recommendation as a decision aid:
 
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf execution recommend <change-dir> \
+npx --yes --package @xulthekl/team-flow@0.24.1 tf execution recommend <change-dir> \
   --wave <wave-id>:<parallel|serial>:<task,...>[:<depends-on,...>] --json
 # Show every available mode, the observed facts, and the recommendation to the user.
-npx --yes --package @xulthekl/team-flow@0.24.0 tf execution plan <change-dir> \
+npx --yes --package @xulthekl/team-flow@0.24.1 tf execution plan <change-dir> \
   --mode <selected-mode> --confirm --reason "user-selected execution mode" \
   --wave <wave-id>:<parallel|serial>:<task,...>[:<depends-on,...>]
 # Add --acknowledge-recommendation when the selection differs from the recommendation.
-npx --yes --package @xulthekl/team-flow@0.24.0 tf execution show <change-dir> --json
+npx --yes --package @xulthekl/team-flow@0.24.1 tf execution show <change-dir> --json
 ```
 
 The optional fourth `--wave` segment names prerequisite wave IDs. `execution show --json` reports `current`, plus each wave's `depends_on`, `receipt`, `blockers`, `retryable`, and `eligible` status.
@@ -37,7 +37,7 @@ Dispatch according to the persisted plan, review each planned wave, and run a fi
 3. A `serial` wave dispatches one task at a time in listed order.
 4. After every wave, write a review report, then record one receipt:
    ```bash
-   npx --yes --package @xulthekl/team-flow@0.24.0 tf execution review <change-dir> \
+   npx --yes --package @xulthekl/team-flow@0.24.1 tf execution review <change-dir> \
      --wave <wave-id> --base <sha> --head <sha> --report <review-report-path> --verdict <pass|fail>
    ```
 5. Critical/Important findings require a `fail` receipt, focused repair, re-review, then replacement `pass` receipt.
@@ -66,7 +66,7 @@ Per-task: extract brief → write failing test → confirm failure → implement
 ## Model Selection
 
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf runtime config --resolve-model <profile>
+npx --yes --package @xulthekl/team-flow@0.24.1 tf runtime config --resolve-model <profile>
 ```
 
 | Profile | Role |
@@ -79,7 +79,7 @@ npx --yes --package @xulthekl/team-flow@0.24.0 tf runtime config --resolve-model
 ## Recovery Checkpoint
 
 ```bash
-npx --yes --package @xulthekl/team-flow@0.24.0 tf checkpoint save <change-dir> \
+npx --yes --package @xulthekl/team-flow@0.24.1 tf checkpoint save <change-dir> \
   --task <completed-task-id> --next "<next task>" --completed "<completed work>" \
   --verification "<verification report path>" --review "<review report path>" \
   --risk "<open risk or None>" --commit-start <base-sha> --commit-end <head-sha>
