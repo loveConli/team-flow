@@ -43,6 +43,8 @@ const BUILTIN_DEFAULTS = {
   arch_design_reason: null,
   arch_design_timestamp: null,
   arch_design_artifacts: null,
+  // Compound engineering capture gate (v0.24.0 复利贯穿强制化)
+  compound_skipped: null,
 };
 
 /**
@@ -117,6 +119,9 @@ export function writeState(changeDir, state) {
   lines.push(`arch_design_reason: ${state.arch_design_reason ?? 'null'}`);
   lines.push(`arch_design_timestamp: ${state.arch_design_timestamp ?? 'null'}`);
   lines.push(`arch_design_artifacts: ${state.arch_design_artifacts ?? 'null'}`);
+  lines.push('');
+  lines.push('# === Compound engineering capture gate (v0.24.0) ===');
+  lines.push(`compound_skipped: ${state.compound_skipped ?? 'null'}`);
 
   fs.writeFileSync(filePath, lines.join('\n') + '\n', 'utf-8');
 }

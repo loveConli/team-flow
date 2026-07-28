@@ -15,16 +15,22 @@ bash scripts/recon-probe.sh --root <项目根> --out /tmp/recon-<slug>.json
 
 固定采集（不依赖 LLM，两次接入结果一致）：目录树（限深 4 层）、依赖清单（pom/package.json/requirements/go.mod/build.gradle）、LOC 与文件类型分布、测试文件计数（含 `.test.mjs`/`.spec.mjs`）、DB 迁移文件清单、README/docs 探测。输出结构化 JSON 供子代理消费。脚本只做确定性机械采集（§17.8 第四类载体），语义判断交给子代理 LLM。
 
-## B1.1a DDL 提取能力（v0.23.0 新增）
+## B1.1a DDL 提取能力（v0.23.0 设计，v0.24.0 已实现）
 
-`recon-probe.sh` 需增加 DDL 提取能力，用于 B2 成果物导入阶段的兜底提取：
+`recon-probe.sh` 已实现 DDL 提取能力（v0.24.0），用于 B2 成果物导入阶段的兜底提取：
 
-- **Entity 类解析**：扫描 `@Entity`、`@Table` 注解的 Java 类，或 ORM 模型定义文件，提取表名、字段名、字段类型、索引信息
-- **SHOW CREATE TABLE**：当项目配置了数据库连接时，执行 `SHOW CREATE TABLE` 导出各表 DDL
-- **迁移文件解析**：解析 Flyway / Liquibase / Alembic 等迁移脚本，提取最终态 schema
-- **输出**：将提取结果写入 `docs/architecture/schema-baseline.sql`，格式为标准 DDL（CREATE TABLE 语句）
+- **策略 1：SQL 文件提取**（优先级最高）：扫描 `*.sql` 文件中的 `CREATE TABLE` 语句，直接提取完整 DDL
+- **策略 2：Java Entity 类解析**：扫描 `@Entity`、`@Table` 注解的 Java 类，提取表名、字段名、字段类型（正则映射：String→varchar(255)、Long/int→bigint、Boolean→tinyint(1)、LocalDateTime→datetime、BigDecimal→decimal(15,4)）
+- **策略 3：占位兜底**：以上均无时生成带注释的空 `schema-baseline.sql`，提示用户手动补充
 
-此能力为 B2 Step 2 兜底提取的前置依赖。当用户无既有 DDL 脚本时，由 recon-probe.sh 自动从代码/数据库中提取 schema 基线。
+**用法**：
+```bash
+bash scripts/recon-probe.sh --root <根> --ddl-out docs/architecture/schema-baseline.sql --out /tmp/recon-<slug>.json
+```
+
+**JSON 输出字段**：`ddl_extraction.source`（sql_files / java_entity / none）、`ddl_extraction.table_count`、`ddl_extraction.tables[]`、`ddl_extraction.ddl_statements`
+
+**未实现**：SHOW CREATE TABLE（需数据库连接，留待用户手动配置）、Flyway/Liquibase 迁移脚本解析（需语义判断，由侦察子代理处理）。
 
 ## B1.2 并行派发侦察子代理（语义增强）
 

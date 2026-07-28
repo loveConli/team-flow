@@ -5,9 +5,9 @@ description: Convert approved planning artifacts into an execution contract. Inv
 
 # Contract Builder
 
-Converts planning artifacts into a single execution handshake: `execution-contract.md`. Load the baseline with `npx --yes --package @xulthekl/team-flow@0.23.0 tf runtime asset read templates/execution-contract.md`.
+Converts planning artifacts into a single execution handshake: `execution-contract.md`. Load the baseline with `npx --yes --package @xulthekl/team-flow@0.24.0 tf runtime asset read templates/execution-contract.md`.
 
-Read before generating: `proposal.md`, `specs/`, `design.md`, `tasks.md`, then load `docs/artifact-contract.md` with `npx --yes --package @xulthekl/team-flow@0.23.0 tf runtime asset read docs/artifact-contract.md`.
+Read before generating: `proposal.md`, `specs/`, `design.md`, `tasks.md`, then load `docs/artifact-contract.md` with `npx --yes --package @xulthekl/team-flow@0.24.0 tf runtime asset read docs/artifact-contract.md`.
 
 **Architecture Design Outputs (v0.9 §26)**: 若 `architecture/` 目录存在，同时读取 `architecture/architecture.md` / `database.md` / `api.md`，作为执行契约的架构约束补充输入——确保 execution-contract.md 的 Implementation Constraints 段包含架构设计的关键约束（聚合边界/CQRS 分流/API 契约/schema 变更）。`architecture/` 不存在时跳过。
 
@@ -38,8 +38,8 @@ Must make obvious: approved behavior, out-of-scope, constraints, batches, test o
 
 After drafting: summarize handoff rules, identify ambiguity, flag unmapped requirements, ask user to approve explicitly. After approval:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.23.0 tf state set <change-dir> dp_3_result "approved: <summary>"
-npx --yes --package @xulthekl/team-flow@0.23.0 tf state set <change-dir> dp_3_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> dp_3_result "approved: <summary>"
+npx --yes --package @xulthekl/team-flow@0.24.0 tf state set <change-dir> dp_3_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 DP-3 is a hard gate — no implementation without this record.
 
@@ -60,9 +60,9 @@ Generate minimal contract: Intent Lock (one sentence), Task List (numbered), App
 
 ## Post-Generation
 
-Run `npx --yes --package @xulthekl/team-flow@0.23.0 tf state init <change-dir>` to create `.team-flow.yaml` with hashes.
+Run `npx --yes --package @xulthekl/team-flow@0.24.0 tf state init <change-dir>` to create `.team-flow.yaml` with hashes.
 
-For hotfix, after writing the minimal contract, run `npx --yes --package @xulthekl/team-flow@0.23.0 tf state init <change-dir>` or `npx --yes --package @xulthekl/team-flow@0.23.0 tf state rebuild <change-dir>` so `contract_hash` is recorded. DP-3 remains mandatory before build.
+For hotfix, after writing the minimal contract, run `npx --yes --package @xulthekl/team-flow@0.24.0 tf state init <change-dir>` or `npx --yes --package @xulthekl/team-flow@0.24.0 tf state rebuild <change-dir>` so `contract_hash` is recorded. DP-3 remains mandatory before build.
 
 ## Exception Handling
 

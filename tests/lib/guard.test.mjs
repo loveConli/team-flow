@@ -312,6 +312,8 @@ describe('guard: execution control records', () => {
   function recordPassingClosingPrerequisites() {
     runNodeScript(CLI_PATH, ['state', 'set', dir, 'test_result', 'pass: unit tests']);
     runNodeScript(CLI_PATH, ['state', 'set', dir, 'spec_merged', 'true']);
+    // v0.24.0: compound-captured dimension requires learnings.md (or explicit skip)
+    writeFileSync(join(dir, 'learnings.md'), '# Session Learnings\n\n## Lesson 1\nCaptured during guard test.\n');
   }
 
   function writeReviewReport(name, content = 'Review completed without blocking findings.\n') {

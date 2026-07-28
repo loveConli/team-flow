@@ -66,9 +66,19 @@ Do NOT invoke for:
 
 **条件**：如果 B1 侦察发现项目有一定复杂度（≥5 个模块或 ≥10 个源文件），执行此阶段。否则跳过。
 
-**B2 成果物导入（v0.23.0 新增）**：
+**B2 成果物导入（v0.23.0 新增，v0.24.0 模板初始化补强）**：
 
 ```
+Step 0: 目录+模板初始化（v0.24.0 新增）
+  ├── mkdir -p docs/architecture/
+  ├── 从 ${CLAUDE_PLUGIN_ROOT}/skills/architecture-design/templates/ 复制模板：
+  │     architecture.md → docs/architecture/ARCHITECTURE.md
+  │     database.md     → docs/architecture/DATABASE.md
+  │     physical-model.md → docs/architecture/PHYSICAL-MODEL.md
+  │     api.md          → docs/architecture/API-INDEX.md
+  │     index.md        → docs/architecture/INDEX.md
+  └── 已存在的文件不覆盖（只补缺失）
+
 Step 1: 询问用户是否有既有成果物
   ├── 有 SQL DDL 脚本 → 导入到 docs/architecture/schema-baseline.sql
   ├── 有物理模型文档 → 转换为 docs/architecture/PHYSICAL-MODEL.md（对齐标准格式）
@@ -76,7 +86,8 @@ Step 1: 询问用户是否有既有成果物
   └── 无既有成果物 → Step 2 兜底
 
 Step 2: 确定性提取（兜底）
-  ├── recon-probe.sh 增加 DDL 提取能力（解析 Entity 类 / SHOW CREATE TABLE）
+  ├── recon-probe.sh DDL 提取能力（v0.24.0 已实现：SQL 文件 / Java Entity / 占位）
+  │   bash scripts/recon-probe.sh --root <根> --ddl-out docs/architecture/schema-baseline.sql
   ├── 从 schema-baseline.sql 反向生成 PHYSICAL-MODEL.md
   └── 扫描 Controller/Router 类 → 生成 API-INDEX.md
 

@@ -36,6 +36,7 @@ set -u  # 未定义变量报错；不用 -e（单条采集失败不应中断整�
 # ----------------------------------------------------------------------------
 ROOT="."
 OUT=""
+DDL_OUT=""           # v0.24.0: DDL 输出文件路径（默认不写，仅含在 JSON 中）
 MAX_FILES=50000     # LOC 统计文件数上限（保护超大仓库）
 TREE_DEPTH=4        # 目录树限深
 
@@ -51,6 +52,8 @@ while [ $# -gt 0 ]; do
     --root=*) ROOT="${1#*=}"; shift ;;
     --out)    OUT="${2:-}"; shift 2 ;;
     --out=*)  OUT="${1#*=}"; shift ;;
+    --ddl-out) DDL_OUT="${2:-}"; shift 2 ;;
+    --ddl-out=*) DDL_OUT="${1#*=}"; shift ;;
     -h|--help) print_help; exit 0 ;;
     *) echo "[recon-probe] warn: unknown arg '$1' (ignored)" >&2; shift ;;
   esac
@@ -261,6 +264,111 @@ pruned_find -maxdepth 2 -type f \
 if [ -d "$ROOT_ABS/docs" ]; then DOCS_DIR=true; else DOCS_DIR=false; fi
 
 # ============================================================================
+# ⑦ DDL 提取（v0.24.0：schema-baseline 兜底采集）
+# ----------------------------------------------------------------------------
+# 策略（优先级）：
+#   1. 既有 .sql 中的 CREATE TABLE 语句 → 直接提取
+#   2. Java Entity 类（@Entity / @Table 注解）→ 正则提取表名+字段
+#   3. 以上均无 → 输出空 schema-baseline.sql + 提示手动补充
+# 设计契约：只做确定性机械采集（regex），语义推断交给侦察子代理。
+# ============================================================================
+
+: > "$TMP/ddl_statements.sql"
+: > "$TMP/ddl_tables.txt"
+DDL_SOURCE="none"
+DDL_TABLE_COUNT=0
+
+# --- 策略 1：从既有 .sql 文件提取 CREATE TABLE ----------------------------------
+if [ -s "$TMP/sql_files.txt" ]; then
+  while IFS= read -r sql_rel; do
+    sql_abs="$ROOT_ABS/$sql_rel"
+    [ -f "$sql_abs" ] || continue
+    # 提取 CREATE TABLE 语句（多行匹配，到第一个 ; 结束）
+    # 兼容：CREATE TABLE / CREATE TABLE IF NOT EXISTS / 大小写不敏感
+    awk '
+      BEGIN { IGNORECASE=1; in_stmt=0; stmt="" }
+      /CREATE[[:space:]]+TABLE/ { in_stmt=1; stmt="" }
+      in_stmt {
+        stmt = stmt $0 "\n"
+        if (/;/) {
+          printf "%s-- Source: %s\n\n", stmt, sql_file
+          in_stmt=0; stmt=""
+        }
+      }
+    ' sql_file="$sql_rel" "$sql_abs" 2>/dev/null >> "$TMP/ddl_statements.sql" || true
+  done < "$TMP/sql_files.txt"
+  if [ -s "$TMP/ddl_statements.sql" ]; then
+    DDL_SOURCE="sql_files"
+    # 提取表名（用于计数和 JSON）
+    grep -ioE 'CREATE[[:space:]]+TABLE[[:space:]]+(IF[[:space:]]+NOT[[:space:]]+EXISTS[[:space:]]+)?[`"]?([a-zA-Z_][a-zA-Z0-9_.]*)[`"]?' \
+      "$TMP/ddl_statements.sql" 2>/dev/null \
+      | grep -ioE '[`"]?[a-zA-Z_][a-zA-Z0-9_]*\.[a-zA-Z_][a-zA-Z0-9_]*[`"]?|[a-zA-Z_][a-zA-Z0-9_]*[`"]?$' \
+      | sed -E 's/[`"]//g' | sort -u > "$TMP/ddl_tables.txt" || true
+    DDL_TABLE_COUNT=$(wc -l < "$TMP/ddl_tables.txt" | tr -d ' ')
+  fi
+fi
+
+# --- 策略 2：从 Java Entity 类提取（@Entity / @Table 注解）-----------------------
+if [ "$DDL_TABLE_COUNT" -eq 0 ]; then
+  : > "$TMP/entity_files.txt"
+  pruned_find -type f -name '*.java' -print 2>/dev/null \
+    | while IFS= read -r jf; do
+        if grep -qlE '@(Entity|Table|Document|TableName)' "$jf" 2>/dev/null; then
+          echo "$jf"
+        fi
+      done | sort > "$TMP/entity_files.txt"
+
+  ENTITY_COUNT=$(wc -l < "$TMP/entity_files.txt" | tr -d ' ')
+  if [ "$ENTITY_COUNT" -gt 0 ]; then
+    DDL_SOURCE="java_entity"
+    while IFS= read -r ef; do
+      ef_rel="${ef#"$ROOT_ABS"/}"
+      # 提取 @Table(name="xxx") 或类名作为表名
+      table_name=""
+      tn="$(grep -oE '@Table\([^)]*name[[:space:]]*=[[:space:]]*"[^"]+"' "$ef" 2>/dev/null | head -1 \
+        | grep -oE '"[^"]+"' | tr -d '"')" || true
+      if [ -n "$tn" ]; then
+        table_name="$tn"
+      else
+        # 降级：用类名转 snake_case 作为表名
+        table_name="$(grep -oE 'class[[:space:]]+[A-Z][a-zA-Z0-9]*' "$ef" 2>/dev/null | head -1 \
+          | sed -E 's/class[[:space:]]+//' \
+          | sed -E 's/([A-Z])/_\1/g' | tr '[:upper:]' '[:lower:]' | sed 's/^_//')" || true
+      fi
+      [ -z "$table_name" ] && continue
+
+      # 攒完整 DDL 到临时文件再一次性追加（避免多次 >> 缓冲问题）
+      : > "$TMP/_entity_ddl.tmp"
+      echo "-- Entity: $ef_rel" >> "$TMP/_entity_ddl.tmp"
+      echo "CREATE TABLE $table_name (" >> "$TMP/_entity_ddl.tmp"
+      # 机械提取 private 字段声明：private Type fieldName;
+      grep -E '^[[:space:]]*private[[:space:]]+' "$ef" 2>/dev/null \
+        | grep -vE 'static[[:space:]]|final[[:space:]]|Logger|log|serialVersionUID' \
+        | sed -E 's/^[[:space:]]*private[[:space:]]+([A-Za-z0-9_<>, ]+)[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]*(=|;).*/  \2 \1,/' \
+        | sed -E 's/String|varchar|text/varchar(255)/g; s/Long|Integer|int|long/bigint/g; s/Boolean|boolean/tinyint(1)/g; s/Date|LocalDateTime|Timestamp/datetime/g; s/BigDecimal|Double|Float/decimal(15,4)/g' \
+        >> "$TMP/_entity_ddl.tmp" 2>/dev/null || true
+      echo "  create_time datetime," >> "$TMP/_entity_ddl.tmp"
+      echo "  update_time datetime," >> "$TMP/_entity_ddl.tmp"
+      echo "  del_flag tinyint(1) DEFAULT 0" >> "$TMP/_entity_ddl.tmp"
+      echo ");" >> "$TMP/_entity_ddl.tmp"
+      echo "" >> "$TMP/_entity_ddl.tmp"
+      cat "$TMP/_entity_ddl.tmp" >> "$TMP/ddl_statements.sql"
+      echo "$table_name" >> "$TMP/ddl_tables.txt"
+    done < "$TMP/entity_files.txt"
+    sort -u "$TMP/ddl_tables.txt" -o "$TMP/ddl_tables.txt"
+    DDL_TABLE_COUNT=$(wc -l < "$TMP/ddl_tables.txt" | tr -d ' ')
+  fi
+fi
+
+# --- 策略 3：生成占位 schema-baseline.sql ---------------------------------------
+if [ "$DDL_TABLE_COUNT" -eq 0 ]; then
+  DDL_SOURCE="none"
+  printf -- '-- schema-baseline.sql (auto-generated placeholder)\n' > "$TMP/ddl_statements.sql"
+  printf -- '-- No CREATE TABLE statements or Java Entity classes detected.\n' >> "$TMP/ddl_statements.sql"
+  printf -- '-- Please populate manually with your database schema.\n\n' >> "$TMP/ddl_statements.sql"
+fi
+
+# ============================================================================
 # 组装 JSON
 # ============================================================================
 {
@@ -288,8 +396,13 @@ if [ -d "$ROOT_ABS/docs" ]; then DOCS_DIR=true; else DOCS_DIR=false; fi
     "$(json_array_from_file "$TMP/migration_dirs.txt")" \
     "$(json_array_from_file "$TMP/sql_samples.txt")"
   # ⑥ docs
-  printf '  "docs": {"docs_dir": %s, "doc_files": %s}\n' \
+  printf '  "docs": {"docs_dir": %s, "doc_files": %s},\n' \
     "$DOCS_DIR" "$(json_array_from_file "$TMP/doc_files.txt")"
+  # ⑦ DDL 提取（v0.24.0）
+  printf '  "ddl_extraction": {"source": "%s", "table_count": %s, "tables": %s, "ddl_statements": "%s"}\n' \
+    "$(json_escape "$DDL_SOURCE")" "$DDL_TABLE_COUNT" \
+    "$(json_array_from_file "$TMP/ddl_tables.txt")" \
+    "$(json_escape "$(cat "$TMP/ddl_statements.sql" 2>/dev/null)")"
   printf '}\n'
 } > "$TMP/out.json"
 
@@ -311,6 +424,13 @@ else
   emit_json
 fi
 
+# v0.24.0: DDL 独立输出文件（--ddl-out）
+if [ -n "$DDL_OUT" ] && [ -s "$TMP/ddl_statements.sql" ]; then
+  mkdir -p "$(dirname "$DDL_OUT")" 2>/dev/null || true
+  cp "$TMP/ddl_statements.sql" "$DDL_OUT" 2>/dev/null || true
+  echo "[recon-probe] DDL baseline written to: $DDL_OUT" >&2
+fi
+
 # 人类可读摘要 → stderr
 {
   echo "================ recon-probe 摘要 ================"
@@ -322,6 +442,7 @@ fi
   echo "SQL 迁移     : $SQL_COUNT 个"
   echo "docs/ 目录   : $DOCS_DIR"
   echo "README 等    : $(wc -l < "$TMP/doc_files.txt" | tr -d ' ') 个"
+  echo "DDL 提取     : source=$DDL_SOURCE, tables=$DDL_TABLE_COUNT"
   echo "================================================="
 } >&2
 

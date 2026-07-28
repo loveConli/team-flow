@@ -130,7 +130,7 @@ ${learning.body}
   return { promoted, updated };
 }
 
-if (process.argv[1]?.includes('solutions-promote')) {
+if (process.env.NODE_ENV !== 'test' && process.argv[1]?.includes('solutions-promote')) {
   const args = { _: [] };
   for (let i = 2; i < process.argv.length; i++) {
     if (process.argv[i].startsWith('--')) {

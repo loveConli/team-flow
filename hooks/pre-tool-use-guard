@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 #
-# pre-tool-use-guard — spec-superflow implementation-edit state guard (PreToolUse)
+# pre-tool-use-guard — team-flow implementation-edit state guard (PreToolUse)
 #
 # ----------------------------------------------------------------------------
 # Purpose
 # ----------------------------------------------------------------------------
 # Blocks Write/Edit/MultiEdit implementation edits unless the active
-# spec-superflow change is in a state that permits building. This enforces the
+# team-flow change is in a state that permits building. This enforces the
 # state-machine rule that "no implementation is allowed" outside the
 # build-permitted states (exploring / specifying / bridging must finish and be
 # approved before any code is written).
@@ -15,8 +15,8 @@
 # Guard logic
 # ----------------------------------------------------------------------------
 #   1. Walk up from $PWD (current dir + max 3 parent levels) looking for
-#      `.spec-superflow.yaml`.
-#        - Not found  -> ALLOW (no active spec-superflow change in scope).
+#      `.team-flow.yaml`.
+#        - Not found  -> ALLOW (no active team-flow change in scope).
 #   2. Read the current workflow state from the `state:` line of the yaml.
 #   3. For Write/Edit/MultiEdit only:
 #        - state in {approved-for-build, executing, debugging} -> ALLOW
@@ -73,13 +73,13 @@ case "$TOOL_NAME" in
   *) allow ;;                  # anything else — allow
 esac
 
-# --- locate .spec-superflow.yaml (cwd + max 3 parent levels) ---------------
+# --- locate .team-flow.yaml (cwd + max 3 parent levels) ---------------
 dir="$PWD"
 yaml=""
 i=0
 while [ "$i" -le 3 ]; do
-  if [ -f "$dir/.spec-superflow.yaml" ]; then
-    yaml="$dir/.spec-superflow.yaml"
+  if [ -f "$dir/.team-flow.yaml" ]; then
+    yaml="$dir/.team-flow.yaml"
     break
   fi
   [ "$dir" = "/" ] && break          # reached filesystem root
@@ -87,7 +87,7 @@ while [ "$i" -le 3 ]; do
   i=$((i + 1))
 done
 
-# No active spec-superflow change in scope -> allow.
+# No active team-flow change in scope -> allow.
 [ -n "$yaml" ] || allow
 [ -r "$yaml" ] || allow
 
@@ -107,7 +107,7 @@ case "$state" in
     allow
     ;;
   *)
-    reason="spec-superflow guard: implementation edits (Write/Edit/MultiEdit) are blocked while the change is in state '$state'. Edits are only allowed in states: approved-for-build, executing, debugging. Advance the workflow to an approved build state first (see docs/state-machine.md or /spec-superflow:workflow-start). If no change is actually active, remove or fix the stray .spec-superflow.yaml."
+    reason="team-flow guard: implementation edits (Write/Edit/MultiEdit) are blocked while the change is in state '$state'. Edits are only allowed in states: approved-for-build, executing, debugging. Advance the workflow to an approved build state first (see docs/state-machine.md or /team-flow:workflow-start). If no change is actually active, remove or fix the stray .team-flow.yaml."
     # Escape backslashes and double quotes for safe JSON string embedding.
     reason_esc="$(printf '%s' "$reason" | sed 's/\\/\\\\/g; s/"/\\"/g')"
     printf '{"decision":"block","reason":"%s"}\n' "$reason_esc"

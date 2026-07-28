@@ -25,6 +25,8 @@ function makeChangeDir() {
   writeFileSync(join(dir, 'tasks.md'), '# Tasks\n\n- [x] Task 1\n- [x] Task 2\n');
   writeFileSync(join(dir, 'specs', 'test.md'), '## ADDED Requirements\n\n### Requirement: Test\n\nThe system SHALL test.\n\n#### Scenario: Test\n- **WHEN** test\n- **THEN** test\n');
   writeFileSync(join(dir, 'execution-contract.md'), '# Execution Contract\n\n## Intent Lock\nTest.\n');
+  // v0.24.0: compound-captured dimension requires learnings.md
+  writeFileSync(join(dir, 'learnings.md'), '# Session Learnings\n\n## Lesson 1\nTest.\n');
   initializeGitRepository(dir);
   return dir;
 }

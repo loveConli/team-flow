@@ -26,6 +26,8 @@ const SETTABLE_FIELDS = [
   // Architecture design gate (v0.9 §26, v0.22.5 评审修复 F02)
   'arch_design_decision', 'arch_design_reason',
   'arch_design_timestamp', 'arch_design_artifacts',
+  // Compound engineering capture gate (v0.24.0 复利贯穿强制化)
+  'compound_skipped',
 ];
 
 export async function run(args) {

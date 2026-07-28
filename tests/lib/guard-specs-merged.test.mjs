@@ -27,6 +27,8 @@ function makeChangeDir(withDelta) {
     ? '## ADDED Requirements\n\n### Requirement: New\n\nThe system SHALL do new.\n\n#### Scenario: New\n- **WHEN** x\n- **THEN** y\n'
     : '## Requirements\n\n### Requirement: Existing\n\nThe system SHALL exist.\n\n#### Scenario: Existing\n- **WHEN** a\n- **THEN** b\n';
   writeFileSync(join(dir, 'specs', 'test.md'), specsContent);
+  // v0.24.0: compound-captured dimension requires learnings.md
+  writeFileSync(join(dir, 'learnings.md'), '# Session Learnings\n\n## Lesson 1\nTest.\n');
   initializeGitRepository(dir);
   return dir;
 }

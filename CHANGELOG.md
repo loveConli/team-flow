@@ -6,6 +6,56 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.24.0] - 2026-07-28
+
+### Fixed（复利工程强制化补强，5 项）
+
+#### P0: Hook 旧名修复
+- **hooks/pre-tool-use-guard**: 修复 `.spec-superflow.yaml` → `.team-flow.yaml` 的硬编码旧名（5 处），恢复状态机编辑守卫
+- **hooks/session-start**: 修复 `spec-superflow` → `team-flow` 的硬编码旧名（3 处），恢复会话启动提示
+
+#### P1: 复利维度 guard
+- **guard/checks/compound-captured.mjs**: 新增复利捕获检查维度（learnings.md 存在性或显式 compound_skipped）
+- **guard/guard.mjs**: 将 `compound-captured` 维度挂到 `executing:closing` 转换（full 和 hotfix workflow）
+- **state-loader.mjs**: BUILTIN_DEFAULTS 新增 `compound_skipped` 字段
+- **cmd-state.mjs**: SETTABLE_FIELDS 新增 `compound_skipped` 字段，支持 `tf state set` 写入
+
+#### P1: Bootstrap DDL 提取
+- **workflow-bootstrap/scripts/recon-probe.sh**: 新增 DDL 提取能力（策略优先级：SQL 文件 > Java Entity 注解 > 占位兜底）
+  - 策略 1: 扫描 `db/migration/` 等目录的 `.sql` 文件，提取 CREATE TABLE 语句
+  - 策略 2: 扫描 `@Entity`/`@Table` 注解的 Java 类，提取表名和字段定义
+  - 策略 3: 无 DDL 源时生成占位文件，提示手动补充
+  - 新增 `--ddl-out` 参数，支持独立输出 DDL 文件
+  - JSON 输出新增 `ddl_extraction` 字段（source/table_count/tables/ddl_statements）
+
+#### P1: Bootstrap 模板引用
+- **workflow-bootstrap/SKILL.md**: B2 阶段新增 Step 0（模板初始化），从 `architecture-design/templates/` 复制 5 个模板到 `docs/architecture/`
+- **workflow-bootstrap/references/b1-reconnaissance.md**: 更新 B1.1a 章节，标注 DDL 提取已实现（v0.24.0），补充 CLI 用法和 JSON 输出字段说明
+
+#### P2: solutions 脚本测试
+- **tests/lib/solutions-capture.test.mjs**: 新增 6 个测试用例（文件创建、INDEX 追加、中文 slugify、默认 phase、无效 phase 拒绝）
+- **tests/lib/solutions-inject.test.mjs**: 新增 8 个测试用例（空索引、phase 过滤、cross-phase 包含、domain 匹配、severity 排序、top-5 截断）
+- **tests/lib/solutions-promote.test.mjs**: 新增 8 个测试用例（无 learnings、高/中/低 severity 晋升、insight 类型跳过、重复检测、多条晋升、INDEX 追加）
+- **tests/lib/solutions-index-gen.test.mjs**: 新增 7 个测试用例（全量重建、severity 排序、date 排序、7 phase 扫描、非 .md 跳过、150 条截断、空目录处理）
+- **scripts/lib/solutions-promote.mjs**: CLI 守卫增加 `NODE_ENV !== 'test'` 条件，避免 import 时触发 process.exit
+
+#### 测试修复
+- **tests/lib/guard.test.mjs**: `recordPassingClosingPrerequisites()` 新增 learnings.md 创建，满足 compound-captured 维度
+- **tests/lib/guard-specs-merged.test.mjs**: `makeChangeDir()` 新增 learnings.md 创建
+- **tests/lib/guard-tests-passing.test.mjs**: `makeChangeDir()` 新增 learnings.md 创建
+
+### Verified
+
+- check-version-consistency: ✅ PASS（全部 0.24.0，自动修复 6 处版本号）
+- npm test: ✅ 457/457 通过（428 既有 + 29 新增）
+
+### Statistics
+
+- 新增代码: ~350 行（guard 检查器 + DDL 提取 + 测试用例）
+- 修改文件: 52 个
+- 测试覆盖: solutions 四个脚本从 0% → 100%（29 个测试用例）
+- 复利强制化: executing:closing 转换新增 compound-captured 维度（learnings.md 或显式 skip）
+
 ## [0.22.5] - 2026-07-28
 
 ### Fixed（制品链评审与修复，设计 v0.9 §28）

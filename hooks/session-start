@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# v0.23.0: conditional injection — detects artifacts, injects workflow-start pointer
-msg="<EXTREMELY_IMPORTANT>\nYou have spec-superflow installed. Use /spec-superflow:workflow-start ONLY when you detect an active spec-superflow change in the workspace (look for \`.spec-superflow.yaml\`, \`proposal.md\`, \`execution-contract.md\`, or \`specs/\` directories), OR when the user explicitly invokes it by name. For ordinary coding tasks without spec-superflow artifacts, do NOT invoke workflow-start — just handle the request directly.\n</EXTREMELY_IMPORTANT>"
+# v0.24.0: conditional injection — detects artifacts, injects workflow-start pointer
+msg="<EXTREMELY_IMPORTANT>\nYou have team-flow installed. Use /team-flow:workflow-start ONLY when you detect an active team-flow change in the workspace (look for \`.team-flow.yaml\`, \`proposal.md\`, \`execution-contract.md\`, or \`specs/\` directories), OR when the user explicitly invokes it by name. For ordinary coding tasks without team-flow artifacts, do NOT invoke workflow-start — just handle the request directly.\n</EXTREMELY_IMPORTANT>"
 
 # Three platforms share the same message, only output format differs.
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
