@@ -40,6 +40,29 @@ Do NOT invoke for:
 **先做需求选择**（v0.15.0 多需求）：读 `.team-flow/registry.yaml`，确定 `active_requirement`（多需求则询问操作哪个/新建）。再判断 7 种入口路径之一；检查 baseline.md / CONCEPTS.md 并注入；复利注入（INDEX.md top-5）。**路由结果必须向用户显式确认**（路由是建议非决定）。详见 `references/s1-path-router.md`。
 
 ### S2: PRD + 原型阶段
+
+**⛔ MANDATORY：执行S2阶段前，必须先读取 `references/s2-prd-prototype-loop.md`**
+
+**S2阶段状态管理（关键规则，必须遵守）**：
+```
+prd_draft → user_review → prototype_loop → prd_frozen → completed
+```
+
+| 子阶段 | 说明 | 是否阻塞 |
+|--------|------|---------|
+| `prd_draft` | PRD草稿生成完成 | ⛔ 是（等待用户确认） |
+| `user_review` | 用户查看PRD文档 | ⛔ 是（等待用户确认） |
+| `prototype_loop` | 原型循环（如需要） | 否（自动执行） |
+| `prd_frozen` | PRD冻结 | 否（自动执行） |
+| `completed` | S2阶段完成 | 否（自动执行） |
+
+**⛔ 关键约束**：
+- `prd_draft` 完成后**必须等待用户确认**，不能自动进入 `prototype_loop`
+- 只有用户确认后，才能进入原型循环
+- PRD冻结后，才能进入S3阶段
+- **错误行为**：PRD草稿完成后直接标记S3阶段完成
+- **正确行为**：PRD草稿完成后等待用户查看，确认后继续S2阶段的后续步骤
+
 调用 `/ce-brainstorm`（mode: orchestrated）产出 PRD 草稿；**冻结前派 `prd-completeness-reviewer` 子代理做 PRD 完整性评审**（v0.15.0，管"说得全不全"）；原型循环由编排层直接编排（prototype skill 内部编排产出 → prototype-reviewer 自动评审 → 人工评审 → 冻结）；冻结语义为 `frozen_downstream`（迭代内变更不升版）。反馈环路检查点：scope 是否合理。详见 `references/s2-prd-prototype-loop.md`。
 
 ### S3: 计划阶段

@@ -135,6 +135,22 @@ Propose **2-3 approaches** (or recommend directly if one is clearly best). Use n
 
 ### Phase 3: Generate PRD Document
 
+**⛔ MANDATORY：生成PRD文档前，必须先读取 `references/brainstorm-sections.md`**
+
+**§8.4 功能模块提取规则（关键规则，必须遵守）**：
+- **详细程度**：保留原始需求文档中的关键细节，不要过度概括
+- **必须保留的内容**：
+  - 页面布局（上下分栏、标准列表等）
+  - 搜索模块（具体字段）
+  - 表格列定义（完整字段列表）
+  - 交互规则（默认选中、点击切换、筛选联动等）
+  - 按领域动态字段（如有）
+  - 动态列名说明
+  - 操作说明（已发布/草稿状态等）
+  - 级联选择逻辑（如有）
+- **⛔ 错误行为**：只提取输入/输出/业务规则，丢失原始需求文档中的大量关键细节
+- **⛔ 正确行为**：充分利用原始需求文档的详细内容，保持信息完整性
+
 Read `references/brainstorm-sections.md` for doc-warranted criteria. If warranted: read template from `PRD_TEMPLATE_PATH`, fill via `references/prd-mapping.md`, write to `prd/{ITERATION_VERSION}/prd.md`. Vocabulary capture: update `CONCEPTS.md` with resolved domain terms (only if it exists).
 
 ### Phase 3.5: Prototype Inner Loop
