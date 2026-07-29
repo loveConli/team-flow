@@ -69,7 +69,72 @@ prd_draft → user_review → prototype_loop → prd_frozen → completed
 **入口一次性问定计划模式**（业务/一人公司），调用 `/ce-plan`（`pipeline_mode: orchestrator` + `plan_mode: business|solo`，跳过仪式开销、保留 repo research + change splitting + 依赖 DAG + 技术方向）产出 `prd/vN/plan.md`。plan 只到产品级策略 + 高阶技术设计，**不含接口清单**（属各 change 的 spec-writer）。反馈环路检查点：plan 是否暴露 PRD scope 问题（是→回退 S2）。详见 `references/s3-plan-pipeline.md`。
 
 ### S4: 拆分验证与分发
-change-split-auditor 审计拆分质量（**必选门禁**，粒度/DAG 无环/并行策略/AC 预分配，PASS 后方可创建 change；FAIL → 回退 S3 调整后重新审计）；创建 change 目录（项目根 `changes/<name>/`）+ `.team-flow.yaml`；写入 change_dag；按依赖顺序分发。反馈环路检查点：依赖图是否可执行（否→回退 S3）。详见 `references/s4-split-validate.md`。
+
+**⛔ MANDATORY：执行S4阶段前，必须先读取 `references/s4-split-validate.md`**
+
+**S4 步骤清单（必须按顺序执行，不可跳过）**：
+
+- [ ] **Step 1: 拆分质量审计**（必选门禁，不可跳过）
+  - 调用 `change-split-auditor` agent 对 plan.md 做拆分质量审计
+  - 质量维度：覆盖矩阵 / DAG 无环 / 粒度均衡 / 字段完整 / 拆分维度合规（D5 硬门禁）
+  - **verdict = PASS 是后续步骤的硬前置条件**
+  - verdict = FAIL → 必须回退 S3 调整拆分后重新审计，**不可绕过直接创建 change**
+
+- [ ] **Step 2: 反馈环路检查点**
+  - 依赖图是否可执行？粒度是否合理？
+  - **否** → 回退 S3 调整拆分策略（详见 `references/feedback-loops.md`）
+  - **是** → 继续
+
+- [ ] **Step 3: 创建 change 脚手架**
+  - 为每个 change 执行 `tf state init changes/<change-name>`
+  - 验证 `.team-flow.yaml` 已创建在 `changes/<change-name>/` 下
+  - ⚠️ 路径约束：项目根 `changes/`，非 `.team-flow/` 或 `specs/`
+
+- [ ] **Step 3.5: 落盘 change-brief.md**（产品级→变更级交接物）
+  - 为每个 change 写 `changes/<change-name>/change-brief.md`（已存在则覆盖更新）
+  - 必须包含 YAML frontmatter（见下方规范）
+  - 验证文件存在且格式正确
+
+- [ ] **Step 4: 写入 change_dag**
+  - 更新 `.team-flow/requirements/<req-id>/orchestrator.yaml` 的 `change_dag` 字段
+  - 格式规范：`[{id, change_dir, state_file, depends_on, priority, parallel_group, status}]`
+  - **同步更新** orchestrator.yaml 顶层 `workflow_phase` 为 `s4_split`（单一真相源）
+
+- [ ] **Step 5: 分发**
+  - 告知用户各 change 已就绪及执行顺序建议
+  - 示例：`Change C1 已就绪，运行 /workflow-start 进入变更级流程。执行顺序：C1 → (C2 ∥ C3) → C4`
+
+**S4 完成校验（必须全部通过才能标记 completed）**：
+
+1. ✅ change-split-auditor verdict = PASS（审计报告已生成）
+2. ✅ 所有 change 目录存在于 `changes/` 下（非 `.team-flow/`）
+3. ✅ 每个 change 目录包含 `.team-flow.yaml`（`tf state init` 已执行）
+4. ✅ 每个 change 目录包含 `change-brief.md`（含 YAML frontmatter）
+5. ✅ orchestrator.yaml 的 `change_dag` 已填充（格式正确）
+6. ✅ orchestrator.yaml 顶层 `workflow_phase` 已更新为 `s4_split`
+
+**change-brief.md 规范（v0.27.0 强化）**：
+
+必要字段（YAML frontmatter）：
+```yaml
+upstream_source: orchestrator          # orchestrator | manual | null
+upstream_req_id: <req-id>              # 对应 requirement ID
+upstream_plan_ref: prd/vN/plan.md      # hotfix/快速通道为 null
+upstream_change_id: C2                 # 对应 change_dag.id
+plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层未同步
+```
+
+内容段：Scope / 约束 / AC 列表（取自 auditor 报告 Dim1 覆盖矩阵）/ 全局技术方向（指针，非完整设计）/ PRD & plan 引用
+
+**⛔ 反模式（禁止）**：
+- 使用 CLAUDE.md 替代 change-brief.md（team-flow 从不读取 CLAUDE.md）
+- 在 change-brief 中写完整文件清单（这是 spec-writer 的职责，不属于编排层）
+- 省略 YAML frontmatter
+
+**workflow_phase 同步规则**：
+- **单一真相源**：`orchestrator.yaml` 顶层 `workflow_phase` 字段
+- **阶段转换时**：必须同步更新顶层 `workflow_phase` + 对应 phase 子节点的 `status`
+- **registry.yaml**：引用 `orchestrator.yaml` 的 `workflow_phase`，不独立维护
 
 ### S5: 全局监控（change ≥ 2 必选）
 跟踪各 change 进度；cross-change-consistency-checker 检测跨 change 冲突；change closing 时复利晋升；必要时触发动态重规划。详见 `references/s5-monitoring.md`。
