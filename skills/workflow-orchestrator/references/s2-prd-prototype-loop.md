@@ -2,6 +2,27 @@
 
 > v0.7 关键变更：原型循环由 orchestrator **直接编排**（思路 B），不再藏在 ce-brainstorm 内部。设计依据：设计增强方案 v0.7 §17.2 / §17.8 / §17.10。
 
+## S2阶段状态管理
+
+**S2阶段包含多个子阶段，必须按顺序执行，不能跳过：**
+
+```
+prd_draft → user_review → prototype_loop → prd_frozen → completed
+```
+
+| 子阶段 | 说明 | 是否阻塞 |
+|--------|------|---------|
+| `prd_draft` | PRD草稿生成完成 | 是（等待用户确认） |
+| `user_review` | 用户查看PRD文档 | 是（等待用户确认） |
+| `prototype_loop` | 原型循环（如需要） | 否（自动执行） |
+| `prd_frozen` | PRD冻结 | 否（自动执行） |
+| `completed` | S2阶段完成 | 否（自动执行） |
+
+**⛔ 关键约束**：
+- `prd_draft` 完成后必须等待用户确认，不能自动进入 `prototype_loop`
+- 只有用户确认后，才能进入原型循环
+- PRD冻结后，才能进入S3阶段
+
 ## 编排层 vs 执行层
 
 | 编排层（orchestrator 自己做） | 执行层（委托） |
@@ -19,6 +40,18 @@
 调用 `/ce-brainstorm`，**显式传入** `mode: orchestrated`（B6 跨 skill 集成规约：用显式入参，禁止语义推断）。被 orchestrator 调用时 ce-brainstorm 跳过其内部 Phase 3.5 原型循环（循环归编排层），直接调用时（standalone）保留。
 
 > **阶段后压缩协议（A4）**：ce-brainstorm 冻结 PRD 后，编排层主动触发 compact，只保留 `prd/vN/prd.md` 路径与 frozen 状态，丢弃过程对话。会话级 skill 的过程对话会进入编排层上下文窗口，必须压缩。
+
+### 1.5 用户确认 PRD 草稿（强制阻塞点）
+
+**⛔ 关键：PRD草稿完成后，必须等待用户确认，不能自动进入下一步。**
+
+PRD草稿生成后：
+1. 输出PRD文档位置：`prd/vN/prd.md`
+2. **阻塞等待用户确认**（使用 AskUserQuestion）
+3. 用户确认后，才能进入步骤2（判断是否需要原型）
+
+**错误行为**：PRD草稿完成后直接标记S3阶段完成
+**正确行为**：PRD草稿完成后等待用户查看，确认后继续S2阶段的后续步骤
 
 ### 2. 判断是否需要原型
 

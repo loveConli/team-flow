@@ -223,6 +223,20 @@ as template placeholder.
   Skip §8.3 (hardware/network) and §8.5 (non-functional) unless the brainstorm
   explicitly covered these.
 
+  **§8.4 功能模块提取规则**：
+  - **详细程度**：保留原始需求文档中的关键细节，不要过度概括
+  - **必须保留的内容**：
+    - 页面布局（上下分栏、标准列表等）
+    - 搜索模块（具体字段）
+    - 表格列定义（完整字段列表）
+    - 交互规则（默认选中、点击切换、筛选联动等）
+    - 按领域动态字段（如有）
+    - 动态列名说明
+    - 操作说明（已发布/草稿状态等）
+    - 级联选择逻辑（如有）
+  - **错误行为**：只提取输入/输出/业务规则，丢失原始需求文档中的大量关键细节
+  - **正确行为**：充分利用原始需求文档的详细内容，保持信息完整性
+
 ## Agent agency
 
 The chapter catalog is a floor, not a ceiling. When the brainstorm's content

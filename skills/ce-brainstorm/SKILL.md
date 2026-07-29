@@ -81,12 +81,21 @@ Determine `OUTPUT_FORMAT` (md or html). For the full 5-level precedence, read `r
 2. **降级逻辑（tf 不可用时）**：
    - 通知用户：`tf` 命令不可用，将使用默认配置
    - **询问用户**：默认模板 or 自定义路径？
-     - 默认模板：使用 skill 内置 `templates/prd.md`
+     - 默认模板：**直接 cp skill 内置模板到项目目录**（见下方步骤）
      - 自定义路径：验证文件存在，在项目工作区记录配置
-   - 在 `.team-flow/templates/` 目录创建/使用模板（绝不在 skill 目录写入）
    - **维护配置文件**：在 `.team-flow/team-flow.config.json` 中记录配置（如文件不存在则创建）
 
+3. **默认模板处理步骤（重要）**：
+   - **源文件**：skill 内置 `templates/prd.md`（相对于 skill 基础目录）
+   - **目标目录**：`.team-flow/templates/`（项目工作区）
+   - **操作**：直接 `cp` 源文件到目标目录，**不要自行创建简化版本**
+   - **验证**：检查目标文件是否存在且包含完整的11个章节
+
 Built-in `templates/prd.md` is relative to the skill's base directory. Custom paths are relative to project root.
+
+**⛔ 关键约束**：
+- **错误行为**：自行创建简化版本的PRD模板
+- **正确行为**：直接 cp 原始 PRD 模板到项目目录，保持模板完整性
 
 **Resolve brainstorm profile.** After template resolution, look for `<template-name>-brainstorm-profile.md` in the same directory. Store as `BRAINSTORM_PROFILE_PATH`. Fall back to built-in `templates/prd-brainstorm-profile.md`.
 
