@@ -6,6 +6,21 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-07-29
+
+### Added（配置管理与 Skill 降级逻辑补强，4 项）
+
+#### Config-loader 查找顺序优化
+- **scripts/lib/config-loader.mjs**：`findConfigFile` 函数增加 `.team-flow/team-flow.config.json` 查找路径（优先于项目根目录）。新查找顺序：① `.team-flow/` → ② 根目录（兼容旧路径）→ ③ git 根 → ④ home
+
+#### ce-brainstorm Phase 0.0 降级逻辑补强
+- **skills/ce-brainstorm/SKILL.md Phase 0.0**：增加 tf CLI 可用性检查（`which tf`），不可用时走显式降级逻辑：询问用户（默认模板 or 自定义路径）→ 在 `.team-flow/templates/` 创建模板 → 维护配置到 `.team-flow/team-flow.config.json`
+- **skills/ce-brainstorm/SKILL.md Phase 0.0**：增加 guardrail——明确禁止写入 skill 源码目录，项目级制品只在项目工作区创建/修改
+
+### Documentation（1 项）
+
+- **docs/architecture-api-db-design-enhancement-v0.10.md**：新增第 32 章「配置管理与 Skill 降级逻辑补强」
+
 ## [0.25.1] - 2026-07-29
 
 ### Changed（SKILL.md 渐进式披露拆分，P1-9，3 项）

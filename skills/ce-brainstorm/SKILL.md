@@ -62,14 +62,29 @@ If no feature description was provided, ask the user. If `docs/ideation/*.md` ex
 
 #### 0.0 Resolve Output Mode + PRD Template
 
+> **⛔ GUARDRAIL：禁止写入 skill 源码目录**
+>
+> 项目级制品（PRD 模板、配置文件等）只在**项目工作区**创建/修改：
+> - 模板文件：`.team-flow/templates/`
+> - 配置文件：`.team-flow/team-flow.config.json`
+>
+> **绝不写入 skill 源码目录**（`skills/ce-brainstorm/` 等）。
+
 Determine `OUTPUT_FORMAT` (md or html). For the full 5-level precedence, read `references/output-format.md`.
 
 **Resolve PRD template — MANDATORY STEP, DO NOT SKIP.**
 
-Run `tf runtime config --get prd.template` to get the configured template (defaults to `templates/prd.md`).
+1. **检查 tf CLI 是否可用**：运行 `which tf`
+   - ✅ 可用：继续执行 `tf runtime config --get prd.template`
+   - ❌ 不可用：走降级逻辑（见下方）
 
-- **Value differs from `templates/prd.md`**: validate the file exists at project root. If valid, use it. If not, fall to user-choice below.
-- **Otherwise**: **YOU MUST ask the user** via the platform's blocking question tool: default template or custom path? Validate custom paths exist before writing config via `tf config --set prd.template=<path>`.
+2. **降级逻辑（tf 不可用时）**：
+   - 通知用户：`tf` 命令不可用，将使用默认配置
+   - **询问用户**：默认模板 or 自定义路径？
+     - 默认模板：使用 skill 内置 `templates/prd.md`
+     - 自定义路径：验证文件存在，在项目工作区记录配置
+   - 在 `.team-flow/templates/` 目录创建/使用模板（绝不在 skill 目录写入）
+   - **维护配置文件**：在 `.team-flow/team-flow.config.json` 中记录配置（如文件不存在则创建）
 
 Built-in `templates/prd.md` is relative to the skill's base directory. Custom paths are relative to project root.
 

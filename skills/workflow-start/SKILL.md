@@ -15,14 +15,14 @@ Do NOT invoke for: general coding tasks outside team-flow changes, casual questi
 
 ## States
 
-`exploring` → `specifying` → `bridging` → `approved-for-build` → `executing` → `closing`, with `debugging` side-path from `executing`, and `abandoned` as terminal. If a transition is ambiguous, run `npx --yes --package @xulthekl/team-flow@0.25.1 tf runtime asset read docs/state-machine.md`.
+`exploring` → `specifying` → `bridging` → `approved-for-build` → `executing` → `closing`, with `debugging` side-path from `executing`, and `abandoned` as terminal. If a transition is ambiguous, run `npx --yes --package @xulthekl/team-flow@0.26.0 tf runtime asset read docs/state-machine.md`.
 
 ## Initialization
 
-1. **Update check**: Run `npx --yes --package @xulthekl/team-flow@0.25.1 tf runtime check-update`. Exit 0 → continue. Exit 1 → non-blocking upgrade reminder. Exit 2 → skip.
+1. **Update check**: Run `npx --yes --package @xulthekl/team-flow@0.26.0 tf runtime check-update`. Exit 0 → continue. Exit 1 → non-blocking upgrade reminder. Exit 2 → skip.
 2. **Inspect change folder**: Check for `proposal.md`, `specs/`, `design.md`, `tasks.md`, `execution-contract.md`. Answer: Is the change fuzzy? Artifacts missing/unstable? Contract exist? User approved contract? Execution in progress or blocked? In verification/wrap-up?
-3. **Overlay recovery scan**: Run `npx --yes --package @xulthekl/team-flow@0.25.1 tf handoff list <change-dir> --json` and `npx --yes --package @xulthekl/team-flow@0.25.1 tf checkpoint list <change-dir> --json`. A `result-ready` handoff requires explicit review and `npx --yes --package @xulthekl/team-flow@0.25.1 tf handoff resolve` before resuming the affected work. An `active` handoff is non-blocking side work. Show a non-stale checkpoint as recovery context; show a stale checkpoint only as historical evidence.
-4. **Execution-control recovery scan**: For `approved-for-build`, `executing`, `debugging`, or `closing`, run `npx --yes --package @xulthekl/team-flow@0.25.1 tf execution show <change-dir> --json`. Treat only `current: true` plus `waves[].eligible: true` as permission to start a wave; report plan revision, mode, next eligible wave, and every wave's receipt/blockers. A missing, invalid, or stale plan blocks implementation and routes to `build-executor`; do not infer progress from chat history.
+3. **Overlay recovery scan**: Run `npx --yes --package @xulthekl/team-flow@0.26.0 tf handoff list <change-dir> --json` and `npx --yes --package @xulthekl/team-flow@0.26.0 tf checkpoint list <change-dir> --json`. A `result-ready` handoff requires explicit review and `npx --yes --package @xulthekl/team-flow@0.26.0 tf handoff resolve` before resuming the affected work. An `active` handoff is non-blocking side work. Show a non-stale checkpoint as recovery context; show a stale checkpoint only as historical evidence.
+4. **Execution-control recovery scan**: For `approved-for-build`, `executing`, `debugging`, or `closing`, run `npx --yes --package @xulthekl/team-flow@0.26.0 tf execution show <change-dir> --json`. Treat only `current: true` plus `waves[].eligible: true` as permission to start a wave; report plan revision, mode, next eligible wave, and every wave's receipt/blockers. A missing, invalid, or stale plan blocks implementation and routes to `build-executor`; do not infer progress from chat history.
 
 ## DP-0: User Confirmation Gate
 
@@ -36,17 +36,17 @@ Ask (manual path): change name + one-sentence intent, known constraints, related
 
 After confirmation:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.25.1 tf state set <change-dir> dp_0_decisions "<summary>"
-npx --yes --package @xulthekl/team-flow@0.25.1 tf state set <change-dir> dp_0_result confirmed
-npx --yes --package @xulthekl/team-flow@0.25.1 tf state set <change-dir> dp_0_confirmed true
-npx --yes --package @xulthekl/team-flow@0.25.1 tf state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+npx --yes --package @xulthekl/team-flow@0.26.0 tf state set <change-dir> dp_0_decisions "<summary>"
+npx --yes --package @xulthekl/team-flow@0.26.0 tf state set <change-dir> dp_0_result confirmed
+npx --yes --package @xulthekl/team-flow@0.26.0 tf state set <change-dir> dp_0_confirmed true
+npx --yes --package @xulthekl/team-flow@0.26.0 tf state set <change-dir> dp_0_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 
 Config-aware routing: check `artifacts.order` and `artifacts.skip` from project config.
 
 ## Mode Detection
 
-If workflow is `auto`/`null`/unset: run `npx --yes --package @xulthekl/team-flow@0.25.1 tf runtime infer <change-dir>`. Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **tweak** (≤4 tasks, config/doc only), **full** (anything larger). Persist with `npx --yes --package @xulthekl/team-flow@0.25.1 tf state set <dir> workflow <mode>`.
+If workflow is `auto`/`null`/unset: run `npx --yes --package @xulthekl/team-flow@0.26.0 tf runtime infer <change-dir>`. Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **tweak** (≤4 tasks, config/doc only), **full** (anything larger). Persist with `npx --yes --package @xulthekl/team-flow@0.26.0 tf state set <dir> workflow <mode>`.
 
 Validate mode against artifact content. If hotfix/tweak criteria not met → upgrade to `full` and output reason. Don't overwrite explicit mode unless user asks.
 
@@ -59,19 +59,19 @@ Change is fuzzy, scope unclear, comparing options, no stable change name.
 Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before spec-writer. Dispatch `architecture-design` as sub-agent; after return, run reasonableness check and write yaml. Full protocol in `references/routing-rules.md`「Route to architecture-design」.
 
 ### Route to spec-writer
-Guard: `npx --yes --package @xulthekl/team-flow@0.25.1 tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK. **arch_design_decision must not be null** → fail = BLOCK (v0.9 §26). User knows what they want, artifacts missing/incomplete.
+Guard: `npx --yes --package @xulthekl/team-flow@0.26.0 tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK. **arch_design_decision must not be null** → fail = BLOCK (v0.9 §26). User knows what they want, artifacts missing/incomplete.
 
 ### Route to contract-builder
 Guard: `... check <dir> specifying bridging --json` → fail = BLOCK. Artifacts exist, implementation requested, contract missing/stale. Include `DP-3: 契约批准`.
 
 ### Route to build-executor
-Contract exists and approved, contract matches artifacts. Include `DP-4: 执行模式选择`: propose waves, run `npx --yes --package @xulthekl/team-flow@0.25.1 tf execution recommend <change-dir> [--wave ...]`, show the user every available mode plus evidence and the recommendation, then obtain a clear selection. The command saves a current receipt; before the first implementation edit, `build-executor` must run `npx --yes --package @xulthekl/team-flow@0.25.1 tf execution plan <change-dir> --mode <selected> --confirm ...` (and `--acknowledge-recommendation` when the selected mode differs from the recommendation) using matching artifacts, contract, and waves, then `npx --yes --package @xulthekl/team-flow@0.25.1 tf execution show <change-dir> --json`; report the saved revision, selected mode, recommendation alignment, ordered waves, and actual concurrent-dispatch capability. A revision must repeat recommend and confirmation. Do not transition to `executing` until `show` reports `current: true`; then run `... check <dir> approved-for-build executing --json` → fail = BLOCK.
+Contract exists and approved, contract matches artifacts. Include `DP-4: 执行模式选择`: propose waves, run `npx --yes --package @xulthekl/team-flow@0.26.0 tf execution recommend <change-dir> [--wave ...]`, show the user every available mode plus evidence and the recommendation, then obtain a clear selection. The command saves a current receipt; before the first implementation edit, `build-executor` must run `npx --yes --package @xulthekl/team-flow@0.26.0 tf execution plan <change-dir> --mode <selected> --confirm ...` (and `--acknowledge-recommendation` when the selected mode differs from the recommendation) using matching artifacts, contract, and waves, then `npx --yes --package @xulthekl/team-flow@0.26.0 tf execution show <change-dir> --json`; report the saved revision, selected mode, recommendation alignment, ordered waves, and actual concurrent-dispatch capability. A revision must repeat recommend and confirmation. Do not transition to `executing` until `show` reports `current: true`; then run `... check <dir> approved-for-build executing --json` → fail = BLOCK.
 
 ### Route to bug-investigator
 Execution hit blockage: test failure, unexpected behavior, build error, task cannot proceed. After debugging, route back to build-executor.
 
 ### Route to code-reviewer
-The current planned wave is implemented and ready for spec-compliance + code-quality verification. A reviewer must write an `npx --yes --package @xulthekl/team-flow@0.25.1 tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>` receipt before any dependent wave or closing transition.
+The current planned wave is implemented and ready for spec-compliance + code-quality verification. A reviewer must write an `npx --yes --package @xulthekl/team-flow@0.26.0 tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>` receipt before any dependent wave or closing transition.
 
 ### Route to release-archivist
 Guard: `... check <dir> executing closing --json` → fail = BLOCK. Implementation complete, verification complete/nearly complete. Include `DP-7: 归档确认`.
@@ -90,10 +90,10 @@ uncertainty. Do not create a prototype handoff or enter a prototype worktree
 until the user confirms. After confirmation:
 
 ```bash
-npx --yes --package @xulthekl/team-flow@0.25.1 tf handoff create <change-dir> \
+npx --yes --package @xulthekl/team-flow@0.26.0 tf handoff create <change-dir> \
   --type prototype --objective "<confirmed objective>" \
   --expected-output "<expected evidence>" --acceptance "<completion criterion>"
-npx --yes --package @xulthekl/team-flow@0.25.1 tf isolate <change-dir> prototype-<handoff-id>
+npx --yes --package @xulthekl/team-flow@0.26.0 tf isolate <change-dir> prototype-<handoff-id>
 ```
 
 Never suggest or enter this route automatically for backend, CLI, configuration,
@@ -107,7 +107,7 @@ work.
 - **Hotfix**: Route to contract-builder (minimal), skip need-explorer + spec-writer, guard check `exploring bridging --workflow hotfix`, then `bridging -> approved-for-build`, after DP-3 → build-executor (recommend, show, and confirm an execution mode), after → release-archivist (lightweight). Hotfix may skip `proposal.md`, `design.md`, `tasks.md`, and `specs/`, but it still requires a fresh minimal `execution-contract.md`, DP-3 approval, and a current execution plan before build. **architecture-design 不豁免**（v0.9 §26）：同样过 architecture-design 子代理判断门，快速判定是否涉及架构变更（hotfix 可能正是架构缺陷导致）
 - **Tweak**: Route to build-executor (direct edit), skip need-explorer + spec-writer + contract-builder, guard check `exploring approved-for-build --workflow tweak`, after → release-archivist (lightweight). **architecture-design 不豁免**（v0.9 §26）：同样过 architecture-design 子代理判断门
 
-Post-transition: 💡 `npx --yes --package @xulthekl/team-flow@0.25.1 tf inject <change-dir>` to update phase-guard artifacts.
+Post-transition: 💡 `npx --yes --package @xulthekl/team-flow@0.26.0 tf inject <change-dir>` to update phase-guard artifacts.
 
 ## Staleness Detection
 
@@ -124,7 +124,7 @@ Use content inspection, not timestamps.
 ## Guardrails
 
 - No implementation before planning artifacts or contract exist
-- No implementation for full/hotfix without a current `npx --yes --package @xulthekl/team-flow@0.25.1 tf execution plan`; no state transition based on an unverified DP-4 string
+- No implementation for full/hotfix without a current `npx --yes --package @xulthekl/team-flow@0.26.0 tf execution plan`; no state transition based on an unverified DP-4 string
 - No "continue" without state inspection
 - No implementation past stale contract
 - No implementation past bug without investigation

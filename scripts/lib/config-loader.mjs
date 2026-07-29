@@ -68,11 +68,15 @@ function deepMerge(target, source) {
 }
 
 function findConfigFile(startDir) {
-  // 1. Check startDir
+  // 1. Check .team-flow/ directory (preferred location)
+  const teamFlowDir = join(startDir, '.team-flow', 'team-flow.config.json');
+  if (existsSync(teamFlowDir)) return teamFlowDir;
+
+  // 2. Check startDir (legacy location, for backward compatibility)
   const direct = join(startDir, 'team-flow.config.json');
   if (existsSync(direct)) return direct;
 
-  // 2. Check git root
+  // 3. Check git root
   try {
     const gitRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], {
       cwd: startDir,
@@ -85,7 +89,7 @@ function findConfigFile(startDir) {
     // Not a git repo — skip
   }
 
-  // 3. Check home directory
+  // 4. Check home directory
   const homePath = join(process.env.HOME || '', 'team-flow.config.json');
   if (existsSync(homePath)) return homePath;
 
