@@ -69,3 +69,40 @@ PRD 冻结时（`frozen_downstream`），在正文标题下方插入冻结声明
 > 仅当**启动新迭代 vN+1** 或**用户显式绝对冻结**（`frozen_absolute`）时，才需升版。
 ```
 
+## Brainstorm Profile 机制（v0.25 新增）
+
+每个 PRD 模板应配套一个 **brainstorm profile** 文件，定义 Phase 2 方案探索的产品维度锚点，确保需求阶段聚焦产品方案而非技术决策。
+
+### 文件命名规则
+
+`<模板名>-brainstorm-profile.md`，与模板同目录：
+
+| PRD 模板 | Brainstorm Profile |
+|----------|-------------------|
+| `templates/prd.md` | `templates/prd-brainstorm-profile.md` |
+| `my-project/prd-template.md` | `my-project/prd-template-brainstorm-profile.md` |
+| `.team-flow/custom-prd.md` | `.team-flow/custom-prd-brainstorm-profile.md` |
+
+### 查找优先级
+
+1. 自定义模板同目录的 profile 文件（按命名规则推导）
+2. 内置默认 `templates/prd-brainstorm-profile.md`（相对 skill 基目录）
+
+### Profile 三段结构
+
+| 段落 | 作用 | Phase 2 中的行为 |
+|------|------|-----------------|
+| **核心思考维度** | 每个方案必须覆盖的产品维度 | 每个方案按维度展开，未覆盖需说明原因 |
+| **扩展思考维度** | 按需触发的补充维度 | 根据需求特征决定是否覆盖 |
+| **反例边界** | 禁止越界的技术决策类型 | 方案探索中不得包含这些内容 |
+
+### 自定义 Profile
+
+创建新 PRD 模板时，**必须同步创建**对应的 brainstorm profile。未配套 profile 的模板将使用内置默认的 GTMC D7 profile——维度可能与模板结构不匹配。
+
+自定义 profile 应包含：
+1. 核心维度表：维度名、对应 PRD 章节、引导问题
+2. 扩展维度表：维度名、触发条件、对应 PRD 章节、引导问题
+3. 反例边界列表：Phase 2 不应包含的技术决策类型
+4. 正向示例：正确的产品方案输出 + 错误的技术方案输出
+

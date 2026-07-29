@@ -24,6 +24,8 @@ This skill does not implement code. It explores, clarifies, and documents decisi
 | `orchestrated` | 被 workflow-orchestrator 内部调用（传入 mode: orchestrated） | Phase 3.5 **跳过**，原型循环由 orchestrator 编排 |
 
 > **显式参数规约**：orchestrator 调用时必须传入 `mode: orchestrated`。ce-brainstorm 检测到该参数即跳过 Phase 3.5 并在输出中回执"原型循环已委托编排层"。未收到该参数时默认为 standalone 模式。
+> 
+> **重要：`orchestrated` 模式仅跳过 Phase 3.5（原型内循环），Phase 0（含 PRD 模板选择）、Phase 1、Phase 2、Phase 3 均正常执行，不可跳过。**
 
 ## Core Principles
 
@@ -94,7 +96,35 @@ Resolution steps:
 
 **Resolve the format here; load the rendering reference at Phase 3, not now.** The format-rendering reference (`references/markdown-rendering.md` for `md`, `references/html-rendering.md` for `html`) is consumed only when the doc is composed — loading it during Phase 0 would carry 200+ lines through the entire dialogue. Phase 3 names the load. Section content is the same in either format; presentation differs.
 
-**Resolve PRD template.** Read `prd.template` config via `tf runtime config --get prd.template`. If configured, use that template path. If not configured or reading fails, use the default template at `templates/prd.md` (relative to the skill's base directory). Store as `PRD_TEMPLATE_PATH`.
+**Resolve PRD template — MANDATORY STEP, DO NOT SKIP.**
+
+Execute these commands in order:
+
+```bash
+# Step 1: Check if a non-default template is configured
+CONFIGURED_TEMPLATE=$(tf runtime config --get prd.template 2>/dev/null)
+echo "Configured template: $CONFIGURED_TEMPLATE"
+```
+
+**Decision gate** (must execute one of these two paths):
+
+- **IF** `$CONFIGURED_TEMPLATE` is a non-empty string AND differs from `templates/prd.md`:
+  → Validate the file exists at project root. If valid, use it as `PRD_TEMPLATE_PATH`. If not found, warn and fall to the user-choice path below.
+
+- **OTHERWISE** (value is empty, equals `templates/prd.md`, or validation failed):
+  → **YOU MUST NOW ask the user using the platform's blocking question tool.** Do not proceed without user input. The question:
+  > PRD 模板决定 PRD 文档的结构和头脑风暴的思考方向。当前默认模板为 **GTMC D7 业务要件**（11 章结构，含业务流程、画面原型、系统功能清单等）。你也可以指定自定义模板。
+  
+  Options:
+  - "使用默认模板（GTMC D7 业务要件）" → set `PRD_TEMPLATE_PATH=templates/prd.md`, then run `tf config --set prd.template=templates/prd.md`
+  - "指定自定义模板路径" → ask user for the path, validate it exists at project root. If not found, inform: *"文件未找到: `<path>`。请提供一个已存在的模板文件路径，或选择默认模板。"* Re-prompt until a valid path is given or the user chooses default. Then run `tf config --set prd.template=<user-path>`
+
+**Path resolution rules:**
+- Built-in default `templates/prd.md` is relative to the **skill's base directory** (the directory containing this SKILL.md).
+- Custom template paths are relative to the **project root** (from `git rev-parse --show-toplevel`).
+- The distinction matters: `templates/prd.md` as a config value always means the built-in default; a custom value like `.team-flow/custom-prd.md` is project-relative.
+
+**Resolve brainstorm profile.** After `PRD_TEMPLATE_PATH` is resolved, look for a brainstorm profile file at the same directory with `-brainstorm-profile` suffix (e.g., `templates/prd.md` → `templates/prd-brainstorm-profile.md`). If found, store as `BRAINSTORM_PROFILE_PATH`. If not found, fall back to the built-in default at `templates/prd-brainstorm-profile.md` (relative to the skill's base directory).
 
 The `output:` preference does NOT auto-propagate to `ce-plan` on handoff — ce-plan re-resolves its own `plan_output` config independently. Because both skills now operate on the same PRD artifact, an explicit conversion by `ce-plan` must report the old path and new canonical path; pipeline mode may force markdown by writing the canonical markdown PRD path and leaving any HTML sibling untouched as non-canonical for automated discovery.
 
@@ -272,6 +302,13 @@ Follow the Interaction Rules above. Use the platform's blocking question tool wh
 
 ### Phase 2: Explore Approaches
 
+**Load brainstorm profile.** If `BRAINSTORM_PROFILE_PATH` is set (resolved at Phase 0.0), read it now. The profile defines:
+- **Thinking dimensions**: product-level dimensions each approach must address (e.g., business process, state model, permission model). These replace generic "mechanism / product shape" with template-specific anchors.
+- **Guiding questions**: per-dimension questions to probe during approach exploration.
+- **Anti-pattern boundary**: what constitutes a technical decision that belongs in ce-plan, not in this phase. Different templates may have different boundaries.
+
+When presenting approaches, each approach must address the profile's core thinking dimensions. If a dimension is not relevant to the current brainstorm, note why rather than silently skipping it.
+
 **Reasoning elevation (Claude Code only).** Before generating approaches, if positively Claude Code (`CLAUDECODE=1`, not Cursor/Codex), load `references/reasoning-elevation.md` and follow it — it may dispatch approach generation to a higher-reasoning model when the user has opted in, and it owns the completion-time discoverability tip. On any non-Claude host, skip it entirely — proceed on the session model with no mention. If a prompt names a model this skill does not recognize on this harness, proceed on the session model without comment.
 
 If multiple plausible directions remain, propose **2-3 concrete approaches** based on research and conversation. Otherwise state the recommended direction directly.
@@ -293,7 +330,7 @@ For each approach, provide:
 - Key risks or unknowns
 - When it's best suited
 
-**Approach granularity: mechanism / product shape, not architecture.** Approach descriptions name mechanism-level distinctions ("pause as a rule property" vs "pause as an event filter" vs "pause as a separate entity") and product-relevant trade-offs (plan-tier coupling, complexity surface, migration difficulty). They do NOT name implementation specifics — column names, table names, file paths, service classes, JSON shapes, exact method names. Those are ce-plan's job. Bringing architecture forward at brainstorm time forces the user to make architectural decisions on ce-brainstorm's intentionally-shallow research, and the synthesis at Phase 2.5 then has to filter out the leak.
+**Approach granularity: profile-driven product thinking, not architecture.** Follow the brainstorm profile's thinking dimensions and anti-pattern boundary. Approach descriptions address the profile's product-level dimensions (business process, state model, permission model, data relationships, business rules, system functions) and product-relevant trade-offs (plan-tier coupling, complexity surface, migration difficulty). They do NOT cross the anti-pattern boundary into implementation specifics — column names, table names, file paths, service classes, JSON shapes, exact method names, module structures, API definitions. Those are ce-plan's job. Bringing architecture forward at brainstorm time forces the user to make architectural decisions on ce-brainstorm's intentionally-shallow research, and the synthesis at Phase 2.5 then has to filter out the leak.
 
 After presenting all approaches, state your recommendation and explain why. Prefer simpler solutions when added complexity creates real carrying cost, but do not reject low-cost, high-value polish just because it is not strictly necessary.
 

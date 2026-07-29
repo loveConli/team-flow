@@ -6,6 +6,29 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-07-29
+
+### Added（brainstorm profile 机制，3 项）
+
+#### Brainstorm Profile 机制
+- **templates/prd-brainstorm-profile.md**（新增）：GTMC D7 模板的 brainstorm profile，定义核心思考维度（7 项：业务流程/状态模型/权限模型/用户角色/数据关系/业务规则/系统功能）、扩展维度（6 项：画面设计/业务术语/报表需求/交互机制/非功能性需求/编码规则）、反例边界（7 项：禁止后端模块划分/前端页面结构/数据库表设计/API 接口定义/技术选型/部署架构/代码结构）和正向示例
+- **skills/ce-brainstorm/references/prd-mapping.md**：新增"Brainstorm Profile 机制"完整说明（文件命名规则、查找优先级、三段结构、自定义 Profile 指南）
+- **skills/ce-brainstorm/references/brainstorm-sections.md**：新增"Brainstorm profile coverage check"段落，确保核心维度在 PRD 中被覆盖
+
+### Changed（Phase 0 模板选择 + Phase 2 profile 驱动，4 项）
+
+#### PRD 模板交互式选择
+- **skills/ce-brainstorm/SKILL.md Phase 0.0**：PRD 模板解析改为 MANDATORY STEP——必须执行 bash 命令检查配置，未配置自定义模板时强制使用 AskUserQuestion 询问用户选择默认或自定义路径，并自动写入 `team-flow.config.json`
+- **skills/ce-brainstorm/SKILL.md Phase 2**：新增"Load brainstorm profile"步骤，按 profile 维度约束方案探索；"Approach granularity"从"mechanism/product shape"改为"profile-driven product thinking, not architecture"
+- **skills/ce-brainstorm/SKILL.md 调用模式**：明确声明 `orchestrated` 模式仅跳过 Phase 3.5，Phase 0-3 均正常执行不可跳过
+
+#### Config 默认值
+- **scripts/lib/config-loader.mjs**：DEFAULTS 增加 `prd.template: 'templates/prd.md'`，`tf runtime config --get prd.template` 未配置时返回默认值而非报错
+
+### Documentation（1 项）
+
+- **AGENTS.md**：`prd.template` 配置字段说明扩充（含 brainstorm profile 关联说明）；通用性描述补充 profile 注入机制
+
 ## [0.24.1] - 2026-07-28
 
 ### Fixed（prototype skill 体系补强，5 项）

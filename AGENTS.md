@@ -8,7 +8,7 @@
 
 - 零运行时依赖（team-flow 底座）
 - prototype 额外 **零外部依赖、可离线**（自包含 HTML + 页面内 Tweaks 控件，无 CDN）
-- 插件保持通用，所有风格由项目 `design-system.md` / `prd.template` 注入，不固化任何公司/产品风格
+- 插件保持通用，所有风格由项目 `design-system.md` / `prd.template`（含配套 `prd-brainstorm-profile.md`）注入，不固化任何公司/产品风格
 
 ### 身份与依赖关系
 
@@ -253,11 +253,11 @@ docs/solutions/
 
 项目 `team-flow.config.json` 可注入（**插件层扩展字段，非 team-flow 原生 schema**；原生仅 `artifacts.order` / `artifacts.skip`）：
 
-- `prd.template`：PRD 模板路径
+- `prd.template`：PRD 模板路径（默认 `templates/prd.md`，GTMC D7 业务要件 11 章结构）。ce-brainstorm Phase 0.0 首次运行时若未配置，会交互式询问用户选择默认模板或自定义路径，并自动写入配置。自定义模板应配套 brainstorm profile（`<模板名>-brainstorm-profile.md`），否则回退使用内置默认的 GTMC D7 profile
 - `prototype.designSystem`：项目 `design-system.md` 路径
 - `prototype.entry`：原型入口（默认 `prototype/index.html`）
 
-读取方式：`tf runtime config --get <key>`（插件层自读，字段命名避开原生 key 冲突）。
+读取方式：`tf runtime config --get <key>`（插件层自读，字段命名避开原生 key 冲突）。`prd.template` 已纳入 DEFAULTS（`config-loader.mjs`），未配置时返回默认值而非报错。
 
 ## Architecture（team-flow 底座，TypeScript）
 

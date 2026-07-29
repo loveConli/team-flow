@@ -19,6 +19,9 @@ const DEFAULTS = {
   verification: {
     language: 'auto',
   },
+  prd: {
+    template: 'templates/prd.md',
+  },
 };
 
 export const MODEL_PROFILES = Object.freeze([

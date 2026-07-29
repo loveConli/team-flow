@@ -146,6 +146,17 @@ When a PRD is warranted, the document follows the PRD template structure. The
 brainstorm dialogue fills chapters where information is available; chapters
 without dialogue content retain template placeholders.
 
+### Brainstorm profile coverage check
+
+Before filling chapters, verify that the brainstorm dialogue has covered the brainstorm profile's core thinking dimensions (resolved at Phase 0.0, loaded at Phase 2). Each core dimension should have been explored during Phase 1.3 dialogue and addressed in Phase 2 approaches.
+
+If a core dimension was not explored:
+- **During Phase 2**: raise it as part of the approach description — the profile's guiding questions prompt coverage.
+- **During Phase 2.5 synthesis**: note it as a gap in the scoping synthesis call-outs.
+- **During Phase 3 writing**: mark unfilled core dimensions as `待补充` in the corresponding PRD chapter (not as template placeholder — the distinction signals a known gap vs a chapter that belongs to a later BA process).
+
+Extension dimensions follow the normal conditional-fill rules below.
+
 ### Always filled (from dialogue or metadata)
 
 - **§1 版本修订记录** — auto-filled from metadata (date, user, iteration
