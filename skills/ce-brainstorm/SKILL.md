@@ -8,15 +8,9 @@ argument-hint: "[feature idea or problem to explore] [output:html]"
 
 **Note: The current year is 2026.** Use this when dating PRD documents.
 
-Brainstorming helps answer **WHAT** to build through collaborative dialogue. It precedes `/ce-plan`, which enriches the same PRD artifact with **HOW** to build it.
-
-The durable output of this workflow is a **PRD document** (产品需求文档). In compound engineering, keep the workflow name `brainstorm`, but write the first version of the PRD under `prd/vN/prd.md` so planning does not need to invent product behavior, scope boundaries, or success criteria. The PRD template is configurable — use the path specified by `prd.template` config, or fall back to the default template at `templates/prd.md` (relative to the skill's base directory).
-
-This skill does not implement code. It explores, clarifies, and documents decisions for later planning or execution.
+Brainstorming answers **WHAT** to build through collaborative dialogue, producing a **PRD document** (产品需求文档). It precedes `/ce-plan` (**HOW** to build). In compound engineering, write under `prd/vN/prd.md`. The PRD template is configurable via `prd.template` config (default: `templates/prd.md`). This skill explores, clarifies, and documents — it does not implement code.
 
 ## 调用模式（v0.7 新增）
-
-本 skill 支持两种调用模式：
 
 | 模式 | 触发条件 | Phase 3.5 行为 |
 |------|---------|---------------|
@@ -24,435 +18,105 @@ This skill does not implement code. It explores, clarifies, and documents decisi
 | `orchestrated` | 被 workflow-orchestrator 内部调用（传入 mode: orchestrated） | Phase 3.5 **跳过**，原型循环由 orchestrator 编排 |
 
 > **显式参数规约**：orchestrator 调用时必须传入 `mode: orchestrated`。ce-brainstorm 检测到该参数即跳过 Phase 3.5 并在输出中回执"原型循环已委托编排层"。未收到该参数时默认为 standalone 模式。
-> 
+>
 > **重要：`orchestrated` 模式仅跳过 Phase 3.5（原型内循环），Phase 0（含 PRD 模板选择）、Phase 1、Phase 2、Phase 3 均正常执行，不可跳过。**
 
 ## Core Principles
 
-1. **Assess scope first** - Match the amount of ceremony to the size and ambiguity of the work.
-2. **Be a thinking partner** - Suggest alternatives, challenge assumptions, and explore what-ifs instead of only extracting requirements.
-3. **Resolve product decisions here** - User-facing behavior, scope boundaries, and success criteria belong in this workflow. Detailed implementation belongs in planning.
-4. **Keep implementation out of the Product Contract by default** - Do not include libraries, schemas, endpoints, file layouts, or code-level design unless the brainstorm itself is inherently about a technical or architectural change.
-5. **Right-size the artifact** - Simple work gets a compact PRD or brief alignment. Larger work gets a fuller PRD. Do not add ceremony that does not help planning.
-6. **Apply YAGNI to carrying cost, not coding effort** - Prefer the simplest approach that delivers meaningful value. Avoid speculative complexity and hypothetical future-proofing, but low-cost polish or delight is worth including when its ongoing cost is small and easy to maintain.
-7. **Do not turn coverage into decomposition** - For software brainstorms, treat named devices, providers, and data sources as coverage requirements, not automatically as separate integration workstreams. Split them only when a shared access path cannot satisfy a named requirement. Leave connector selection to planning unless that choice materially changes product scope or behavior.
+1. **Assess scope first** — Match ceremony to size and ambiguity.
+2. **Be a thinking partner** — Suggest alternatives, challenge assumptions.
+3. **Resolve product decisions here** — User-facing behavior, scope, success criteria. Implementation belongs in planning.
+4. **Keep implementation out** — No libraries, schemas, endpoints, file layouts unless the brainstorm is about a technical change.
+5. **Right-size the artifact** — Simple work gets compact PRD; larger work gets fuller PRD.
+6. **YAGNI on carrying cost, not coding effort** — Simplest approach that delivers value; low-cost polish is worth including.
+7. **Don't turn coverage into decomposition** — Named devices/providers are coverage requirements, not separate workstreams.
 
 ## Interaction Rules
 
-These rules apply to every brainstorm, including the universal (non-software) flow routed to `references/universal-brainstorming.md`.
-
-1. **Ask one question at a time** - One question per turn, even when sub-questions feel related. Stacking several questions in a single message produces diluted answers; pick the single most useful one and ask it.
-2. **Prefer single-select multiple choice** - Use single-select when choosing one direction, one priority, or one next step.
-3. **Use multi-select rarely and intentionally** - Use it only for compatible sets such as goals, constraints, non-goals, or success criteria that can all coexist. If prioritization matters, follow up by asking which selected item is primary.
-4. **Default to the platform's blocking question tool** - Use `AskUserQuestion` in Claude Code (call `ToolSearch` with `select:AskUserQuestion` first if its schema isn't loaded), `request_user_input` in Codex, `ask_question` in Antigravity CLI (`agy`), `ask_user` in Pi (requires the `pi-ask-user` extension). These tools include a free-text fallback, so well-chosen options scaffold the answer without confining it. This default holds for opening and elicitation questions too, not only narrowing. Fall back to numbered options in chat only when no blocking tool exists in the harness (including `ToolSearch` returning no match for it) or the call errors (e.g., Codex edit modes) — not because a schema load is required. Never silently skip the question. **Exception — visual-probe gate:** on an inherently-visual topic (Phase 0.3 tripwire), the first shape/behavior/state/layout/flow/diagram decision is governed by `references/visual-probes.md`, which takes precedence over this rule. See the Phase 1.3 gate.
-5. **Use an open-ended question only when the question is genuinely open** - Drop the blocking tool when the answer is inherently narrative, when presented options would steer a diagnostic or introspective answer, or when you cannot write 3-4 genuinely distinct, plausibly-correct options without padding. The test: if you'd be straining to fill the option slots, the question is open — ask it open-ended. Rule 1 still applies: one question per turn.
-6. **Open-ended questions earn their place only when they're specific enough to elicit a substantive answer** - Apply Rule 5 silently: just ask the question, never narrate the form choice. The question must give the user something concrete to anchor on. Good: *"What's the most concrete thing someone's already done about this — paid for it, built a workaround, quit a tool over it?"* — it names what counts as an answer. Too thin: *"What's your take?"* — nothing to bite into, and framings that imply a short answer ("briefly", yes/no) waste the open question the same way.
+1. **One question at a time** — Pick the single most useful one.
+2. **Prefer single-select multiple choice** — When choosing one direction.
+3. **Use multi-select rarely** — Only for compatible sets (goals, constraints).
+4. **Default to blocking question tool** — `AskUserQuestion`, `request_user_input`, etc. Fall back to numbered options only when no blocking tool exists.
+5. **Open-ended only when genuinely open** — When you can't write 3-4 distinct options without padding.
+6. **Specific open-ended questions** — Give something concrete to anchor on. Not "What's your take?"
 
 ## Output Guidance
 
-- **Prioritize decision-relevant detail** - Preserve the facts, tradeoffs, and caveats needed for the next decision; trim introductions, repetition, and optional background first.
+Prioritize decision-relevant detail. Preserve facts, tradeoffs, caveats; trim introductions and repetition.
 
 ## Model Tiers
 
-Sub-agent dispatch is tiered by task shape, never hardcoded to a model name. When dispatching the Phase 1.1 grounding scout, the Phase 2.6 claim verifier, or the opt-in Slack researcher, read `references/model-tiers.md` for the tier definitions (extraction / generation / ceiling) and the degradation rule for platforms without per-agent model selection or with no subagent primitive at all.
+Sub-agent dispatch is tiered by task shape. Read `references/model-tiers.md` for tier definitions and degradation rules.
 
 ## Optional Inputs
 
-- `docs/ideation/*.md`（可选）：如果 ce-ideate 已产出 ideation artifact，读取作为 brainstorm 的起点。若文件不存在，则从用户提供的 feature description 获取输入。
+- `docs/ideation/*.md`（可选）：如果 ce-ideate 已产出 ideation artifact，读取作为 brainstorm 的起点。
 
 ## Feature Description
 
-The **feature description** is the input this skill was invoked with — what to explore, present in the current prompt or conversation, whether the user provided it directly or a calling skill passed it.
-
-**If no feature description was provided, ask the user:** "What would you like to explore? Please describe the feature, problem, or improvement you're thinking about."
-
-**If `docs/ideation/*.md` exists**, read it first and use its ranked ideation content as the starting point for the brainstorm.
-
-Do not proceed until you have a feature description from the user.
-
-**Session-settled decisions.** The invoking conversation, or a distilled brief passed as invocation input — from the user or a calling skill — may carry decisions already examined-and-chosen. Read `references/settled-decisions.md` before classifying conversation-carried decisions — it carries the settlement test, the two provenance classes, the annotation shape, and capture rules. Skipping the classification fails in both directions: re-asking a decision the user already made, or promoting an unexamined assertion to settled.
+If no feature description was provided, ask the user. If `docs/ideation/*.md` exists, read it first. Read `references/settled-decisions.md` before classifying conversation-carried decisions. Do not proceed until you have a feature description.
 
 ## Execution Flow
 
 ### Phase 0: Resume, Assess, and Route
 
-#### 0.0 Resolve Output Mode
+#### 0.0 Resolve Output Mode + PRD Template
 
-Determine `OUTPUT_FORMAT` before any other phase fires. Output mode is **exclusive** — the PRD document is written as either markdown (`.md`) OR HTML (`.html`), never both. Precedence: in-prompt request > user-stated preference > config > default (`md`), with a hard pipeline-mode override.
-
-**Read config.** Resolve `<repo-root>` at runtime by running `git rev-parse --show-toplevel` with the shell tool. Then read `<repo-root>/.compound-engineering/config.local.yaml` with the native file-read tool. If the root cannot be resolved (not a git repo) or the file does not exist, fall through to the defaults below.
-
-Resolution steps:
-
-1. **In-prompt request.** Reason over the user's prompt for this run for a request about *this document's* output format, expressed either as the `output:` shorthand or in plain language ("make this a webpage", "I want this in HTML"). On an explicit format, match it case-insensitively to `md`/`html`, and ignore the `output:` shorthand token when reading the rest of the prompt as the feature description. Distinguish a request about the document's format from a format named as subject matter: "explore an HTML export feature" is the work, not a doc-format request — do not switch on it.
-   - `output:` alone (no value) → no-op, fall through to step 2.
-   - `output:<unknown>` (e.g., `output:pdf`) → drop the token, fall through to step 2, and remember to emit a one-line note above the post-generation menu after final resolution: `Ignored unknown output: value '<value>' — using <resolved_format> instead.` where `<resolved_format>` is the value `OUTPUT_FORMAT` actually resolved to after the remaining precedence steps. Do not hardcode `md` in the note — that misleads users when config has set HTML.
-2. **User-stated preference.** If this prompt holds no format request, honor an output-format preference (markdown vs HTML) the user established earlier — earlier in this session, in your memory, or written into their active instructions — that is already in your context (match `md`/`html` case-insensitively). A remembered preference is more current than the rarely-edited config, so it **overrides** the config in step 3. Do not open or search instruction files to find it — act only on a preference already present in your context; if none is, fall through to the config.
-3. **Config.** If steps 1-2 did not resolve and the config file read above has an **active (non-commented)** `brainstorm_output:` key whose value matches `md` or `html` (case-insensitive), use it. Missing, invalid, or commented values fall through silently. Critical: lines starting with `#` are YAML comments and must be ignored — the shipped config template includes commented examples like `# brainstorm_output: html` to document the option, and matching those as active settings would silently force HTML mode on every run without the user having opted in.
-4. **Default.** Otherwise `OUTPUT_FORMAT=md`.
-5. **Pipeline override.** When invoked from LFG or any `disable-model-invocation` context, force `OUTPUT_FORMAT=md` regardless of steps 1-4. Downstream consumers (`ce-plan`, `ce-work`) parse markdown reliably; HTML in pipeline runs is unnecessary friction.
-
-**Token-parsing convention:** only literal-prefix flag tokens (`output:`, `mode:`, `delegate:` where applicable) are consumed and stripped. Other `<word>:<word>` tokens — including conventional commit prefixes like `feat:`, `fix:`, `chore:` that may appear inside a feature description — pass through verbatim.
-
-**Resolve the format here; load the rendering reference at Phase 3, not now.** The format-rendering reference (`references/markdown-rendering.md` for `md`, `references/html-rendering.md` for `html`) is consumed only when the doc is composed — loading it during Phase 0 would carry 200+ lines through the entire dialogue. Phase 3 names the load. Section content is the same in either format; presentation differs.
+Determine `OUTPUT_FORMAT` (md or html). For the full 5-level precedence, read `references/output-format.md`.
 
 **Resolve PRD template — MANDATORY STEP, DO NOT SKIP.**
 
-Execute these commands in order:
+Run `tf runtime config --get prd.template` to get the configured template (defaults to `templates/prd.md`).
 
-```bash
-# Step 1: Check if a non-default template is configured
-CONFIGURED_TEMPLATE=$(tf runtime config --get prd.template 2>/dev/null)
-echo "Configured template: $CONFIGURED_TEMPLATE"
-```
+- **Value differs from `templates/prd.md`**: validate the file exists at project root. If valid, use it. If not, fall to user-choice below.
+- **Otherwise**: **YOU MUST ask the user** via the platform's blocking question tool: default template or custom path? Validate custom paths exist before writing config via `tf config --set prd.template=<path>`.
 
-**Decision gate** (must execute one of these two paths):
+Built-in `templates/prd.md` is relative to the skill's base directory. Custom paths are relative to project root.
 
-- **IF** `$CONFIGURED_TEMPLATE` is a non-empty string AND differs from `templates/prd.md`:
-  → Validate the file exists at project root. If valid, use it as `PRD_TEMPLATE_PATH`. If not found, warn and fall to the user-choice path below.
+**Resolve brainstorm profile.** After template resolution, look for `<template-name>-brainstorm-profile.md` in the same directory. Store as `BRAINSTORM_PROFILE_PATH`. Fall back to built-in `templates/prd-brainstorm-profile.md`.
 
-- **OTHERWISE** (value is empty, equals `templates/prd.md`, or validation failed):
-  → **YOU MUST NOW ask the user using the platform's blocking question tool.** Do not proceed without user input. The question:
-  > PRD 模板决定 PRD 文档的结构和头脑风暴的思考方向。当前默认模板为 **GTMC D7 业务要件**（11 章结构，含业务流程、画面原型、系统功能清单等）。你也可以指定自定义模板。
-  
-  Options:
-  - "使用默认模板（GTMC D7 业务要件）" → set `PRD_TEMPLATE_PATH=templates/prd.md`, then run `tf config --set prd.template=templates/prd.md`
-  - "指定自定义模板路径" → ask user for the path, validate it exists at project root. If not found, inform: *"文件未找到: `<path>`。请提供一个已存在的模板文件路径，或选择默认模板。"* Re-prompt until a valid path is given or the user chooses default. Then run `tf config --set prd.template=<user-path>`
+#### 0.1–0.5 Routing Sub-phases
 
-**Path resolution rules:**
-- Built-in default `templates/prd.md` is relative to the **skill's base directory** (the directory containing this SKILL.md).
-- Custom template paths are relative to the **project root** (from `git rev-parse --show-toplevel`).
-- The distinction matters: `templates/prd.md` as a config value always means the built-in default; a custom value like `.team-flow/custom-prd.md` is project-relative.
+For detailed routing logic, read `references/phase0-routing.md`. Summary:
 
-**Resolve brainstorm profile.** After `PRD_TEMPLATE_PATH` is resolved, look for a brainstorm profile file at the same directory with `-brainstorm-profile` suffix (e.g., `templates/prd.md` → `templates/prd-brainstorm-profile.md`). If found, store as `BRAINSTORM_PROFILE_PATH`. If not found, fall back to the built-in default at `templates/prd-brainstorm-profile.md` (relative to the skill's base directory).
-
-The `output:` preference does NOT auto-propagate to `ce-plan` on handoff — ce-plan re-resolves its own `plan_output` config independently. Because both skills now operate on the same PRD artifact, an explicit conversion by `ce-plan` must report the old path and new canonical path; pipeline mode may force markdown by writing the canonical markdown PRD path and leaving any HTML sibling untouched as non-canonical for automated discovery.
-
-#### 0.1 Resume Existing Work When Appropriate
-
-If the user references an existing brainstorm topic or document, or there is an obvious recent matching PRD in the `prd/` directory:
-- Scan `prd/` for existing iteration versions (v1, v2, ...)
-- Read the latest PRD document
-- Confirm with the user before resuming: "Found an existing PRD for [topic]. Should I continue from this, or start fresh?"
-- If resuming, summarize the current state briefly, continue from its existing decisions and outstanding questions, and update the existing document instead of creating a duplicate
-- **Resume preserves the existing artifact's format, except pipeline mode.** Write back in whatever format the existing artifact uses — markdown if the existing file is `.md`, HTML if it is `.html`. Explicit `output:` arguments on this run override (e.g., resuming an `.html` doc with `output:md` switches the artifact to markdown). Pipeline mode (LFG, any `disable-model-invocation` context) always wins per Phase 0.0: even when resuming an existing `.html` brainstorm, pipeline runs force `OUTPUT_FORMAT=md` so downstream automation receives the markdown shape it expects. The resume rewrites the markdown file at the parallel path and the original `.html` is left in place untouched.
-
-Historical `docs/brainstorms/*-requirements.{md,html}` files remain legacy inputs for `ce-plan`, but new `ce-brainstorm` outputs write to `prd/{ITERATION_VERSION}/prd.md` instead.
-
-#### 0.1b Classify Task Domain
-
-Before proceeding to Phase 0.2, classify whether this is a software task. The key question is: **does the task involve building, modifying, or architecting software?** -- not whether the task *mentions* software topics.
-
-**Software** (continue to Phase 0.2) -- the task references code, repositories, APIs, databases, or asks to build/modify/debug/deploy software.
-
-**Non-software brainstorming** (route to universal brainstorming) -- BOTH conditions must be true:
-- None of the software signals above are present
-- The task describes something the user wants to explore, decide, or think through in a non-software domain
-
-**Neither** (respond directly, skip all brainstorming phases) -- the input is a quick-help request, error message, factual question, or single-step task that doesn't need a brainstorm.
-
-**Verdict-shape carve-out — do not exit before the 0.1c gate.** A request weighing whether to **adopt / switch to / replace** a *named external technology, library, pattern, platform, or architecture* for this project is a **software** decision even when it only names the tool and asks the bare question ("should we adopt Biome here?"). Classify it as **Software** and continue so the 0.1c gate below can catch it — do **not** route it to *Neither* or *Non-software*, which would skip the gate and lose the exact verdict-shape prompts that gate is for.
-
-**If non-software brainstorming is detected:** Read `references/universal-brainstorming.md` now and follow it — it replaces Phases 0.2–4 entirely. Scope assessment, exploration moves, convergence, and the wrap-up menu for this route live there, not in this main body; improvising them produces an unstructured chat with no synthesis and no handoff. The non-software route does **not** write a PRD document; PRD generation is reserved for software brainstorming that can later become implementation-ready plans. The **Core Principles and Interaction Rules above still apply unchanged** — including one-question-per-turn and the default to the platform's blocking question tool — and are the only part of this file that survives the route.
-
-#### 0.1c Route a Verdict Question to ce-pov
-
-A brainstorm scopes **what to build** once a direction is chosen. Deciding **whether to adopt, switch to, or replace** a *specific named external candidate* (technology, library, pattern, platform, or architecture) judged against this project is a different job — a decisive, project-grounded verdict, which is `ce-pov`'s purpose.
-
-**The verdict shape — all three hold:** a **named external candidate** (one outside thing, or a bounded set the user already named like "X vs Y vs Z" — not an open field for *you* to enumerate); a **whether-to-commit intent** (adopt / switch to / migrate / replace / is-it-time-for / revisit — not "how should we design or scope Y"); judged **against this project** (fit, migration cost, worth it here), not a neutral explainer. Open-ended design or scoping where *you'd* invent the options stays here. The whether-to-commit trigger separates the two: "help me **pick** between X, Y, Z" is a verdict; "I'm **mulling** X, Y, Z" stays here.
-
-When the shape matches — at intake, or whenever later dialogue (Phases 1.3–2) clarifies a request into it — read `references/verdict-routing.md` and follow it: offer the `/ce-pov` handoff interactively (never silently switch), invoke `ce-pov` on accept, drop the offer and continue the normal workflow unchanged on decline. The reference owns the offer construction, field mapping, and what to pass to `ce-pov`.
-
-#### 0.2 Assess Whether Brainstorming Is Needed
-
-**Clear requirements indicators:**
-- Specific acceptance criteria provided
-- Referenced existing patterns to follow
-- Described exact expected behavior
-- Constrained, well-defined scope
-
-**If requirements are already clear:**
-Keep the interaction brief. Confirm understanding and present concise next-step options rather than forcing a long brainstorm. Only write a short PRD when a durable handoff to planning or later review would be valuable. Skip Phase 1.1 and 1.2 entirely — still classify tier in Phase 0.3, then go straight to Phase 1.3 or Phase 2.5 and follow `references/synthesis-summary.md`'s Path A / Path B gate exactly. Do not assume the synthesis is announce-only: a richly pre-loaded prompt classifies as Standard or Deep, which routes to Path B (full scoping synthesis + confirmation), not Path A — collapsing that gate is the defect `synthesis-summary.md` warns against.
-
-#### 0.3 Assess Scope
-
-Use the feature description plus a light repo scan to classify the work:
-- **Lightweight** - small, well-bounded, low ambiguity
-- **Standard** - normal feature or bounded refactor with some decisions to make
-- **Deep** - cross-cutting, strategic, or highly ambiguous
-
-If the scope is unclear, ask one targeted question to disambiguate and then proceed.
-
-**Deep sub-mode: feature vs product.** For Deep scope, also classify whether the brainstorm must establish product shape or inherit it:
-
-- **Deep — feature** (default): existing product shape anchors decisions. Primary actors, core outcome, positioning, and primary flows are already established in the product or repo. The brainstorm extends or refines within that shape.
-- **Deep — product**: the brainstorm must establish product shape rather than inherit it. Primary actors, core outcome, positioning against adjacent products, or primary end-to-end flows are materially unresolved. Existing code lowers the odds of product-tier but does not by itself rule it out — a half-built tool with ambiguous shape is still product-tier.
-
-Product-tier triggers additional Phase 1.2 questions and additional Product Contract sections. Feature-tier uses the current Deep behavior unchanged.
-
-**Visual probe tripwire.** If the feature is inherently visual or spatial — drawing/canvas tools, annotation behavior, visual editors, UI layout or navigation, interaction states, charts, diagrams, animation, maps, timelines, or spatial flows — read `references/visual-probes.md` now. Strong signals include freehand vs constrained drawing behavior, canvas annotation tools, layout comparisons, and state/flow placement. Loading the reference here is readiness only; it owns when the gate fires (state-based, at the first shape/behavior/state/layout/flow/diagram decision), the text-vs-visual offer, and helper invocation.
-
-**Unfamiliarity tripwire.** If the user signals they lack working knowledge of the domain or the territory the topic touches — "I know nothing about X", "never touched the auth modules", "I don't know what's possible / what I should be asking" — read `references/blindspot-pass.md` now. Loading here is readiness only; the reference owns when the offer fires (territory-scoped, before the first substantive question into the flagged territory), the map's shape, and how mapped decisions re-enter the dialogue.
-
-#### 0.4 Surface the Workflow Spine
-
-For **Standard and Deep** scope, use the platform's task-tracking capability when available (`TaskCreate`/`TaskUpdate`/`TaskList` in Claude Code, `update_plan` in Codex, or the equivalent on other harnesses). Skip it entirely for Lightweight and on the Phase 0.1b non-software route. Create it here, not earlier — 0.1b and 0.1c exit before this point, and the tier is unknown until 0.3.
-
-If the harness exposes no task-tracking capability — including `ToolSearch` or its equivalent returning no match — continue normally without simulating a task list in chat.
-
-The spine is five tasks, in order:
-
-1. Check what already exists
-2. Ask scoping questions
-3. Weigh approaches and recommend
-4. Confirm scope before writing
-5. Write the PRD document
-
-**Conditional work earns a task only when its gate fires** — never at creation, and never as a placeholder for a branch that may not run. A branch earns one when the user is either waiting on it or would be surprised to learn it happened: an accepted blindspot pass, a dispatched Slack researcher, a Phase 2.6 verifier working in the background. A step that fires per-decision rather than once does not — it would thrash the list. Insert it at the position where it runs.
-
-**Name every task you add the way the spine is named:** verb first, five words or fewer, naming the outcome the user can hold you to — not the phase, the internal activity, or the tool. `Verify claims against the code`, not `Phase 2.6 claim verification`. Never restate counts, quotas, or pacing in a name; that contract lives in the phase that owns it.
-
-**When a gate resolves such that a listed task will not run, record the skip — never mark it plainly complete, and never let it vanish unexplained.** In order of preference: set a `cancelled` or `skipped` status if the harness has one; otherwise rename the task to name the skip (`Skipped: no doc warranted`) and then mark it complete; only if the name cannot be changed, delete it. Say why in the conversation either way — the list carries the fact, not the reason. If Phase 3 decides no doc is warranted, that is task 5. If the 0.1c handoff is accepted mid-dialogue, clear the list entirely — `ce-pov` owns the run from there. A task you find yourself skipping routinely is misnamed: it encodes a branch rather than an outcome, so rename it to what happens in the common case.
-
-The list is a view for the user, not an instruction to you. It does not change when a phase fires or what that phase requires, and it never substitutes for a phase's own exit condition.
-
-#### 0.5 Resolve Iteration Version
-
-Scan the `prd/` directory to detect existing iteration versions (v1, v2, v3, ...).
-- If no iterations exist: suggest creating v1, ask user to confirm
-- If iterations exist: suggest the latest iteration, offer to continue or create new
-- User confirms the target iteration version
-- Store as `ITERATION_VERSION` (e.g., "v1", "v2")
-- Target PRD path: `prd/{ITERATION_VERSION}/prd.md`
-- Scan `prototype/` directory to confirm prototype branch aligns with PRD iteration version (if prototype exists).
+- **0.1 Resume**: scan `prd/` for existing work; confirm before resuming
+- **0.1b Classify**: software → continue; non-software → `references/universal-brainstorming.md`; neither → respond directly
+- **0.1c Verdict**: verdict-shaped requests → offer `/ce-pov` handoff via `references/verdict-routing.md`
+- **0.2 Assess**: clear requirements → skip to Phase 2.5; ambiguous → full brainstorm
+- **0.3 Scope**: Lightweight / Standard / Deep (+ feature vs product); arm visual-probe and blindspot tripwires
+- **0.4 Spine**: create 5-task tracking spine for Standard/Deep
+- **0.5 Iteration**: resolve `ITERATION_VERSION` from `prd/` directory
 
 ### Phase 1: Understand the Idea
 
-#### 1.1 Existing Context Scan
+**1.1 Context Scan** — For Standard/Deep, dispatch grounding scout sub-agent (extraction-tier) to produce a grounding dossier. For the scout prompt, scratch directory setup, and Slack routing, read `references/grounding.md`. Two rules: **verify before claiming** (check infrastructure exists) and **defer design to planning**.
 
-Scan the repo before substantive brainstorming. Match depth to scope:
+**1.2 Pressure Test** — Scan opening for rigor gaps (evidence, specificity, counterfactual, attachment). Read `references/product-pressure-test.md` for per-tier lens catalog. Session-settled decisions count as already-probed.
 
-**Lightweight** — Search for the topic, check if something similar already exists, and move on.
-
-**Standard and Deep** — Two passes:
-
-*Constraint Check (inline)* — Use the project's active instructions and conventions already in your context. Read `STRATEGY.md` if it exists for product direction and `CONCEPTS.md` if it exists for canonical vocabulary. Use canonical names in dialogue, approaches, and the Product Contract; if a source adds nothing, move on.
-- **Solutions index (v0.5)**: Read `docs/solutions/INDEX.md` if it exists. Filter entries where `phase = prd OR phase = cross-phase` and `domain` matches the current topic. Inject top-5 summaries as context constraints. If INDEX.md does not exist or is empty, skip silently.
-
-*Topic Scan (grounding scout)* — Create and retain the absolute scratch directory with this shell block, substituting the absolute path of this skill's directory and a short unique run slug:
-
-```bash
-SCRATCH_ROOT="/tmp/compound-engineering-$(id -u)";
-if [ -L "$SCRATCH_ROOT" ]; then echo "unsafe scratch root symlink: $SCRATCH_ROOT" >&2; exit 1; fi;
-install -d -m 700 "$SCRATCH_ROOT" || exit 1;
-if [ -L "$SCRATCH_ROOT" ] || [ ! -O "$SCRATCH_ROOT" ]; then echo "scratch root is not owned by the current user: $SCRATCH_ROOT" >&2; exit 1; fi;
-chmod 700 "$SCRATCH_ROOT" || exit 1;
-SCRATCH_DIR="$SCRATCH_ROOT/ce-brainstorm/<run-id>";
-(umask 077; mkdir -p "$SCRATCH_DIR") || exit 1; chmod 700 "$SCRATCH_DIR" || exit 1;
-echo "$SCRATCH_DIR";
-```
-
-Then dispatch one extraction-tier sub-agent via the platform's subagent primitive where available (a Task/Agent-style dispatch on harnesses that expose one); otherwise run the work inline or serially. In harnesses that support background dispatch, proceed to Phase 1.2/1.3 **without waiting**: the scout runs during the user's think-time on the opening questions. Scout prompt:
-
-> Gather grounding for a requirements brainstorm about **{topic}** in this repo. Search first with the native file-search and content-search tools, then read targeted sections — budget ~20 reads, preferring ranges over whole files. Find: whether something similar already exists, the most relevant existing artifacts (brainstorms, plans, specs, feature docs), adjacent examples of similar behavior, and the current state of anything the topic would touch (tables, routes, config, dependencies). Write a **grounding dossier** to `{scratch-dir}/grounding.md`: at most 150 lines of verbatim quotes and short code snippets, each with a `file:line` pointer. Extraction only — quote what the repo says; do not interpret or propose. If the topic has little footprint, write less rather than padding. Return only a gist: 3-5 lines summarizing what the dossier holds, plus its absolute path.
-
-Carry only the gist in the dialogue. When the conversation needs specifics the gist can't answer — the user challenges a claim, an approach needs grounding — read the dossier on demand: it is a condensed, verified quote-sheet, always cheaper than re-scanning raw files. Downstream consumers (the Phase 2.6 verifier, the ce-plan handoff) receive the dossier path, not its contents. If the scout has not returned by the time Phase 2 needs it, wait for it then.
-
-If the scan and scout surface nothing relevant, say so and continue. Two rules govern technical depth during the scan:
-
-1. **Verify before claiming** — When the brainstorm touches checkable infrastructure (database tables, routes, config files, dependencies, model definitions), read the relevant source files to confirm what actually exists. Any claim that something is absent — a missing table, an endpoint that doesn't exist, a dependency not in the Gemfile, a config option with no current support — must be verified against the codebase first; if not verified, label it as an unverified assumption. This applies to every brainstorm regardless of topic.
-
-2. **Defer design decisions to planning** — Implementation details like schemas, migration strategies, endpoint structure, or deployment topology belong in planning, not here — unless the brainstorm is itself about a technical or architectural decision, in which case those details are the subject of the brainstorm and should be explored.
-
-**Slack context** (opt-in, Standard and Deep only) — never auto-dispatch. Route by condition:
-
-- **Tools available + user asked**: Read `references/agents/slack-researcher.md` and dispatch a generic subagent seeded with that local prompt plus a brief summary of the brainstorm topic alongside Phase 1.1 work. Do not dispatch a standalone agent by type/name. Incorporate findings into constraint and context awareness.
-- **Tools available + user didn't ask**: Note in output: "Slack tools detected. Ask me to search Slack for organizational context at any point, or include it in your next prompt."
-- **No tools + user asked**: Note in output: "Slack context was requested but no Slack tools are available. Install and authenticate the Slack plugin to enable organizational context search."
-
-#### 1.2 Product Pressure Test
-
-Before generating approaches, scan the user's opening for rigor gaps. This is agent-internal analysis, not a user-facing checklist: read the opening, note which gaps actually exist, and raise only those during Phase 1.3 — folded into the normal flow of dialogue, not fired as a pre-flight gauntlet. A fuzzy opening may earn three or four probes; a concrete, well-framed one may earn zero because no scope-appropriate gaps were found.
-
-Read `references/product-pressure-test.md` for the per-tier lens catalog (Lightweight / Standard / Deep / Deep-product) and the synthesis questions the agent weighs in its own reasoning. Match depth to the Phase 0.3 scope. Phase 1.3 owns how each found gap fires as a probe.
-
-A session-settled decision counts as already-probed — it is not a gap. Spend the pressure test's scrutiny on unexamined assertions instead: each gets its one examination here rather than being re-litigated downstream.
-
-#### 1.3 Collaborative Dialogue
-
-Follow the Interaction Rules above. Use the platform's blocking question tool when available.
-
-**Blindspot gate — check it before probing flagged territory.** If the Phase 0.3 unfamiliarity tripwire fired, fire the blindspot offer from `references/blindspot-pass.md` before the first substantive question into the flagged territory (questions about the user's own problem, users, and evidence proceed normally — the gate is territory-scoped). The gate also arms mid-dialogue without a tripwire: when two consecutive answers show the user *cannot evaluate* the question's substance — not merely hasn't decided — read the reference and offer the pass then. Never silently switch into teaching; the offer is a blocking question.
-
-**Visual-probe gate — precondition, check it before raising the first shape decision.** If the Phase 0.3 tripwire fired, then before raising the first decision about shape, behavior, state, layout, flow, or a diagram — in any form, plain chat or a blocking tool — fire the text-vs-visual offer from `references/visual-probes.md`. The gate is state-based: offer unless this specific decision has already been through it; anchor the check to the decision you are about to raise, not a "pending gate" remembered since Phase 0.3. It **takes precedence over the default blocking-question path** (Interaction Rule 4): do not raise the shape decision as an `AskUserQuestion`/`request_user_input` menu until the user has declined visual. **An ASCII preview or text mockup inside the question's choices does not satisfy the offer** — that is the shortcut this gate exists to stop. Use the platform's blocking question tool for the text-vs-visual offer itself when available; the reference owns the offer wording, the cheapest-probe build, helper invocation, and the display-only feedback contract.
-
-**Guidelines:**
-- Ask what the user is already thinking before offering your own ideas. This surfaces hidden context and prevents fixation on AI-generated framings.
-- Start broad (problem, users, value) then narrow (constraints, exclusions, edge cases)
-- **Rigor probes fire before Phase 2 and are open-ended, not menus.** Each scope-appropriate gap found in Phase 1.2 fires as a **separate** direct open-ended probe — one probe satisfies one gap, not multiple. Surface them progressively across the conversation — interleaving with narrowing moves is fine — as long as every gap found in Phase 1.2 has been probed before Phase 2. A menu would signal which kinds of evidence count and let the user pick rather than produce; an open probe forces real observation or surfaces real uncertainty. Each of Phase 1.2's "when present, ask..." lines is the probe; phrase it per Interaction Rule 6. **Attachment is the final rigor probe before Phase 2 when that gap is present — presence is judged from the opening per Phase 1.2, and narrowing having already produced a shape is not a reason to skip it; its job is to pressure-test the user's implicit framing before Phase 2 inherits it.** If a probe's answer reveals genuine uncertainty, record it as an explicit assumption in the Product Contract rather than skipping the probe.
-- Clarify the problem frame, validate assumptions, and ask about success criteria
-- Make requirements concrete enough that planning will not need to invent behavior
-- Surface dependencies or prerequisites only when they materially affect scope
-- Resolve product decisions here; leave technical implementation choices for planning
-- Bring ideas, alternatives, and challenges instead of only interviewing
-
-**Before exiting Phase 1.3: integration check.** Mentally combine what the user has said so far and surface any non-obvious consequences the dialogue hasn't probed. If user-stated X plus user-stated Y plus your-default-Z produces a downstream effect the user is unlikely to have tracked through one-question-at-a-time dialogue ("if mute lives on the rule AND we don't warn on delete, then rule-delete silently loses pause state"), probe it now while you're still in dialogue. One probe per genuine combination effect, asked open-ended, same discipline as rigor probes. Phase 2.5's call-outs are a safety net for residuals (silent agent inferences, pre-loaded contexts with no dialogue) — NOT a punt list for consequences you could have asked about now.
-
-**Exit condition:** Exit Phase 1.3 when each of these holds, OR the user explicitly wants to proceed: the primary actor/user is identified or marked unknown; the desired outcome is stated; the in-scope and out-of-scope boundaries that matter are known; success criteria or acceptance signals are known or recorded as assumptions; every Phase 1.2 gap found has been probed or recorded as an assumption; and no integration-check question is pending. A session-settled decision counts as already-probed toward every clause — never re-ask it.
+**1.3 Dialogue** — Follow Interaction Rules. Fire blindspot gate (if tripwire armed) and visual-probe gate (before first shape decision). Rigor probes fire as open-ended questions before Phase 2. Before exit: integration check for non-obvious consequences. **Exit when**: primary actor, outcome, scope, success criteria all known or recorded as assumptions.
 
 ### Phase 2: Explore Approaches
 
-**Load brainstorm profile.** If `BRAINSTORM_PROFILE_PATH` is set (resolved at Phase 0.0), read it now. The profile defines:
-- **Thinking dimensions**: product-level dimensions each approach must address (e.g., business process, state model, permission model). These replace generic "mechanism / product shape" with template-specific anchors.
-- **Guiding questions**: per-dimension questions to probe during approach exploration.
-- **Anti-pattern boundary**: what constitutes a technical decision that belongs in ce-plan, not in this phase. Different templates may have different boundaries.
+**Load brainstorm profile.** If `BRAINSTORM_PROFILE_PATH` is set, read it. Each approach must address core thinking dimensions; note irrelevant dimensions.
 
-When presenting approaches, each approach must address the profile's core thinking dimensions. If a dimension is not relevant to the current brainstorm, note why rather than silently skipping it.
+If `CLAUDECODE=1`, read `references/reasoning-elevation.md` for optional model elevation.
 
-**Reasoning elevation (Claude Code only).** Before generating approaches, if positively Claude Code (`CLAUDECODE=1`, not Cursor/Codex), load `references/reasoning-elevation.md` and follow it — it may dispatch approach generation to a higher-reasoning model when the user has opted in, and it owns the completion-time discoverability tip. On any non-Claude host, skip it entirely — proceed on the session model with no mention. If a prompt names a model this skill does not recognize on this harness, proceed on the session model without comment.
+Propose **2-3 approaches** (or recommend directly if one is clearly best). Use non-obvious angles (inversion, constraint removal, analogy). Present all before recommending. For each: description, pros/cons, risks, when suited.
 
-If multiple plausible directions remain, propose **2-3 concrete approaches** based on research and conversation. Otherwise state the recommended direction directly.
-
-Use at least one non-obvious angle — inversion (what if we did the opposite?), constraint removal (what if X weren't a limitation?), or analogy from how another domain solves this. The first approaches that come to mind are usually variations on the same axis. Hold each approach to an anti-genericness test: if it would appear in a generic listicle for this problem category, sharpen it against the grounding dossier or drop it.
-
-Present approaches first, then evaluate. Let the user see all options before hearing which one is recommended — leading with a recommendation before the user has seen alternatives anchors the conversation prematurely.
-
-If approach differences are spatial, behavioral, or otherwise visual enough that prose would be slower or lower-fidelity, use `references/visual-probes.md` before presenting the choice. If the Phase 0.3 tripwire fired and no shape decision has yet been through the gate, the offer fires here, per that reference. The visual path remains opt-in and display-only; text remains a first-class path.
-
-When useful, include one deliberately higher-upside alternative:
-- Identify what adjacent addition or reframing would most increase usefulness, compounding value, or durability without disproportionate carrying cost. Present it as a challenger option alongside the baseline, not as the default. Omit it when the work is already obviously over-scoped or the baseline request is clearly the right move.
-
-At product tier, alternatives should differ on *what* is built (product shape, actor set, positioning), not *how* it is built. Implementation-variant alternatives belong at feature tier.
-
-For each approach, provide:
-- Brief description (2-3 sentences)
-- Pros and cons
-- Key risks or unknowns
-- When it's best suited
-
-**Approach granularity: profile-driven product thinking, not architecture.** Follow the brainstorm profile's thinking dimensions and anti-pattern boundary. Approach descriptions address the profile's product-level dimensions (business process, state model, permission model, data relationships, business rules, system functions) and product-relevant trade-offs (plan-tier coupling, complexity surface, migration difficulty). They do NOT cross the anti-pattern boundary into implementation specifics — column names, table names, file paths, service classes, JSON shapes, exact method names, module structures, API definitions. Those are ce-plan's job. Bringing architecture forward at brainstorm time forces the user to make architectural decisions on ce-brainstorm's intentionally-shallow research, and the synthesis at Phase 2.5 then has to filter out the leak.
-
-After presenting all approaches, state your recommendation and explain why. Prefer simpler solutions when added complexity creates real carrying cost, but do not reject low-cost, high-value polish just because it is not strictly necessary.
-
-If one approach is clearly best and alternatives are not meaningful, skip the menu and state the recommendation directly.
-
-If relevant, call out whether the choice is:
-- Reuse an existing pattern
-- Extend an existing capability
-- Build something net new
+**Granularity: profile-driven product thinking, not architecture.** Address profile dimensions (business process, state model, permissions, data, rules, functions). Do NOT cross into implementation specifics (tables, paths, classes, APIs).
 
 ### Phase 2.5: Synthesis Summary
 
-**STOP. Before composing the synthesis, read `references/synthesis-summary.md`.** The two-stage shape (internal three-bucket draft → chat-time scoping synthesis), the four scoping synthesis sections with their keep tests, the per-bullet affirmability and detail tests, the tier-aware bullet budget with re-cut rule, anti-pattern guidance, soft-cut behavior, self-redirect support, and internal-draft routing into doc body sections all live there — none of them appear in this main body. Composing a synthesis without these rules loaded reliably produces malformed output: the full internal three-bucket draft pasted verbatim into chat, implementation detail leaking into the scoping synthesis, the proposal-pitch anti-pattern. The Path A / Path B routing below decides only *whether* a confirmation fires — it is not the synthesis spec.
-
-Surface a scoping synthesis to the user before Phase 3 writes the PRD document — the user's last opportunity to correct scope before the artifact lands. The scoping synthesis is shaped like what two product collaborators would confirm before writing a PRD, not like a comprehensive audit or a one-line preview.
-
-Fires for **all tiers** including Lightweight. Skip Phase 2.5 entirely on the Phase 0.1b non-software (universal-brainstorming) route.
-
-**Path A vs Path B** is decided by `references/synthesis-summary.md` from two signals: whether any blocking question fired, and the Phase 0.3 tier. Path A (announce-only, no confirmation) fires **solely** for Lightweight tier with no blocking questions; every other case — including a richly pre-loaded Standard/Deep opener that needed no dialogue — is Path B (full tier-aware scoping synthesis with an unconditional confirmation gate). Follow the reference's gate exactly; do not decide the path or compose the synthesis from memory.
-
-Session-settled decisions render in the scoping synthesis as `Carrying forward:` lines, never as questions or call-outs — `references/synthesis-summary.md` owns the rendering. Path B rich-context openers carrying prior-session decisions are the common case.
-
-#### 2.6 Claim Verification (inside the Path B confirmation wait)
-
-When the upcoming Product Contract will assert checkable claims about the repo — absence claims ("no retry logic exists"), references to specific files, config, or dependencies, anything planning would build on — dispatch one generation-tier verifier at the same moment the Path B confirmation question goes up, so it runs during the user's think-time. Pass it the claim list (one line each), the grounding dossier path if one exists, and this instruction: verify each claim directly against the codebase — budget ~15 targeted reads — and return a per-claim verdict: **confirmed** (with `file:line`), **refuted** (with the contradicting evidence), or **unverifiable**. Do not block the confirmation question on the verifier.
-
-Consume the verdicts at Phase 3: correct refuted claims before writing, label unverifiable ones as explicit assumptions. A fresh-context verifier replaces self-graded verification — the author confirming its own claims is anchored; the verifier never saw the dialogue.
-
-Skip when Path A fires, when the doc will make no checkable claims, or on the non-software route. If the verifier dispatch fails, fall back to verifying the claims inline before the Phase 3 write — Phase 1.1's verify-before-claiming rule still holds either way.
+**Read `references/synthesis-summary.md` before composing.** Surface scoping synthesis — user's last chance to correct scope. Fires for all tiers. Path A (announce-only) for Lightweight + no blocking questions; Path B (confirmation gate) for all others. 2.6: dispatch claim verifier during Path B confirmation wait.
 
 ### Phase 3: Generate PRD Document
 
-Generate a PRD document when the conversation produced durable decisions worth preserving — see `references/brainstorm-sections.md` "Decide whether a doc is warranted at all" for the criteria and the bug-fix stress test. Skip when the user only needs brief alignment.
+Read `references/brainstorm-sections.md` for doc-warranted criteria. If warranted: read template from `PRD_TEMPLATE_PATH`, fill via `references/prd-mapping.md`, write to `prd/{ITERATION_VERSION}/prd.md`. Vocabulary capture: update `CONCEPTS.md` with resolved domain terms (only if it exists).
 
-When a doc is warranted:
+### Phase 3.5: Prototype Inner Loop
 
-1. **Read the PRD template** from `PRD_TEMPLATE_PATH` (resolved at Phase 0.0). The template defines the 11-chapter PRD structure.
-
-2. **Fill the template** using `references/prd-mapping.md` — it maps brainstorm dialogue information to PRD chapters. Key rules:
-   - Chapters with dialogue-derived content get filled (§2-§4, §6-§8)
-   - Chapters without dialogue content retain template placeholders (§5, §9-§11)
-   - §1 (版本修订记录) is auto-filled from metadata (date, user info)
-   - Do NOT hard-fill chapters that belong to later BA processes
-
-3. **Write to `prd/{ITERATION_VERSION}/prd.md`** (resolved at Phase 0.5). Create the directory if it doesn't exist.
-
-4. **Metadata**: Replace ce-unified-plan metadata with PRD metadata:
-   - Remove: `artifact_contract`, `artifact_readiness`, `product_contract_source`
-   - Add: `project_name`, `iteration_version`, `prd_template` (path to template used)
-   - Keep: `title`, `date`
-
-5. **Report** the written artifact with its absolute path.
-
-#### Vocabulary Capture — after the PRD document (only if CONCEPTS.md already exists)
-
-**Skip this step entirely if `CONCEPTS.md` does not exist at repo root** — creation is owned by ce-compound and ce-compound-refresh.
-
-Run this **after** the approaches, the scope synthesis, and the PRD document — that is where the canonical term often gets chosen or corrected, so capturing during early dialogue (before this point) would miss the final resolved name. If it exists, scan the full dialogue and the Product Contract for **resolved** domain terms — terms where the conversation actively pinned down a precise local meaning, not terms merely mentioned in passing. **Resolved means the definition is settled, not still under discussion.** Provisional terms that may still revise stay in the conversation only.
-
-For each resolved term: if missing, add it; if present but new precision surfaced, refine it; if already consistent, no action.
-
-**Domain entities, named processes, and status concepts with project-specific meaning only.** Not file paths, class names, function signatures, or implementation decisions — `CONCEPTS.md` is a glossary, not a spec or catch-all.
-
-Follow the format set by existing entries. Apply edits silently. (If Phase 3 skipped the doc, still run this against the resolved dialogue.)
-
-### Phase 3.5: Prototype Inner Loop（原型内循环，v0.5 新增）
-
-> **v0.7 条件化**：当 `mode: orchestrated` 时，跳过整个 Phase 3.5（原型循环由 orchestrator 编排，含 prototype-reviewer 自动评审 + 人工评审）。以下为 standalone 模式的 Phase 3.5 流程。
-
-PRD 文档写入后、Handoff 之前，执行原型内循环。原型是 PRD 的**验证工具**，不是 PRD 的下游。
-
-#### 3.5.1 原型触发判断
-
-检查 PRD 草稿中是否包含 UI/画面/交互相关功能点（§4 画面原型、§7 系统功能清单中的 UI 功能）。
-
-- **包含 UI 功能点** → 使用平台阻塞问题工具询问用户："PRD 包含 UI 功能点，是否需要产出原型进行验证？"
-- **不包含 UI 功能点** → 跳过原型内循环，直接进入 Phase 4
-- **用户选择跳过** → 跳过，PRD 直接冻结
-
-#### 3.5.2 原型产出
-
-如果需要原型：
-1. 读取 PRD 草稿中的功能点清单（§7 系统功能清单）
-2. 读取项目 `design-system.md`（通过 `tf runtime config --get prototype.designSystem` 获取路径）
-3. 调用 `/prototype` skill 产出原型页面
-4. 产出 `prototype/` 目录（index.html + pages/ + components/ + flow.md）
-
-#### 3.5.3 原型审查（对照 PRD）
-
-逐功能点检查：
-- PRD 中每个 UI 功能点是否在原型中有对应页面/组件？
-- PRD 中的状态流转是否在原型 flow.md 中完整体现？
-- PRD 中的边界条件是否在原型中有体现（空状态/错误状态/加载状态）？
-
-产出审查报告：覆盖/遗漏/矛盾清单。
-
-#### 3.5.4 修正循环
-
-如果审查发现问题：
-- **遗漏** → 回到 Phase 1.3 对话，补充 PRD 功能点 → 更新原型 → 回 3.5.3
-- **矛盾** → 回到 Phase 1.3 对话，解决矛盾 → 更新原型 → 回 3.5.3
-- **最多循环 3 次**，超过则标记为"需人工介入"，在 PRD 中记录未解决项
-- 每次修正触发复利捕获：`tf solutions capture --phase prd --domain <domain> --type pitfall --severity medium --summary "<修正原因>"`
-
-#### 3.5.5 PRD 完整性评审（v0.8 新增，冻结前门禁）
-
-原型审查通过后、冻结前，派发 `prd-completeness-reviewer` 子代理（只读，独立上下文），评审 PRD「是否完整到能支撑后续 plan/spec 实施」（区别于 Phase 2.6 claim verifier——后者管"说得对不对"，本评审管"说得全不全"）。
-
-- 派发：按名派发插件 agent `prd-completeness-reviewer`（定义见插件 `agents/prd-completeness-reviewer.md`，只读审查员），传入 PRD 路径 + CONCEPTS.md 路径。
-- 子代理按 §18.1 交接协议返回（status/deliverable/blockers/outstanding_questions/summary）。报告写在 response，本 skill 落盘到 `prd/{ITERATION_VERSION}/prd-completeness-review.md`。
-- 判定（柔性）：PASS / PASS_WITH_WARNINGS → 进入冻结；**FAIL（Critical>0）→ 回 Phase 1.3 补充**后重审。
-- 5 维度：用户故事完整性(Critical)/验收标准(Critical)/边界与非功能(Important)/术语一致性(Minor)/范围闭环(Important)。
-
-#### 3.5.6 冻结
-
-完整性评审通过后：
-1. 写入 `prd/{ITERATION_VERSION}/prototype-review.md`（审查结论 + 版本 + 日期 + 循环次数）
-2. PRD 标记为 frozen（在 PRD frontmatter 中增加 `frozen: true` + `frozen_date: YYYY-MM-DD`），并在正文标题下插入冻结声明（措辞见 `references/prd-mapping.md`「冻结声明」节）
-3. **冻结语义为 `frozen_downstream`（非升版）**：后续阶段（ce-plan、spec-writer）**不可直接回改** PRD；如 plan 或实施暴露 scope 问题，经 **S3→S2 回退在 vN 内修订**并记录「决策与变更履历」（不升版）。**仅当启动新迭代 vN+1 或用户显式绝对冻结（`frozen: absolute`）时才需升版。**
-4. 同步更新正文 §1.1 文档状态为「已冻结-下游」（与 frontmatter `frozen: true` 一致，见 `references/prd-mapping.md`「版本格式规范」）
+**`orchestrated` mode skips this phase.** For standalone: read `references/prototype-loop.md`. Trigger: PRD has UI functions. Steps: produce prototype → review vs PRD → fix loop (max 3) → completeness review → freeze PRD.
 
 ### Phase 4: Handoff
 
-Read `references/handoff.md` now — before presenting any options. The option set and its visibility conditions, the rendering-mode rule, the per-selection dispatch instructions (including what gets passed to `ce-plan`), and the closing summary formats all live there — none of them appear in this main body. An improvised menu silently breaks pipeline routing: options surface in states where they must be hidden, and downstream skills receive the wrong payload. When handing off to `ce-plan`, pass the PRD path (`prd/{ITERATION_VERSION}/prd.md`) as the source artifact.
-Also pass the prototype path (`prototype/`) and prototype-review path (`prd/{ITERATION_VERSION}/prototype-review.md`) if the prototype inner loop ran. ce-plan reads the frozen PRD + prototype as input.
+Read `references/handoff.md` — option set, visibility conditions, dispatch instructions all live there. Pass PRD path + prototype path (if loop ran) to `ce-plan`.

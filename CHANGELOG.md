@@ -6,6 +6,28 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.25.1] - 2026-07-29
+
+### Changed（SKILL.md 渐进式披露拆分，P1-9，3 项）
+
+#### ce-proof (346→88 行)
+- **skills/ce-proof/SKILL.md**：保留核心决策逻辑（Identity/Credentials/Publish Mode/Edit Strategy/Safety），curl 示例和工作流移入 references
+- **skills/ce-proof/references/api-recipes.md**（新增）：Create/Read/Edit/Presence/Title/Delete 的完整 curl 示例 + 错误码表 + Marks & Privacy + When the loop breaks
+- **skills/ce-proof/references/workflows.md**（新增）：Review/Create/Pull 三个完整工作流
+
+#### ce-brainstorm (458→122 行)
+- **skills/ce-brainstorm/SKILL.md**：保留核心原则 + 每个 Phase 摘要 + reference 引用指针
+- **skills/ce-brainstorm/references/output-format.md**（新增）：OUTPUT_FORMAT 5 级优先级解析逻辑
+- **skills/ce-brainstorm/references/phase0-routing.md**（新增）：Phase 0 的 Resume/Classify/Verdict/Assess/Scope/Spine/Iteration 详细路由
+- **skills/ce-brainstorm/references/prototype-loop.md**（新增）：Phase 3.5 原型内循环完整流程
+- **skills/ce-brainstorm/references/grounding.md**（新增）：Phase 1.1 上下文扫描 + grounding scout 提示词 + Slack 路由
+
+#### ce-ideate (402→85 行)
+- **skills/ce-ideate/SKILL.md**：保留核心原则 + Phase 摘要 + reference 引用指针
+- **skills/ce-ideate/references/phase0-scope.md**（新增）：Phase 0 完整路由逻辑（输出模式/主题门/模式分类/上下文门/聚焦与容量/成本透明）
+- **skills/ce-ideate/references/grounding.md**（新增）：Phase 1 模式感知 Grounding（仓库/非仓库调度 + Web 研究 + 用户研究工件 + 综合摘要）
+- **skills/ce-ideate/references/topic-surface.md**（新增）：Phase 1.5 主题表面分解（轴标准 + 证据侦察）
+
 ## [0.25.0] - 2026-07-29
 
 ### Added（brainstorm profile 机制，3 项）
