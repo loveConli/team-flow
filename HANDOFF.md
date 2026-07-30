@@ -111,7 +111,7 @@ team-flow/
 2. **npm 包名 = `@xulthekl/team-flow`**（scoped，解决 publish 权限冲突；author = `xulthekl`）。
 3. **compound 范围 = 核心子集（C 方案，6 个）**，非全量 33。理由：避免 27 个嵌套 agent 全部并入导致膨胀；6 个核心已覆盖「头脑风暴→PRD→全局复利→策略→创意→验证」主链路。
 4. **compound 的 agent 随所属 skill 自动并入**：嵌套在各 skill 内部的 `references/agents/*.md`，作为运行时子代理，非独立顶层 agents。
-5. **CLI = `tf`**（bin 同时暴露 `team-flow` 别名）。npx 调用统一用 `npx --yes --package @xulthekl/team-flow@X.Y.Z tf <subcmd>`。
+5. **CLI = `tf`**（bin 同时暴露 `team-flow` 别名）。CLI 调用统一用 `tf <subcmd>`（全局安装后直接可用，版本由 session-start hook 自动同步）。
 6. **状态文件 = `.team-flow.yaml`**（扁平，每 change 一份）。
 7. **配置文件 = `team-flow.config.json`**（插件层扩展字段：`prd.template` / `prototype.designSystem` / `prototype.entry`）。
 8. **版本同步机制**：`npm run version <x.y.z>` 自动更新 package.json + 所有 manifest + 所有 skill npx 引用 + phase-guard.md / llms.txt / GEMINI.md 版本戳。

@@ -1,0 +1,8 @@
+{
+  "hooks": [
+    {
+      "event": "sessionStart",
+      "command": "bash /Users/litong/Documents/work/code/practice/team-flow-workspace/team-flow/.zcode/team-flow/hooks/session-start"
+    }
+  ]
+}

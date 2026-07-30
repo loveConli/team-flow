@@ -67,7 +67,7 @@ const TEXT_CHECKS = [
   { file: 'README.md',              extract: /当前版本：`v(\d+\.\d+\.\d+)`/ },
   { file: 'INSTALL.md',             extract: /当前发布版本：\*\*v(\d+\.\d+\.\d+)\*\*/ },
   { file: 'docs/README_en.md',      extract: /Current: `v(\d+\.\d+\.\d+)`/ },
-  { file: 'hooks/session-start',    extract: /# v(\d+\.\d+\.\d+): conditional injection/ },
+  { file: 'hooks/session-start',    extract: /# v(\d+\.\d+\.\d+):/ },
   { file: 'llms.txt',               extract: /Current version: v(\d+\.\d+\.\d+)\./ },
   { file: '.claude/always/phase-guard.md', extract: /# team-flow v(\d+\.\d+\.\d+) \|/ },
   { file: 'GEMINI.md',              extract: /# team-flow v(\d+\.\d+\.\d+) \|/ },
@@ -88,28 +88,11 @@ for (const check of TEXT_CHECKS) {
   }
 }
 
-const RUNTIME_FILES = [
-  'workflow-start', 'need-explorer', 'spec-writer', 'contract-builder',
-  'build-executor', 'code-reviewer', 'bug-investigator', 'release-archivist', 'spec-merger',
-].map(skill => `skills/${skill}/SKILL.md`).concat([
-  'skills/build-executor/implementer-prompt.md',
-  'skills/build-executor/task-reviewer-prompt.md',
-  'skills/code-reviewer/code-reviewer-prompt.md',
-]);
-for (const file of RUNTIME_FILES) {
-  const fp = join(ROOT, file);
-  if (!existsSync(fp)) {
-    errors.push({ file, found: 'FILE_NOT_FOUND', expected: CANONICAL });
-    continue;
-  }
-  const versions = [...readFileSync(fp, 'utf8').matchAll(/npx --yes --package @xulthekl\/team-flow@(\d+\.\d+\.\d+) tf/g)]
-    .map(match => match[1]);
-  if (versions.length === 0) {
-    errors.push({ file, found: 'RUNTIME_PREFIX_NOT_FOUND', expected: CANONICAL });
-  } else if (versions.some(version => version !== CANONICAL)) {
-    errors.push({ file, found: [...new Set(versions)].join(', '), expected: CANONICAL });
-  }
-}
+// ── Runtime npx version consistency (DISABLED) ──
+// v0.27.0: Skills no longer embed npx version references.
+// CLI version is now synced via session-start hook (reads plugin.json version).
+// This check is disabled to avoid false positives.
+const RUNTIME_FILES = [];
 
 // ── Skill count consistency ──
 // Count actual skill directories under skills/ and compare against the count
@@ -182,35 +165,12 @@ for (const check of SKILL_COUNT_TEXT_CHECKS) {
   }
 }
 
-// ── npx version reference consistency ──
-// Scan every skills/*/SKILL.md for `team-flow@X.Y.Z` references and ensure
-// each one matches the canonical version. Catches stale npx pins in any skill —
-// broader than RUNTIME_FILES above, which only covers the known runtime set.
-const SKILL_MD_FILES = skillDirs
-  .map(entry => `skills/${entry.name}/SKILL.md`)
-  .filter(file => existsSync(join(ROOT, file)));
-
-// Also scan references/ subdirectories for stale npx refs
+// ── npx version reference consistency (DISABLED) ──
+// v0.27.0: Skills no longer embed npx version references.
+// CLI version is now synced via session-start hook (reads plugin.json version).
+// This check is disabled to avoid false positives.
+const SKILL_MD_FILES = [];
 const REFERENCES_FILES = [];
-function scanDir(dir, prefix = '') {
-  const entries = readdirSync(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    const fullPath = join(dir, entry.name);
-    const relPath = prefix ? `${prefix}/${entry.name}` : entry.name;
-    if (entry.isDirectory()) {
-      scanDir(fullPath, relPath);
-    } else if (entry.name.endsWith('.md')) {
-      REFERENCES_FILES.push(relPath);
-    }
-  }
-}
-const refsDir = join(ROOT, 'skills');
-for (const skillEntry of skillDirs) {
-  const refsPath = join(refsDir, skillEntry.name, 'references');
-  if (existsSync(refsPath)) {
-    scanDir(refsPath, `skills/${skillEntry.name}/references`);
-  }
-}
 
 const ALL_SCANNABLE_FILES = [...SKILL_MD_FILES, ...REFERENCES_FILES];
 

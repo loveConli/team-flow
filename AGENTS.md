@@ -14,7 +14,7 @@
 
 - **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 23 个 skills + 8 个 agents + hooks + templates
 - **@xulthekl/team-flow**（npm 底座包）：team-flow 的 CLI 工具层（`package.json` name = `@xulthekl/team-flow`，bin = `tf` / `team-flow`），提供状态机、校验、复利 CLI 等运行时能力
-- 关系：team-flow 插件 **包含** @xulthekl/team-flow npm 包作为底座（同一仓库、同一版本）。skills 中的 `npx --yes --package @xulthekl/team-flow@x.y.z tf ...` 调用的是已发布的 npm 底座包，版本号必须与当前 `package.json` version 一致
+- 关系：team-flow 插件 **包含** @xulthekl/team-flow npm 包作为底座（同一仓库、同一版本）。skills 中的 `tf ...` 调用的是已全局安装的 @xulthekl/team-flow CLI，版本由 session-start hook 自动同步
 - 历史身份（已废弃）：`spec-superflow`（npm 包名，0.11.0 后停止发布）/ `ssf`（CLI 前缀）/ `.spec-superflow.yaml`（状态文件）—— 详见设计增强方案 v0.9 §27
 
 ## Commands

@@ -34,7 +34,7 @@
 change closing 时检查经验晋升（change 内经验 → 产品级经验）：
 
 ```bash
-npx --yes --package @xulthekl/team-flow@0.26.1 tf solutions promote <change-dir>
+tf solutions promote <change-dir>
 ```
 
 ### 4. 动态重规划触发

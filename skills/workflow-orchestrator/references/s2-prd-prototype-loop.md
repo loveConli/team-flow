@@ -87,7 +87,7 @@ PRD草稿生成后：
 检测可复利时刻（需求矛盾、原型返工、自动评审发现不一致并修正等）。每次自动评审发现不一致并修正后触发：
 
 ```bash
-npx --yes --package @xulthekl/team-flow@0.26.1 tf solutions capture --phase prd --domain <domain> --type pitfall --severity <sev> --summary "<summary>"
+tf solutions capture --phase prd --domain <domain> --type pitfall --severity <sev> --summary "<summary>"
 ```
 
 ### 6. 反馈环路检查点

@@ -41,8 +41,8 @@ Restate what you heard: "Here's what I'm hearing: [problem, scope, non-goals, su
 
 After user confirms the summary:
 ```bash
-npx --yes --package @xulthekl/team-flow@0.26.1 tf state set <change-dir> dp_1_result "confirmed: <one-line summary>"
-npx --yes --package @xulthekl/team-flow@0.26.1 tf state set <change-dir> dp_1_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+tf state set <change-dir> dp_1_result "confirmed: <one-line summary>"
+tf state set <change-dir> dp_1_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 DP-1 confirms scope, non-goals, and success criteria before artifact creation.
 

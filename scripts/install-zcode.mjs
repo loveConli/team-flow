@@ -104,9 +104,10 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
       if (content.includes('${CLAUDE_PLUGIN_ROOT}')) {
         content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, pluginRootAbs);
       }
+      // v0.27.0: Replace bare `tf` commands with local node path for ZCODE platform
       content = content.replace(
-        /npx --yes --package @xulthekl\/team-flow@\d+\.\d+\.\d+ tf/g,
-        `node ${shellQuote(join(pluginRootAbs, 'scripts', 'team-flow.mjs'))}`,
+        /\btf\s+(?=state|execution|checkpoint|handoff|runtime|validate|doctor|config|version|list|inject|audit|sync|prototype-sync|arch-merge|solutions)/g,
+        `node ${shellQuote(join(pluginRootAbs, 'scripts', 'team-flow.mjs'))} `,
       );
       writeFileSync(skillMd, content, 'utf-8');
     }
@@ -118,9 +119,10 @@ async function copySkillsWithRoot(sourceSkills, targetSkills, pluginRootAbs) {
       if (content.includes('${CLAUDE_PLUGIN_ROOT}')) {
         content = content.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, pluginRootAbs);
       }
+      // v0.27.0: Replace bare `tf` commands with local node path for ZCODE platform
       content = content.replace(
-        /npx --yes --package @xulthekl\/team-flow@\d+\.\d+\.\d+ tf/g,
-        `node ${shellQuote(join(pluginRootAbs, 'scripts', 'team-flow.mjs'))}`,
+        /\btf\s+(?=state|execution|checkpoint|handoff|runtime|validate|doctor|config|version|list|inject|audit|sync|prototype-sync|arch-merge|solutions)/g,
+        `node ${shellQuote(join(pluginRootAbs, 'scripts', 'team-flow.mjs'))} `,
       );
       writeFileSync(subPath, content, 'utf-8');
     }
