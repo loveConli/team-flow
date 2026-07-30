@@ -22,10 +22,19 @@ sync_tf_version() {
   if [ "$installed_version" != "$PLUGIN_VERSION" ]; then
     echo "🔄 team-flow CLI version mismatch: ${installed_version:-not installed} → $PLUGIN_VERSION"
     echo "   Auto-installing @xulthekl/team-flow@$PLUGIN_VERSION..."
-    npm install -g "@xulthekl/team-flow@$PLUGIN_VERSION" 2>&1 || {
-      echo "⚠️  Auto-install failed. Please run manually:"
-      echo "   npm install -g @xulthekl/team-flow@$PLUGIN_VERSION"
-    }
+
+    # Try install with cache clean on failure
+    if ! npm install -g "@xulthekl/team-flow@$PLUGIN_VERSION" 2>&1; then
+      echo "⚠️  Install failed, cleaning cache and retrying..."
+      npm cache clean --force 2>/dev/null
+      if ! npm install -g "@xulthekl/team-flow@$PLUGIN_VERSION" 2>&1; then
+        echo "❌ Auto-install failed after cache clean. Please run manually:"
+        echo "   npm cache clean --force && npm install -g @xulthekl/team-flow@$PLUGIN_VERSION"
+        return 1
+      fi
+    fi
+
+    echo "✅ @xulthekl/team-flow@$PLUGIN_VERSION installed successfully"
   fi
 }
 
