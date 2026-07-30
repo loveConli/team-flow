@@ -3,37 +3,15 @@
 set -e
 
 # ═══════════════════════════════════════════════════════════════
+# Plugin version (update this when releasing new versions)
+# ═══════════════════════════════════════════════════════════════
+PLUGIN_VERSION="0.27.0"
+
+# ═══════════════════════════════════════════════════════════════
 # Step 1: Auto-sync CLI version with plugin version
 # ═══════════════════════════════════════════════════════════════
 
 sync_tf_version() {
-  # Find plugin.json from plugin root
-  local plugin_json=""
-  local plugin_root="${CURSOR_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-}}"
-
-  if [ -n "$plugin_root" ] && [ -f "$plugin_root/plugin.json" ]; then
-    plugin_json="$plugin_root/plugin.json"
-  else
-    # Fallback: search common plugin directories
-    for dir in ".cursor" ".claude" ".cline" ".kiro" ".windsurf"; do
-      if [ -f "$dir/plugin.json" ]; then
-        plugin_json="$dir/plugin.json"
-        break
-      fi
-    done
-  fi
-
-  # Read plugin version from plugin.json
-  local plugin_version=""
-  if [ -n "$plugin_json" ]; then
-    plugin_version=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$plugin_json" | head -1 | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
-  fi
-
-  # If plugin.json not found or version not extracted, skip sync
-  if [ -z "$plugin_version" ]; then
-    return 0
-  fi
-
   # Get installed tf version
   local installed_version=""
   if command -v tf &>/dev/null; then
@@ -41,18 +19,18 @@ sync_tf_version() {
   fi
 
   # Compare versions and sync if needed
-  if [ "$installed_version" != "$plugin_version" ]; then
-    echo "🔄 team-flow CLI version mismatch: ${installed_version:-not installed} → $plugin_version"
-    echo "   Auto-installing @xulthekl/team-flow@$plugin_version..."
-    npm install -g "@xulthekl/team-flow@$plugin_version" --prefer-offline 2>/dev/null || {
+  if [ "$installed_version" != "$PLUGIN_VERSION" ]; then
+    echo "🔄 team-flow CLI version mismatch: ${installed_version:-not installed} → $PLUGIN_VERSION"
+    echo "   Auto-installing @xulthekl/team-flow@$PLUGIN_VERSION..."
+    npm install -g "@xulthekl/team-flow@$PLUGIN_VERSION" 2>&1 || {
       echo "⚠️  Auto-install failed. Please run manually:"
-      echo "   npm install -g @xulthekl/team-flow@$plugin_version"
+      echo "   npm install -g @xulthekl/team-flow@$PLUGIN_VERSION"
     }
   fi
 }
 
-# Run version sync (suppress output for clean hook execution)
-sync_tf_version >/dev/null 2>&1 || true
+# Run version sync (show output for visibility)
+sync_tf_version
 
 # ═══════════════════════════════════════════════════════════════
 # Step 2: Inject workflow context
