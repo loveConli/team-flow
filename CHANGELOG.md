@@ -6,6 +6,44 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-08-01
+
+### Added（设计增强方案 v0.12 §40-§46 测试矩阵驱动开发 + 测试复利闭环）
+
+#### test-strategy skill（24→25 skills）
+- **skills/test-strategy/**：新建测试设计方法论 skill（≤50 行硬规则），含 3 个 references：design-methods-detail.md（10+1 种 design_method 详细说明）、complexity-grading.md（复杂度分级规则 + 圈复杂度计算）、adversarial-patterns.md（对抗验证三招 + 攻击向量模板）
+- **agents/build-executor.md**：frontmatter `skills` 新增 `test-strategy` 预加载
+
+#### test-matrix.md 附属产物
+- **skills/contract-builder/SKILL.md**：新增 Test Matrix Generation 段（12 列格式 + 候选覆盖台账 + 对抗验证段 + GLAF4 Java 路由）
+- **skills/spec-writer/SKILL.md**：新增 Unit/Integration 可选标签（test-matrix 提取 hints）
+- **scripts/lib/hash.mjs**：新增 `computeTestMatrixHash()`（独立于 artifacts_hash，避免自循环）
+- **scripts/lib/state-loader.mjs**：BUILTIN_DEFAULTS 新增 `test_matrix_hash` / `test_matrix_skipped`
+- **scripts/lib/cmd-state.mjs**：SETTABLE_FIELDS 新增 `test_matrix_skipped`；init 计算 test_matrix_hash
+
+#### build-executor 按矩阵 TDD
+- **skills/build-executor/implementer-prompt.md**：新增 Test Matrix Protocol 段（TDD/CHARACTERIZATION/REGRESSION 三种 work_mode + 两不原则 + 五步闭环 + 矩阵覆盖率自检）
+
+#### code-reviewer Test Matrix Compliance
+- **skills/code-reviewer/SKILL.md**：新增 Step 5b Test Matrix Compliance（case-by-case 验证 + 覆盖率计算 + 候选台账审计 + 金字塔比例检查）
+- **skills/code-reviewer/code-reviewer-prompt.md**：reviewer prompt 新增 Test Matrix Compliance 检查段
+
+#### release-archivist Test Matrix Reconciliation
+- **skills/release-archivist/SKILL.md**：新增 Step 2b Test Matrix Reconciliation（条件触发 PASS/FAIL/WARN/SKIP）+ Test Merge 段 + closing 顺序更新为 arch-merge → prototype-sync → test-merge → compound promotion
+
+#### guard 维度 test-matrix-complete
+- **scripts/guard/checks/test-matrix-complete.mjs**：新建检查（~55 行），4 条豁免路径（显式 skip / 存量兼容 / 无 contract / hash 一致）
+- **scripts/guard/guard.mjs**：`executing:closing` 新增 `test-matrix-complete`（full 考核 7 维度）；hotfix `executing:closing` 新增（6 维度，豁免 test-matrix-complete）；tweak 保持 3 维度不变
+
+#### 测试复利闭环（test-ledger + test-merge）
+- **scripts/lib/test-merge.mjs**：新建 6 步流程（preCheck → mergeBaselines → resolveDeferred → appendChangelog → rewriteIndex → gitCommit）
+- **scripts/lib/test-matrix-export.mjs**：新建 glaf4 JSON → team-flow Markdown 格式转换（test_kind → test_tier 映射）
+- **scripts/team-flow.mjs**：注册 `test-merge` + `test-matrix-export` 两个新 CLI 命令
+
+#### 注入侧
+- **skills/workflow-orchestrator/references/s1-path-router.md**：新增「测试台账注入」段（读取 docs/test-ledger/INDEX.md，注入 partial 模块列表）
+- **skills/workflow-start/references/routing-rules.md**：新增「Route to glaf4-tests」段（GLAF4 Java 项目可选 glaf4-tests design stage）
+
 ## [0.30.0] - 2026-08-01
 
 ### Added（设计增强方案 v0.11 §39 workflow 健壮性增强，来源：workflow-feedback 2026-08-01 ×9）
