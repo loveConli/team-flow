@@ -307,3 +307,20 @@ Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **twe
 
 ## Post-transition
 💡 `tf inject <change-dir>` to update phase-guard artifacts.
+
+## Route to glaf4-tests (v0.12 §46, v0.31.0)
+
+**触发条件**：`project_type == glaf4-java`（Spring Boot / JUnit 5 / Mockito）AND contract-builder 需要生成 test-matrix。
+
+**协议**：
+1. contract-builder 检测项目技术栈（读取 `pom.xml` / `build.gradle` 判断是否 GLAF4 Java）
+2. GLAF4 项目 → 提示用户：「检测到 GLAF4 Java 项目，是否调用 `glaf4-test:glaf4-tests` 做精细测试矩阵设计？」
+3. 用户同意 → 调用 `glaf4-test:glaf4-tests-design` 生成 `test-matrix.json`
+4. `glaf4-tests-validate` 校验矩阵完整性
+5. `scripts/lib/test-matrix-export.mjs` 转换为 team-flow 格式的 `test-matrix.md`
+6. 用户确认（轻量版 DP-A）
+7. 写入 `test-matrix.md`，contract 中添加 `## Test Matrix` 段引用
+
+**非 GLAF4 项目**：contract-builder 使用内置 test-strategy skill 直接生成 `test-matrix.md`。
+
+**设计决策**：glaf4-tests 对接为**可选增强**，不是必经路径。

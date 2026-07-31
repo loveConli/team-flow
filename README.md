@@ -1,6 +1,6 @@
 # team-flow
 
-> 当前版本：`v0.30.0`
+> 当前版本：`v0.31.0`
 
 > 统一插件：**team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同。
 
@@ -70,7 +70,7 @@ specs/<cap>/        每变更设计/任务/契约 + learnings.md
 STRATEGY.md CONCEPTS.md 策略 / 领域词汇
 ```
 
-## 九套能力（23 skills）
+## 九套能力（24 skills）
 
 - **team-flow**（9）：workflow-start / need-explorer / spec-writer / contract-builder / build-executor / code-reviewer / spec-merger / release-archivist / bug-investigator
 - **compound 核心子集**（6）：ce-brainstorm / ce-plan / ce-compound / ce-strategy / ce-ideate / ce-proof

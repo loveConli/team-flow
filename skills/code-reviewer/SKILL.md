@@ -134,6 +134,31 @@ Check for:
 - **Edge cases**: Tests cover boundary conditions, error cases
 - **Test quality**: Tests are meaningful (not just "it works"), assertions are specific
 
+### Step 5b: Test Matrix Compliance (v0.12 §44.3)
+
+If `test-matrix.md` exists in the change directory, audit the implementation against it:
+
+1. **Case-by-case verification**: For each case in the matrix:
+   - Check if the test implementation exists (`test_file` + `test_method_name` match)
+   - Verify assertions match the matrix's `expected` output
+   - Verify `design_method` matches actual test approach (a `boundary` case must use real boundary values, not a happy-path disguised as boundary)
+
+2. **Coverage calculation**:
+   - Matrix coverage = implemented cases / total cases in matrix
+   - Matrix coverage < 100% → **Critical finding** (test-matrix-gap)
+   - List missing case_ids
+
+3. **Candidate Coverage Ledger audit**:
+   - Entries with `decision=deferred` have a reasonable `reason`?
+   - Entries with `decision=covered` actually have corresponding tests?
+
+4. **Pyramid ratio check**:
+   - unit cases: 70-80% of total
+   - integration cases: ≤30% of total
+   - Significant deviation → **Important finding** (test-pyramid-imbalance)
+
+If `test-matrix.md` does NOT exist, skip this step silently (legacy change compatibility).
+
 ### Step 6: Documentation Review
 
 Check for:
@@ -156,7 +181,9 @@ Check for:
 |---------|-----------|
 | **PASS** | No Critical or Important findings |
 | **PASS_WITH_WARNINGS** | No Critical, but Important findings exist |
-| **FAIL** | Any Critical finding |
+| **FAIL** | Any Critical finding (including Test Matrix Compliance gaps — v0.12 §44.3) |
+
+Test Matrix Compliance Critical findings carry the same weight as Spec Compliance violations — matrix gaps are always Critical, never Important.
 
 ## Calibration Rules
 

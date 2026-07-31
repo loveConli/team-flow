@@ -14,6 +14,7 @@ import { checkDp3Approved } from './checks/dp3-approved.mjs';
 import { checkExecutionPlanReady } from './checks/execution-plan-ready.mjs';
 import { checkExecutionReviewsPassed } from './checks/execution-reviews-passed.mjs';
 import { checkCompoundCaptured } from './checks/compound-captured.mjs';
+import { checkTestMatrixComplete } from './checks/test-matrix-complete.mjs';
 
 // Transition matrix: <from>:<to> → required check dimensions
 const TRANSITION_CHECKS = {
@@ -22,7 +23,7 @@ const TRANSITION_CHECKS = {
   'specifying:bridging':            ['artifacts-exist', 'schema-valid'],
   'bridging:approved-for-build':    ['artifacts-exist', 'schema-valid', 'contract-fresh', 'dp-gate-passed'],
   'approved-for-build:executing':   ['artifacts-exist', 'contract-fresh', 'dp-gate-passed', 'execution-plan-ready'],
-  'executing:closing':              ['tasks-complete', 'tests-passing', 'specs-merged', 'execution-plan-ready', 'execution-reviews-passed', 'compound-captured'],
+  'executing:closing':              ['tasks-complete', 'tests-passing', 'specs-merged', 'execution-plan-ready', 'execution-reviews-passed', 'compound-captured', 'test-matrix-complete'],
 
   // Debugging side-path
   'executing:debugging':            [],
@@ -55,6 +56,8 @@ const WORKFLOW_TRANSITION_CHECKS = {
     'exploring:bridging': [],
     'bridging:approved-for-build': ['contract-current', 'dp3-approved'],
     'approved-for-build:executing': ['contract-current', 'dp3-approved', 'execution-plan-ready'],
+    // hotfix exemption: no test-matrix-complete (v0.12 §45.3)
+    'executing:closing': ['tasks-complete', 'tests-passing', 'specs-merged', 'execution-plan-ready', 'execution-reviews-passed', 'compound-captured'],
   },
   tweak: {
     'exploring:approved-for-build': [],
@@ -167,6 +170,7 @@ async function main() {
     'execution-reviews-passed': (dir) => checkExecutionReviewsPassed(dir),
     'arch-design': (dir) => checkArchDesign(dir),
     'compound-captured': (dir) => checkCompoundCaptured(dir),
+    'test-matrix-complete': (dir) => checkTestMatrixComplete(dir),
   };
 
   const checks = [];

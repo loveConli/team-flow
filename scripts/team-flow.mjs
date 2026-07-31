@@ -34,6 +34,8 @@ const COMMANDS = {
   'install-zcode':     () => import('./lib/cmd-install-zcode.mjs'),
   'prototype-sync':    () => import('./lib/prototype-sync.mjs'),
   'arch-merge':        () => import('./lib/arch-merge.mjs'),
+  'test-merge':        () => import('./lib/test-merge.mjs'),
+  'test-matrix-export': () => import('./lib/test-matrix-export.mjs'),
 };
 
 const HELP = `team-flow (tf) — Unified workflow plugin CLI
@@ -50,6 +52,10 @@ Commands:
                         Merge UX delta into global prototype/ + design-system.md
   arch-merge <change-dir> [--project-root <path>] [--dry-run]
                         Merge architecture delta into global docs/architecture/
+  test-merge <change-dir> [--project-root <path>] [--dry-run]
+                        Merge test matrix results into global docs/test-ledger/
+  test-matrix-export <input.json> <output.md> [--change-id <id>]
+                        Convert glaf4 test-matrix.json to team-flow test-matrix.md
   config [options]      Display or modify configuration
   config --resolve-model <profile>  Resolve a configured model profile without switching models
   state <sub> <dir>     Manage .team-flow.yaml state (init|check|transition|get|rebuild)

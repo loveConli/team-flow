@@ -88,6 +88,8 @@ Every requirement must be testable. Use SHALL or MUST. Every requirement must ha
 
 Optional structured AC tags under a Scenario are supported for E2E extraction (v0.4, design spec ch.16): `##### Exception:` (→ EX AC, ×2), `##### State:` (→ ST AC, ×2), `##### Boundary:` (→ BND AC, ×1). These are **OPTIONAL** — omitting them does NOT fail validation. The `e2e` skill applies dimension-conditional gating (absent dimension = N/A, not 0%) plus keyword fallback (error/invalid/fail/边界), so no spec is forced to add tags.
 
+Optional test-dimension tags under a Scenario are supported for test-matrix extraction (v0.12 §44.1): `##### Unit:` (→ unit test hints: equivalence classes, boundary values), `##### Integration:` (→ integration test hints: cross-module, transaction boundaries). These are **OPTIONAL** — omitting them does NOT fail validation. The `contract-builder` extracts matrix skeletons from these tags when present, but does not require them.
+
 ### design.md
 Must have: Context (current state, constraints, stakeholders), Goals, Decisions (Choice + Rationale + Alternatives considered), Risks And Trade-Offs.
 
@@ -127,7 +129,7 @@ Generate one at a time. Confirm each before next. This prevents scope drift — 
 - `## Why` > 50 chars, `## What Changes`, `## Scope` (In/Out), `## Impact`, `## Capabilities`, no TBD/TODO
 
 ### specs/
-- SHALL/MUST for required behavior, `#### Scenario:` with WHEN/THEN per requirement, grouped under delta headers, no contradictions; optional `##### Exception:/State:/Boundary:` sub-tags allowed but NOT required (absent dimension = N/A, not 0%). Regression: a spec containing `##### Exception:` must still pass `npm run validate` (validateDeltaSpec must not reject unknown sub-headings).
+- SHALL/MUST for required behavior, `#### Scenario:` with WHEN/THEN per requirement, grouped under delta headers, no contradictions; optional `##### Exception:/State:/Boundary:` sub-tags allowed but NOT required (absent dimension = N/A, not 0%); optional `##### Unit:/Integration:` sub-tags allowed but NOT required (test-matrix hints for contract-builder). Regression: a spec containing `##### Exception:` must still pass `npm run validate` (validateDeltaSpec must not reject unknown sub-headings).
 
 ### design.md
 - `## Context`, `## Goals`, `## Decisions` (≥1, with Choice+Rationale+Alternatives), `## Risks And Trade-Offs`

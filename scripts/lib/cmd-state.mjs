@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 // VALID_STATES 统一从 state-loader.mjs 引入(状态机合法值唯一真相源),不再本地硬编码。
 // 来源:workflow-feedback 2026-08-01,#100005。
 import { readState, writeState, updateField, rebuildState, VALID_STATES } from './state-loader.mjs';
-import { computeArtifactsHash, computeContractHash } from './hash.mjs';
+import { computeArtifactsHash, computeContractHash, computeTestMatrixHash } from './hash.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -29,6 +29,8 @@ const SETTABLE_FIELDS = [
   'dp_a_result', 'dp_a_timestamp', 'dp_a_adjustments',
   // Compound engineering capture gate (v0.24.0 复利贯穿强制化)
   'compound_skipped',
+  // Test matrix gate (v0.12 §45.4)
+  'test_matrix_skipped',
 ];
 
 export async function run(args) {
@@ -84,15 +86,18 @@ export async function run(args) {
       }
       const hash = computeArtifactsHash(changeDir);
       const ch = computeContractHash(changeDir);
+      const tmh = computeTestMatrixHash(changeDir);
       const state = readState(changeDir);
       state.artifacts_hash = hash;
       state.contract_hash = ch;
+      // v0.12 §42.5: test_matrix_hash is independent from artifacts_hash
+      state.test_matrix_hash = tmh;
       state.last_transition = new Date().toISOString();
       writeState(changeDir, state);
       if (values.json) {
-        console.log(JSON.stringify({ ok: true, artifacts_hash: hash, contract_hash: ch }));
+        console.log(JSON.stringify({ ok: true, artifacts_hash: hash, contract_hash: ch, test_matrix_hash: tmh }));
       } else {
-        console.log(`State initialized. artifacts_hash: ${hash}`);
+        console.log(`State initialized. artifacts_hash: ${hash}` + (tmh ? `, test_matrix_hash: ${tmh}` : ''));
       }
       break;
     }
@@ -209,7 +214,7 @@ export async function run(args) {
       break;
     }
     case 'rebuild': {
-      const state = rebuildState(changeDir, { computeArtifactsHash, computeContractHash });
+      const state = rebuildState(changeDir, { computeArtifactsHash, computeContractHash, computeTestMatrixHash });
       if (values.json) {
         console.log(JSON.stringify({ ok: true, state: state.state }));
       } else {

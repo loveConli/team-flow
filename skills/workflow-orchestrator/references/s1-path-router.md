@@ -48,6 +48,10 @@ S1 只做编排动作（需求选择、存在性检查、路径判断、阻塞�
 
 工作流模式复利（L2）：S1 路由时额外注入历史 `workflow_pattern` top-3（confidence ≥ 0.5）。详见 state-model.md「工作流模式复利 L2」。
 
+## 测试台账注入（v0.12 §43.5，advisory 级）
+
+读取 `docs/test-ledger/INDEX.md`（如存在），注入 `coverage_status=partial` 的模块列表。新 change 涉及这些模块时，提示「有未解决的 deferred 测试项，本次可考虑解决」。读取失败时静默跳过，不阻断。
+
 ## 路由结果显式呈现（强制，B3）
 
 路由判断后**必须**向用户确认，路由是建议而非决定：

@@ -67,6 +67,17 @@ export function computeContractHash(changeDir) {
   return `sha256:${hash.digest('hex')}`;
 }
 
+// Compute SHA256 hash of test-matrix.md alone (v0.12 §42.5).
+// Independent from artifacts_hash to avoid self-circulation:
+// modify matrix → contract stale → rollback bridging → regenerate matrix.
+export function computeTestMatrixHash(changeDir) {
+  const matrix = path.join(changeDir, 'test-matrix.md');
+  if (!fs.existsSync(matrix)) return null;
+  const hash = crypto.createHash('sha256');
+  hash.update(fs.readFileSync(matrix, 'utf-8'));
+  return `sha256:${hash.digest('hex')}`;
+}
+
 // Fast staleness check: compare stored artifacts_hash against current.
 export function isContractFresh(changeDir, stateLoader) {
   const stateFile = path.join(changeDir, '.team-flow.yaml');

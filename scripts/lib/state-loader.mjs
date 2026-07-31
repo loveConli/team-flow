@@ -61,6 +61,9 @@ const BUILTIN_DEFAULTS = {
   dp_a_adjustments: null,
   // Compound engineering capture gate (v0.24.0 复利贯穿强制化)
   compound_skipped: null,
+  // Test matrix gate (v0.12 §42.5 + §45.4)
+  test_matrix_hash: null,
+  test_matrix_skipped: null,
 };
 
 /**
@@ -162,6 +165,10 @@ export function writeState(changeDir, state) {
   lines.push('');
   lines.push('# === Compound engineering capture gate (v0.24.0) ===');
   lines.push(`compound_skipped: ${state.compound_skipped ?? 'null'}`);
+  lines.push('');
+  lines.push('# === Test matrix gate (v0.12 §42.5) ===');
+  lines.push(`test_matrix_hash: ${state.test_matrix_hash ?? 'null'}`);
+  lines.push(`test_matrix_skipped: ${state.test_matrix_skipped ?? 'null'}`);
 
   fs.writeFileSync(filePath, lines.join('\n') + '\n', 'utf-8');
 }
@@ -179,10 +186,14 @@ export function updateField(changeDir, field, value) {
  * Rebuild state file from artifacts — recomputes hashes.
  * Requires hash functions to be passed in (avoids circular dependency).
  */
-export function rebuildState(changeDir, { computeArtifactsHash, computeContractHash }) {
+export function rebuildState(changeDir, { computeArtifactsHash, computeContractHash, computeTestMatrixHash }) {
   const state = readState(changeDir);
   state.artifacts_hash = computeArtifactsHash(changeDir);
   state.contract_hash = computeContractHash(changeDir);
+  // v0.12 §42.5: test_matrix_hash is independent from artifacts_hash
+  if (computeTestMatrixHash) {
+    state.test_matrix_hash = computeTestMatrixHash(changeDir);
+  }
   writeState(changeDir, state);
   return state;
 }

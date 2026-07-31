@@ -164,7 +164,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
   全局作为下一 change / 下一 PRD 版本的 grounding → 闭环
 ```
 
-## Skills 索引（23 个）
+## Skills 索引（24 个）
 
 | Skill | 归属 | 用途 |
 |---|---|---|
@@ -173,6 +173,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | spec-writer | team-flow | 写 spec |
 | contract-builder | team-flow | 构建执行契约 |
 | build-executor | team-flow | TDD 实现 |
+| test-strategy | team-flow | 测试设计方法论（design_method 三级分层 + 对抗验证 + 复杂度分级，v0.12 §41） |
 | code-reviewer | team-flow | 代码审查 |
 | spec-merger | team-flow | 合并 delta spec |
 | release-archivist | team-flow | 发布归档 |

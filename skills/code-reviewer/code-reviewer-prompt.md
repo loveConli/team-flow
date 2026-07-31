@@ -68,6 +68,16 @@ Subagent (general-purpose):
     - Integration tests where they matter?
     - All tests passing?
 
+    **Test Matrix Compliance (v0.12 §44.3):**
+    If `test-matrix.md` exists, audit against it:
+    - Each case has a corresponding test implementation (test_file + test_method_name match)?
+    - Assertions match the matrix's `expected` output?
+    - `design_method` matches actual test approach (boundary case uses real boundary values)?
+    - Matrix coverage < 100% → Critical finding (test-matrix-gap)
+    - Candidate Coverage Ledger: deferred items have reasonable reasons?
+    - Pyramid ratio: unit 70-80%, integration ≤30%?
+    If `test-matrix.md` does NOT exist, skip this section silently.
+
     **Production readiness:**
     - Migration strategy if schema changed?
     - Backward compatibility considered?

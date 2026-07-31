@@ -40,12 +40,41 @@ Subagent (general-purpose):
     ## Your Job
 
     Once you're clear on requirements:
-    1. Implement exactly what the task specifies
-    2. Write tests (following TDD if task says to)
-    3. Verify implementation works
+    1. Read test-matrix.md for this task's module section (if it exists)
+    2. Implement exactly what the task specifies, following the Test Matrix Protocol below
+    3. Verify implementation works (all matrix cases pass)
     4. Commit your work
     5. Self-review (see below)
     6. Report back
+
+    ## Test Matrix Protocol (v0.12 §44.2)
+
+    If `test-matrix.md` exists, read the module section relevant to your task.
+    For each case in the matrix, follow the protocol matching its `work_mode`:
+
+    **work_mode=TDD** (new behavior):
+    1. RED: Write failing test matching `case_id` + `test_method_name`, confirm failure
+    2. GREEN: Implement minimum code to pass
+    3. REFACTOR: Clean up, suite stays green
+    4. Report TDD Evidence: RED command + failure output, GREEN command + pass output
+
+    **work_mode=CHARACTERIZATION** (legacy behavior capture):
+    1. Write test capturing current behavior — do NOT change production code
+    2. Report: `current_behavior_note` + test output
+    3. `production_change_allowed=false` — if test reveals a bug, report it but do NOT fix
+
+    **work_mode=REGRESSION** (defect reproduction + fix):
+    1. Write failing test reproducing the defect
+    2. Fix production code, confirm green
+    3. Report: defect reproduction + fix evidence
+
+    After all cases: self-check matrix coverage = passed cases / total cases in matrix for your module.
+
+    **两不原则 (Two Prohibitions)**:
+    - ⛔ DO NOT write production code and test code simultaneously — RED first, then GREEN
+    - ⛔ DO NOT skip the RED failure confirmation — you must see the test fail before implementing
+
+    If `test-matrix.md` does NOT exist, fall back to standard TDD (Law 2): write tests first, then implement.
 
     Work from: [directory]
 
@@ -109,6 +138,8 @@ Subagent (general-purpose):
     - Did I follow TDD if required?
     - Are tests comprehensive?
     - Is the test output pristine (no stray warnings or noise)?
+    - If test-matrix.md exists: matrix coverage = passed cases / total cases for my module
+    - Each case's `design_method` matches the actual test approach (boundary case uses real boundary values, not happy-path disguised as boundary)
 
     If you find issues during self-review, fix them now before reporting.
 
@@ -126,6 +157,10 @@ Subagent (general-purpose):
     - **TDD Evidence** (if TDD was required for this task):
       - RED: command run, relevant failing output before implementation, and why the failure was expected
       - GREEN: command run and relevant passing output after implementation
+    - **Test Matrix Coverage** (if test-matrix.md exists):
+      - Cases implemented: N/M (list case_ids)
+      - Cases deferred: N (list case_ids + reason)
+      - Any case where expected_red did not match actual failure — report mismatch
     - Files changed
     - Self-review findings (if any)
     - Any issues or concerns

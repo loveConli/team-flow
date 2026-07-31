@@ -34,6 +34,21 @@ Run full test suite. Record total/passed/failed/skipped. Zero failures = PASS.
 ### Step 2: Completeness
 Compare contract batches against actual diff. Every SHALL/MUST must have implementation evidence. Missing = Critical severity.
 
+### Step 2b: Test Matrix Reconciliation (conditional, v0.12 §44.4)
+
+If `test-matrix.md` exists:
+1. **Statistics**: total cases / implemented / passed
+2. **Candidate Coverage Ledger audit**: any `decision=deferred` without reasonable reason?
+3. **Complexity tier check**: cases per module meet minimum (trivial≥3 / medium≥5 / complex≥7)?
+4. **Verdict**:
+   - Matrix coverage = 100% AND all cases pass → **PASS**
+   - Matrix coverage ≥ 90% with reasonable deferred items → **CONDITIONAL (WARN)**
+   - Matrix coverage < 90% OR unexplained gaps → **FAIL**
+
+If `test-matrix.md` does NOT exist → **SKIP** (legacy change compatibility).
+
+Add a report row: `| Test Matrix | PASS/FAIL/WARN/SKIP | [reconciliation summary] |`
+
 ### Step 3: Coherence
 Compare design decisions against code. Check naming consistency. Inconsistencies = IMPORTANT.
 
@@ -115,7 +130,7 @@ tf arch-merge <change-dir>
 
 This merges `architecture/{architecture,database,api}.md` and `architecture/sql/` into the global architecture docs. Skip silently when `architecture/` does not exist (architecture-design was `skipped`).
 
-**Execution order (mandatory)**: `arch-merge` → `prototype-sync` → `compound promotion`. Do not parallelise — global docs must not be in a half-updated state.
+**Execution order (mandatory, v0.12 §43.4)**: `arch-merge` → `prototype-sync` → `test-merge` → `compound promotion`. Do not parallelise — global docs must not be in a half-updated state.
 
 ### Prototype Sync (v0.5)
 
@@ -125,11 +140,29 @@ After `arch-merge` completes, run prototype-sync to merge UX deltas back to the 
 tf prototype-sync <change-dir>
 ```
 
-**Write-back order (mandatory)**: `arch-merge` → `prototype-sync` → `compound promotion` must be executed **sequentially** within the same change closing. Do not run them in parallel — the global `docs/architecture/` and `prototype/` must not be in a half-updated state when the next change grounds on them.
+**Write-back order (mandatory, v0.12 §43.4)**: `arch-merge` → `prototype-sync` → `test-merge` → `compound promotion` must be executed **sequentially** within the same change closing. Do not run them in parallel — the global `docs/architecture/`, `prototype/`, and `docs/test-ledger/` must not be in a half-updated state when the next change grounds on them.
 
 If `prototype-sync` reports conflicts, list them in the closing summary and flag for manual resolution. Do not block closing on prototype-sync conflicts (advisory level).
 
 **Execution verification（v0.24.0）**：`prototype-sync` 命令执行后，检查其 stdout 输出确认合并完成（输出含 `merged`/`no UX delta`/`conflicts` 之一）。若命令未执行或执行失败，Step 5 Report 的 `Prototype sync` 行必须标注 `SKIPPED` 或 `FAILED`，并在 closing summary 中说明原因。**禁止在 prototype-sync 未执行时将 Prototype sync 行标注为已完成**。
+
+### Test Merge (v0.12 §43)
+
+After `prototype-sync` completes, run test-merge to write test matrix results back to the global test ledger:
+
+```bash
+tf test-merge <change-dir>
+```
+
+This merges `test-matrix.md` into `docs/test-ledger/`:
+- **mergeBaselines**: extract cases by module, incrementally update `baselines/{module}.md`
+- **resolveDeferred**: new cases covering old deferred items → remove from Deferred
+- **appendChangelog**: archive test-matrix.md → `changelog/{change-id}.md`
+- **rewriteIndex**: recalculate module/case/deferred counts, rewrite `INDEX.md`
+
+Skip silently when `test-matrix.md` does not exist (legacy change or test_matrix_skipped=true).
+
+**Execution verification**: check stdout output for `test-merge complete` confirmation. If the command did not execute or failed, Step 5 Report's `Test Matrix` row (from Step 2b) must note the reason.
 
 ### Compound Promotion (v0.5)
 
