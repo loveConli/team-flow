@@ -52,6 +52,12 @@ LT 确认后进入 ③。**confirmed_plan 序列化**：将 scout 简报的选�
 
 派发插件 agent `prototype-builder`（有 Write），传入：已确认的原型方案（含选定方向）、`design-system.md` 路径、目标分支/版本、PRD 路径。
 
+**⛔ 子代理 ID 记录（v0.29.1，必须执行）**：dispatch 后**立即记录**子代理 ID，后续 ⑤ 循环修正和 ⑥ 人工评审调整**必须通过此 ID 恢复子代理**，不得启动新子代理：
+```
+builder_agent_id = <agentId>    # ③ dispatch 返回
+reviewer_agent_id = <agentId>   # ④ dispatch 返回
+```
+
 **prompt 组装顺序契约（v0.18.0, v0.24.0 扩展）**：`design-system.md → references/template.html → references/layouts.md → references/checklist.md → references/craft/（按页面类型选择注入）→ references/interactive-prototype.md（按需）→ references/wireframe.md（按需）→ PRD`。
 
 craft 注入策略：仪表盘→laws-of-ux+state-coverage；表单→state-coverage+accessibility-baseline；列表→typography-hierarchy；通用→anti-ai-slop（始终注入）。
@@ -91,7 +97,7 @@ test -f <prototype_path>/index.html && test -s <prototype_path>/index.html && ec
 
 ## 步骤 ⑤ 循环编排（主代理）
 
-- FAIL → 主代理把不一致项交给 prototype-builder 修正（回 ③），重新 ④ 评审，**≤3 轮**。
+- FAIL → **⛔ 必须通过 SendMessage 恢复原 prototype-builder 修正**（`SendMessage(to: builder_agent_id, message: "审查 FAIL，不一致项如下：{findings}。请修正后返回。")`），然后 **SendMessage 恢复原 prototype-reviewer 重新评审**（`SendMessage(to: reviewer_agent_id, message: "第 {N} 轮审查，原型已修正。请重新评审。")`），**≤3 轮**。**禁止启动新的 builder/reviewer 子代理**——原子代理拥有完整的设计上下文和审查历史。唯一例外：SendMessage 恢复失败时的 fallback。
 - **收敛检测**：连续两轮不一致项集合无缩小（修正无效/误报死循环）→ 立即转人工，不等满 3 轮。
 - PASS / PASS_WITH_WARNINGS → 进入 ⑥。
 
@@ -99,7 +105,7 @@ test -f <prototype_path>/index.html && test -s <prototype_path>/index.html && ec
 
 主代理用 AskUserQuestion 呈现评审结论 + 争议项，LT 选择：
 - **PRD 有问题** → 回 orchestrator S2 修订 PRD（**vN 内修订 + 变更履历，非升版**；见 feedback-loops 设计）→ PRD 更新后再回 ① 更新原型。**独立调用 fallback**（非 orchestrator 触发时）：无 S2 可回，直接提示 LT 修订 `prd/vN/prd.md` 后重入本 skill。
-- **原型需调整**（美观/体验/品牌/信息密度等自动评审查不到的维度）→ 回 ③ 派 prototype-builder 实施调整
+- **原型需调整**（美观/体验/品牌/信息密度等自动评审查不到的维度）→ **⛔ 必须通过 SendMessage 恢复原 prototype-builder 实施调整**（`SendMessage(to: builder_agent_id, message: "用户评审反馈：{调整意见}。请修改原型。")`），修改后 SendMessage 恢复原 prototype-reviewer 重新评审。**禁止启动新子代理**（唯一例外：SendMessage 恢复失败时的 fallback）
 - **通过** → 冻结：PRD frontmatter `frozen: true`（frozen_downstream），prototype 定版
 
 ## 子代理阻断处理（§18.1）
