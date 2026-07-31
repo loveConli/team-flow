@@ -156,6 +156,12 @@ change 进入 closing 阶段时，由 release-archivist 调用 `tf arch-merge` C
 
 architecture-design 执行时的上下文组装：
 
+**conventions 注入（v0.11 §33）**：
+1. 通过 `tf runtime config --get conventions` 获取 conventions 配置
+2. 按 phase 过滤：`database` / `backend` / `api`
+3. 读取匹配的 `.team-flow/conventions/*.md` 文件
+4. 注入为架构决策约束（advisory 级）
+
 **始终加载**：
 1. `Read docs/architecture/INDEX.md`（~50行摘要）
 2. `Read changes/<name>/change-brief.md`（如有）
@@ -177,3 +183,28 @@ architecture-design 执行时的上下文组装：
 
 ## Scope & Limits
 本 skill 覆盖 4A+DDD 架构设计方法及其与 team-flow/compound-engineering 的衔接。落地实现结合项目具体工具；超出本范围见相关 skill 或直接问 agent。
+
+## 阶段转换前规范建议（v0.11 §33，被动式自动沉淀）
+
+architecture-design 阶段即将结束、进入 spec-writer 之前，执行以下规范沉淀协议：
+
+1. **回顾本阶段工作**：扫描本阶段所有用户纠正、CC 观察到的项目既有模式、踩坑记录
+2. **生成规范建议列表**：提取跨 change 可复用的规范条目（排除仅适用于本次 change 的特定业务逻辑）
+3. **去重检查**：对比已有 convention 文件，排除已存在的条目
+4. **向用户展示建议**：
+
+```
+📋 架构设计阶段规范建议
+┌───┬──────────────────────────────────────────────────┐
+│ # │ 规范条目                                          │
+├───┼──────────────────────────────────────────────────┤
+│ 1 │ [条目描述]                                        │
+│   │   来源：[来源说明]                                  │
+│   │   建议写入：.team-flow/conventions/[目标文件]       │
+└───┴──────────────────────────────────────────────────┘
+
+请逐条确认（接受/拒绝/修改），或输入「全部接受」：
+```
+
+5. **用户确认后写入**：接受的条目追加到对应 convention 文件，更新 YAML frontmatter 的 date 字段
+6. **无建议时静默跳过**：如果本阶段没有可沉淀的规范，不弹出确认，直接进入下一阶段

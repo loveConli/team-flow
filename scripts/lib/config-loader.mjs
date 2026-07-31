@@ -22,6 +22,12 @@ const DEFAULTS = {
   prd: {
     template: 'templates/prd.md',
   },
+  conventions: {
+    // 项目级规范文件路径映射（v0.11 §33）
+    // key = 规范类别，value = 相对于项目根的路径
+    // 各 skill 上下文加载时按 phase 过滤注入
+    // 示例: { database: ".team-flow/conventions/db-design.md", ... }
+  },
 };
 
 export const MODEL_PROFILES = Object.freeze([

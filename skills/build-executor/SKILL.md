@@ -17,6 +17,11 @@ When `architecture/sql/` exists, also read:
 
 Check workflow mode first: `tf state get <change-dir> workflow`. If `tweak` → direct edit mode. If `hotfix` or `full` → standard contract-first discipline.
 
+**conventions 注入（v0.11 §33）**：
+- 通过 `tf runtime config --get conventions` 获取 conventions 配置
+- 按 phase 过滤：`backend` / `api`
+- 注入为实施约束（代码产出时遵循）
+
 Branch/worktree preflight before ANY implementation edit (mandatory — do not skip):
 1. Run the isolation check:
    ```bash
@@ -165,3 +170,28 @@ Don't report completion until: tests pass, contract obligations satisfied, revie
 - **Parse failures**: Stop and report exact line/format issue. Route back to `contract-builder`.
 - **Missing artifacts**: Route back to appropriate upstream skill. Don't guess.
 - **User interruption**: Progress ledger enables recovery. Check ledger on resume.
+
+## 阶段转换前规范建议（v0.11 §33，被动式自动沉淀）
+
+build-executor 阶段即将结束、进入 closing 之前，执行以下规范沉淀协议：
+
+1. **回顾本阶段工作**：扫描本阶段所有用户纠正、CC 观察到的项目既有模式、踩坑记录
+2. **生成规范建议列表**：提取跨 change 可复用的规范条目（排除仅适用于本次 change 的特定业务逻辑）
+3. **去重检查**：对比已有 convention 文件，排除已存在的条目
+4. **向用户展示建议**：
+
+```
+📋 构建执行阶段规范建议
+┌───┬──────────────────────────────────────────────────┐
+│ # │ 规范条目                                          │
+├───┼──────────────────────────────────────────────────┤
+│ 1 │ [条目描述]                                        │
+│   │   来源：[来源说明]                                  │
+│   │   建议写入：.team-flow/conventions/[目标文件]       │
+└───┴──────────────────────────────────────────────────┘
+
+请逐条确认（接受/拒绝/修改），或输入「全部接受」：
+```
+
+5. **用户确认后写入**：接受的条目追加到对应 convention 文件，更新 YAML frontmatter 的 date 字段
+6. **无建议时静默跳过**：如果本阶段没有可沉淀的规范，不弹出确认，直接进入下一阶段

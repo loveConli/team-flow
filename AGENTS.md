@@ -1,6 +1,6 @@
 # AGENTS.md · team-flow
 
-> team-flow 统一插件 = **team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（23 skills + 8 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
+> team-flow 统一插件 = **team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（23 skills + 10 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
 
 ## What This Is
 
@@ -12,7 +12,7 @@
 
 ### 身份与依赖关系
 
-- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 23 个 skills + 8 个 agents + hooks + templates
+- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 23 个 skills + 10 个 agents + hooks + templates
 - **@xulthekl/team-flow**（npm 底座包）：team-flow 的 CLI 工具层（`package.json` name = `@xulthekl/team-flow`，bin = `tf` / `team-flow`），提供状态机、校验、复利 CLI 等运行时能力
 - 关系：team-flow 插件 **包含** @xulthekl/team-flow npm 包作为底座（同一仓库、同一版本）。skills 中的 `tf ...` 调用的是已全局安装的 @xulthekl/team-flow CLI，版本由 session-start hook 自动同步
 - 历史身份（已废弃）：`spec-superflow`（npm 包名，0.11.0 后停止发布）/ `ssf`（CLI 前缀）/ `.spec-superflow.yaml`（状态文件）—— 详见设计增强方案 v0.9 §27
@@ -207,18 +207,20 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 
 > **规则**：新增 skill 时必须在此表登记所属层级。产品级新需求触发词归 workflow-orchestrator 独占。
 
-### Agents 索引（v0.7 新增，v0.15.0 增至 8 个）
+### Agents 索引（v0.7 新增，v0.15.0 增至 10 个）
 
 | Agent | 职责 | Tools | 触发场景 |
 |-------|------|-------|---------|
-| code-reviewer | spec 合规审查（批次完成/合并门禁） | Read/Bash/Grep/Glob | build-executor 批次完成、release-archivist 合并前 |
+| architecture-design | 架构设计门控 agent——五项检查 + 三件套产出 + SQL 制品（workflow-start 子代理调用，判断+执行一体化） | Read/Bash/Grep/Glob/Write | workflow-start exploring→specifying 状态转换时（架构设计门控，v0.27.2） |
+| architecture-reviewer | 架构设计自动审查 agent——6 维度审查（A1-A6）+ 只读 + 独立上下文（架构设计产出后自动审查，≤3 轮循环修正） | Read/Bash/Grep/Glob | architecture-design 三件套产出后自动触发（只读审查，v0.27.2） |
 | bug-investigator | 科学方法根因调查（执行期 bug/测试失败） | Read/Bash/Grep/Glob/Write | build-executor 遇阻、DP-5 升级 |
-| prototype-reviewer | PRD 6 维度 + P0 grep + craft 4 席 rubric 评审 | Read/Bash/Grep/Glob | orchestrator S2 原型循环每轮产出后 |
 | change-split-auditor | plan.md 拆分质量审计 | Read/Bash/Grep/Glob | orchestrator S4 脚手架前（必选门禁，PASS 方可继续） |
+| code-reviewer | spec 合规审查（批次完成/合并门禁） | Read/Bash/Grep/Glob | build-executor 批次完成、release-archivist 合并前 |
 | cross-change-consistency-checker | 跨 change 冲突检测 | Read/Bash/Grep/Glob | orchestrator S5 多 change 并行/closing 时 |
 | prd-completeness-reviewer | PRD 完整性评审（能否支撑 plan/spec，5 维度） | Read/Bash/Grep/Glob | orchestrator S2 / ce-brainstorm 冻结前门禁（v0.15.0） |
 | prototype-builder | 原型绘制执行者（种子优先：template.html+layouts.md 组合；**v0.20.0 产物落盘硬闸门**：index.html 未落盘非空禁返 done + 大产出分片；**v0.21.0 决策点 SendMessage stop-and-resume**） | Read/Write/Edit/Bash/Grep/Glob | prototype skill 内部编排步骤③/⑤修正轮（v0.15.0，v0.18.0 种子优先） |
 | prototype-env-scout | 原型环境探查 + 2-3 差异化方向（direction-picker；**v0.20.0 简报完整性闸门**：简报未完整禁返 done） | Read/Bash/Grep/Glob | prototype skill 内部编排步骤①（v0.15.0，v0.18.0 direction-picker） |
+| prototype-reviewer | PRD 6 维度 + P0 grep + craft 4 席 rubric 评审 | Read/Bash/Grep/Glob | orchestrator S2 原型循环每轮产出后 |
 
 ## 复利贯穿机制（v0.5 新增）
 

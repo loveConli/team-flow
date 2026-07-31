@@ -1,6 +1,6 @@
 # team-flow
 
-> 当前版本：`v0.27.2`
+> 当前版本：`v0.28.0`
 
 > 统一插件：**team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同。
 
@@ -83,7 +83,7 @@ STRATEGY.md CONCEPTS.md 策略 / 领域词汇
 - **工作流反馈**（1）：workflow-feedback（工作流问题结构化记录，与 ce-compound 互补，v0.16.0）
 - **设计系统**（1）：design-system（独立创建/迭代项目级设计系统，用户主导交互，v0.19.0）
 
-### 配套 agents（8 个，v0.15.0 增至 8）
+### 配套 agents（10 个，v0.15.0 增至 10）
 
 执行下沉的非交互子代理（主代理只编排）：code-reviewer / bug-investigator / prototype-reviewer / change-split-auditor / cross-change-consistency-checker / **prd-completeness-reviewer**（PRD 完整性评审）/ **prototype-builder**（原型绘制）/ **prototype-env-scout**（原型环境探查）。
 

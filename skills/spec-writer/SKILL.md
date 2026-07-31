@@ -53,6 +53,11 @@ Read `docs/solutions/INDEX.md` if it exists. Filter entries where `phase = spec 
 
 `architecture/` 目录不存在时（判定为 `skipped`）跳过本段。
 
+**conventions 注入（v0.11 §33）**：
+- 通过 `tf runtime config --get conventions` 获取 conventions 配置
+- 读取所有匹配的 convention 文件
+- 注入为规格约束（specs/design/tasks 产出时遵循）
+
 ## Config Check
 
 Run: `tf runtime config --get artifacts.order` — generate in configured order (default: proposal → specs → design → tasks). Run with `artifacts.skip` — skip any listed artifacts.
@@ -149,3 +154,28 @@ Do not start implementation after writing planning artifacts. Once stable, valid
 - **Missing templates**: Fall back to artifact structure defined in this skill
 - **User interruption**: Artifacts on disk are the recovery checkpoint; resume from first missing/incomplete one
 - **Validation failure**: Fix before handoff — do not hand off broken artifacts
+
+## 阶段转换前规范建议（v0.11 §33，被动式自动沉淀）
+
+spec-writer 阶段即将结束、进入 build-executor 之前，执行以下规范沉淀协议：
+
+1. **回顾本阶段工作**：扫描本阶段所有用户纠正、CC 观察到的项目既有模式、踩坑记录
+2. **生成规范建议列表**：提取跨 change 可复用的规范条目（排除仅适用于本次 change 的特定业务逻辑）
+3. **去重检查**：对比已有 convention 文件，排除已存在的条目
+4. **向用户展示建议**：
+
+```
+📋 规格编写阶段规范建议
+┌───┬──────────────────────────────────────────────────┐
+│ # │ 规范条目                                          │
+├───┼──────────────────────────────────────────────────┤
+│ 1 │ [条目描述]                                        │
+│   │   来源：[来源说明]                                  │
+│   │   建议写入：.team-flow/conventions/[目标文件]       │
+└───┴──────────────────────────────────────────────────┘
+
+请逐条确认（接受/拒绝/修改），或输入「全部接受」：
+```
+
+5. **用户确认后写入**：接受的条目追加到对应 convention 文件，更新 YAML frontmatter 的 date 字段
+6. **无建议时静默跳过**：如果本阶段没有可沉淀的规范，不弹出确认，直接进入下一阶段

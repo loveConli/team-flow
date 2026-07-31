@@ -5,9 +5,11 @@
 ## Route to need-explorer
 Change is fuzzy, scope unclear, comparing options, no stable change name.
 
-## Route to architecture-design (v0.9 §26)
+## Route to architecture-design (v0.9 §26, v0.11 §34 审查增强)
 
 Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before spec-writer.
+
+### Step 1: Dispatch architecture-design sub-agent
 
 Dispatch `architecture-design` as sub-agent with inputs:
 - `change-brief.md`（scope / AC / 技术方向）
@@ -26,9 +28,38 @@ artifacts:                       # required 时必填
   - architecture/api.md
 ```
 
-**Reasonableness check**（workflow-start 确认后写入 yaml）：
+### Step 2: Auto-review (v0.11 §34, decision=required 时触发)
+
+When `decision: required`, dispatch `architecture-reviewer` as sub-agent with inputs:
+- `prd_path`, `plan_path`, `change_brief_path`
+- `architecture_dir`（Step 1 产出目录）
+- `global_arch_dir`（`docs/architecture/`）
+- `conventions_config`（从 `team-flow.config.json` 读取）
+
+**交接后产物校验**（defense in depth）：
+```bash
+test -f <architecture_dir>/architecture.md && test -s <architecture_dir>/architecture.md && echo OK
+```
+- OK → dispatch reviewer
+- 缺失/为空 → **不派 reviewer**，resume architecture-design 补全
+
+**审查循环**（≤3 轮 + 收敛检测）：
+```
+reviewer 报告 → FAIL → 不一致项交给 architecture-design 修正 → 重新审查
+  → 收敛（不一致项缩小）→ 继续循环
+  → 不收敛（连续两轮不一致项集合无缩小）→ 立即转人工
+  → 满 3 轮仍 FAIL → 转人工
+reviewer 报告 → PASS / PASS_WITH_WARNINGS → 进入 Step 3
+```
+
+报告落盘到 `changes/<name>/architecture/auto-review.md`。
+
+### Step 3: Reasonableness check
+
+workflow-start 确认后写入 yaml：
 - `skipped` + reason inconsistent with brief/plan scope → **BLOCK**（如 scope 含"新增 API"但 reason 说"不涉及架构变更"）
 - `required` + artifacts files missing on disk → **BLOCK**
+- `required` + auto-review FAIL → **BLOCK**（修正后再写入）
 - `null`（未判定）→ **BLOCK**
 
 ```bash
@@ -39,7 +70,7 @@ tf state set <change-dir> arch_design_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 tf state set <change-dir> arch_design_artifacts "architecture/architecture.md,architecture/database.md,architecture/api.md"
 ```
 
-**hotfix / tweak 不豁免**：同样过 architecture-design 子代理判断门。
+**hotfix / tweak 不豁免**：同样过 architecture-design 子代理判断门（hotfix 可能正是架构缺陷导致）。
 
 ## Route to spec-writer
 Guard: `tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK.
