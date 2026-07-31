@@ -6,6 +6,14 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.29.1] - 2026-08-01
+
+### Fixed（子代理复用 SOP 强化）
+
+- **skills/workflow-start/SKILL.md**：四步协议摘要中明确"记录子代理 ID + 循环修正/DP-A 调整必须 SendMessage 恢复原子代理"
+- **skills/workflow-start/references/routing-rules.md**：Step 1 增加子代理 ID 记录指令；Step 2 审查循环从隐式 resume 改为"⛔ 必须 SendMessage 恢复，禁止启动新子代理"；Step 4d 从"优先 SendMessage"改为"⛔ 必须 SendMessage"；反模式清单增加"启动新子代理"禁令
+- 来源：LT 实测发现主代理在循环修正时启动新子代理而非恢复原子代理
+
 ## [0.29.0] - 2026-07-31
 
 ### Added（§37 DP-A 确认门 + 产物权限规则 + A4 增强，来源：workflow-feedback 2026-07-31 × 7）

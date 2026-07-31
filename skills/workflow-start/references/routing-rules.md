@@ -17,6 +17,12 @@ Dispatch `architecture-design` as sub-agent with inputs:
 - existing `specs/`
 - global `docs/architecture/`（As-Is 基线）
 
+**⛔ 子代理 ID 记录（v0.29.0 §37，必须执行）**：dispatch 后**立即记录**子代理 ID（Agent 工具返回的 `agentId` 或 task-notification 中的 `task-id`），后续 Step 2 审查循环和 Step 4 DP-A 调整**必须通过此 ID 恢复子代理**，不得启动新子代理。记录格式：
+```
+arch_design_agent_id = <agentId>   # Step 1 dispatch 返回
+arch_reviewer_agent_id = <agentId> # Step 2 dispatch 返回
+```
+
 Sub-agent returns structured output:
 ```yaml
 decision: required | skipped
@@ -51,6 +57,12 @@ reviewer 报告 → FAIL → 不一致项交给 architecture-design 修正 → �
   → 满 3 轮仍 FAIL → 转人工
 reviewer 报告 → PASS / PASS_WITH_WARNINGS → 进入 Step 3
 ```
+
+**⛔ 循环修正必须通过 SendMessage 恢复原子代理（v0.29.0 §37，禁止启动新子代理）**：
+- FAIL 后修正：`SendMessage(to: arch_design_agent_id, message: "审查 FAIL，不一致项如下：{findings}。请修正后返回更新的结构化输出。")`
+- 重新审查：`SendMessage(to: arch_reviewer_agent_id, message: "第 {N} 轮审查，架构产物已修正。请重新执行 6 维度审查。")`
+- **禁止**在循环中启动新的 architecture-design 或 architecture-reviewer 子代理——原子代理拥有完整的设计上下文和审查历史，新子代理需要重新加载全部上下文（浪费 10-20K tokens 且可能丢失修正连贯性）
+- **唯一例外**：SendMessage 恢复失败（子代理 transcript 不可用）时，启动新子代理作为 fallback，但必须在 dispatch prompt 中传入：原产物路径 + auto-review 报告 + 历次修正记录
 
 报告落盘到 `changes/<name>/architecture/auto-review.md`。
 
@@ -148,12 +160,20 @@ AskUserQuestion:
 
 - **选择 B（需要调整）**：
   1. 记录用户调整意见
-  2. **通过子代理修改（禁止主代理直接 Edit 架构产物）**：
-     - 优先：`SendMessage(to: <原 architecture-design 子代理 ID>)` 发送修复指令，传入调整意见
-     - 子代理不可恢复时：启动新 architecture-design 子代理，传入：调整意见 + 原产物路径 + auto-review 报告
-  3. 子代理修改完成后，**重新触发 auto-review**（即使之前已 PASS）
+  2. **⛔ 必须通过 SendMessage 恢复原 architecture-design 子代理修改（禁止启动新子代理，禁止主代理直接 Edit）**：
+     ```
+     SendMessage(to: arch_design_agent_id, message: "用户评审反馈（DP-A 调整）：
+       {用户调整意见}
+       请修改架构产物，保持内部一致性，返回更新后的结构化输出。")
+     ```
+     原子代理拥有完整的设计上下文（PRD、brief、基线、conventions），能保持修改的一致性。启动新子代理会丢失上下文（重新加载 10-20K tokens）且可能引入不一致。
+  3. 子代理修改完成后，**通过 SendMessage 恢复原 architecture-reviewer 子代理重新审查**（即使之前已 PASS）：
+     ```
+     SendMessage(to: arch_reviewer_agent_id, message: "架构产物已按用户评审意见修正。请重新执行 6 维度审查。")
+     ```
   4. auto-review PASS 后，更新 yaml 状态（arch_review_verdict / arch_review_rounds）
   5. 回到 Step 4a 重新输出摘要 + 重新确认
+  6. **唯一 fallback**：SendMessage 恢复失败时，启动新子代理，但必须在 dispatch prompt 中传入：调整意见 + 原产物路径 + auto-review 报告 + 历次修正记录
   ```bash
   tf state set <change-dir> dp_a_result "adjustment_requested"
   tf state set <change-dir> dp_a_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
@@ -167,6 +187,7 @@ AskUserQuestion:
 - 主代理直接 Read + Edit `architecture/*.md` 文件（违反 Artifact Ownership 规则）
 - 跳过 DP-A 直接路由 spec-writer
 - 用户选择 B 后不重新 auto-review 就直接重新确认
+- **循环修正或 DP-A 调整时启动新的 architecture-design / architecture-reviewer 子代理**（必须通过 SendMessage 恢复原子代理，原子代理拥有完整上下文；新子代理 = 上下文断裂 + token 浪费。唯一例外：SendMessage 恢复失败时的 fallback）
 
 ## Route to spec-writer
 Guard: `tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK.
