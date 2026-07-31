@@ -103,6 +103,10 @@ prototype/
 ## 脚手架
 新建项目：`cp -r references/prototype-scaffold/ <project>/prototype/`，再按 `.team-flow/design-system/` 的设计系统填 token（缺设计系统先用 `/team-flow:design-system` 创建）。
 
+## prototype-builder agent 方法论（v0.28.1 §37，Agent/Skill 职责分离）
+
+`prototype-builder` agent 通过 `skills: [prototype]` 预加载本 SKILL.md。其详细构建方法论（Hard Constraints / Build Process Steps 0-4 / Seed Composition / P0-P2 Quality Self-Check / Structured Handoff / Deliverable Hard Gate / Decision-Point Interaction）已迁移至 `references/builder-methodology.md`，由 agent 在执行中按需 Read。
+
 ## 方法论参考与归因
 
 > ⚠️ **命名区分**：本 skill 负向清单中排除的「Open Design 桌面应用」（nexu-io/open-design 出品的 Electron 桌面设计工作台产品）与 `references/craft/anti-ai-slop.md` 借鉴的「nexu-io/open-design 开源设计方法论」**同名不同义**：

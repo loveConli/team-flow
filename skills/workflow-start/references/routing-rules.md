@@ -5,7 +5,7 @@
 ## Route to need-explorer
 Change is fuzzy, scope unclear, comparing options, no stable change name.
 
-## Route to architecture-design (v0.9 §26, v0.11 §34 审查增强)
+## Route to architecture-design (v0.9 §26, v0.11 §34 审查增强, v0.28.1 §36 主干补强)
 
 Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before spec-writer.
 
@@ -68,6 +68,10 @@ tf state set <change-dir> arch_design_reason "<reason>"
 tf state set <change-dir> arch_design_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 # if required:
 tf state set <change-dir> arch_design_artifacts "architecture/architecture.md,architecture/database.md,architecture/api.md"
+# if required + auto-review completed (v0.28.1 §36):
+tf state set <change-dir> arch_review_verdict "<PASS|PASS_WITH_WARNINGS>"
+tf state set <change-dir> arch_review_rounds "<N>"
+tf state set <change-dir> arch_review_report "architecture/auto-review.md"
 ```
 
 **hotfix / tweak 不豁免**：同样过 architecture-design 子代理判断门（hotfix 可能正是架构缺陷导致）。

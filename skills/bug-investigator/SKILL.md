@@ -51,6 +51,66 @@ Scientific method: form a single hypothesis ("I think X is the root cause becaus
 
 3+ failed fixes = architectural problem. Each fix revealing new problems elsewhere = wrong architecture. Record: `tf state set <change-dir> dp_5_result <decision>`. Discuss with user before attempting more fixes.
 
+## Report Format
+
+Write the investigation report with this structure:
+
+```markdown
+# Bug Investigation Report
+
+## Summary
+[One-paragraph description of the bug and investigation outcome]
+
+## Symptom
+- **What happens:** [Exact observed behavior]
+- **Expected behavior:** [What should happen]
+- **Reproduction:** [Exact steps, commands, or conditions]
+- **Frequency:** [Always / intermittent / specific conditions]
+
+## Investigation Trail
+[Chronological record of what you investigated, in order]
+
+### Phase 1: Root Cause Investigation
+- Error messages analyzed: [details]
+- Recent changes checked: [git log summary, relevant commits]
+- Data flow traced: [path from symptom to source]
+- Component boundaries tested: [if applicable]
+
+### Phase 2: Pattern Analysis
+- Working examples found: [file references]
+- Key differences identified: [list]
+
+### Phase 3: Hypotheses Tested
+| # | Hypothesis | Test | Result |
+|---|-----------|------|--------|
+| 1 | [hypothesis] | [what you did] | Confirmed / Rejected |
+| 2 | ... | ... | ... |
+
+## Root Cause
+[Clear, specific statement of the root cause with evidence]
+- **Location:** [file:line]
+- **Mechanism:** [How the bug works, step by step]
+- **Evidence:** [What proves this is the cause]
+
+## Recommended Fix
+[Suggested approach — describe what to change and why, but do NOT implement it]
+- **Fix location:** [where to change]
+- **Fix approach:** [what to change]
+- **Test to add:** [regression test suggestion]
+- **Risk assessment:** [what could go wrong with this fix]
+
+## DP-5 Escalation
+[Only if 3+ hypotheses failed — architectural concern details]
+```
+
+## Writing Investigation Notes
+
+During investigation, you may write intermediate notes to track your progress:
+- Use a working file (e.g., `investigation-notes.md`) for scratch work
+- Record each hypothesis, test, and result as you go
+- This protects against losing your train of thought on complex investigations
+- Clean up or consolidate into the final report when done
+
 ## Red Flags — Return to Phase 1
 
 "Quick fix, investigate later" / "Just try changing X" / "Skip the test, I'll verify manually" / "It's probably X, let me fix that" / "I don't fully understand but this might work" / "One more fix attempt" (after 2+) / Proposing solutions before tracing data flow.
@@ -75,3 +135,18 @@ If truly environmental/timing-dependent/external: document what you investigated
 - **Parse failures**: Report raw output, ask for clarification — don't guess
 - **Missing files**: Escalate immediately — not a normal debugging scenario
 - **User interruption**: Re-read investigation report on resume, continue from last completed phase
+
+## Quality Standards
+
+1. **Evidence over intuition**: Every claim in your report must be backed by observable evidence (test output, code path, git history)
+2. **Specificity**: Name exact files, line numbers, functions, and values — not "somewhere in the auth module"
+3. **Completeness**: Document what you ruled OUT, not just what you found. Negative results are valuable.
+4. **Actionability**: Your recommended fix should be specific enough that an implementer can act on it without re-investigating
+5. **Honesty**: If you cannot determine root cause, say so explicitly and document what you DID investigate. 95% of "no root cause found" cases are incomplete investigation — but the remaining 5% are genuinely environmental/timing/external.
+
+## Edge Cases
+
+- **Environmental issues**: If the bug is environment-specific, document the environment differences and suggest environment normalization
+- **Timing/race conditions**: Document the timing window, suggest synchronization or defensive handling
+- **External dependencies**: If the root cause is in a third-party library, document the version, the specific behavior, and suggest workarounds or upstream issues
+- **Cannot reproduce**: Document everything you tried. Suggest monitoring/instrumentation for the next occurrence. Do NOT guess at a cause you cannot verify.

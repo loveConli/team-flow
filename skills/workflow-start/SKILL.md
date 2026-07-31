@@ -55,8 +55,16 @@ Validate mode against artifact content. If hotfix/tweak criteria not met → upg
 ### Route to need-explorer
 Change is fuzzy, scope unclear, comparing options, no stable change name.
 
-### Route to architecture-design (v0.9 §26)
-Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before spec-writer. Dispatch `architecture-design` as sub-agent; after return, run reasonableness check and write yaml. Full protocol in `references/routing-rules.md`「Route to architecture-design」.
+### Route to architecture-design (v0.9 §26, v0.28.1 §36 审查增强)
+Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before spec-writer.
+
+**Three-step protocol (MUST execute in order)**:
+
+1. **Dispatch**: `architecture-design` as sub-agent → returns `decision` + `reason` + `artifacts`
+2. **Auto-review** (decision=required 时触发): 校验产物文件存在且非空 → dispatch `architecture-reviewer` sub-agent → FAIL 则循环修正（≤3 轮 + 收敛检测，不收敛转人工）→ 报告落盘 `changes/<name>/architecture/auto-review.md`
+3. **Reasonableness check + state write**: PASS/PASS_WITH_WARNINGS → write `arch_design_decision` + `arch_review_*` to yaml; skipped + brief 含架构关键词 → BLOCK; required + artifacts 缺失 → BLOCK; required + auto-review FAIL → BLOCK
+
+Full protocol in `references/routing-rules.md`「Route to architecture-design」.
 
 ### Route to spec-writer
 Guard: `tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK. **arch_design_decision must not be null** → fail = BLOCK (v0.9 §26). User knows what they want, artifacts missing/incomplete.
@@ -135,6 +143,7 @@ Use content inspection, not timestamps.
 - No auto-abandon without user confirmation
 - No merging delta specs from abandoned change
 - **No routing to spec-writer without architecture-design gate pass** (v0.9 §26): `arch_design_decision` must be `required` or `skipped` (not `null`). hotfix/tweak 不豁免
+- **No arch state write without auto-review PASS** (v0.28.1 §36): when `decision: required`, auto-review MUST complete with PASS or PASS_WITH_WARNINGS before writing `arch_design_decision` to yaml. FAIL → loop fix (≤3 rounds) or escalate to human
 
 ## State Writes (v0.22.5 F06 修复)
 
@@ -154,12 +163,17 @@ workflow-start 负责写入以下字段到 `.team-flow.yaml`：
 - `dp_7_*`：其他决策点
 
 **架构设计门控字段**（v0.9 §26，v0.22.5 F02 修复）：
-- `arch_design_decision`：`required` | `skipped`（architecture-design 子代理返回，workflow-start 经 reasonableness check 后写入）
+- `arch_design_decision`：`required` | `skipped`（architecture-design 子代理返回，workflow-start 经 auto-review + reasonableness check 后写入）
 - `arch_design_reason`：判断理由
 - `arch_design_timestamp`：ISO 8601 时间戳（UTC）
 - `arch_design_artifacts`：产出路径列表（required 时必填，skipped 时为空）
 
-**职责边界**：architecture-design 负责判断+产出，workflow-start 负责 reasonableness check + 状态写入。详细写入命令见 `references/routing-rules.md`「Route to architecture-design」。
+**架构审查字段**（v0.28.1 §36，decision=required 时写入）：
+- `arch_review_verdict`：`PASS` | `PASS_WITH_WARNINGS`（auto-review 最终判定）
+- `arch_review_rounds`：审查轮次（1-3）
+- `arch_review_report`：`architecture/auto-review.md` 路径
+
+**职责边界**：architecture-design 负责判断+产出，architecture-reviewer 负责 6 维度审查，workflow-start 负责编排三步协议（dispatch → auto-review → reasonableness check）+ 状态写入。详细写入命令见 `references/routing-rules.md`「Route to architecture-design」。
 
 ## Output Standard
 

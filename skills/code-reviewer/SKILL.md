@@ -86,3 +86,98 @@ Suggestion breaks existing functionality, reviewer lacks context, violates YAGNI
 - **Parse failures**: Report specific file, request regenerated review package
 - **Missing files**: Regenerate via `scripts/review-package`. Empty diff = nothing to review
 - **User interruption**: Re-read review report on resume, continue from next unreviewed batch
+
+---
+
+## Review Process (Agent Methodology)
+
+The code-reviewer agent follows this 6-step process:
+
+### Step 1: Gather Context
+
+1. Read `change-brief.md` to understand scope and constraints
+2. Read `specs/*.md` to understand requirements
+3. Read `design.md` to understand architectural decisions
+4. Get the list of changed files: `git diff --name-only BASE..HEAD` or from the change directory
+
+### Step 2: Spec Compliance Check
+
+For each requirement in specs/:
+1. Locate the corresponding implementation
+2. Check if the implementation faithfully reflects the spec
+3. Note any deviations (with justification or flag as Critical)
+4. Build a compliance matrix: spec requirement → implementation status
+
+### Step 3: Code Quality Review
+
+Check for:
+- **Readability**: Clear naming, appropriate comments, logical structure
+- **Maintainability**: DRY principles, appropriate abstraction, no code smells
+- **Error handling**: Proper exception handling, meaningful error messages
+- **Performance**: No obvious N+1 queries, no unnecessary loops, appropriate caching
+- **Security**: Input validation, SQL injection prevention, XSS prevention, auth checks
+
+### Step 4: Architecture Review
+
+Check for:
+- **Separation of concerns**: Each module/class has a single responsibility
+- **Dependency direction**: Dependencies flow inward (domain ← application ← infrastructure)
+- **Interface design**: Clean APIs, appropriate abstraction layers
+- **Scalability**: No obvious bottlenecks, appropriate use of async/queue for heavy operations
+- **Consistency**: Follows established patterns in the codebase
+
+### Step 5: Test Coverage Review
+
+Check for:
+- **Unit tests**: Each function/method has corresponding unit tests
+- **Integration tests**: API endpoints have integration tests
+- **Edge cases**: Tests cover boundary conditions, error cases
+- **Test quality**: Tests are meaningful (not just "it works"), assertions are specific
+
+### Step 6: Documentation Review
+
+Check for:
+- **Code comments**: Complex logic is explained
+- **API documentation**: Endpoints are documented (Swagger/OpenAPI)
+- **README updates**: User-facing changes are documented
+- **Change log**: Significant changes are noted
+
+## Severity Levels
+
+| Level | Meaning | Examples |
+|-------|---------|----------|
+| **Critical** | Must fix before merge | Spec violations, bugs, security issues, data loss risks |
+| **Important** | Should fix before next batch | Architecture problems, poor error handling, missing tests |
+| **Minor** | Nice to have, note for later | Code style, optimization opportunities, documentation polish |
+
+## Verdict Criteria
+
+| Verdict | Condition |
+|---------|-----------|
+| **PASS** | No Critical or Important findings |
+| **PASS_WITH_WARNINGS** | No Critical, but Important findings exist |
+| **FAIL** | Any Critical finding |
+
+## Calibration Rules
+
+1. **Evidence-based**: Every finding must cite specific file:line
+2. **Severity-appropriate**: Don't mark style issues as Critical
+3. **Constructive**: Provide actionable suggestions, not just complaints
+4. **Context-aware**: Consider the change scope and constraints
+5. **Spec-grounded**: Spec violations are always Critical (unless explicitly justified)
+
+## Critical Rules
+
+**DO:**
+- Read specs and design BEFORE reading implementation
+- Build an explicit spec compliance matrix
+- Cite file:line for every finding
+- Distinguish Critical (spec violation/bug) from Important (architecture/quality)
+- Give a clear, unambiguous verdict
+
+**DON'T:**
+- Guess at spec requirements not explicitly stated
+- Mark style issues as Critical (they're Minor)
+- Produce vague findings without file:line references
+- Skip the spec compliance check (it's the core deliverable)
+- Implement fixes (that's the implementer's job after your review)
