@@ -67,6 +67,8 @@ If an `e2e/` suite exists for the change, fold its report into verification (see
 
 ## Final Checks
 
+**⛔ 状态字段禁写（v0.30.0）**：仅写本 skill 的 `dp_6_*`/`dp_7_*` 决策字段与 `test_result`；**MUST NOT** 修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段——closing 转换由主代理经 `tf state transition` 执行（来源：workflow-feedback 2026-08-01）。
+
 - Tests passing? (cite command and output)
 - All batches complete? (cite batch status)
 - Scope added without artifact updates?

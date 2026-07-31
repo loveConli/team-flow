@@ -34,6 +34,8 @@ artifacts:                       # required 时必填
   - architecture/api.md
 ```
 
+**📡 结果协议（v0.30.0）**：子代理终态须标注 `FINAL VERDICT: <DONE|BLOCKED|FAIL>`（审查类用 PASS/PASS_WITH_WARNINGS/FAIL）。**SendMessage 报告为权威结果**；task-notification.result 仅内部元数据，二者冲突时以 SendMessage + 落盘产物为准。
+
 ### Step 2: Auto-review (v0.11 §34, decision=required 时触发)
 
 When `decision: required`, dispatch `architecture-reviewer` as sub-agent with inputs:
@@ -58,8 +60,12 @@ reviewer 报告 → FAIL → 不一致项交给 architecture-design 修正 → �
 reviewer 报告 → PASS / PASS_WITH_WARNINGS → 进入 Step 3
 ```
 
+**🎯 实事求是原则（v0.30.0，修复子代理行为准则）**：reviewer 建议是**输入不是指令**。修复子代理收到 findings 后，**必须先对照代码库与项目既有模式逐条验证属实性**（搜索既有实现、读取参照模块）：属实则修正；认为不属实或与既有模式冲突，则据实 SendMessage 反馈主代理（finding + 证据 + 替代建议），**不得盲目遵从**（移植自 ce-brainstorm「may contradict only on evidence / report it — do not suppress it」）。
+
+> **⛔ 修复→审查必须串行（v0.30.0）**：修复子代理（architecture-design）**完成前 MUST NOT dispatch/恢复审查子代理**——并行会使审查跑在修复之前、误报"全部未修复"FAIL。
+
 **⛔ 循环修正必须通过 SendMessage 恢复原子代理（v0.29.0 §37，禁止启动新子代理）**：
-- FAIL 后修正：`SendMessage(to: arch_design_agent_id, message: "审查 FAIL，不一致项如下：{findings}。请修正后返回更新的结构化输出。")`
+- FAIL 后修正：`SendMessage(to: arch_design_agent_id, message: "审查 FAIL，不一致项如下：{findings}。请先对照代码库与项目既有模式逐条验证 finding 属实性——属实则修正；认为不属实或冲突则据实反馈主代理（finding+证据+替代建议），勿盲目遵从。修正后返回更新的结构化输出。")`
 - 重新审查：`SendMessage(to: arch_reviewer_agent_id, message: "第 {N} 轮审查，架构产物已修正。请重新执行 6 维度审查。")`
 - **禁止**在循环中启动新的 architecture-design 或 architecture-reviewer 子代理——原子代理拥有完整的设计上下文和审查历史，新子代理需要重新加载全部上下文（浪费 10-20K tokens 且可能丢失修正连贯性）
 - **唯一例外**：SendMessage 恢复失败（子代理 transcript 不可用）时，启动新子代理作为 fallback，但必须在 dispatch prompt 中传入：原产物路径 + auto-review 报告 + 历次修正记录
@@ -164,7 +170,7 @@ AskUserQuestion:
      ```
      SendMessage(to: arch_design_agent_id, message: "用户评审反馈（DP-A 调整）：
        {用户调整意见}
-       请修改架构产物，保持内部一致性，返回更新后的结构化输出。")
+       请先对照代码库与项目既有模式验证调整点的合理性，再修改架构产物，保持内部一致性；若调整点与既有模式冲突请据实反馈。返回更新后的结构化输出。")
      ```
      原子代理拥有完整的设计上下文（PRD、brief、基线、conventions），能保持修改的一致性。启动新子代理会丢失上下文（重新加载 10-20K tokens）且可能引入不一致。
   3. 子代理修改完成后，**通过 SendMessage 恢复原 architecture-reviewer 子代理重新审查**（即使之前已 PASS）：
@@ -189,16 +195,16 @@ AskUserQuestion:
 - 用户选择 B 后不重新 auto-review 就直接重新确认
 - **循环修正或 DP-A 调整时启动新的 architecture-design / architecture-reviewer 子代理**（必须通过 SendMessage 恢复原子代理，原子代理拥有完整上下文；新子代理 = 上下文断裂 + token 浪费。唯一例外：SendMessage 恢复失败时的 fallback）
 
-## Route to spec-writer
+## Route to spec-writer (dispatch sub-agent)
 Guard: `tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK.
 **arch_design_decision must not be null** → fail = BLOCK（architecture-design gate not passed，v0.9 §26）。
 User knows what they want, artifacts missing/incomplete.
 
-## Route to contract-builder
+## Route to contract-builder (dispatch sub-agent)
 Guard: `... check <dir> specifying bridging --json` → fail = BLOCK.
 Artifacts exist, implementation requested, contract missing/stale. Include DP-3: 契约批准.
 
-## Route to build-executor
+## Route to build-executor (dispatch sub-agent)
 Contract exists and approved, contract matches artifacts. Include DP-4: 执行模式选择.
 
 Propose waves, run:
@@ -222,7 +228,7 @@ Current planned wave implemented and ready for review. Reviewer must write:
 tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>
 ```
 
-## Route to release-archivist
+## Route to release-archivist (dispatch sub-agent)
 Guard: `... check <dir> executing closing --json` → fail = BLOCK. Include DP-7: 归档确认.
 
 ## Route to spec-merger

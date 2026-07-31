@@ -1,6 +1,6 @@
 # team-flow
 
-> 当前版本：`v0.29.2`
+> 当前版本：`v0.30.0`
 
 > 统一插件：**team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同。
 
@@ -34,7 +34,7 @@
 git clone <your-repo> && <cli> plugin install ./team-flow
 ```
 
-> 不同宿主 CLI 的安装子命令略有差异（如 Claude Code 为 `/plugin add`，Cursor 为 `plugin install`）。以宿主文档为准；本插件提供单一 `plugin.json`，一次安装即加载全部 22 个 skills。
+> 不同宿主 CLI 的安装子命令略有差异（如 Claude Code 为 `/plugin add`，Cursor 为 `plugin install`）。以宿主文档为准；本插件提供单一 `plugin.json`，一次安装即加载全部 23 个 skills。
 
 ## 配置（插件层扩展字段）
 
@@ -83,9 +83,9 @@ STRATEGY.md CONCEPTS.md 策略 / 领域词汇
 - **工作流反馈**（1）：workflow-feedback（工作流问题结构化记录，与 ce-compound 互补，v0.16.0）
 - **设计系统**（1）：design-system（独立创建/迭代项目级设计系统，用户主导交互，v0.19.0）
 
-### 配套 agents（10 个，v0.15.0 增至 10）
+### 配套 agents（15 个，v0.30.0 增至 15）
 
-执行下沉的非交互子代理（主代理只编排）：code-reviewer / bug-investigator / prototype-reviewer / change-split-auditor / cross-change-consistency-checker / **prd-completeness-reviewer**（PRD 完整性评审）/ **prototype-builder**（原型绘制）/ **prototype-env-scout**（原型环境探查）。
+全部由编排层 dispatch（主代理只编排，need-explorer 为主进程交互式澄清）：architecture-design（架构设计门控）/ architecture-reviewer（架构自动审查）/ bug-investigator（bug 根因调查）/ change-split-auditor（拆分质量审计）/ code-reviewer（代码审查）/ cross-change-consistency-checker（跨 change 一致性）/ prd-completeness-reviewer（PRD 完整性评审）/ prototype-builder（原型绘制）/ prototype-env-scout（原型环境探查）/ prototype-reviewer（原型评审）/ need-explorer（需求探索）/ spec-writer（规格编写）/ contract-builder（执行契约构建）/ build-executor（TDD 构建执行）/ release-archivist（发布归档）。
 
 ### 命名约定
 

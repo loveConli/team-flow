@@ -72,6 +72,8 @@ Run: `tf runtime config --get artifacts.order` — generate in configured order 
 
 ## Working Rules
 
+**⛔ 状态字段禁写（v0.30.0）**：仅通过 `tf state set` 写本 skill 的 `dp_2_*` 决策字段；**MUST NOT** 修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段——状态转换是主代理（workflow-start）经 `tf state transition` 的专有职责（来源：workflow-feedback 2026-08-01）。
+
 **Honor DP-0**: Read `dp_0_decisions`, respect confirmed constraints, don't silently expand scope. Pause on unconfirmed decisions.
 
 **Honor Brief (v0.9)**: 若 `change-brief.md` 存在，尊重其 scope 边界与 AC 列表（见 Required Inputs「Change Brief」）——不静默丢弃 brief AC、不静默超出 brief scope；与 plan.md 冲突时以 plan.md 为准并注明。

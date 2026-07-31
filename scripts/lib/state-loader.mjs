@@ -4,6 +4,14 @@ import path from 'node:path';
 
 const STATE_FILE = '.team-flow.yaml';
 
+// 状态机合法值唯一真相源 (来源:workflow-feedback 2026-08-01,#100005)。
+// 所有状态枚举校验统一引用此常量,禁止在各处硬编码状态字符串数组,避免多处定义漂移。
+// cmd-state.mjs(transition 校验 / set 报错)、cmd-doctor.mjs(非法 state 巡检)均从这里 import。
+export const VALID_STATES = [
+  'exploring', 'specifying', 'bridging', 'approved-for-build',
+  'executing', 'debugging', 'closing', 'abandoned',
+];
+
 const BUILTIN_DEFAULTS = {
   state: 'exploring',
   workflow: 'auto',
@@ -74,6 +82,20 @@ export function readState(changeDir) {
  * Write state object to .team-flow.yaml.
  */
 export function writeState(changeDir, state) {
+  // Defense-in-depth 状态合法性校验 (来源:workflow-feedback 2026-08-01,#100004)。
+  // 主修复是子代理 prompt 禁令(禁止绕过 CLI 直接 Edit .team-flow.yaml);此处是最后一道防线,
+  // 拦截任何非法 state 落盘。init/transition/rebuild/updateField 等 CLI 路径产生的 state 均合法
+  // (缺失时回退 'exploring'),不会误伤;仅当出现非法值时抛错,提示用 tf doctor 排查。
+  const effectiveState = state.state || 'exploring';
+  if (!VALID_STATES.includes(effectiveState)) {
+    throw new Error(
+      `Refusing to write illegal state '${effectiveState}' to ${path.join(changeDir, STATE_FILE)}. ` +
+      `Legal states: ${VALID_STATES.join(', ')}. ` +
+      `This is usually caused by a subagent bypassing the CLI and editing .team-flow.yaml directly — ` +
+      `restore a legal value or run 'tf doctor' to diagnose.`
+    );
+  }
+
   const filePath = path.join(changeDir, STATE_FILE);
   const lines = [];
   lines.push('# .team-flow.yaml — lightweight state machine');

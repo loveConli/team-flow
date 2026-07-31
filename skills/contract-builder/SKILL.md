@@ -53,6 +53,8 @@ Generate minimal contract: Intent Lock (one sentence), Task List (numbered), App
 
 ## Guardrails
 
+- **状态字段禁写（v0.30.0）**：仅写本 skill 的 `dp_3_*` 决策字段；**MUST NOT** 修改 `state`/`workflow` 核心字段——状态转换由主代理经 `tf state transition` 执行。`tf state init` 只创建状态文件，不改 `state` 值（来源：workflow-feedback 2026-08-01）。
+
 - Do not continue to implementation if ambiguity remains
 - Do not approve the contract on the user's behalf
 - Do not skip the contract because planning docs look complete

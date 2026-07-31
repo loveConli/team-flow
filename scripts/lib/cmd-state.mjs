@@ -2,17 +2,14 @@
 import { parseArgs } from 'node:util';
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import path, { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readState, writeState, updateField, rebuildState } from './state-loader.mjs';
+// VALID_STATES 统一从 state-loader.mjs 引入(状态机合法值唯一真相源),不再本地硬编码。
+// 来源:workflow-feedback 2026-08-01,#100005。
+import { readState, writeState, updateField, rebuildState, VALID_STATES } from './state-loader.mjs';
 import { computeArtifactsHash, computeContractHash } from './hash.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-const VALID_STATES = [
-  'exploring', 'specifying', 'bridging', 'approved-for-build',
-  'executing', 'debugging', 'closing', 'abandoned',
-];
 
 const SETTABLE_FIELDS = [
   'workflow', 'test_result', 'batches_completed', 'spec_merged',
@@ -44,7 +41,7 @@ export async function run(args) {
   });
 
   const sub = positionals[0];  // init | check | transition | get | rebuild | set
-  const changeDir = positionals[1];
+  let changeDir = positionals[1];
   const arg = positionals[2];  // <to-state> for transition, <field> for get
 
   if (!changeDir) {
@@ -52,6 +49,13 @@ export async function run(args) {
     console.error('Subcommands: init, check, transition, get, rebuild, set');
     process.exit(2);
   }
+
+  // 修复相对路径 bug(来源:workflow-feedback 2026-08-01,#100005)。
+  // 根因:readState 用 path.join(changeDir,...) 按用户 cwd 解析,而 transition 分支 spawn guard
+  // 子进程时 cwd 设为包根(join(__dirname,'..','..'))+ 原样 changeDir,两处基准不一致——用户传
+  // 相对路径时 guard 在包根下找不到产物。统一在入口 resolve 为绝对路径,使后续 readState /
+  // guard spawn / existsSync 全部基于同一绝对基准,消除 cwd 歧义。
+  changeDir = path.resolve(changeDir);
 
   // Unknown subcommand: report a usage error (exit 2) BEFORE the BUG-B
   // state-file existence check, so a bad subcommand is not masked by the
@@ -222,7 +226,18 @@ export async function run(args) {
         process.exit(2);
       }
       if (!SETTABLE_FIELDS.includes(field)) {
-        console.error(`⛔ Field '${field}' is not settable (use 'transition' for state, or check SETTABLE_FIELDS)`);
+        // 错误提示升级(来源:workflow-feedback 2026-08-01,#100005):
+        // 'state' 是最常被误用 set 的字段,专门给出完整 transition 语法示例;合法状态清单
+        // 引用 VALID_STATES(唯一真相源),不硬编码。保留 'not settable' 措辞以兼容既有回归测试。
+        if (field === 'state') {
+          console.error(
+            `⛔ 'state' 不是可 set 的字段(not settable)。状态转换请用完整语法:\n` +
+            `   tf state transition <change-dir 绝对路径> <目标状态>\n` +
+            `   合法状态:${VALID_STATES.join('/')}`
+          );
+        } else {
+          console.error(`⛔ Field '${field}' is not settable (use 'transition' for state, or check SETTABLE_FIELDS)`);
+        }
         process.exit(1);
       }
       updateField(changeDir, field, value);

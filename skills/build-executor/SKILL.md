@@ -27,16 +27,26 @@ Branch/worktree preflight before ANY implementation edit (mandatory — do not s
    ```bash
    tf isolate <change-dir>
    ```
-   This script enforces git isolation: if you are on `main`/`master` it creates a
-   git worktree (preferred) or a new branch, and exits non-zero if it cannot and you
-   have not approved `--force`.
+   This script enforces git isolation. In a **multi-repo workspace** (a workspace root
+   whose direct subdirectories are independent code repositories, e.g. `bff-*`/`ui-*`/
+   `prototype/`, while the root itself is often a near-empty git repo), it creates one git
+   worktree per code repo under `<workspace>/.worktrees/<change>/<repo>` — each based on
+   that repo's current branch — so the implementation subagent enters that aggregated
+   directory and sees reference code from every repo with the same layout as the main
+   workspace. In a **single code repository** it falls back to creating one git worktree
+   (preferred) or a new branch. It exits non-zero if it cannot isolate and you have not
+   approved `--force`.
 2. If `tf isolate` exits non-zero: STOP. Do not edit `main`/`master` in place.
    Ask the user for explicit approval (and re-run with `tf isolate <change-dir> --force`
    only after they approve).
-3. If it succeeds, report the chosen branch/worktree and make all implementation
+3. If it succeeds, report the chosen branch/worktree — in a multi-repo workspace, the
+   aggregated `<workspace>/.worktrees/<change>/` directory — and make all implementation
    edits there.
 
 ## Core Laws
+
+### Law 0: State Field Boundary (v0.30.0)
+本 skill 仅通过 `tf state set` 写自己的 `dp_5_*` 决策字段；**MUST NOT** 修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段——状态转换是主代理（workflow-start）经 `tf state transition` 的专有职责（来源：workflow-feedback 2026-08-01）。
 
 ### Law 1: Contract First
 The execution contract is the approved handoff artifact, not chat history.

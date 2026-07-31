@@ -52,6 +52,8 @@ Once DP-1 is recorded, hand off to `spec-writer`.
 
 ## Anti-Patterns
 
+- **修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段**（v0.30.0 禁止）：状态转换是主代理经 `tf state transition` 的专有职责；need-explorer 只写自己的 `dp_1_*` 决策字段（来源：workflow-feedback 2026-08-01）。
+
 - **Skipping exploration**: "Simple" changes have scope too. Five minutes of exploration prevents two hours of rework.
 - **Proposing solutions before clarifying**: If the user says "add caching," first ask what problem caching solves.
 - **Exploring indefinitely**: Stop when change name, problem statement, scope, non-goals, success criteria, and decomposition decision are all clear.

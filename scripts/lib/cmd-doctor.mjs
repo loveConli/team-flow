@@ -3,6 +3,8 @@ import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadConfig } from './config-loader.mjs';
 import { PLATFORM_RUNTIME_INVENTORY } from './platform-runtime-inventory.mjs';
+// 非法 state 巡检所需的共享常量与读取器(来源:workflow-feedback 2026-08-01,#100004)。
+import { readState, VALID_STATES } from './state-loader.mjs';
 
 const RUNTIME_SKILLS = new Set([
   'workflow-start', 'need-explorer', 'spec-writer', 'contract-builder',
@@ -220,6 +222,42 @@ function checkDocs(root) {
   return { pass: false, message: warnings.join('; ') };
 }
 
+// 非法 state 巡检(来源:workflow-feedback 2026-08-01,#100004):
+// 扫描 changes/<name>/.team-flow.yaml,若 state 字段不在 VALID_STATES 则报 FAIL。
+// 非法值通常由子代理绕过 CLI 直接 Edit .team-flow.yaml 导致,提示修复为合法值。
+// 沿用 checkSkills 的目录扫描 + 计数报告风格。
+function checkChangeStates(root) {
+  const changesDir = join(root, 'changes');
+  if (!existsSync(changesDir)) {
+    return { pass: true, message: 'no changes/ directory (skipped)' };
+  }
+  const dirs = readdirSync(changesDir).filter(f => {
+    try { return statSync(join(changesDir, f)).isDirectory(); } catch { return false; }
+  });
+  const invalid = [];
+  let checked = 0;
+  for (const d of dirs) {
+    if (!existsSync(join(changesDir, d, '.team-flow.yaml'))) continue;
+    checked += 1;
+    const current = readState(join(changesDir, d)).state;
+    if (!VALID_STATES.includes(current)) {
+      invalid.push(`${d}='${current}'`);
+    }
+  }
+  if (checked === 0) {
+    return { pass: true, message: 'no state files under changes/ (skipped)' };
+  }
+  if (invalid.length > 0) {
+    return {
+      pass: false,
+      message:
+        `state 值非法(可能是子代理绕过 CLI 直接 Edit .team-flow.yaml 所致):${invalid.join('; ')}。` +
+        `请修复为合法值:${VALID_STATES.join('/')}`,
+    };
+  }
+  return { pass: true, message: `${checked} change(s) have legal state values` };
+}
+
 export async function run(args) {
   const root = process.cwd();
   const config = loadConfig(root);
@@ -236,6 +274,7 @@ export async function run(args) {
     ['dist/', checkDist(root)],
     ['Node.js', checkNodeVersion()],
     ['Docs', checkDocs(root)],
+    ['Change states', checkChangeStates(root)],
   ];
 
   // Config check
@@ -264,4 +303,4 @@ export async function run(args) {
   }
 }
 
-export { checkVersionConsistency, checkHooks, checkCodexManifest, checkSkills, checkRuntimeDistribution, checkDist, checkRootPluginAuthor, checkNodeVersion, checkDocs };
+export { checkVersionConsistency, checkHooks, checkCodexManifest, checkSkills, checkRuntimeDistribution, checkDist, checkRootPluginAuthor, checkNodeVersion, checkDocs, checkChangeStates };

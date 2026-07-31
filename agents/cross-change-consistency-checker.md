@@ -45,7 +45,7 @@ Dim 4 检测原型 testid 契约是否被 change 实现正确引用，保障 E2E
 </example>
 
 model: inherit
-color: orange
+color: red
 tools: ["Read", "Bash", "Grep", "Glob"]
 ---
 

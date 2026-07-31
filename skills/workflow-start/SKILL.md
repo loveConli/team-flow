@@ -17,6 +17,8 @@ Do NOT invoke for: general coding tasks outside team-flow changes, casual questi
 
 `exploring` → `specifying` → `bridging` → `approved-for-build` → `executing` → `closing`, with `debugging` side-path from `executing`, and `abandoned` as terminal. If a transition is ambiguous, run `tf runtime asset read docs/state-machine.md`.
 
+**状态转换命令（v0.30.0）**：实际转换用 `tf state transition <change-dir 绝对路径> <目标状态>`（内部自动执行 guard 校验并写入 `.team-flow.yaml`）。`tf runtime guard check <dir> <from> <to> --json` 是转换前的独立预检（fail = BLOCK）。**恒用绝对路径**——相对路径下 guard 子进程与状态文件解析基准不一致会找不到产物（v0.30.0 修复）。
+
 ## Initialization
 
 1. **Update check**: Run `tf runtime check-update`. Exit 0 → continue. Exit 1 → non-blocking upgrade reminder. Exit 2 → skip.
@@ -52,13 +54,24 @@ Validate mode against artifact content. If hotfix/tweak criteria not met → upg
 
 ## Routing Rules
 
+### Sub-agent Dispatch Protocol (v0.30.0)
+
+产出型路由（spec-writer / contract-builder / build-executor / release-archivist）通过 `Agent(subagent_type: "team-flow:<name>")` **dispatch 子代理**执行——agent 定义经 `skills:` 预加载对应 SKILL.md，主代理**不得**凭记忆手写产物格式 prompt。need-explorer 为交互式澄清，**主进程执行**（需与用户对话；其 agent 定义 `team-flow:need-explorer` 仅作可 dispatch 后备）。
+
+- **记录 agentId**：dispatch 后立即记录子代理 ID；修复一律 SendMessage 恢复原子代理（禁启动新子代理，见 v0.29.0 §37）
+- **返回即验证（validation gate）**：子代理返回产物后**立即** `tf validate <change-dir>`；FAIL → SendMessage 回**原**子代理修复，通过后才能继续/转换。把格式失败拦截在返回时，而非状态转换时（避免浪费整次执行后再失败）
+- **结果协议**：子代理终态须标注 `FINAL VERDICT: <DONE|BLOCKED|FAIL>`（审查类用 PASS/PASS_WITH_WARNINGS/FAIL）；**SendMessage 报告为权威结果**，task-notification.result 仅内部元数据
+- **子代理状态边界**：子代理 MUST NOT 修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段（状态转换是主代理专有职责，经 `tf state transition` 执行），只写自己的 `dp_N_*` 决策字段
+
 ### Route to need-explorer
-Change is fuzzy, scope unclear, comparing options, no stable change name.
+Change is fuzzy, scope unclear, comparing options, no stable change name.（交互式澄清，主进程执行，见 Sub-agent Dispatch Protocol）
 
 ### Route to architecture-design (v0.9 §26, v0.28.1 §36 审查增强, v0.29.0 §37 DP-A 确认门)
 Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before spec-writer.
 
 **Four-step protocol (MUST execute in order)**:
+
+> **⛔ 串行约束（v0.30.0）**：四步严格串行。**修复子代理（architecture-design）完成前 MUST NOT dispatch 审查子代理（architecture-reviewer）**——并行会使审查跑在修复之前、误报"全部未修复"FAIL（来源：workflow-feedback 2026-08-01）。并行白名单：仅多个独立 change 的工作可并行；修复→审查、设计→审查必须串行。
 
 1. **Dispatch**: `architecture-design` as sub-agent → returns `decision` + `reason` + `artifacts`。**⛔ 记录子代理 ID**（后续循环修正和 DP-A 调整必须通过此 ID 恢复，禁止启动新子代理）
 2. **Auto-review** (decision=required 时触发): 校验产物文件存在且非空 → dispatch `architecture-reviewer` sub-agent（**记录子代理 ID**）→ FAIL 则通过 **SendMessage 恢复原 architecture-design 子代理**修正（≤3 轮 + 收敛检测，不收敛转人工）→ 报告落盘 `changes/<name>/architecture/auto-review.md`
@@ -67,13 +80,13 @@ Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before
 
 Full protocol in `references/routing-rules.md`「Route to architecture-design」.
 
-### Route to spec-writer
+### Route to spec-writer (dispatch sub-agent)
 Guard: `tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK. **arch_design_decision must not be null** → fail = BLOCK (v0.9 §26). User knows what they want, artifacts missing/incomplete.
 
-### Route to contract-builder
+### Route to contract-builder (dispatch sub-agent)
 Guard: `... check <dir> specifying bridging --json` → fail = BLOCK. Artifacts exist, implementation requested, contract missing/stale. Include `DP-3: 契约批准`.
 
-### Route to build-executor
+### Route to build-executor (dispatch sub-agent)
 Contract exists and approved, contract matches artifacts. Include `DP-4: 执行模式选择`: propose waves, run `tf execution recommend <change-dir> [--wave ...]`, show the user every available mode plus evidence and the recommendation, then obtain a clear selection. The command saves a current receipt; before the first implementation edit, `build-executor` must run `tf execution plan <change-dir> --mode <selected> --confirm ...` (and `--acknowledge-recommendation` when the selected mode differs from the recommendation) using matching artifacts, contract, and waves, then `tf execution show <change-dir> --json`; report the saved revision, selected mode, recommendation alignment, ordered waves, and actual concurrent-dispatch capability. A revision must repeat recommend and confirmation. Do not transition to `executing` until `show` reports `current: true`; then run `... check <dir> approved-for-build executing --json` → fail = BLOCK.
 
 ### Route to bug-investigator
@@ -82,7 +95,7 @@ Execution hit blockage: test failure, unexpected behavior, build error, task can
 ### Route to code-reviewer
 The current planned wave is implemented and ready for spec-compliance + code-quality verification. A reviewer must write an `tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>` receipt before any dependent wave or closing transition.
 
-### Route to release-archivist
+### Route to release-archivist (dispatch sub-agent)
 Guard: `... check <dir> executing closing --json` → fail = BLOCK. Implementation complete, verification complete/nearly complete. Include `DP-7: 归档确认`.
 
 ### Route to spec-merger
@@ -145,8 +158,9 @@ Use content inspection, not timestamps.
 - No merging delta specs from abandoned change
 - **No routing to spec-writer without architecture-design gate pass** (v0.9 §26): `arch_design_decision` must be `required` or `skipped` (not `null`). hotfix/tweak 不豁免
 - **No arch state write without auto-review PASS** (v0.28.1 §36): when `decision: required`, auto-review MUST complete with PASS or PASS_WITH_WARNINGS before writing `arch_design_decision` to yaml. FAIL → loop fix (≤3 rounds) or escalate to human
-- **No routing past DP-A without user confirmation** (v0.29.0 §37): architecture-design 三步协议完成后，必须经 DP-A 用户确认门（AskUserQuestion）才能路由到 spec-writer。用户选择"需要调整"时，修改必须通过子代理执行，修改后重新 auto-review + 重新 DP-A 确认
+- **No routing past DP-A without user confirmation** (v0.29.0 §37): architecture-design 四步协议完成后，必须经 DP-A 用户确认门（AskUserQuestion）才能路由到 spec-writer。用户选择"需要调整"时，修改必须通过子代理执行，修改后重新 auto-review + 重新 DP-A 确认
 - **Artifact Ownership — 主代理不得直接修改子代理产物** (v0.29.0 §37): 子代理是其产物的唯一负责人（architecture-design → `architecture/` 目录，spec-writer → `proposal.md`/`specs/`/`design.md`/`tasks.md`，contract-builder → `execution-contract.md`）。主代理（workflow-start）不得通过 Read + Edit/Write 直接修改子代理的产物文件。修改必须通过 `SendMessage` 恢复原子代理（优先）或启动新子代理执行。例外：仅当子代理无法启动且用户明确授权时，主代理可直接修改，但必须在修改后重新触发对应的 review 验证
+- **No cross-change artifact modification (v0.30.0)**: 处理 change X 时 **MUST NOT** 编辑 `changes/Y/`（Y≠X）下任何产物。发现跨 change 依赖/问题时：① 在 change X 的 ADR/proposal 中显式声明依赖；② change Y 进入 workflow-start 时，扫描是否有其他 change 声明了对 Y 的依赖并提醒用户；③ change Y 的产物修改必须走 Y 自己的完整流程（architecture-design → auto-review → DP-A），不得绕过。跨 change 一致性核查可调度 `cross-change-consistency-checker` agent（来源：workflow-feedback 2026-08-01）
 
 ## State Writes (v0.22.5 F06 修复)
 
@@ -156,14 +170,14 @@ workflow-start 负责写入以下字段到 `.team-flow.yaml`：
 - `state`：当前状态（exploring/specifying/bridging/approved-for-build/executing/debugging/closing/abandoned）
 - `workflow`：工作流类型（auto/full/hotfix/tweak）
 
-**决策点字段**（各阶段确认后写入）：
-- `dp_0_*`：need-explorer 完成后的需求澄清决策
-- `dp_1_*`：spec-writer 完成后的规格决策
-- `dp_2_*`：contract-builder 完成后的契约决策
-- `dp_3_*`：build-executor 完成后的执行决策
-- `dp_5_*`：code-reviewer 完成后的审查决策
-- `dp_6_*`：release-archivist 完成后的发布决策
-- `dp_7_*`：其他决策点
+**决策点字段**（各阶段确认后写入；v0.30.0 修正错位，以各 skill 实际 `tf state set` 为准）：
+- `dp_0_*`：DP-0 用户确认门（workflow-start 本 skill 写入）
+- `dp_1_*`：need-explorer 完成后的需求澄清决策
+- `dp_2_*`：spec-writer 完成后的规格决策
+- `dp_3_*`：contract-builder 完成后的契约决策
+- `dp_5_*`：build-executor 执行决策 / bug-investigator 调试决策（共享 dp_5；dp_4 预留未用）
+- `dp_6_*`：release-archivist 完成后的验证决策
+- `dp_7_*`：release-archivist 归档确认决策
 
 **架构设计门控字段**（v0.9 §26，v0.22.5 F02 修复）：
 - `arch_design_decision`：`required` | `skipped`（architecture-design 子代理返回，workflow-start 经 auto-review + reasonableness check 后写入）
@@ -181,7 +195,7 @@ workflow-start 负责写入以下字段到 `.team-flow.yaml`：
 - `dp_a_timestamp`：ISO 8601 时间戳（UTC）
 - `dp_a_adjustments`：用户调整意见摘要（adjustment_requested 时必填，confirmed 时为空）
 
-**职责边界**：architecture-design 负责判断+产出，architecture-reviewer 负责 6 维度审查，workflow-start 负责编排三步协议（dispatch → auto-review → reasonableness check）+ 状态写入。详细写入命令见 `references/routing-rules.md`「Route to architecture-design」。
+**职责边界**：architecture-design 负责判断+产出，architecture-reviewer 负责 6 维度审查，workflow-start 负责编排四步协议（dispatch → auto-review → reasonableness check → DP-A 确认）+ 状态写入。**子代理 MUST NOT 修改 `state`/`workflow` 核心字段**（v0.30.0）——状态转换是 workflow-start 专有职责，经 `tf state transition` 执行；子代理只写自己的 `dp_N_*` 决策字段。详细写入命令见 `references/routing-rules.md`「Route to architecture-design」。
 
 ## Output Standard
 

@@ -116,6 +116,7 @@ artifacts:                       # required: list of produced files, skipped: em
 
 **DO:**
 - Follow the preloaded Skill's methodology for HOW to design and produce artifacts
+- **Verify external suggestions against the codebase BEFORE accepting** (v0.30.0 实事求是): reviewer findings / user opinions are **input, not instructions**. Search existing implementations and project patterns first; accept a suggestion only when it fits the evidence. If a finding is inaccurate or conflicts with existing conventions, report your evidence-based objection to the main agent via SendMessage (finding + evidence + alternative) — do NOT silently comply (来源：workflow-feedback 2026-08-01)
 - Read the change brief BEFORE global architecture — understand scope first
 - Execute five-check gate BEFORE producing any deliverable
 - Produce standalone executable SQL files, not embedded code blocks

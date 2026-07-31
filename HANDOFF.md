@@ -8,7 +8,7 @@
 
 ## 0. 这是什么 / 目标
 
-`team-flow` 是一个**统一插件**，把九套能力合并进一个 `plugin.json`，一次安装即加载全部 23 个 skill + 8 个 agent，覆盖
+`team-flow` 是一个**统一插件**，把九套能力合并进一个 `plugin.json`，一次安装即加载全部 23 个 skill + 15 个 agent，覆盖
 「需求探索 → PRD → 架构增量 → 本地原型 → spec 驱动实现 → 复利回写 → e2e 测试 → session 交接 → 反馈闭环」的完整工作流。
 
 | 来源 | 并入范围 | skill 数 |
@@ -23,7 +23,7 @@
 | **e2e**（端到端测试） | 整个 skill | 1 |
 | **session-handoff**（session 交接） | 整个 skill | 1 |
 | **workflow-feedback**（反馈闭环） | 整个 skill | 1 |
-| **合计** | | **23 skills + 8 agents** |
+| **合计** | | **23 skills + 15 agents** |
 
 - 零运行时外部依赖（team-flow 底座自包含）。
 - prototype 额外**零外部依赖、可离线**（自包含 HTML + 页面内 Tweaks 控件，无 CDN）。
@@ -91,7 +91,7 @@ team-flow/
 │   ├── e2e                                  # 端到端测试
 │   ├── session-handoff                      # session 交接
 │   └── workflow-feedback                    # 反馈闭环
-├── agents/                    # 8 个顶层 agent
+├── agents/                    # 15 个顶层 agent
 ├── docs/                      # 设计文档 + 上游文档
 │   ├── architecture-api-db-design-enhancement-v0.9.md  # ★ 权威设计规格（当前版本）
 │   ├── prototype-design-research.md                    # 原型方案调研
@@ -240,5 +240,5 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 - `team-flow/` —— 统一插件工程（本 handoff 的载体）。
 - `architecture-api-db-design-enhancement-v0.9.md` / `prototype-design-research.md` —— 权威设计文档。
 - `skills/` —— 23 个 skill 全部就位。
-- `agents/` —— 8 个顶层 agent。
+- `agents/` —— 15 个顶层 agent。
 - `@xulthekl/team-flow@0.22.4` —— 已发布 npm 公共源。

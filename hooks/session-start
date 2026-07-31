@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# v0.29.2: auto-sync CLI version with plugin version
+# v0.30.0: auto-sync CLI version with plugin version
 set -e
 
 # ═══════════════════════════════════════════════════════════════

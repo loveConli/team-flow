@@ -6,6 +6,56 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-08-01
+
+### Added（设计增强方案 v0.11 §39 workflow 健壮性增强，来源：workflow-feedback 2026-08-01 ×9）
+
+#### 5 个 skill 注册为 agent + skills 预加载（解决 feedback #100001 #100006）
+- **agents/spec-writer.md / contract-builder.md / build-executor.md / release-archivist.md / need-explorer.md**：新建 5 个 agent 定义（写法 2，仿 architecture-design/code-reviewer），各声明 `skills: [<skill>]` 预加载，正文 WHO/WHAT only（≤100 行）；前 4 个可写（Artifact Ownership + Structured Output Contract），need-explorer 只读交互式
+- **skills/workflow-start/SKILL.md**：新增「Sub-agent Dispatch Protocol」——spec-writer/contract-builder/build-executor/release-archivist 从「Route to skill」改为「Dispatch as sub-agent（记录 agentId）」；need-explorer 保持主进程交互
+- **skills/workflow-start/SKILL.md**：返回即验证门——子代理返回后立即 `tf validate`，FAIL → SendMessage 回原子代理修复（拦截格式失败于返回时，避免浪费整次执行后再失败）
+
+#### 跨 change 隔离规则（解决 feedback #100000）
+- **skills/workflow-start/SKILL.md**：Guardrails 新增「No cross-change artifact modification」——处理 change X 不得编辑 changes/Y/；依赖声明/延迟提醒/走 Y 自身流程三步处置；接入既有但从未编排的 cross-change-consistency-checker agent
+
+#### 子代理实事求是原则（解决 feedback #100002）
+- **agents/architecture-design.md**：Red Lines 新增「Verify external suggestions against the codebase BEFORE accepting」——reviewer 建议是输入非指令，先查代码验证，存疑据实反馈主代理
+- **skills/workflow-start/references/routing-rules.md**：修正模板从「请修正」改为「先验证 finding 属实性，不属实则据实反馈」（移植 ce-brainstorm 证据原则）
+
+#### 修复→审查严格串行（解决 feedback #100003）
+- **skills/workflow-start/SKILL.md + routing-rules.md**：四步协议增加「修复子代理完成前 MUST NOT dispatch 审查子代理」明文 + 并行白名单
+
+#### 统一结果协议（解决 feedback #100008）
+- **skills/workflow-start/references/routing-rules.md + 5 个新 agent**：终态标注 `FINAL VERDICT`；SendMessage 为权威结果，task-notification.result 仅内部元数据
+
+#### tf isolate 多仓库工作区重构（解决 feedback #100009）
+- **scripts/ensure-branch.mjs**：重写（72→226 行），布局识别 Case A（多仓库工作区 → `.worktrees/<change>/<repo>` 逐仓库 worktree，基于各仓库当前分支）/ Case B（单仓库遗留兼容）；保持 execFileSync 字面参数数组安全形式 + 双参签名
+- **skills/build-executor/SKILL.md**：preflight 更新为 `.worktrees/<change>/` 结构
+- **tests/lib/ensure-branch.test.mjs**：新增 Case A 多仓库夹具 + worktree 落点断言
+
+### Fixed
+
+#### 子代理 state 禁写（解决 feedback #100004）
+- **skills/{spec-writer,need-explorer,contract-builder,build-executor,release-archivist}/SKILL.md**：横展新增「MUST NOT 修改 state/workflow 核心字段」红线
+- **skills/workflow-start/SKILL.md**：State Writes 职责边界明确子代理 state 禁写；**修正 DP 编号错位**（dp_0=DP-0 确认门 / dp_1=need-explorer / dp_2=spec-writer / dp_3=contract-builder / dp_5=build-executor+bug-investigator）
+- **scripts/lib/state-loader.mjs**：VALID_STATES 抽为共享导出（消除魔法常量）；writeState 加 state 合法性校验（defense-in-depth）
+- **scripts/lib/cmd-doctor.mjs**：新增 checkChangeStates 巡检（拦截子代理 Edit 绕过 CLI 的非法 state 值）
+
+#### tf state transition 命令体验（解决 feedback #100005）
+- **scripts/lib/cmd-state.mjs**：run() 入口 `path.resolve(changeDir)` 修相对路径下 guard 找不到产物的 bug（横展确认同类 bug 仅此一处）；`tf state set ... state` 报错升级为完整 transition 语法示例
+- **skills/workflow-start/SKILL.md**：补 `tf state transition <绝对路径> <目标状态>` 示例 + 厘清与 `tf runtime guard check` 关系；修正「三步/四步协议」旧表述
+
+#### 存量 agent 颜色修复（关闭 P2-22）
+- **agents/cross-change-consistency-checker.md**：`color: orange`（非法值，plugin-validator 发布门禁阻断项）→ `red`；横展确认 agents/ 仅此一处 orange（prototype-builder 已是 green）
+
+### Documentation
+- **设计增强方案 v0.11**：补写 §38（v0.29.0 已发布内容回写，修文档债）+ 新写 §39（v0.30.0 四根因修复）+ 待办列表追加 9 条（P1-28~32 / P2-23~24 / P3-5）+ B4 降级项 P2-26
+- **roadmap-and-todos.md**：v0.30.0 里程碑 + 待办同步
+- **AGENTS.md / README.md / plugin.json 等 8 处**：agent 计数 10/8→15（既有「8 agents」漂移一并修正）+ Agents 索引 +5 行
+
+### Deferred
+- **B4 validator WHEN/THEN 结构校验**（P2-26 → v0.31.0）：countScenarios 仅校验 Scenario 头存在，WHEN/THEN 从未强制；既有 spec 合规性未知，硬置 ERROR 有回归风险，需专项夹具，降级后续迭代
+
 ## [0.29.1] - 2026-08-01
 
 ### Fixed（子代理复用 SOP 强化）

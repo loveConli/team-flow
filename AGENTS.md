@@ -1,6 +1,6 @@
 # AGENTS.md · team-flow
 
-> team-flow 统一插件 = **team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（23 skills + 10 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
+> team-flow 统一插件 = **team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（23 skills + 15 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
 
 ## What This Is
 
@@ -12,7 +12,7 @@
 
 ### 身份与依赖关系
 
-- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 23 个 skills + 10 个 agents + hooks + templates
+- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 23 个 skills + 15 个 agents + hooks + templates
 - **@xulthekl/team-flow**（npm 底座包）：team-flow 的 CLI 工具层（`package.json` name = `@xulthekl/team-flow`，bin = `tf` / `team-flow`），提供状态机、校验、复利 CLI 等运行时能力
 - 关系：team-flow 插件 **包含** @xulthekl/team-flow npm 包作为底座（同一仓库、同一版本）。skills 中的 `tf ...` 调用的是已全局安装的 @xulthekl/team-flow CLI，版本由 session-start hook 自动同步
 - 历史身份（已废弃）：`spec-superflow`（npm 包名，0.11.0 后停止发布）/ `ssf`（CLI 前缀）/ `.spec-superflow.yaml`（状态文件）—— 详见设计增强方案 v0.9 §27
@@ -207,7 +207,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 
 > **规则**：新增 skill 时必须在此表登记所属层级。产品级新需求触发词归 workflow-orchestrator 独占。
 
-### Agents 索引（v0.7 新增，v0.15.0 增至 10 个）
+### Agents 索引（v0.7 新增，v0.30.0 增至 15 个）
 
 | Agent | 职责 | Tools | 触发场景 |
 |-------|------|-------|---------|
@@ -221,6 +221,11 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | prototype-builder | 原型绘制执行者（种子优先：template.html+layouts.md 组合；**v0.20.0 产物落盘硬闸门**：index.html 未落盘非空禁返 done + 大产出分片；**v0.21.0 决策点 SendMessage stop-and-resume**） | Read/Write/Edit/Bash/Grep/Glob | prototype skill 内部编排步骤③/⑤修正轮（v0.15.0，v0.18.0 种子优先） |
 | prototype-env-scout | 原型环境探查 + 2-3 差异化方向（direction-picker；**v0.20.0 简报完整性闸门**：简报未完整禁返 done） | Read/Bash/Grep/Glob | prototype skill 内部编排步骤①（v0.15.0，v0.18.0 direction-picker） |
 | prototype-reviewer | PRD 6 维度 + P0 grep + craft 4 席 rubric 评审 | Read/Bash/Grep/Glob | orchestrator S2 原型循环每轮产出后 |
+| need-explorer | 需求探索 agent——交互式澄清意图/scope/约束/成功标准，稳定 change 定义、守 DP-1 门（只读型，不产出制品不写代码；workflow-start 路由后、spec-writer 前） | Read/Bash/Grep/Glob | workflow-start 路由，主进程交互式澄清 |
+| spec-writer | 规格编写 agent——产出并打磨 proposal.md / specs/ / design.md / tasks.md 四件规划制品（可写型，规划制品唯一所有者；need-explorer DP-1 后、contract-builder 前） | Read/Bash/Grep/Glob/Write/Edit | workflow-start 路由时作为子代理 dispatch |
+| contract-builder | 执行契约 agent——将规划制品压缩为单一执行握手 execution-contract.md、守 DP-3 批准门（可写型，契约文件唯一所有者；spec-writer DP-2 后、build-executor 前） | Read/Bash/Grep/Glob/Write/Edit | workflow-start 路由时作为子代理 dispatch |
+| build-executor | 构建执行 agent——以契约为权威驱动 TDD 批次实施（SDD/Inline/Batch Inline）、守 TDD Iron Law（可写型，实施代码所有者；契约 DP-3 批准后、release-archivist 前） | Read/Bash/Grep/Glob/Write/Edit | workflow-start 路由时作为子代理 dispatch |
+| release-archivist | 发布归档 agent——执行验证、产出 closing 总结、完成归档就绪（arch-merge → prototype-sync → 复利晋升）（可写型，归档制品所有者；build-executor 后、change 关闭前） | Read/Bash/Grep/Glob/Write/Edit | workflow-start 路由时作为子代理 dispatch |
 
 ## 复利贯穿机制（v0.5 新增）
 
