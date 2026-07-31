@@ -176,6 +176,7 @@ plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层�
 - **路由是建议非决定**：S1 路由判断必须用户确认；重规划必须 DP-R 阻塞确认
 - **回退必写 replan_log**：active → pending 回退必须记录；受影响制品归档为 .revN，重入不读旧制品
 - **不阻断流程**：所有复利操作为 advisory 级，INDEX.md 读取失败时静默跳过
+- **Artifact Ownership — 主代理不得直接修改子代理产物** (v0.29.0 §37)：子代理是其产物的唯一负责人（architecture-design → `architecture/` 目录，spec-writer → `proposal.md`/`specs/`/`design.md`/`tasks.md`，contract-builder → `execution-contract.md`，prototype-builder → `prototype/` 目录）。主代理（workflow-orchestrator）不得通过 Read + Edit/Write 直接修改子代理的产物文件。修改必须通过 `SendMessage` 恢复原子代理（优先）或启动新子代理执行。例外：仅当子代理无法启动且用户明确授权时，主代理可直接修改，但必须在修改后重新触发对应的 review 验证。编排层自己负责的产物（change-brief.md、orchestrator.yaml、审计报告落盘）不受此限制
 
 ## Output Standard
 

@@ -1,7 +1,8 @@
-# S4 拆分验证与分发（v0.7 重写，v0.17.0 审计必选）
+# S4 拆分验证与分发（v0.7 重写，v0.17.0 审计必选，v0.29.0 命名规范）
 
 > 原 v0.5「拆分与分发」。v0.7 新增拆分质量审计与并行策略。设计依据：设计增强方案 v0.7 §17.2 / §17.8。
 > v0.17.0 变更：change-split-auditor 审计由隐含步骤升级为「必选门禁」，PASS 前不可创建 change 脚手架。change_dag 字段 `spec_dir` 更名为 `change_dir`，路径修正为 `changes/<change-name>/`。
+> v0.29.0 变更：change 目录命名增加 PRD 版本号前缀（`changes/v1-C1-domain-policy/`），change_dag 增加 `prd_version` 字段，S5 按版本分组展示。
 
 ## 编排层 vs 执行层
 
@@ -36,10 +37,23 @@ verdict = FAIL → 必须回退 S3 调整拆分后重新审计，不可绕过直
 
 按 plan 中的 change 拆分方案，为每个 change 创建目录并初始化状态文件：
 
+**命名规范（v0.29.0）**：`changes/<prd-version>-<C-ID>-<kebab-name>/`
+
 ```bash
-mkdir -p changes/<change-name>
-tf state init changes/<change-name>
+# 格式：changes/v{N}-C{n}-{kebab-name}/
+# 示例：
+mkdir -p changes/v1-C1-domain-policy
+tf state init changes/v1-C1-domain-policy
+
+mkdir -p changes/v1-C2-policy-management
+tf state init changes/v1-C2-policy-management
 ```
+
+**命名规则**：
+- `v{N}`：创建时的 PRD 版本号（取自 orchestrator.yaml 的 `prd_version`），**创建后不变**（即使后续 PRD 升版，已创建的 change 目录名不改）
+- `C{n}`：plan.md 中的 C-ID 稳定编号（never renumbered）
+- `{kebab-name}`：plan.md 中 `### C{n}. [Name]` 的 kebab-case 形式
+- 续版需求（vN+1）新增的 change 使用新版本号前缀，与旧版本 change 天然区分
 
 > ⚠️ **路径约束**：change 脚手架目录固定为项目根 `changes/<change-name>/`。
 > 不要与 `specs/<cap>/`（change 内部行为规格目录）或 `architecture/`（change 内部架构设计目录）混淆。
@@ -88,7 +102,20 @@ plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层�
 
 ### 4. 写入 change_dag
 
-把每个 change 的 id / change_dir / state_file / depends_on / priority / parallel_group / status 写入 `.team-flow/requirements/<req-id>/orchestrator.yaml` 的 `change_dag`。详见 state-model.md「change_dag 结构」。
+把每个 change 的 id / change_dir / state_file / depends_on / priority / parallel_group / status / **prd_version**（v0.29.0 新增）写入 `.team-flow/requirements/<req-id>/orchestrator.yaml` 的 `change_dag`。详见 state-model.md「change_dag 结构」。
+
+**change_dag 条目格式（v0.29.0）**：
+```yaml
+change_dag:
+  - id: C1
+    change_dir: changes/v1-C1-domain-policy/
+    state_file: changes/v1-C1-domain-policy/.team-flow.yaml
+    depends_on: []
+    priority: 1
+    parallel_group: null
+    status: pending
+    prd_version: v1              # v0.29.0 新增：创建时的 PRD 版本号
+```
 
 ### 5. 分发
 
@@ -102,7 +129,7 @@ Change C1 已就绪，运行 /workflow-start 进入变更级流程。
 ## 完成条件
 
 - change-split-auditor 审计 verdict = PASS（必选门禁已通过，含 v0.9 D5 拆分维度合规）
-- 所有 change 目录已创建在项目根 `changes/` 下（非 `specs/` 或 `.team-flow/`），`.team-flow.yaml` 已初始化
+- 所有 change 目录已创建在项目根 `changes/` 下（非 `specs/` 或 `.team-flow/`），**命名符合 `v{N}-C{n}-{kebab-name}` 规范**（v0.29.0），`.team-flow.yaml` 已初始化
 - 每个 change 目录已落盘 `change-brief.md`（v0.9 交接物，含 scope/AC/技术方向/frontmatter）
-- `.team-flow/requirements/<req-id>/orchestrator.yaml` 的 `change_dag` 已填充
+- `.team-flow/requirements/<req-id>/orchestrator.yaml` 的 `change_dag` 已填充（含 `prd_version` 字段）
 - S4 状态 = completed，已告知用户执行顺序

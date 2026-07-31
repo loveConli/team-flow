@@ -5,7 +5,7 @@
 ## Route to need-explorer
 Change is fuzzy, scope unclear, comparing options, no stable change name.
 
-## Route to architecture-design (v0.9 §26, v0.11 §34 审查增强, v0.28.1 §36 主干补强)
+## Route to architecture-design (v0.9 §26, v0.11 §34 审查增强, v0.28.1 §36 主干补强, v0.29.0 §37 DP-A 确认门)
 
 Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before spec-writer.
 
@@ -75,6 +75,98 @@ tf state set <change-dir> arch_review_report "architecture/auto-review.md"
 ```
 
 **hotfix / tweak 不豁免**：同样过 architecture-design 子代理判断门（hotfix 可能正是架构缺陷导致）。
+
+### Step 4: DP-A 用户确认门 (v0.29.0 §37)
+
+> **设计动机**：v0.28.1 的三步协议是全自动闭环（dispatch → auto-review → state write → 路由下一步），缺少人工审批环节。用户在架构设计完成后无法确认或提出调整意见，被迫手动打断流程。DP-A 在 Step 3 之后、路由 spec-writer 之前插入结构化用户确认门。
+
+Step 3 reasonableness check + state write 完成后，**必须**执行 DP-A：
+
+**4a. 输出架构决策摘要**：
+
+```
+📐 架构设计完成 — 决策摘要
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+判定：{decision} ({reason})
+审查：{arch_review_verdict}（{arch_review_rounds} 轮）
+
+聚合定义：
+  {列出新增/修改的聚合及聚合根}
+
+限界上下文：
+  {列出 BC 边界变更}
+
+API 端点概览：
+  {端点总数} 个（Command: {n}, Query: {n}）
+  {列出关键端点}
+
+DB 变更概览：
+  {新增/修改的表数量}
+
+ADR 列表：
+  {列出关键架构决策记录}
+
+产物路径：
+  - changes/<name>/architecture/architecture.md
+  - changes/<name>/architecture/database.md
+  - changes/<name>/architecture/api.md
+  - changes/<name>/architecture/auto-review.md
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+**4b. 项目规范变更提示（advisory，不阻断）**：
+
+在摘要末尾附加：
+```
+📋 项目规范变更检查（advisory）：
+  本次架构设计是否引入了新的项目级规范？
+  （如：新模块不使用 CQRS、Mapper 放 domain 等）
+  如是，请确认已更新 docs/architecture/ 相关文档
+  （ARCHITECTURE.md / baseline.md / CONCEPTS.md）。
+```
+
+**4c. AskUserQuestion 确认**：
+
+```
+AskUserQuestion:
+  question: "架构设计确认？"
+  options:
+    [A] "确认，进入 spec-writer"（推荐）
+    [B] "需要调整（列出调整点）"
+    [C] "需要查看详细产物（给出文件路径）"
+```
+
+**4d. 处理用户选择**：
+
+- **选择 A（确认）**：
+  ```bash
+  tf state set <change-dir> dp_a_result "confirmed"
+  tf state set <change-dir> dp_a_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+  tf state set <change-dir> dp_a_adjustments ""
+  ```
+  → 路由到 spec-writer
+
+- **选择 B（需要调整）**：
+  1. 记录用户调整意见
+  2. **通过子代理修改（禁止主代理直接 Edit 架构产物）**：
+     - 优先：`SendMessage(to: <原 architecture-design 子代理 ID>)` 发送修复指令，传入调整意见
+     - 子代理不可恢复时：启动新 architecture-design 子代理，传入：调整意见 + 原产物路径 + auto-review 报告
+  3. 子代理修改完成后，**重新触发 auto-review**（即使之前已 PASS）
+  4. auto-review PASS 后，更新 yaml 状态（arch_review_verdict / arch_review_rounds）
+  5. 回到 Step 4a 重新输出摘要 + 重新确认
+  ```bash
+  tf state set <change-dir> dp_a_result "adjustment_requested"
+  tf state set <change-dir> dp_a_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
+  tf state set <change-dir> dp_a_adjustments "<调整意见摘要>"
+  ```
+
+- **选择 C（查看详细产物）**：
+  输出文件路径列表，等待用户阅读后重新 AskUserQuestion（回到 4c）
+
+**⛔ 反模式（禁止）**：
+- 主代理直接 Read + Edit `architecture/*.md` 文件（违反 Artifact Ownership 规则）
+- 跳过 DP-A 直接路由 spec-writer
+- 用户选择 B 后不重新 auto-review 就直接重新确认
 
 ## Route to spec-writer
 Guard: `tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK.

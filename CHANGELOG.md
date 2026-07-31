@@ -6,6 +6,39 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-07-31
+
+### Added（§37 DP-A 确认门 + 产物权限规则 + A4 增强，来源：workflow-feedback 2026-07-31 × 7）
+
+#### DP-A 用户确认门（解决 feedback #1 #5）
+- **skills/workflow-start/SKILL.md**：三步协议升级为四步协议，Step 4 DP-A 用户确认门（架构决策摘要输出 + AskUserQuestion + 调整转交子代理）
+- **skills/workflow-start/references/routing-rules.md**：Step 4 完整协议（4a 摘要 + 4b 项目规范变更提示 + 4c AskUserQuestion + 4d 选择处理 + SendMessage 复用指导）
+- **scripts/lib/state-loader.mjs**：新增 `dp_a_result` / `dp_a_timestamp` / `dp_a_adjustments` 字段（BUILTIN_DEFAULTS + writeState）
+- **scripts/lib/cmd-state.mjs**：`dp_a_*` 加入 SETTABLE_FIELDS 白名单
+
+#### Artifact Ownership 产物修改权限规则（解决 feedback #5 #6）
+- **skills/workflow-start/SKILL.md**：Guardrails 新增"主代理不得直接修改子代理产物"显式禁令
+- **skills/workflow-orchestrator/SKILL.md**：Guardrails 同步新增 Artifact Ownership 条款
+- **agents/architecture-design.md**：新增"architecture/ 目录唯一负责人"声明
+
+#### A4 审查 PRD 功能清单交叉验证（解决 feedback #7）
+- **agents/architecture-reviewer.md**：A4 维度增加双对照源（brief + PRD 功能清单）、子实体 CRUD 完整性检查、PRD vs api.md 端点交叉验证
+- **skills/architecture-design/SKILL.md**：api.md 增加 PRD 功能清单→API 端点映射表要求
+- **agents/architecture-design.md**：Red Lines 增加 PRD 映射表产出要求
+- **agents/change-split-auditor.md**：Dim 1 增加子实体操作完整性检查
+
+#### change 目录命名版本前缀（解决 feedback #2）
+- **skills/workflow-orchestrator/references/s4-split-validate.md**：命名规范 `v{N}-C{n}-{kebab-name}`、change_dag 增加 `prd_version` 字段
+
+### Fixed（代码层贯通）
+
+- **scripts/lib/state-loader.mjs**：补齐 `arch_review_verdict` / `arch_review_rounds` / `arch_review_report` 字段（v0.28.1 §36 遗留的"死命令"问题）
+- **scripts/lib/cmd-state.mjs**：`arch_review_*` 加入 SETTABLE_FIELDS 白名单
+
+### Documentation
+
+- 工作区 **CLAUDE.md**：更新 arch_design_* 差异表（代码层已全链路贯通）、代码强制执行点、内置字段列表
+
 ## [0.26.0] - 2026-07-29
 
 ### Added（配置管理与 Skill 降级逻辑补强，4 项）

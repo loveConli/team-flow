@@ -76,6 +76,10 @@ If either path is missing or unreadable, report `FAIL` with reason `INPUT_ERROR`
    - **Gap** (requirement not covered by any change) → Critical
    - **Overlap** (requirement covered by 2+ changes without explicit justification) → Important
    - **Orphan** (change scope not traceable to any PRD requirement) → Important
+5. **子实体操作完整性检查（v0.29.0 §37 新增）**：
+   - PRD 中含"明细管理/子项管理/详情维护"类功能（如 F001_S4_F1 领域方针内容明细管理）→ 对应 change 的 scope/AC 必须包含该子实体的**独立 CRUD 操作**（新增/编辑/删除），不能仅覆盖查询
+   - 主表操作与子实体操作必须分别覆盖——PRD 中"新增/编辑主表"和"新增/编辑明细"是两个独立功能点
+   - 子实体写操作未被任何 change 覆盖 → Critical（与 Gap 同级）
 
 ### Dimension 2: DAG Validity + Dependency Integrity
 

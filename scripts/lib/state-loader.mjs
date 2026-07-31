@@ -43,6 +43,14 @@ const BUILTIN_DEFAULTS = {
   arch_design_reason: null,
   arch_design_timestamp: null,
   arch_design_artifacts: null,
+  // Architecture review (v0.28.1 §36 审查增强)
+  arch_review_verdict: null,
+  arch_review_rounds: null,
+  arch_review_report: null,
+  // DP-A user confirmation gate (v0.29.0 §37)
+  dp_a_result: null,
+  dp_a_timestamp: null,
+  dp_a_adjustments: null,
   // Compound engineering capture gate (v0.24.0 复利贯穿强制化)
   compound_skipped: null,
 };
@@ -119,6 +127,16 @@ export function writeState(changeDir, state) {
   lines.push(`arch_design_reason: ${state.arch_design_reason ?? 'null'}`);
   lines.push(`arch_design_timestamp: ${state.arch_design_timestamp ?? 'null'}`);
   lines.push(`arch_design_artifacts: ${state.arch_design_artifacts ?? 'null'}`);
+  lines.push('');
+  lines.push('# === Architecture review (v0.28.1 §36) ===');
+  lines.push(`arch_review_verdict: ${state.arch_review_verdict ?? 'null'}`);
+  lines.push(`arch_review_rounds: ${state.arch_review_rounds ?? 'null'}`);
+  lines.push(`arch_review_report: ${state.arch_review_report ?? 'null'}`);
+  lines.push('');
+  lines.push('# === DP-A user confirmation gate (v0.29.0 §37) ===');
+  lines.push(`dp_a_result: ${state.dp_a_result ?? 'null'}`);
+  lines.push(`dp_a_timestamp: ${state.dp_a_timestamp ?? 'null'}`);
+  lines.push(`dp_a_adjustments: ${state.dp_a_adjustments ?? 'null'}`);
   lines.push('');
   lines.push('# === Compound engineering capture gate (v0.24.0) ===');
   lines.push(`compound_skipped: ${state.compound_skipped ?? 'null'}`);

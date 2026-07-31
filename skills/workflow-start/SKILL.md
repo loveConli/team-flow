@@ -55,14 +55,15 @@ Validate mode against artifact content. If hotfix/tweak criteria not met → upg
 ### Route to need-explorer
 Change is fuzzy, scope unclear, comparing options, no stable change name.
 
-### Route to architecture-design (v0.9 §26, v0.28.1 §36 审查增强)
+### Route to architecture-design (v0.9 §26, v0.28.1 §36 审查增强, v0.29.0 §37 DP-A 确认门)
 Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before spec-writer.
 
-**Three-step protocol (MUST execute in order)**:
+**Four-step protocol (MUST execute in order)**:
 
 1. **Dispatch**: `architecture-design` as sub-agent → returns `decision` + `reason` + `artifacts`
 2. **Auto-review** (decision=required 时触发): 校验产物文件存在且非空 → dispatch `architecture-reviewer` sub-agent → FAIL 则循环修正（≤3 轮 + 收敛检测，不收敛转人工）→ 报告落盘 `changes/<name>/architecture/auto-review.md`
 3. **Reasonableness check + state write**: PASS/PASS_WITH_WARNINGS → write `arch_design_decision` + `arch_review_*` to yaml; skipped + brief 含架构关键词 → BLOCK; required + artifacts 缺失 → BLOCK; required + auto-review FAIL → BLOCK
+4. **DP-A 用户确认门（v0.29.0 §37）**: 输出架构决策摘要 → AskUserQuestion 确认 → 需要调整时转交子代理修改（禁止主代理直接修改）→ 修改后重新 auto-review → 回到本步骤重新确认。含项目规范变更提示（advisory）。详见 `references/routing-rules.md`「Step 4: DP-A」
 
 Full protocol in `references/routing-rules.md`「Route to architecture-design」.
 
@@ -144,6 +145,8 @@ Use content inspection, not timestamps.
 - No merging delta specs from abandoned change
 - **No routing to spec-writer without architecture-design gate pass** (v0.9 §26): `arch_design_decision` must be `required` or `skipped` (not `null`). hotfix/tweak 不豁免
 - **No arch state write without auto-review PASS** (v0.28.1 §36): when `decision: required`, auto-review MUST complete with PASS or PASS_WITH_WARNINGS before writing `arch_design_decision` to yaml. FAIL → loop fix (≤3 rounds) or escalate to human
+- **No routing past DP-A without user confirmation** (v0.29.0 §37): architecture-design 三步协议完成后，必须经 DP-A 用户确认门（AskUserQuestion）才能路由到 spec-writer。用户选择"需要调整"时，修改必须通过子代理执行，修改后重新 auto-review + 重新 DP-A 确认
+- **Artifact Ownership — 主代理不得直接修改子代理产物** (v0.29.0 §37): 子代理是其产物的唯一负责人（architecture-design → `architecture/` 目录，spec-writer → `proposal.md`/`specs/`/`design.md`/`tasks.md`，contract-builder → `execution-contract.md`）。主代理（workflow-start）不得通过 Read + Edit/Write 直接修改子代理的产物文件。修改必须通过 `SendMessage` 恢复原子代理（优先）或启动新子代理执行。例外：仅当子代理无法启动且用户明确授权时，主代理可直接修改，但必须在修改后重新触发对应的 review 验证
 
 ## State Writes (v0.22.5 F06 修复)
 
@@ -173,6 +176,11 @@ workflow-start 负责写入以下字段到 `.team-flow.yaml`：
 - `arch_review_rounds`：审查轮次（1-3）
 - `arch_review_report`：`architecture/auto-review.md` 路径
 
+**DP-A 确认门字段**（v0.29.0 §37，DP-A 用户确认后写入）：
+- `dp_a_result`：`confirmed` | `adjustment_requested`（用户确认结果）
+- `dp_a_timestamp`：ISO 8601 时间戳（UTC）
+- `dp_a_adjustments`：用户调整意见摘要（adjustment_requested 时必填，confirmed 时为空）
+
 **职责边界**：architecture-design 负责判断+产出，architecture-reviewer 负责 6 维度审查，workflow-start 负责编排三步协议（dispatch → auto-review → reasonableness check）+ 状态写入。详细写入命令见 `references/routing-rules.md`「Route to architecture-design」。
 
 ## Output Standard
@@ -180,7 +188,7 @@ workflow-start 负责写入以下字段到 `.team-flow.yaml`：
 Always state: (1) current detected state, (2) why (cite file/content/condition), (3) which skill should run next. If blocking, explain missing artifact/approval.
 
 Decision point references when routing:
-- architecture-design → DP-A（架构设计判断门，v0.9 §26）, contract-builder → DP-3, build-executor → DP-4, bug-investigator (escalation) → DP-5, release-archivist (verification failure) → DP-6, release-archivist → DP-7
+- architecture-design → DP-A（架构设计用户确认门，v0.9 §26 判断门 + v0.29.0 §37 用户确认门）, contract-builder → DP-3, build-executor → DP-4, bug-investigator (escalation) → DP-5, release-archivist (verification failure) → DP-6, release-archivist → DP-7
 
 ## Exception Handling
 

@@ -26,6 +26,10 @@ const SETTABLE_FIELDS = [
   // Architecture design gate (v0.9 §26, v0.22.5 评审修复 F02)
   'arch_design_decision', 'arch_design_reason',
   'arch_design_timestamp', 'arch_design_artifacts',
+  // Architecture review (v0.28.1 §36 审查增强)
+  'arch_review_verdict', 'arch_review_rounds', 'arch_review_report',
+  // DP-A user confirmation gate (v0.29.0 §37)
+  'dp_a_result', 'dp_a_timestamp', 'dp_a_adjustments',
   // Compound engineering capture gate (v0.24.0 复利贯穿强制化)
   'compound_skipped',
 ];

@@ -109,16 +109,24 @@ Mechanical verification, no LLM semantic judgment needed:
 
 Dimensions requiring semantic understanding, marked as "advisory, false positives can be overridden":
 
-4. **A4 需求覆盖**:
-   - Read change-brief.md → extract all requirement items (scope, AC, technical direction)
+4. **A4 需求覆盖** (v0.29.0 §37 增强：双对照源 + 子实体 CRUD 检查):
+   - **对照源 1（现有）**：Read change-brief.md → extract all requirement items (scope, AC, technical direction)
+   - **对照源 2（v0.29.0 新增）**：Read `prd/vN/prd.md` → extract feature list (e.g., F001_P0_P1 ~ P0_PN)
    - Read plan.md → extract relevant technical design sections
-   - For each requirement, check if architecture deliverables provide corresponding design:
+   - For each requirement from BOTH sources, check if architecture deliverables provide corresponding design:
      - New aggregate → architecture.md covers it?
      - DB change → database.md covers it?
      - New API → api.md covers it?
      - BC boundary change → architecture.md Context Map updated?
+   - **子实体 CRUD 完整性检查（v0.29.0 新增）**：
+     - PRD 中含"明细管理/子项管理/详情维护"类功能 → api.md 必须有该子实体的**独立 CRUD 端点**（新增/编辑/删除）
+     - 仅查询接口（如 `/detail/list`）**不算覆盖**"新增/编辑"功能 → 缺失的写操作端点 = Critical finding
+     - 主表与子实体的操作必须分离审查——PRD 中"新增/编辑主表"和"新增/编辑明细"是两个独立功能点
+   - **PRD 功能清单 vs api.md 端点路由表交叉验证（v0.29.0 新增）**：
+     - 逐条对照 PRD 功能清单与 api.md 端点，PRD 中有但 api.md 中没有的功能点 = Critical finding
+     - 如 api.md 包含"PRD Feature → API Endpoint 映射表"（v0.29.0 architecture-design 产出），验证其完整性
    - Uncovered requirement = Critical finding
-   - Build coverage matrix table
+   - Build coverage matrix table (MUST include columns for both brief source AND PRD source)
 
 5. **A5 基线一致性**:
    - Read global `ARCHITECTURE.md` → check naming conventions, BC boundaries
@@ -201,6 +209,7 @@ Aggregate all findings and determine verdict.
 | 新增 XX 聚合 | brief §2.1 | architecture.md §1 | ✅ |
 | 修改 YY 表结构 | brief §2.3 | database.md §2 | ✅ |
 | 新增 ZZ API | brief §2.5 | — (not covered) | ❌ |
+| 新增明细 CRUD | PRD F001_S4_F1 | api.md 仅有 /detail/list | ❌ 缺写操作端点 |
 
 ## A5 基线一致性 — {PASS/FAIL}
 | Check Item | Global Baseline | Incremental Design | Status |
