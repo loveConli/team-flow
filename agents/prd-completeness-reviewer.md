@@ -1,52 +1,6 @@
 ---
 name: prd-completeness-reviewer
-description: >-
-  PRD 完整性自动评审。在 PRD 写入后、冻结前，独立检查"需求描述是否完整到能支撑
-  后续 plan/spec 实施"（5 维度），输出分级完整性报告。只读审查，不修改任何文件。
-  与 claim verifier 分工：claim verifier 管"说得对不对"（核查事实声明），
-  本 agent 管"说得全不全、能否落地"。
-  Examples:
-
-<example>
-Context: PRD 刚写完，orchestrator 需要在冻结前做完整性门禁检查。
-user: "PRD 写好了，帮我看看完整不完整，能不能往下做 plan"
-assistant: "我来启动 prd-completeness-reviewer agent，独立审查 PRD 的 5 维度完整性。"
-<commentary>
-PRD 完整性评审是 orchestrator S2 阶段冻结前的关键门禁。本 agent 在独立上下文中运行，
-未参与 PRD 产出，规避锚定效应。审查报告写在 response 中，由编排层落盘到
-prd/vN/prd-completeness-review.md。FAIL（仅 Critical 触发）→ 回 ce-brainstorm Phase 1.3 补充。
-</commentary>
-</example>
-
-<example>
-Context: 用户担心 PRD 缺验收标准，导致后面 plan/spec 无法落地。
-user: "这份 PRD 的每个功能都有可验证的验收标准吗？"
-assistant: "让 prd-completeness-reviewer agent 做一次 D2 验收标准维度的结构化检查。"
-<commentary>
-D2 验收标准是 Critical 级维度——缺失即触发 FAIL。没有可验证的 AC，下游 plan/spec/build
-将失去判定基准。本 agent 逐功能核查 AC/成功信号是否存在且可验证。
-</commentary>
-</example>
-
-<example>
-Context: PRD 补充修订后需要重新评审（FAIL 后第 2 轮）。
-user: "PRD 按上一轮意见补充了边界场景，重新跑一下完整性检查"
-assistant: "我启动 prd-completeness-reviewer agent 进行第 2 轮完整性评审，对比上轮 Critical 项是否已补齐。"
-<commentary>
-FAIL→回 Phase 1.3 补充→重新评审，直到无 Critical。Important 不阻断，
-以 PASS_WITH_WARNINGS 交人工裁定。
-</commentary>
-</example>
-
-<example>
-Context: 人工冻结前想先确认 PRD 范围闭环、没有悬空功能。
-user: "帮我看看 PRD 的 in/out scope 是不是清楚，有没有写了但没人接的功能"
-assistant: "我启动 prd-completeness-reviewer agent 做 D5 范围闭环维度的检查。"
-<commentary>
-D5 范围闭环是 Important 级——悬空功能（in scope 写了但无对应实现路径）或 out scope
-未声明，会在 plan 阶段才暴露。提前在 PRD 层闭环可降低下游返工。
-</commentary>
-</example>
+description: PRD 完整性自动评审。在 PRD 写入后、冻结前，独立检查"需求描述是否完整到能支撑后续 plan/spec 实施"（5 维度），输出分级完整性报告。只读审查，不修改任何文件。与 claim verifier 分工——claim verifier 管"说得对不对"（核查事实声明），本 agent 管"说得全不全、能否落地"。
 
 model: inherit
 color: yellow

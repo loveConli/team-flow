@@ -1,48 +1,7 @@
 ---
 name: cross-change-consistency-checker
-description: >-
-  跨 change 冲突检测。在多 change 并行执行期或 change closing 时，
-  检测共享聚合/实体被多个 change 修改、API 签名变更影响、
-  与全局架构锚点漂移、与原型 testid 契约漂移。只读审查。
-  Examples:
+description: 跨 change 冲突检测。在多 change 并行执行期或 change closing 时，检测共享聚合/实体被多个 change 修改、API 签名变更影响、与全局架构锚点漂移、与原型 testid 契约漂移。只读审查。
 
-<example>
-Context: 两个 change 正在并行开发，orchestrator 在 S5 监控阶段触发一致性检测。
-user: "change-1 和 change-2 都在跑，帮我看看有没有冲突"
-assistant: "我来启动 cross-change-consistency-checker agent，检测跨 change 的 4 维度冲突。"
-<commentary>
-多 change 并行执行时，共享聚合/API/架构锚点可能被不同 change 独立修改导致冲突。
-S5 全局监控阶段（change≥2 时必选）定期触发此检测。
-</commentary>
-</example>
-
-<example>
-Context: 一个 change 即将 closing，需要检查它的修改是否与其他 change 矛盾。
-user: "change-3 要合并了，先检查一下跟其他 change 有没有冲突"
-assistant: "我启动 cross-change-consistency-checker agent 做 closing 前的跨 change 冲突检测。"
-<commentary>
-Change closing 是冲突检测的关键时机——合并后再发现冲突代价更高。
-</commentary>
-</example>
-
-<example>
-Context: 用户怀疑某个 change 的实现偏离了全局架构文档。
-user: "change-2 改的数据模型跟 DATABASE.md 里定义的对不上"
-assistant: "让 cross-change-consistency-checker agent 检测 change-2 与全局架构锚点的漂移。"
-<commentary>
-架构锚点漂移检测（Dim 3）比对 change 实际修改与 ARCHITECTURE.md/DATABASE.md
-的声明，发现未回写的结构性变更。
-</commentary>
-</example>
-
-<example>
-Context: 原型中定义了 data-testid 契约，需要检查各 change 是否遵守。
-user: "原型里定义了 testid，看看各个 change 有没有按契约来"
-assistant: "我启动 cross-change-consistency-checker agent 做 testid 契约漂移检测。"
-<commentary>
-Dim 4 检测原型 testid 契约是否被 change 实现正确引用，保障 E2E 测试基础。
-</commentary>
-</example>
 
 model: inherit
 color: red

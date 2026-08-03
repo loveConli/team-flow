@@ -1,6 +1,6 @@
 ---
 name: e2e
-description: 从 spec 验收场景生成 Playwright E2E 测试、执行并审计覆盖率（可选 overlay）。用法: /e2e [原型|集成|验收] [spec路径]
+description: "从 spec 验收场景生成 Playwright E2E 测试、执行并审计覆盖率（可选 overlay）。用法: /e2e [原型|集成|验收] [spec路径]"
 version: 0.1.0
 user-invocable: true
 ---

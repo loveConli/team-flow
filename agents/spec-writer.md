@@ -1,27 +1,6 @@
 ---
 name: spec-writer
-description: >-
-  规格编写 agent——在 need-explorer 完成 DP-1 之后、contract-builder 之前，产出并打磨
-  proposal.md / specs/ / design.md / tasks.md 四件规划制品。可写型,负责规划制品目录。
-  Examples:
-
-<example>
-Context: need-explorer 已记录 DP-1,change 意图稳定,可以落盘规划制品。
-user: "需求已经澄清清楚了,帮我把 proposal/specs/design/tasks 写出来"
-assistant: "I'll launch the spec-writer agent to produce the four planning artifacts in order."
-<commentary>
-spec-writer 是 exploring→bridging 之间的产出 agent。逐件生成、逐件确认,防止 scope 漂移。
-</commentary>
-</example>
-
-<example>
-Context: 本 change 经 architecture-design 判定为 required,architecture/ 三件套已产出。
-user: "架构设计做完了,写 design.md 时要对齐架构决策"
-assistant: "I'll have spec-writer read architecture/ and align design.md Decisions with it."
-<commentary>
-design.md 的 Decisions 必须引用 architecture/ 决策,tasks.md 须对齐 api.md 路由表与 sql/ 脚本。
-</commentary>
-</example>
+description: 规格编写 agent——在 need-explorer 完成 DP-1 之后、contract-builder 之前，产出并打磨 proposal.md / specs/ / design.md / tasks.md 四件规划制品。可写型，负责规划制品目录。
 
 model: inherit
 color: cyan

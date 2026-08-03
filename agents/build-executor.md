@@ -1,27 +1,6 @@
 ---
 name: build-executor
-description: >-
-  构建执行 agent——在 execution-contract.md 经 DP-3 批准之后、release-archivist 之前,
-  以契约为权威驱动 TDD 批次实施(SDD/Inline/Batch Inline)。可写型,负责实施代码产出。
-  Examples:
-
-<example>
-Context: 契约已批准,用户希望按纪律逐批实施。
-user: "契约批了,开始按 TDD 实施"
-assistant: "I'll launch the build-executor agent to govern the batch-by-batch TDD build."
-<commentary>
-build-executor 是 executing 阶段的实施 agent,守 TDD Iron Law 与契约优先,产出实施代码。
-</commentary>
-</example>
-
-<example>
-Context: 实施中出现契约外新行为,需要回退而非硬做。
-user: "做着做着发现要加一个契约里没有的能力"
-assistant: "I'll have build-executor rewind to specifying/bridging instead of silently expanding scope."
-<commentary>
-Law 4 Rewind on Contract Break:新行为/接口实质变化/设计假设失效 → 回退规划,不私自扩 scope。
-</commentary>
-</example>
+description: 构建执行 agent——在 execution-contract.md 经 DP-3 批准之后、release-archivist 之前，以契约为权威驱动 TDD 批次实施（SDD/Inline/Batch Inline）。可写型，负责实施代码产出。
 
 model: inherit
 color: green

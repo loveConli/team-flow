@@ -1,6 +1,6 @@
 {
   "name": "@xulthekl/team-flow",
-  "version": "0.32.2",
+  "version": "0.33.0",
   "description": "Unified plugin (24 skills + 15 agents) integrating team-flow, compound-engineering, architecture-design, prototype, design-system, workflow-orchestrator, workflow-bootstrap, e2e, session-handoff, workflow-feedback for multi-agent coding tools.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -47,6 +47,7 @@
     "node": ">=20"
   },
   "devDependencies": {
+    "js-yaml": "^5.2.3",
     "typescript": "^6.0.3"
   }
 }

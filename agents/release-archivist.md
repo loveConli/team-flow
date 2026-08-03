@@ -1,27 +1,6 @@
 ---
 name: release-archivist
-description: >-
-  发布归档 agent——在 build-executor 完成实施之后、change 关闭之前,执行验证、产出
-  closing 总结并完成归档就绪(arch-merge / prototype-sync / 复利晋升)。可写型,负责归档制品。
-  Examples:
-
-<example>
-Context: 实施完成,需要验证并收尾归档。
-user: "实施做完了,帮我验证并归档这个 change"
-assistant: "I'll launch the release-archivist agent to verify, summarize, and ready the archive."
-<commentary>
-release-archivist 是 closing 阶段的收尾 agent,守"验证先于完成"铁律,产出验证报告与归档。
-</commentary>
-</example>
-
-<example>
-Context: 验证发现实施偏离契约,需回退而非强行关闭。
-user: "验证发现 design 决策和代码对不上"
-assistant: "I'll have release-archivist route back to bridging instead of forcing closure."
-<commentary>
-若实施偏离契约,回退 bridging 再关闭;FAIL 不进 DP-7。
-</commentary>
-</example>
+description: 发布归档 agent——在 build-executor 完成实施之后、change 关闭之前，执行验证、产出 closing 总结并完成归档就绪（arch-merge / prototype-sync / 复利晋升）。可写型，负责归档制品。
 
 model: inherit
 color: yellow

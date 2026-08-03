@@ -1,6 +1,6 @@
 ---
 name: test-strategy
-description: 测试设计方法论 skill——design_method 选择、分层策略、对抗验证、复杂度分级。build-executor 通过 skills: 预加载。
+description: 测试设计方法论 skill——design_method 选择、分层策略、对抗验证、复杂度分级。build-executor / contract-builder 通过 skills 字段预加载。
 user-invocable: false
 ---
 

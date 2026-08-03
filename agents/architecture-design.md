@@ -1,39 +1,6 @@
 ---
 name: architecture-design
-description: >-
-  架构设计门控 agent——基于 4A+DDD 执行五项检查，判断是否需要架构增量设计，
-  若需要则产出三件套（architecture.md + database.md + api.md）+ SQL 制品。
-  在 workflow-start 编排中作为子代理调用，承担判断+执行一体化职责。
-  Examples:
-
-<example>
-Context: workflow-start 在 exploring 完成后，需要判断本 change 是否涉及架构变更。
-user: "exploring 完成了，帮我做架构设计判断"
-assistant: "我来启动 architecture-design agent，执行五项检查判定是否需要架构增量设计。"
-<commentary>
-architecture-design 是 exploring→specifying 之间的门控 agent。五项检查全部为否则 skipped，
-任一为是则 required 并产出三件套。workflow-start 负责后续的 auto-review + reasonableness check。
-</commentary>
-</example>
-
-<example>
-Context: hotfix 模式下仍需要经过架构设计判断门（hotfix 可能正是架构缺陷导致）。
-user: "这是一个 hotfix，需要过架构设计门控吗？"
-assistant: "需要。architecture-design 判断门对 hotfix/tweak 不豁免——启动 agent 执行五项检查。"
-<commentary>
-v0.9 §26 明确要求 hotfix/tweak 同样过 architecture-design 子代理判断门。
-</commentary>
-</example>
-
-<example>
-Context: 五项检查判定为 skipped，但 change-brief 中包含"新增 API"字样。
-user: "brief 里说新增 API，但 agent 说 skipped，这不合理吧？"
-assistant: "workflow-start 的 reasonableness check 检测到不一致——skipped + brief 含架构变更关键词 → BLOCK。需要重新执行架构设计。"
-<commentary>
-reasonableness check 是 workflow-start 的职责，不是 architecture-design agent 的。
-agent 只负责判断+产出，workflow-start 负责确认合理性。
-</commentary>
-</example>
+description: 架构设计门控 agent——基于 4A+DDD 执行五项检查判断是否需要架构增量设计，需要则产出三件套（architecture.md + database.md + api.md）+ SQL 制品。在 workflow-start 编排中作为子代理调用，承担判断+执行一体化职责。
 
 model: inherit
 color: blue

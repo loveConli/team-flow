@@ -1,47 +1,6 @@
 ---
 name: change-split-auditor
-description: >-
-  plan.md 拆分质量审计。在 ce-plan 产出 plan.md 后、change 脚手架前，
-  独立审计拆分质量：PRD 需求覆盖矩阵、DAG 无环、粒度均衡、字段完整性、所有权粒度合规（v0.9 根因判据硬门禁：切碎检测/无设计单元/跨单元臃肿）。
-  输出 PASS/FAIL verdict。只读审查。
-  Examples:
-
-<example>
-Context: ce-plan 刚产出 plan.md，orchestrator 需要在创建 change 目录前验证拆分质量。
-user: "plan.md 写好了，帮我检查一下拆分是否合理"
-assistant: "我来启动 change-split-auditor agent，独立审计 plan.md 的拆分质量。"
-<commentary>
-拆分质量审计是 orchestrator S4 阶段的前置门禁。审计失败时编排层携 findings
-回退 ce-plan 加深，避免有缺陷的拆分进入执行。
-</commentary>
-</example>
-
-<example>
-Context: 用户担心 plan 遗漏了 PRD 中的某些需求。
-user: "PRD 里有 12 个功能点，plan 的 change 是不是都覆盖了？"
-assistant: "让 change-split-auditor agent 构建 PRD→change 覆盖矩阵，检查有无遗漏或重叠。"
-<commentary>
-需求覆盖矩阵是 5 维度审计中最关键的一环——遗漏意味着需求丢失，重叠意味着重复工作。
-</commentary>
-</example>
-
-<example>
-Context: plan 中有多组依赖关系，用户想确认不存在循环依赖。
-user: "change-3 依赖 change-1，change-1 又依赖 change-3，这不是死循环了吗？"
-assistant: "我启动 change-split-auditor agent 做 DAG 无环验证和依赖完整性检查。"
-<commentary>
-循环依赖会导致所有涉及的 change 永远无法启动。DAG 验证是机械化的拓扑排序检查。
-</commentary>
-</example>
-
-<example>
-Context: plan 修订后需要重新审计。
-user: "plan 改过了，重新跑一下拆分审计"
-assistant: "我启动 change-split-auditor agent 对修订后的 plan.md 重新做 5 维度审计。"
-<commentary>
-FAIL 后 ce-plan 加深→重新审计，直到 PASS 才进入 change 脚手架。
-</commentary>
-</example>
+description: plan.md 拆分质量审计。在 ce-plan 产出 plan.md 后、change 脚手架前，独立审计拆分质量——PRD 需求覆盖矩阵、DAG 无环、粒度均衡、字段完整性、所有权粒度合规（v0.9 根因判据硬门禁：切碎检测/无设计单元/跨单元臃肿）。输出 PASS/FAIL verdict。只读审查。
 
 model: inherit
 color: cyan

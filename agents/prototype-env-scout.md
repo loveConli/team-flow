@@ -1,31 +1,6 @@
 ---
 name: prototype-env-scout
-description: >-
-  原型环境探查（prototype skill 内部编排步骤①）。只读探查设计系统现状（9 段 schema
-  完整度）、原型仓库分支、PRD 版本、已有页面，产出环境简报 + 推荐原型方案设计 +
-  readiness verdict。只读，不写 prototype/，不改 design-system.md。
-  Examples:
-
-<example>
-Context: prototype skill 进入步骤①，需要先摸清环境再设计原型方案。
-user: "要做驾驶舱原型，先帮我看看设计系统、分支、PRD 这些环境情况"
-assistant: "我启动 prototype-env-scout agent，只读探查设计系统/分支/PRD/已有页面，产出环境简报和原型方案建议。"
-<commentary>
-环境探查是 prototype 内部编排的第一步，为后续方案评审和 prototype-builder 绘制提供
-决策依据。本 agent 只读，发现设计系统缺失时把 verdict 标为 needs_design_system 交主代理
-决定是否先派 design-system-architect，而非自己阻断或写文件。
-</commentary>
-</example>
-
-<example>
-Context: 迭代已有原型，需要确认当前分支与 PRD 版本是否对齐。
-user: "PRD 升到 v2 了，原型分支对不对得上？已有哪些页面？"
-assistant: "让 prototype-env-scout agent 探查到原型分支与 PRD 版本的对齐情况和现有原型清单。"
-<commentary>
-原型随 PRD 当前版本分支维护（prd-vN 分支）。本 agent 检测当前分支是否匹配目标 PRD 版本，
-并清点现有 pages/components/flow.md，供迭代方案参考。
-</commentary>
-</example>
+description: 原型环境探查（prototype skill 内部编排步骤①）。只读探查设计系统现状（9 段 schema 完整度）、原型仓库分支、PRD 版本、已有页面，产出环境简报 + 推荐原型方案设计 + readiness verdict。只读，不写 prototype/，不改 design-system.md。
 
 model: inherit
 color: cyan

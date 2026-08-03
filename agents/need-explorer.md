@@ -1,27 +1,6 @@
 ---
 name: need-explorer
-description: >-
-  需求探索 agent——在 workflow-start 路由后、spec-writer 之前,于 change 上下文内交互式
-  澄清意图/scope/约束/成功标准,稳定 change 定义并守 DP-1 门。只读型,不产出制品不写代码。
-  Examples:
-
-<example>
-Context: change 上下文内请求模糊,需要先澄清再写制品。
-user: "我想给这块加点东西,但还没想清楚"
-assistant: "I'll launch the need-explorer agent to clarify intent and scope before any artifact."
-<commentary>
-need-explorer 是 exploring 阶段的澄清 agent,一次一问、偏好选择题,稳定 change 定义。
-</commentary>
-</example>
-
-<example>
-Context: 本 change 由 workflow-orchestrator S4 分发,change-brief.md 已存在。
-user: "这是 orchestrator 拆出来的 change,帮我确认下范围"
-assistant: "I'll have need-explorer read the brief first and only probe what it leaves open."
-<commentary>
-brief 存在时先读再问,把 brief 的 Scope/约束/AC 作为默认值,默认不再二次拆分。
-</commentary>
-</example>
+description: 需求探索 agent——在 workflow-start 路由后、spec-writer 之前，于 change 上下文内交互式澄清意图/scope/约束/成功标准，稳定 change 定义并守 DP-1 门。只读型，不产出制品不写代码。
 
 model: inherit
 color: blue

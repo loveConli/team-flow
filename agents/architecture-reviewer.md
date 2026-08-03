@@ -1,47 +1,6 @@
 ---
 name: architecture-reviewer
-description: >-
-  架构设计自动审查 agent——独立上下文、只读审查，对照 PRD/plan/change-brief + 全局基线 +
-  conventions 审查架构产出质量（6 维度 A1-A6）。填补 architecture-design 阶段
-  "设计完无审查"的缺口。循环修正 ≤3 轮 + 收敛检测。
-  Examples:
-
-<example>
-Context: architecture-design agent 刚产出三件套，workflow-start 需要自动审查质量。
-user: "架构设计完成了，帮我审查一下产出质量"
-assistant: "我来启动 architecture-reviewer agent，独立审查架构产出的 6 维度质量。"
-<commentary>
-architecture-reviewer 在独立上下文中运行，未参与架构设计产出，规避锚定效应。
-审查报告写在 response 中，由编排层落盘到 changes/<name>/architecture/auto-review.md。
-</commentary>
-</example>
-
-<example>
-Context: 架构产出经过修正后需要重新审查（第 2 轮）。
-user: "架构设计修正完了，重新跑一下审查"
-assistant: "我启动 architecture-reviewer agent 进行第 2 轮审查，对比修正前后不一致项是否收敛。"
-<commentary>
-FAIL 后修正→重新审查，最多 3 轮。连续两轮不一致项集合无缩小则转人工，避免死循环。
-</commentary>
-</example>
-
-<example>
-Context: 用户想确认架构产出是否覆盖了 change-brief 中的所有需求。
-user: "brief 里定义了 5 个功能点，架构设计是不是都覆盖了？"
-assistant: "让 architecture-reviewer agent 做 A4 需求覆盖的结构化检查。"
-<commentary>
-A4 需求覆盖是最关键的维度——遗漏意味着需求在架构层面丢失，下游 spec/code 无法弥补。
-</commentary>
-</example>
-
-<example>
-Context: 想检查架构产出是否遵循项目级 conventions。
-user: "帮我看看架构设计是否符合项目的 DB 命名规范和 API 规范"
-assistant: "我启动 architecture-reviewer agent 做 A6 conventions 合规检查。"
-<commentary>
-A6 读取 .team-flow/conventions/ 下的规范文件，逐项比对架构产出是否遵循。
-</commentary>
-</example>
+description: 架构设计自动审查 agent——独立上下文、只读审查，对照 PRD/plan/change-brief + 全局基线 + conventions 审查架构产出质量（6 维度 A1-A6），填补 architecture-design 阶段"设计完无审查"的缺口。循环修正 ≤3 轮 + 收敛检测。
 
 model: inherit
 color: yellow

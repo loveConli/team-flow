@@ -1,42 +1,6 @@
 ---
 name: bug-investigator
-description: Use this agent when the user encounters a bug, test failure, unexpected behavior, build failure, or performance issue and wants autonomous root-cause investigation. The agent explores the codebase, forms hypotheses, tests them, and produces a structured root-cause analysis report. Examples:
-
-<example>
-Context: A test is failing and the user wants to understand why before attempting a fix.
-user: "This test has been failing since yesterday, can you investigate why?"
-assistant: "I'll launch the bug-investigator agent to systematically trace the root cause of the test failure."
-<commentary>
-The user wants root-cause analysis, not a quick patch. The bug-investigator agent follows a scientific method: read errors → reproduce → trace data flow → form hypothesis → test → report. It writes investigation notes but does not fix the code.
-</commentary>
-</example>
-
-<example>
-Context: Unexpected behavior in production that doesn't reproduce easily.
-user: "用户在生产环境报了一个诡异的 bug，偶发性的，帮我排查一下"
-assistant: "我来启动 bug-investigator agent，系统性地排查这个偶发问题的根因。"
-<commentary>
-Intermittent bugs require structured investigation — gathering evidence, checking component boundaries, tracing data flow. The agent excels at methodical root-cause analysis for hard-to-reproduce issues.
-</commentary>
-</example>
-
-<example>
-Context: Multiple fix attempts have failed and the user suspects a deeper issue.
-user: "I've tried fixing this three times and it keeps breaking in different ways — something is fundamentally wrong"
-assistant: "This sounds like an architectural issue. Let me dispatch the bug-investigator agent to do a deep root-cause investigation."
-<commentary>
-Multiple failed fixes indicate the symptom is being addressed, not the cause. The agent's DP-5 escalation logic specifically handles this: 3+ failures = question the architecture.
-</commentary>
-</example>
-
-<example>
-Context: A build failure with unclear error messages.
-user: "The build broke and the error message doesn't make sense, can you figure out what's going on?"
-assistant: "I'll use the bug-investigator agent to trace the build failure to its root cause."
-<commentary>
-Unclear errors require careful reading of stack traces, checking recent changes, and tracing dependency chains. The agent systematically narrows down the cause.
-</commentary>
-</example>
+description: Use this agent when the user encounters a bug, test failure, unexpected behavior, build failure, or performance issue and wants autonomous root-cause investigation. The agent explores the codebase, forms hypotheses, tests them, and produces a structured root-cause analysis report without implementing fixes.
 
 model: inherit
 color: yellow

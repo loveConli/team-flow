@@ -1,46 +1,6 @@
 ---
 name: prototype-reviewer
-description: >-
-  原型 vs PRD 一致性自动评审。在原型产出后、人工评审前，独立检查原型与 PRD
-  的结构化一致性（6 维度），输出分级一致性报告。只读审查，不修改任何文件。
-  Examples:
-
-<example>
-Context: 原型刚产出，orchestrator 需要在人工评审前做自动一致性检查。
-user: "原型做好了，帮我检查一下和 PRD 是否一致"
-assistant: "我来启动 prototype-reviewer agent，独立审查原型与 PRD 的 6 维度一致性。"
-<commentary>
-原型自动评审是 orchestrator S2 阶段的关键门禁。prototype-reviewer 在独立上下文中运行，
-未参与 PRD/原型产出，规避锚定效应。审查报告写在 response 中，由编排层落盘。
-</commentary>
-</example>
-
-<example>
-Context: 原型经过修正后需要重新评审（第 2 轮）。
-user: "原型修正完了，重新跑一下一致性检查"
-assistant: "我启动 prototype-reviewer agent 进行第 2 轮自动评审，对比修正前后不一致项是否收敛。"
-<commentary>
-FAIL 后修正→重新评审，最多 3 轮。连续两轮不一致项集合无缩小则转人工，避免死循环。
-</commentary>
-</example>
-
-<example>
-Context: 用户想确认原型是否覆盖了 PRD 中定义的所有页面和功能。
-user: "PRD 里定义了 8 个页面，原型是不是都有了？"
-assistant: "让 prototype-reviewer agent 做一次 D1 页面完整性 + D2 功能覆盖的结构化检查。"
-<commentary>
-D1/D4 走 Pre-check（Bash 结构化预检），机械化验证页面文件存在性和导航链接完整性。
-</commentary>
-</example>
-
-<example>
-Context: 人工评审前想先过一遍术语和字段是否对齐。
-user: "帮我看看原型里的字段名称和 PRD 定义的是否一致"
-assistant: "我启动 prototype-reviewer agent 做 D3 字段一致性 + D5 术语一致性的语义对比。"
-<commentary>
-D3/D5 走 Deep-check（LLM 语义对比），标注为建议级，误报可被人工推翻。
-</commentary>
-</example>
+description: 原型 vs PRD 一致性自动评审。在原型产出后、人工评审前，独立检查原型与 PRD 的结构化一致性（6 维度），输出分级一致性报告。只读审查，不修改任何文件。
 
 model: inherit
 color: green

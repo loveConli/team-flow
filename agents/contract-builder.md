@@ -1,27 +1,6 @@
 ---
 name: contract-builder
-description: >-
-  执行契约 agent——在 spec-writer 产出规划制品并通过 DP-2 之后、build-executor 之前,
-  将规划制品压缩为单一执行握手 execution-contract.md。可写型,负责执行契约文件。
-  Examples:
-
-<example>
-Context: 四件规划制品已稳定且 DP-2 已记录,准备进入实施。
-user: "规划都确认了,帮我生成执行契约,准备开干"
-assistant: "I'll launch the contract-builder agent to convert the artifacts into execution-contract.md."
-<commentary>
-contract-builder 是 bridging 阶段的核心 agent,产出 execution-contract.md 并守 DP-3 批准门。
-</commentary>
-</example>
-
-<example>
-Context: 既有契约因 scope 变更而过期,需要刷新。
-user: "specs 改了,执行契约好像对不上了"
-assistant: "I'll have contract-builder detect staleness and refresh the contract."
-<commentary>
-契约过期检测:scope/requirements/constraints/batches 变化即刷新,不静默放行陈旧契约。
-</commentary>
-</example>
+description: 执行契约 agent——在 spec-writer 产出规划制品并通过 DP-2 之后、build-executor 之前，将规划制品压缩为单一执行握手 execution-contract.md。可写型，负责执行契约文件。
 
 model: inherit
 color: magenta

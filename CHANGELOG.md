@@ -6,6 +6,27 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-08-03
+
+### Fixed（skills 注入恢复——frontmatter YAML 非法导致预加载静默失效，设计见工作区级文档 team-flow-workspace/docs/architecture-api-db-design-enhancement-v0.13.md §54）
+
+#### 根因（P2-41）
+- 全部 15 个 agent .md 的 frontmatter 是非法 YAML：`description` 块标量内顶格书写 `<example>`，缩进断裂 → Claude Code 解析静默降级：`skills:` 预加载被丢弃、`tools:` 限制失效、description 回退泛化标签，且无任何警告。插件诞生至今 SKILL.md 方法论从未被注入子代理（v0.32.1 的 contract-builder test-strategy 预加载修复同样未生效）
+- **agents/*.md（15 个）**：description 单句化 + 删除 `<example>` 块（LT 决策，学 glaf4 合法写法）；`skills:`/`tools:` 声明保持
+- **skills/e2e/SKILL.md**、**skills/test-strategy/SKILL.md**：description 含裸 `: `（非法 YAML）→ 加引号/改写修复；test-strategy 顺带修正预加载主体表述（build-executor / contract-builder）
+
+#### 行为变更
+- `skills:` 预加载开始真实生效：dispatch 时 SKILL.md 全文注入子代理上下文
+- `tools:` 限制开始真实生效：子代理工具集从全量（117 个，含全部 MCP）收紧为 frontmatter 声明集
+
+### Added
+- **tests/lib/frontmatter-lint.test.mjs**（P3-12）：frontmatter 合法性长效门禁——js-yaml 严格解析全部 agents/skills/commands frontmatter + name/description 必填断言 + agent name 与文件名一致 + skills: 引用必须解析到真实 skills/<name>/SKILL.md；进 npm test（58 例），杜绝同类缺陷复发
+- devDependency：js-yaml
+
+### Tests
+- 全量回归：556/556（lib 498 + lint 58）+ Tier1 e2e + check-versions ✅
+- 变异验证：门禁对旧式病态 frontmatter 样本可捕获
+
 ## [0.32.2] - 2026-08-03
 
 ### Fixed（C1 死锁链修复三件套，设计见工作区级文档 team-flow-workspace/docs/plan/v0.32.2-hook-and-gate-fix.md）
