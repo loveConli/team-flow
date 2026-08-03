@@ -210,6 +210,8 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 
 ### Agents 索引（v0.7 新增，v0.30.0 增至 15 个）
 
+> **agent 文件设计规范见 CONTRIBUTING.md §6 + `templates/agent-template.md`**（v0.33.0）：frontmatter 必须合法 YAML（非法时 Claude Code 静默降级，skills: 预加载与 tools: 限制全部失效）；description 单句、禁 `<example>` 块；新增/修改 agent 必过 frontmatter-lint + 实证探针。
+
 | Agent | 职责 | Tools | 触发场景 |
 |-------|------|-------|---------|
 | architecture-design | 架构设计门控 agent——五项检查 + 三件套产出 + SQL 制品（workflow-start 子代理调用，判断+执行一体化） | Read/Bash/Grep/Glob/Write | workflow-start exploring→specifying 状态转换时（架构设计门控，v0.27.2） |
