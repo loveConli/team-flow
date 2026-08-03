@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "tf": "./scripts/team-flow.mjs",
-    "team-flow": "./scripts/team-flow.mjs"
+    "tf": "scripts/team-flow.mjs",
+    "team-flow": "scripts/team-flow.mjs"
   },
   "type": "module",
   "scripts": {
@@ -41,7 +41,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MageByte-Zero/team-flow"
+    "url": "git+https://github.com/MageByte-Zero/team-flow.git"
   },
   "engines": {
     "node": ">=20"
