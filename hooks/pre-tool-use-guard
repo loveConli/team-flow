@@ -5,11 +5,20 @@
 # ----------------------------------------------------------------------------
 # Purpose
 # ----------------------------------------------------------------------------
-# Blocks Write/Edit/MultiEdit implementation edits unless the active
+# Blocks Write/Edit/MultiEdit IMPLEMENTATION edits unless the active
 # team-flow change is in a state that permits building. This enforces the
 # state-machine rule that "no implementation is allowed" outside the
 # build-permitted states (exploring / specifying / bridging must finish and be
 # approved before any code is written).
+#
+# v0.32.2 (P1-44): path-based artifact-zone exemption. The workflow itself
+# REQUIRES artifact writes during non-build states (architecture/*.md while
+# exploring, proposal/specs/design/tasks while specifying, contract/matrix
+# while bridging). The original state-only gate blocked those too, forcing
+# LLMs to bypass via Bash writes (which are not gated at all). Now writes
+# INSIDE the active change directory (artifact zone) are allowed; only writes
+# OUTSIDE it (implementation code) remain state-gated. `.team-flow.yaml`
+# itself stays state-gated even inside the change dir (state 禁写红线).
 #
 # ----------------------------------------------------------------------------
 # Guard logic
@@ -19,6 +28,9 @@
 #        - Not found  -> ALLOW (no active team-flow change in scope).
 #   2. Read the current workflow state from the `state:` line of the yaml.
 #   3. For Write/Edit/MultiEdit only:
+#      3a. Target path inside the change directory (artifact zone) AND not
+#          `.team-flow.yaml` -> ALLOW (workflow artifacts are state-agnostic).
+#      3b. Otherwise by state:
 #        - state in {approved-for-build, executing, debugging} -> ALLOW
 #        - any other state (exploring/specifying/bridging/closing/abandoned/
 #          unknown) -> BLOCK with an explanatory reason.
@@ -101,13 +113,42 @@ state="$(grep -E '^[[:space:]]*state:[[:space:]]*' "$yaml" 2>/dev/null \
 # Could not determine state -> defensive allow (never block on parse failure).
 [ -n "$state" ] || allow
 
+# --- v0.32.2 (P1-44): artifact-zone exemption ------------------------------
+# Writes targeting the active change directory itself are workflow artifacts
+# (architecture/, specs/, proposal/design/tasks, contract, test-matrix,
+# reviews, learnings...) — required by the workflow in EVERY state, so they
+# are exempt from the build-state gate. Only writes outside the change dir
+# (implementation code) are gated. `.team-flow.yaml` remains gated (state 禁写).
+file_path="$(printf '%s' "$INPUT" \
+  | grep -o '"file_path"[[:space:]]*:[[:space:]]*"[^"]*"' \
+  | head -1 \
+  | sed 's/.*:"//; s/"$//')"
+# Relative target -> absolutize against $PWD for a stable prefix comparison.
+case "$file_path" in
+  ''|/*) : ;;
+  *) file_path="$PWD/$file_path" ;;
+esac
+if [ -n "$file_path" ] && [ "${file_path##*/}" != ".team-flow.yaml" ]; then
+  case "$file_path" in
+    "$dir"/*) allow ;;   # artifact zone: inside the change directory
+  esac
+  # macOS symlink normalization: /var,/tmp are symlinks to /private/var,/private/tmp.
+  # $PWD may be physical (child-process chdir) while file_path is logical, or vice
+  # versa — strip the /private prefix on both sides before comparing.
+  norm_dir="${dir#/private}"
+  norm_fp="${file_path#/private}"
+  case "$norm_fp" in
+    "$norm_dir"/*) allow ;;
+  esac
+fi
+
 # --- decision --------------------------------------------------------------
 case "$state" in
   approved-for-build|executing|debugging)
     allow
     ;;
   *)
-    reason="team-flow guard: implementation edits (Write/Edit/MultiEdit) are blocked while the change is in state '$state'. Edits are only allowed in states: approved-for-build, executing, debugging. Advance the workflow to an approved build state first (see docs/state-machine.md or /team-flow:workflow-start). If no change is actually active, remove or fix the stray .team-flow.yaml."
+    reason="team-flow guard: implementation edits (Write/Edit/MultiEdit) OUTSIDE the change directory are blocked while the change is in state '$state'. Code edits are only allowed in states: approved-for-build, executing, debugging. Artifact writes inside the change directory are always permitted (v0.32.2). Advance the workflow to an approved build state first (see docs/state-machine.md or /team-flow:workflow-start). If no change is actually active, remove or fix the stray .team-flow.yaml."
     # Escape backslashes and double quotes for safe JSON string embedding.
     reason_esc="$(printf '%s' "$reason" | sed 's/\\/\\\\/g; s/"/\\"/g')"
     printf '{"decision":"block","reason":"%s"}\n' "$reason_esc"

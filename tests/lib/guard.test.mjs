@@ -65,11 +65,15 @@ describe('guard: transition matrix', () => {
     }
   }
 
-  it('exploring→specifying requires artifacts-exist', () => {
+  // v0.32.2 (P3-10): exploring→specifying no longer carries artifacts-exist
+  // (产物由 spec-writer 在 specifying 阶段生成，鸡生蛋死锁修复；齐全性由
+  // specifying→bridging 独家负责)。arch-design 维度保留。
+  it('exploring→specifying requires arch-design only (artifacts-exist moved to specifying→bridging)', () => {
     const result = runGuard('exploring', 'specifying');
     assert.equal(result.exitCode, 0, `Expected exit 0 but got ${result.exitCode}: ${JSON.stringify(result.output)}`);
-    const checks = result.output.checks;
-    assert.ok(checks.some(c => c.dimension === 'artifacts-exist'));
+    const dims = result.output.checks.map(c => c.dimension);
+    assert.ok(dims.includes('arch-design'));
+    assert.ok(!dims.includes('artifacts-exist'), 'artifacts-exist should no longer gate exploring→specifying');
   });
 
   it('specifying→bridging requires artifacts-exist + schema-valid', () => {
@@ -606,7 +610,9 @@ describe('guard: artifacts-exist check', () => {
   }
 
   it('fails when no artifacts exist', () => {
-    const result = runGuard('exploring', 'specifying');
+    // v0.32.2 (P3-10): artifacts-exist moved off exploring→specifying;
+    // specifying→bridging is now the single owner of artifact completeness.
+    const result = runGuard('specifying', 'bridging');
     // artifacts-exist should fail — no proposal, specs, etc.
     const artifactsCheck = result.output.checks.find(c => c.dimension === 'artifacts-exist');
     assert.ok(artifactsCheck);

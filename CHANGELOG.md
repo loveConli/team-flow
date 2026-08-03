@@ -6,6 +6,28 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.32.2] - 2026-08-03
+
+### Fixed（C1 死锁链修复三件套，设计见工作区级文档 team-flow-workspace/docs/plan/v0.32.2-hook-and-gate-fix.md）
+
+#### pre-tool-use-guard 路径化（P1-44，死锁环1）
+- **hooks/pre-tool-use-guard**：新增产物区豁免——Write/Edit/MultiEdit 目标在活动 change 目录内（architecture/、specs/、proposal/design/tasks、contract、test-matrix、reviews 等工作流产物）→ 全状态放行；change 目录外（实现代码）→ 维持状态门禁（仅 approved-for-build/executing/debugging）。修复 exploring/specifying/bridging 阶段产物写入被一刀切拦截、LLM 被迫 Bash 绕过（写入彻底脱管）的死锁
+- `.team-flow.yaml` 本身恒受状态门禁（state 禁写红线保留）
+- macOS symlink 归一化（/private/var ↔ /var 双侧对齐），防物理/逻辑路径前缀失配
+
+#### exploring→specifying 门禁时序（P3-10，死锁环2）
+- **scripts/guard/guard.mjs**：`exploring:specifying` 移除 `artifacts-exist` 维度（四件规划产物由 spec-writer 在 specifying 阶段生成，转换前要求属鸡生蛋死锁）；产物齐全性由 `specifying:bridging` 独家负责（该维度本就挂着，单一责任人）
+
+#### hooks 版本同步（P2-40，发版中断根治）
+- **scripts/lib/cmd-version.mjs**：hooks/session-start 纳入自动同步——头部注释行 pattern 后缀改通配（根因：旧 pattern 写死 `: conditional injection` 措辞，hook 注释演进后失配，v0.27.2~v0.32.1 四次发版中断）+ PLUGIN_VERSION 变量首次纳入同步
+- 顺带修复：major 版本号硬编码为 0 的缺陷（v1.0.0 里程碑会静默写成 0.x.y）——解构补 major + 全部 replacement 改 %MAJOR% 占位 + 全部 pattern 首段泛化（`0\.` → `\d+`，支持 1.x 匹配）
+
+### Tests
+- tests/lib/hook-pre-tool-use.test.mjs：路径化判定 9 场景矩阵（产物区放行/代码区拦截/构建态/禁写红线/无 change/非 Write 工具/相对路径）
+- tests/lib/cmd-version-hooks.test.mjs：hooks 双位置同步 + 幂等 + pattern 防腐化 3 例
+- guard.test.mjs / guard-dimensions.test.mjs：artifacts-exist 断言迁移至 specifying→bridging + exploring→specifying 新语义断言
+- 全量回归：lib 498/498 + Tier1 e2e 68/68 + check-versions ✅
+
 ## [0.32.1] - 2026-08-03
 
 > 版本号说明：0.32.0 因 `.npmignore` 缺失 `/tests/` 排除项，误将 61.8M e2e 基线归档打入 tarball（72MB），发布后 30 分钟内撤回；npm 版本号一经发布不可复用，故以 **0.32.1** 重发（内容完全一致 + 打包修复）。

@@ -19,25 +19,30 @@ const MANIFESTS = [
 // ── Text files with regex patterns (first capture group = version to replace) ──
 // Note: CLAUDE.md is intentionally gitignored (project-local AI instructions).
 const TEXT_FILES = [
-  { file: 'README.md',              pattern: /(当前版本：`v?)0\.\d+\.\d+(`?)/g,                   replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'INSTALL.md',             pattern: /(当前发布版本：\*\*v)0\.\d+\.\d+(\*\*)/g,            replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'docs/README_en.md',      pattern: /(Current: `v)0\.\d+\.\d+(`)/g,                     replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'hooks/session-start',    pattern: /(# v)0\.\d+\.\d+(: conditional injection)/g,       replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'llms.txt',               pattern: /(Current version: v)0\.\d+\.\d+(\.)/g,             replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: '.claude/always/phase-guard.md', pattern: /(# team-flow v)0\.\d+\.\d+( \|)/g,      replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'GEMINI.md',              pattern: /(# team-flow v)0\.\d+\.\d+( \|)/g,              replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/workflow-start/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/need-explorer/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/spec-writer/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/contract-builder/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/build-executor/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/build-executor/implementer-prompt.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/build-executor/task-reviewer-prompt.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/code-reviewer/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/code-reviewer/code-reviewer-prompt.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/bug-investigator/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/release-archivist/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
-  { file: 'skills/spec-merger/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)0\.\d+\.\d+( tf)/g, replacement: '$10.%MINOR%.%PATCH%$2' },
+  { file: 'README.md',              pattern: /(当前版本：`v?)\d+\.\d+\.\d+(`?)/g,                   replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'INSTALL.md',             pattern: /(当前发布版本：\*\*v)\d+\.\d+\.\d+(\*\*)/g,            replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'docs/README_en.md',      pattern: /(Current: `v)\d+\.\d+\.\d+(`)/g,                     replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  // v0.32.2（P2-40）：hooks/session-start 两处版本号都纳入同步——
+  // ① 头部注释行（后缀用通配 `:.*`，防止注释措辞变更导致 pattern 腐化失配，
+  //    v0.27.2~v0.32.1 四次发版中断的根因即旧 pattern 写死了后缀措辞）；
+  // ② PLUGIN_VERSION 变量（check-version-consistency 的门禁判据）。
+  { file: 'hooks/session-start',    pattern: /(# v)\d+\.\d+\.\d+(:.*)/g,                            replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'hooks/session-start',    pattern: /(PLUGIN_VERSION=")\d+\.\d+\.\d+(")/g,                 replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'llms.txt',               pattern: /(Current version: v)\d+\.\d+\.\d+(\.)/g,             replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: '.claude/always/phase-guard.md', pattern: /(# team-flow v)\d+\.\d+\.\d+( \|)/g,      replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'GEMINI.md',              pattern: /(# team-flow v)\d+\.\d+\.\d+( \|)/g,              replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/workflow-start/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/need-explorer/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/spec-writer/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/contract-builder/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/build-executor/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/build-executor/implementer-prompt.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/build-executor/task-reviewer-prompt.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/code-reviewer/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/code-reviewer/code-reviewer-prompt.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/bug-investigator/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/release-archivist/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
+  { file: 'skills/spec-merger/SKILL.md', pattern: /(npx --yes --package @xulthekl\/team-flow@)\d+\.\d+\.\d+( tf)/g, replacement: '$1%MAJOR%.%MINOR%.%PATCH%$2' },
 ];
 
 function getNestedValue(obj, pathParts) {
@@ -72,7 +77,7 @@ export async function run(args) {
     console.error(`Invalid semver: ${newVersion}`);
     process.exit(2);
   }
-  const [, , minor, patch] = match;
+  const [, major, minor, patch] = match;
 
   console.log(`Version sync → ${newVersion}${dryRun ? ' (dry run)' : ''}\n`);
   let changed = 0;
@@ -122,7 +127,7 @@ export async function run(args) {
 
     const content = readFileSync(filePath, 'utf-8');
     const replacement = entry.replacement
-      .replace('%MINOR%', minor)
+      .replace('%MAJOR%', major).replace('%MINOR%', minor)
       .replace('%PATCH%', patch);
 
     const newContent = content.replace(entry.pattern, replacement);

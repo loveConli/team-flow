@@ -20,7 +20,12 @@ import { checkTestMatrixReady } from './checks/test-matrix-ready.mjs';
 // Transition matrix: <from>:<to> → required check dimensions
 const TRANSITION_CHECKS = {
   // Forward transitions
-  'exploring:specifying':           ['artifacts-exist', 'arch-design'],
+  // v0.32.2 (P3-10): artifacts-exist removed from exploring:specifying —
+  // the four planning artifacts are PRODUCED by spec-writer during specifying,
+  // so requiring them before the transition was a chicken-and-egg deadlock
+  // (C1 事件：主代理被此门禁逼出绕行行为)。Artifact completeness is enforced
+  // by specifying:bridging (artifacts-exist remains there, single owner).
+  'exploring:specifying':           ['arch-design'],
   'specifying:bridging':            ['artifacts-exist', 'schema-valid'],
   'bridging:approved-for-build':    ['artifacts-exist', 'schema-valid', 'contract-fresh', 'dp-gate-passed'],
   // v0.13 §49：test-matrix-ready 门禁前移——full 模式进入 executing 前强制测试准备度

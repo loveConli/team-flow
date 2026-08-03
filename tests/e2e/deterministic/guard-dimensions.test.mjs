@@ -22,20 +22,32 @@ function dim(checks, name) {
   return c;
 }
 
-// ── exploring → specifying：artifacts-exist + arch-design ───────────────────
-describe('T1 guard: exploring→specifying 维度', () => {
+// ── artifacts-exist 维度（v0.32.2 起由 specifying→bridging 独家承载）────────
+describe('T1 guard: artifacts-exist 维度（specifying→bridging）', () => {
   it('artifacts-exist 正向：四件产物 + specs 齐 → pass', () => {
-    const fix = track(makeChange({ state: 'exploring', artifacts: true }));
-    const r = guardCheck(fix.changeDir, 'exploring', 'specifying');
+    const fix = track(makeChange({ state: 'specifying', artifacts: true }));
+    const r = guardCheck(fix.changeDir, 'specifying', 'bridging');
     assert.equal(dim(r.checks, 'artifacts-exist').pass, true);
   });
 
   it('artifacts-exist 负向：缺 proposal → fail', () => {
-    const fix = track(makeChange({ state: 'exploring', artifacts: false }));
+    const fix = track(makeChange({ state: 'specifying', artifacts: false }));
     writePlanningArtifacts(fix.changeDir, { specs: true });
     rmSync(join(fix.changeDir, 'proposal.md')); // 删 proposal
-    const r = guardCheck(fix.changeDir, 'exploring', 'specifying');
+    const r = guardCheck(fix.changeDir, 'specifying', 'bridging');
     assert.equal(dim(r.checks, 'artifacts-exist').pass, false);
+  });
+});
+
+// ── exploring → specifying：arch-design（v0.32.2 P3-10 起仅此维度）──────────
+describe('T1 guard: exploring→specifying 维度', () => {
+  it('维度清单仅含 arch-design（artifacts-exist 已移走，P3-10）', () => {
+    const fix = track(makeChange({ state: 'exploring', artifacts: false })); // 无产物也过——产物不再是本转换的判据
+    const r = guardCheck(fix.changeDir, 'exploring', 'specifying');
+    assert.equal(r.error, null);
+    const dims = r.checks.map(c => c.dimension);
+    assert.ok(dims.includes('arch-design'), `应含 arch-design，实际: ${dims.join(',')}`);
+    assert.ok(!dims.includes('artifacts-exist'), 'artifacts-exist 不应再挂 exploring→specifying');
   });
 
   it('arch-design 正向：arch_design_decision=null → pass（向后兼容）', () => {
