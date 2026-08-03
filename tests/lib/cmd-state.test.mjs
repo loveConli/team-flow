@@ -318,11 +318,36 @@ describe('cmd-state: set', () => {
 
   it('--json outputs structured result', () => {
     tf(`state init ${tempDir}`);
-    const result = tf(`state set ${tempDir} test_result pass --json`);
+    const result = tf(`state set ${tempDir} compound_skipped true --json`);
     const parsed = JSON.parse(result.stdout);
     assert.equal(parsed.ok, true);
-    assert.equal(parsed.field, 'test_result');
-    assert.equal(parsed.value, 'pass');
+    assert.equal(parsed.field, 'compound_skipped');
+    assert.equal(parsed.value, 'true');
+  });
+
+  // v0.13 §50（BUG-A 政策修正）：test_result 手工自述通道关闭，必须经 tf test record 程序化记录。
+  it('rejects manual set of test_result (v0.13 §50)', () => {
+    tf(`state init ${tempDir}`);
+    const result = tf(`state set ${tempDir} test_result pass`);
+    assert.equal(result.exitCode, 1);
+    assert.match(result.stderr || result.stdout, /tf test record/);
+  });
+
+  // v0.13 §48.1：schema_version 是存量豁免键，只由 init 打戳，禁止手工设置。
+  it('rejects manual set of schema_version (v0.13 §48.1)', () => {
+    tf(`state init ${tempDir}`);
+    const result = tf(`state set ${tempDir} schema_version 1`);
+    assert.equal(result.exitCode, 1);
+    assert.match(result.stderr || result.stdout, /schema_version/);
+  });
+
+  // v0.13 §48.2：skip 理由字段可设置（可审计豁免）。
+  it('sets test_matrix_skip_reason', () => {
+    tf(`state init ${tempDir}`);
+    const result = tf(`state set ${tempDir} test_matrix_skip_reason "docs-only change"`);
+    assert.equal(result.exitCode, 0);
+    const get = tf(`state get ${tempDir} test_matrix_skip_reason`);
+    assert.ok(get.stdout.includes('docs-only change'));
   });
 });
 

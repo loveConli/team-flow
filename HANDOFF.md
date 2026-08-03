@@ -23,7 +23,7 @@
 | **e2e**（端到端测试） | 整个 skill | 1 |
 | **session-handoff**（session 交接） | 整个 skill | 1 |
 | **workflow-feedback**（反馈闭环） | 整个 skill | 1 |
-| **合计** | | **23 skills + 15 agents** |
+| **合计** | | **24 skills + 15 agents** |
 
 - 零运行时外部依赖（team-flow 底座自包含）。
 - prototype 额外**零外部依赖、可离线**（自包含 HTML + 页面内 Tweaks 控件，无 CDN）。

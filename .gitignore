@@ -23,6 +23,12 @@ workflow-start-workspace/
 .team-flow/handoffs/
 opt-results/
 
+# e2e 测试产物（大体积、机器本地、可再生，不入仓）
+# baseline/：vrm4teamflow 冻结基线归档（~62M，npm run test:e2e:baseline 再生）
+# workflow/runs/：Tier2 claude -p 的 stream-json transcript（每轮一份，事后诊断用）
+tests/e2e/baseline/
+tests/e2e/workflow/runs/
+
 # Dependencies
 node_modules/
 

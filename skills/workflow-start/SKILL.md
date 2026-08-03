@@ -54,12 +54,14 @@ Validate mode against artifact content. If hotfix/tweak criteria not met → upg
 
 ## Routing Rules
 
+> **⚠️ 路由优先级（硬规则）**：路由按文档顺序从前到后评估，**第一个匹配的路由必须执行**。关键门控：`arch_design_decision` 为 `null` 时 MUST 路由到 `architecture-design`，即使后续路由（spec-writer / contract-builder / build-executor）的其他条件也满足——架构判定是 exploring→specifying 的硬前置，不可跳过。hotfix/tweak 走快速转换，guard 不挂 `arch-design` 维度（`exploring:bridging`/`exploring:approved-for-build` 为空维度），但 **SOP 层仍须过 architecture-design 判断门，不豁免**（v0.9 §26，见 Fast-Path Routing；hotfix 可能正是架构缺陷导致）——判断结果由 architecture-design 子代理写入 `arch_design_decision`，无"自动写 skipped"行为。
+
 ### Sub-agent Dispatch Protocol (v0.30.0)
 
 产出型路由（spec-writer / contract-builder / build-executor / release-archivist）通过 `Agent(subagent_type: "team-flow:<name>")` **dispatch 子代理**执行——agent 定义经 `skills:` 预加载对应 SKILL.md，主代理**不得**凭记忆手写产物格式 prompt。need-explorer 为交互式澄清，**主进程执行**（需与用户对话；其 agent 定义 `team-flow:need-explorer` 仅作可 dispatch 后备）。
 
 - **记录 agentId**：dispatch 后立即记录子代理 ID；修复一律 SendMessage 恢复原子代理（禁启动新子代理，见 v0.29.0 §37）
-- **返回即验证（validation gate）**：子代理返回产物后**立即** `tf validate <change-dir>`；FAIL → SendMessage 回**原**子代理修复，通过后才能继续/转换。把格式失败拦截在返回时，而非状态转换时（避免浪费整次执行后再失败）
+- **返回即验证（validation gate）**：子代理返回产物后**立即** `tf validate <change-dir>`；FAIL → SendMessage 回**原**子代理修复，通过后才能继续/转换。把格式失败拦截在返回时，而非状态转换时（避免浪费整次执行后再失败）。**build-executor 附加验证（v0.13 §52 B3，SDD/full 模式）**：返回的 diff 中必须包含测试文件（src/test/ 或项目测试目录）；零测试文件的实现返回一律 BLOCK，SendMessage 回原子代理按 test-matrix.md / TDD Iron Law 补齐——不得以"手动验证"替代（C1-domain-policy 事件教训）。例外：已显式记录 `test_matrix_skipped=true` + 理由的 change（纯文档/配置类）不要求测试文件
 - **结果协议**：子代理终态须标注 `FINAL VERDICT: <DONE|BLOCKED|FAIL>`（审查类用 PASS/PASS_WITH_WARNINGS/FAIL）；**SendMessage 报告为权威结果**，task-notification.result 仅内部元数据
 - **子代理状态边界**：子代理 MUST NOT 修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段（状态转换是主代理专有职责，经 `tf state transition` 执行），只写自己的 `dp_N_*` 决策字段
 
@@ -84,10 +86,10 @@ Full protocol in `references/routing-rules.md`「Route to architecture-design」
 Guard: `tf runtime guard check <dir> exploring specifying --json` → fail = BLOCK. **arch_design_decision must not be null** → fail = BLOCK (v0.9 §26). User knows what they want, artifacts missing/incomplete.
 
 ### Route to contract-builder (dispatch sub-agent)
-Guard: `... check <dir> specifying bridging --json` → fail = BLOCK. Artifacts exist, implementation requested, contract missing/stale. Include `DP-3: 契约批准`.
+Guard: `... check <dir> specifying bridging --json` → fail = BLOCK. Artifacts exist, implementation requested, contract missing/stale. Include `DP-3: 契约批准`. **full workflow 必产 test-matrix.md（v0.13 §52 B1）**：契约 `## Test Matrix` 段 + 非空矩阵文件 + `tf state rebuild` 捕获 hash；确无测试需求只能显式 skip + 理由（`test_matrix_skipped=true` + `test_matrix_skip_reason`）。GLAF4 Java 项目矩阵生成的工具选择见 `references/routing-rules.md`「Route to glaf4-tests」。
 
 ### Route to build-executor (dispatch sub-agent)
-Contract exists and approved, contract matches artifacts. Include `DP-4: 执行模式选择`: propose waves, run `tf execution recommend <change-dir> [--wave ...]`, show the user every available mode plus evidence and the recommendation, then obtain a clear selection. The command saves a current receipt; before the first implementation edit, `build-executor` must run `tf execution plan <change-dir> --mode <selected> --confirm ...` (and `--acknowledge-recommendation` when the selected mode differs from the recommendation) using matching artifacts, contract, and waves, then `tf execution show <change-dir> --json`; report the saved revision, selected mode, recommendation alignment, ordered waves, and actual concurrent-dispatch capability. A revision must repeat recommend and confirmation. Do not transition to `executing` until `show` reports `current: true`; then run `... check <dir> approved-for-build executing --json` → fail = BLOCK.
+Contract exists and approved, contract matches artifacts. Include `DP-4: 执行模式选择`: propose waves, run `tf execution recommend <change-dir> [--wave ...]`, show the user every available mode plus evidence and the recommendation, then obtain a clear selection. The command saves a current receipt; before the first implementation edit, `build-executor` must run `tf execution plan <change-dir> --mode <selected> --confirm ...` (and `--acknowledge-recommendation` when the selected mode differs from the recommendation) using matching artifacts, contract, and waves, then `tf execution show <change-dir> --json`; report the saved revision, selected mode, recommendation alignment, ordered waves, and actual concurrent-dispatch capability. A revision must repeat recommend and confirmation. Do not transition to `executing` until `show` reports `current: true`; then run `... check <dir> approved-for-build executing --json` → fail = BLOCK. **v0.13 §49 门禁前移**：该 guard 含 `test-matrix-ready` 维度——full 模式非存量 change 必须"带着矩阵开工"（矩阵存在非空 OR 显式 skip 附理由）；FAIL 时回 bridging 让 contract-builder 补矩阵，或按指引显式 skip，禁止绕过。
 
 ### Route to bug-investigator
 Execution hit blockage: test failure, unexpected behavior, build error, task cannot proceed. After debugging, route back to build-executor.

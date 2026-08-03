@@ -15,6 +15,7 @@ import { checkExecutionPlanReady } from './checks/execution-plan-ready.mjs';
 import { checkExecutionReviewsPassed } from './checks/execution-reviews-passed.mjs';
 import { checkCompoundCaptured } from './checks/compound-captured.mjs';
 import { checkTestMatrixComplete } from './checks/test-matrix-complete.mjs';
+import { checkTestMatrixReady } from './checks/test-matrix-ready.mjs';
 
 // Transition matrix: <from>:<to> → required check dimensions
 const TRANSITION_CHECKS = {
@@ -22,7 +23,9 @@ const TRANSITION_CHECKS = {
   'exploring:specifying':           ['artifacts-exist', 'arch-design'],
   'specifying:bridging':            ['artifacts-exist', 'schema-valid'],
   'bridging:approved-for-build':    ['artifacts-exist', 'schema-valid', 'contract-fresh', 'dp-gate-passed'],
-  'approved-for-build:executing':   ['artifacts-exist', 'contract-fresh', 'dp-gate-passed', 'execution-plan-ready'],
+  // v0.13 §49：test-matrix-ready 门禁前移——full 模式进入 executing 前强制测试准备度
+  //（矩阵存在非空 OR 显式 skip 附理由；legacy 豁免）。hotfix/tweak 沿用 §45.3 豁免，不挂。
+  'approved-for-build:executing':   ['artifacts-exist', 'contract-fresh', 'dp-gate-passed', 'execution-plan-ready', 'test-matrix-ready'],
   'executing:closing':              ['tasks-complete', 'tests-passing', 'specs-merged', 'execution-plan-ready', 'execution-reviews-passed', 'compound-captured', 'test-matrix-complete'],
 
   // Debugging side-path
@@ -171,6 +174,7 @@ async function main() {
     'arch-design': (dir) => checkArchDesign(dir),
     'compound-captured': (dir) => checkCompoundCaptured(dir),
     'test-matrix-complete': (dir) => checkTestMatrixComplete(dir),
+    'test-matrix-ready': (dir) => checkTestMatrixReady(dir),
   };
 
   const checks = [];

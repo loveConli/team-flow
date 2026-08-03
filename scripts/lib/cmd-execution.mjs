@@ -22,6 +22,10 @@ export async function run(args) {
       head: { type: 'string' },
       report: { type: 'string' },
       verdict: { type: 'string' },
+      // v0.13 §51.2：wave 级测试统计（可选证据字段，三个须同时提供）
+      'tests-total': { type: 'string' },
+      'tests-passed': { type: 'string' },
+      'tests-failed': { type: 'string' },
       json: { type: 'boolean', default: false },
       help: { type: 'boolean', default: false },
     },
@@ -137,6 +141,7 @@ function recordAndPrintReview(changeDir, values) {
     base: values.base,
     head: values.head,
     report: values.report,
+    tests: parseTestsStats(values),
   });
   print(values.json, { ok: true, wave: values.wave[0], receipt }, `Review for ${values.wave[0]} recorded: ${receipt.status}.`);
 }
@@ -180,6 +185,24 @@ function requireOption(value, option) {
   if (typeof value !== 'string' || !value.trim()) throw new Error(`${option} is required`);
 }
 
+// v0.13 §51.2：--tests-total/--tests-passed/--tests-failed 三个须同时提供且为非负整数。
+function parseTestsStats(values) {
+  const raw = {
+    total: values['tests-total'],
+    passed: values['tests-passed'],
+    failed: values['tests-failed'],
+  };
+  const provided = Object.values(raw).filter(v => v !== undefined);
+  if (provided.length === 0) return undefined;
+  if (provided.length < 3) throw new Error('--tests-total, --tests-passed and --tests-failed must be provided together');
+  const parsed = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (!/^\d+$/.test(String(value))) throw new Error(`--tests-${key} must be a non-negative integer`);
+    parsed[key] = parseInt(value, 10);
+  }
+  return parsed;
+}
+
 function requireSafeReason(reason) {
   if (/[\p{Cc}\p{Zl}\p{Zp}]/u.test(reason)) {
     throw new Error('--reason must not contain control characters or line separators');
@@ -202,5 +225,5 @@ function printHelp() {
   tf execution plan <dir> --mode <mode> --confirm --reason <text> --wave <id>:<strategy>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]
   tf execution show <dir> [--json]
   tf execution revise <dir> --mode sdd --confirm --reason <text> --wave <id>:<strategy>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]
-  tf execution review <dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict pass|fail`);
+  tf execution review <dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict pass|fail [--tests-total N --tests-passed N --tests-failed N]`);
 }

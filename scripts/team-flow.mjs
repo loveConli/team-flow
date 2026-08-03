@@ -36,6 +36,7 @@ const COMMANDS = {
   'arch-merge':        () => import('./lib/arch-merge.mjs'),
   'test-merge':        () => import('./lib/test-merge.mjs'),
   'test-matrix-export': () => import('./lib/test-matrix-export.mjs'),
+  test:                () => import('./lib/test-record.mjs'),
 };
 
 const HELP = `team-flow (tf) — Unified workflow plugin CLI
@@ -56,6 +57,8 @@ Commands:
                         Merge test matrix results into global docs/test-ledger/
   test-matrix-export <input.json> <output.md> [--change-id <id>]
                         Convert glaf4 test-matrix.json to team-flow test-matrix.md
+  test record <dir> --from <runner-output> [--runner auto|maven-surefire|jest|pytest]
+                        Record programmatic test evidence (v0.13 §50; feeds tests-passing gate)
   config [options]      Display or modify configuration
   config --resolve-model <profile>  Resolve a configured model profile without switching models
   state <sub> <dir>     Manage .team-flow.yaml state (init|check|transition|get|rebuild)

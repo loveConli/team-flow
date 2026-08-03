@@ -308,19 +308,23 @@ Inference: **hotfix** (≤2 tasks, ≤2 files, no schema/API/new modules), **twe
 ## Post-transition
 💡 `tf inject <change-dir>` to update phase-guard artifacts.
 
-## Route to glaf4-tests (v0.12 §46, v0.31.0)
+## Route to glaf4-tests (v0.12 §46, v0.31.0, v0.13 §52 B3 归位)
 
-**触发条件**：`project_type == glaf4-java`（Spring Boot / JUnit 5 / Mockito）AND contract-builder 需要生成 test-matrix。
+**归位说明（v0.13）**：本段的触发主体是 **bridging 阶段的 contract-builder 子代理**（矩阵生成者），workflow-start 主路由表不包含 glaf4-tests 条目——放在本文件仅作 bridging 期参考。
+
+**强制性澄清（v0.13 §52 B1）**：full workflow 生成 test-matrix.md 本身是**必选动作**（`test-matrix-ready`/`test-matrix-complete` 门禁强制）；**可选的是工具选择**——GLAF4 Java 项目可选用 glaf4-tests 流水线做精细矩阵设计，非 GLAF4 项目用内置 test-strategy skill。两条路都必须产出非空 `test-matrix.md` + contract `## Test Matrix` 段 + `tf state rebuild`。
+
+**触发条件**：`project_type == glaf4-java`（Spring Boot / JUnit 5 / Mockito）。
 
 **协议**：
 1. contract-builder 检测项目技术栈（读取 `pom.xml` / `build.gradle` 判断是否 GLAF4 Java）
 2. GLAF4 项目 → 提示用户：「检测到 GLAF4 Java 项目，是否调用 `glaf4-test:glaf4-tests` 做精细测试矩阵设计？」
 3. 用户同意 → 调用 `glaf4-test:glaf4-tests-design` 生成 `test-matrix.json`
 4. `glaf4-tests-validate` 校验矩阵完整性
-5. `scripts/lib/test-matrix-export.mjs` 转换为 team-flow 格式的 `test-matrix.md`
+5. `tf test-matrix-export <test-matrix.json> <change-dir>/test-matrix.md` 转换为 team-flow 格式
 6. 用户确认（轻量版 DP-A）
-7. 写入 `test-matrix.md`，contract 中添加 `## Test Matrix` 段引用
+7. contract 中添加 `## Test Matrix` 段引用 + `tf state rebuild` 捕获 test_matrix_hash
 
-**非 GLAF4 项目**：contract-builder 使用内置 test-strategy skill 直接生成 `test-matrix.md`。
+**非 GLAF4 项目**：contract-builder 使用预加载的 test-strategy skill 直接生成 `test-matrix.md`（同等强制）。
 
-**设计决策**：glaf4-tests 对接为**可选增强**，不是必经路径。
+**用户拒绝 glaf4-tests 时**：回退内置 test-strategy 生成（不是跳过矩阵）。确无测试需求的特例走显式 skip + 理由。

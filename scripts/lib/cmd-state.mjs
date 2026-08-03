@@ -11,8 +11,12 @@ import { computeArtifactsHash, computeContractHash, computeTestMatrixHash } from
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// v0.13 §50（BUG-A 政策修正）：test_result 移出可手工设置字段——测试证据必须经
+// tf test record 程序化记录，手工自述值不再被 tests-passing 门禁接受。
+// v0.13 §48.2：test_matrix_skip_reason 可设置（显式 skip 的理由留痕）。
+// schema_version 不可设置（仅 init 打戳，防止伪造豁免身份，v0.13 §48.1）。
 const SETTABLE_FIELDS = [
-  'workflow', 'test_result', 'batches_completed', 'spec_merged',
+  'workflow', 'batches_completed', 'spec_merged',
   'dp_0_decisions', 'dp_0_confirmed', 'dp_0_timestamp', 'dp_0_result',
   'dp_1_result', 'dp_1_timestamp', 'dp_1_decisions', 'dp_1_confirmed',
   'dp_2_result', 'dp_2_timestamp', 'dp_2_decisions', 'dp_2_confirmed',
@@ -29,8 +33,8 @@ const SETTABLE_FIELDS = [
   'dp_a_result', 'dp_a_timestamp', 'dp_a_adjustments',
   // Compound engineering capture gate (v0.24.0 复利贯穿强制化)
   'compound_skipped',
-  // Test matrix gate (v0.12 §45.4)
-  'test_matrix_skipped',
+  // Test matrix gate (v0.12 §45.4 + v0.13 §48.2)
+  'test_matrix_skipped', 'test_matrix_skip_reason',
 ];
 
 export async function run(args) {
@@ -84,10 +88,17 @@ export async function run(args) {
       if (!existsSync(changeDir)) {
         mkdirSync(changeDir, { recursive: true });
       }
+      // v0.13 §48.1：schema_version 只在 change 创建（状态文件尚不存在）时打戳。
+      // 对已有状态文件的目录重新 init 不得追加打戳——"字段缺失"是存量豁免键，
+      // 追加会把真存量 change 错误地纳入 v0.32 严格门禁。
+      const stateFileExisted = existsSync(join(changeDir, '.team-flow.yaml'));
       const hash = computeArtifactsHash(changeDir);
       const ch = computeContractHash(changeDir);
       const tmh = computeTestMatrixHash(changeDir);
       const state = readState(changeDir);
+      if (!stateFileExisted) {
+        state.schema_version = 1;
+      }
       state.artifacts_hash = hash;
       state.contract_hash = ch;
       // v0.12 §42.5: test_matrix_hash is independent from artifacts_hash
@@ -95,9 +106,9 @@ export async function run(args) {
       state.last_transition = new Date().toISOString();
       writeState(changeDir, state);
       if (values.json) {
-        console.log(JSON.stringify({ ok: true, artifacts_hash: hash, contract_hash: ch, test_matrix_hash: tmh }));
+        console.log(JSON.stringify({ ok: true, artifacts_hash: hash, contract_hash: ch, test_matrix_hash: tmh, schema_version: state.schema_version ?? null }));
       } else {
-        console.log(`State initialized. artifacts_hash: ${hash}` + (tmh ? `, test_matrix_hash: ${tmh}` : ''));
+        console.log(`State initialized. artifacts_hash: ${hash}` + (tmh ? `, test_matrix_hash: ${tmh}` : '') + (state.schema_version != null ? `, schema_version: ${state.schema_version}` : ''));
       }
       break;
     }
@@ -239,6 +250,18 @@ export async function run(args) {
             `⛔ 'state' 不是可 set 的字段(not settable)。状态转换请用完整语法:\n` +
             `   tf state transition <change-dir 绝对路径> <目标状态>\n` +
             `   合法状态:${VALID_STATES.join('/')}`
+          );
+        } else if (field === 'test_result') {
+          // v0.13 §50（BUG-A 政策修正）：测试证据程序化，手工自述通道关闭。
+          console.error(
+            `⛔ 'test_result' 不再支持手工 set(v0.13 §50)。测试证据必须程序化记录:\n` +
+            `   运行项目测试套件后: tf test record <change-dir> --from <runner 输出文件>\n` +
+            `   确无自动化测试时显式跳过(可审计): tf state set <dir> test_matrix_skipped true\n` +
+            `                                    + tf state set <dir> test_matrix_skip_reason "<理由>"`
+          );
+        } else if (field === 'schema_version') {
+          console.error(
+            `⛔ 'schema_version' 不可手工设置(v0.13 §48.1)。它只由 tf state init 在 change 创建时打戳,是测试门禁的存量豁免键。`
           );
         } else {
           console.error(`⛔ Field '${field}' is not settable (use 'transition' for state, or check SETTABLE_FIELDS)`);

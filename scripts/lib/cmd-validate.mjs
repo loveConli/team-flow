@@ -3,6 +3,8 @@ import { readFileSync, existsSync, statSync } from 'node:fs';
 import { join, basename } from 'node:path';
 import { loadConfig } from './config-loader.mjs';
 import { validateSpecPathLayout, relativeSpecPath } from './spec-paths.mjs';
+import { readState } from './state-loader.mjs';
+import { computeTestMatrixHash } from './hash.mjs';
 
 async function getValidator() {
   const mod = await import('../../dist/index.js');
@@ -92,6 +94,46 @@ export async function run(args) {
     };
     printReport(file, report);
     if (!report.valid) hasErrors = true;
+  }
+
+  // v0.13 §52 B1：test-matrix 双向互锁（contract '## Test Matrix' 段 ↔ test-matrix.md）
+  // 非存量（有 schema_version 打戳）且未显式 skip 的 change：
+  //   契约声明段 → 矩阵文件必须存在非空；矩阵文件存在 → 契约必须声明段（孤儿矩阵）。
+  // 两者皆无不算错（矩阵是否必产由 test-matrix-ready 门禁在转换时强制）。
+  const contractForMatrixPath = join(changeDir, 'execution-contract.md');
+  if (existsSync(contractForMatrixPath)) {
+    const stateForMatrix = readState(changeDir);
+    const legacyChange = stateForMatrix.schema_version == null;
+    const matrixSkipped = stateForMatrix.test_matrix_skipped === 'true';
+    const contractContent = readFileSync(contractForMatrixPath, 'utf-8');
+    const declaresMatrix = contractContent.includes('## Test Matrix');
+    const matrixPath = join(changeDir, 'test-matrix.md');
+    const matrixExists = existsSync(matrixPath) && readFileSync(matrixPath, 'utf-8').trim().length > 0;
+    const issues = [];
+    if (!legacyChange && !matrixSkipped) {
+      if (declaresMatrix && !matrixExists) {
+        issues.push({ level: 'ERROR', path: 'test-matrix.md', message: 'contract declares ## Test Matrix but test-matrix.md is missing or empty — generate the matrix (contract-builder) or remove the section' });
+      }
+      if (!declaresMatrix && matrixExists) {
+        issues.push({ level: 'ERROR', path: 'execution-contract.md', message: 'test-matrix.md exists but contract does not declare ## Test Matrix — add the section or remove the orphaned matrix' });
+      }
+    }
+    if (declaresMatrix && matrixExists) {
+      const computed = computeTestMatrixHash(changeDir);
+      if (!stateForMatrix.test_matrix_hash) {
+        issues.push({ level: 'WARNING', path: 'test-matrix.md', message: "test_matrix_hash not recorded — run 'tf state rebuild' to capture the matrix hash" });
+      } else if (stateForMatrix.test_matrix_hash !== computed) {
+        issues.push({ level: 'WARNING', path: 'test-matrix.md', message: "test_matrix_hash drifted from test-matrix.md — run 'tf state rebuild'" });
+      }
+    }
+    if (issues.length > 0) {
+      printReport('test-matrix cross-lock', {
+        valid: issues.filter(i => i.level === 'ERROR').length === 0,
+        issues,
+        summary: { errors: issues.filter(i => i.level === 'ERROR').length, warnings: issues.filter(i => i.level === 'WARNING').length, info: 0 },
+      });
+      if (issues.some(i => i.level === 'ERROR')) hasErrors = true;
+    }
   }
 
   console.log('');

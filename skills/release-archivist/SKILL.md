@@ -29,7 +29,15 @@ Claiming work is complete without verification is dishonesty, not efficiency. Be
 ## Verification Steps
 
 ### Step 1: Test Suite
-Run full test suite. Record total/passed/failed/skipped. Zero failures = PASS.
+Run full test suite fresh (e.g. `mvn test` / `npm test`). Record total/passed/failed/skipped. **Zero failures AND total > 0 = PASS.**
+
+**⛔ 空真拒绝（v0.13 §50，C1-domain-policy 事件修复）**：0 个测试时"0 失败"在逻辑上为真，但不是证据——**0 tests ≠ PASS**。发现测试套件为空或项目无测试文件时：要么回 build-executor 补测试（按 test-matrix.md），要么该 change 本应在 bridging 阶段显式 skip（`test_matrix_skipped=true` + 理由）；两种情况都不得写 pass。
+
+**程序化记录（v0.13 §50）**：跑完测试套件后，把 runner 输出落盘并用命令写入证据（`test_result` 已不可手工 `tf state set`）：
+```bash
+tf test record <change-dir> --from <runner-output-file>   # 支持 maven-surefire/jest/pytest，auto 识别
+```
+该命令写入结构化 `test_result`（recorded-by=tf-test-record）+ 证据文件（`.superpowers/test-evidence/`），是 `tests-passing` 门禁对非存量 change 的唯一合法凭证。
 
 ### Step 2: Completeness
 Compare contract batches against actual diff. Every SHALL/MUST must have implementation evidence. Missing = Critical severity.
@@ -45,7 +53,9 @@ If `test-matrix.md` exists:
    - Matrix coverage ≥ 90% with reasonable deferred items → **CONDITIONAL (WARN)**
    - Matrix coverage < 90% OR unexplained gaps → **FAIL**
 
-If `test-matrix.md` does NOT exist → **SKIP** (legacy change compatibility).
+If `test-matrix.md` does NOT exist（v0.13 §52 B2 修订）:
+- legacy change（.team-flow.yaml 无 `schema_version` 字段）或 `test_matrix_skipped=true` → **SKIP**
+- 非存量且未 skip → **FAIL**（矩阵缺失即验证失败；删除静默 SKIP——C1-domain-policy 事件教训）
 
 Add a report row: `| Test Matrix | PASS/FAIL/WARN/SKIP | [reconciliation summary] |`
 
@@ -82,7 +92,7 @@ If an `e2e/` suite exists for the change, fold its report into verification (see
 
 ## Final Checks
 
-**⛔ 状态字段禁写（v0.30.0）**：仅写本 skill 的 `dp_6_*`/`dp_7_*` 决策字段与 `test_result`；**MUST NOT** 修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段——closing 转换由主代理经 `tf state transition` 执行（来源：workflow-feedback 2026-08-01）。
+**⛔ 状态字段禁写（v0.30.0 + v0.13 §50）**：仅写本 skill 的 `dp_6_*`/`dp_7_*` 决策字段；测试证据经 `tf test record` 程序化写入（不再手工 set `test_result`）；**MUST NOT** 修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段——closing 转换由主代理经 `tf state transition` 执行（来源：workflow-feedback 2026-08-01）。
 
 - Tests passing? (cite command and output)
 - All batches complete? (cite batch status)
@@ -98,12 +108,7 @@ tf state set <change-dir> dp_6_timestamp $(date -u +%Y-%m-%dT%H:%M:%SZ)
 ```
 If FAIL, do NOT proceed to DP-7. Route back or ask about abandonment.
 
-After recording a PASS outcome, also record it as the verification gate so the
-`executing → closing` transition is allowed (the guard accepts either
-`test_result: pass` or a `dp_6_result` starting with `pass`):
-```bash
-tf state set <change-dir> test_result pass
-```
+**测试门禁凭证（v0.13 §50 修订）**：`dp_6_result` 只是决策点记录，不再是 `tests-passing` 门禁的证据（BUG-A 等价通道仅对存量 change 保留）。非存量 change 的 `executing → closing` 放行凭证是 Step 1 中 `tf test record` 写入的结构化 `test_result`（+ 证据文件）。若 Step 1 尚未执行 `tf test record`，先补跑测试套件并记录，再守 DP-6。
 
 ### DP-7 (Archive Confirmation)
 ```bash
@@ -207,6 +212,8 @@ This check is advisory — skip if the user declines. If the user reports issues
 ## Lightweight Closure (hotfix/tweak)
 
 Verify files exist and are non-empty, run `node --check` on code files, skip 5-step verification. Still record DP-6 and DP-7.
+
+**⚠️ tests-passing 门禁不因轻量收尾而豁免（v0.13 §50）**：hotfix/tweak 的 `executing→closing` guard 同样挂 `tests-passing`。非存量 change 仅记 DP-6/DP-7 不足以放行——必须二选一：① `test_matrix_skipped=true` + `test_matrix_skip_reason` 已由 contract-builder 设置（hotfix/tweak 常规路径，先 `tf state get` 核实）；② 有代码变更时补跑测试套件并 `tf test record <change-dir> --from <输出>`。
 
 ## Exception Handling
 

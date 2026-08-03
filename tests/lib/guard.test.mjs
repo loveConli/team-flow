@@ -310,7 +310,10 @@ describe('guard: execution control records', () => {
   }
 
   function recordPassingClosingPrerequisites() {
-    runNodeScript(CLI_PATH, ['state', 'set', dir, 'test_result', 'pass: unit tests']);
+    // v0.13 §50：`tf state set test_result` 手工通道已关闭（测试证据须 tf test record 程序化记录）。
+    // 本夹具是 legacy change（prepareFreshFullState 先写状态文件再 init → init 不补打 schema_version），
+    // tests-passing 对 legacy 保留 v0.31 读取行为，故此处直写 yaml 模拟旧 CLI 写入的状态。
+    setStateField('test_result', 'pass: unit tests');
     runNodeScript(CLI_PATH, ['state', 'set', dir, 'spec_merged', 'true']);
     // v0.24.0: compound-captured dimension requires learnings.md (or explicit skip)
     writeFileSync(join(dir, 'learnings.md'), '# Session Learnings\n\n## Lesson 1\nCaptured during guard test.\n');

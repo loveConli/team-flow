@@ -11,12 +11,7 @@ Read before generating: `proposal.md`, `specs/`, `design.md`, `tasks.md`, then l
 
 **Architecture Design Outputs (v0.9 §26)**: 若 `architecture/` 目录存在，同时读取 `architecture/architecture.md` / `database.md` / `api.md`，作为执行契约的架构约束补充输入——确保 execution-contract.md 的 Implementation Constraints 段包含架构设计的关键约束（聚合边界/CQRS 分流/API 契约/schema 变更）。`architecture/` 不存在时跳过。
 
-**Test Ledger Injection (v0.12 §43.5)**: 若 `docs/test-ledger/` 存在，读取：
-1. `docs/test-ledger/INDEX.md` → 获取相关模块的测试覆盖概览（coverage_status）
-2. `docs/test-ledger/baselines/{module}.md` → 获取已有 case，避免重复设计；读取 Deferred Items → 评估本次是否可解决
-3. 将已有 baseline 和 deferred 项作为 test-matrix.md 生成的增量输入
-
-`docs/test-ledger/` 不存在时跳过（首次使用或无历史数据）。
+**Test Ledger Injection (v0.12 §43.5)**: 若 `docs/test-ledger/` 存在，读取 `INDEX.md`（模块覆盖概览 coverage_status）+ `baselines/{module}.md`（已有 case 避免重复设计；Deferred Items 评估本次是否可解决），作为 test-matrix.md 生成的增量输入。不存在时跳过（首次使用或无历史数据）。
 
 ## Artifact Mapping
 
@@ -41,9 +36,11 @@ Before finalizing:
 
 Must make obvious: approved behavior, out-of-scope, constraints, batches, test obligations, review gates, and conditions that force a rewind to planning. Prefer compression over repeating planning details.
 
-## Test Matrix Generation (v0.12 §42)
+## Test Matrix Generation (v0.12 §42, v0.13 §52 B1 强制化)
 
 `test-matrix.md` 是 `execution-contract.md` 的**附属产物**（不是独立第 6 核心产物），在 contract 的 `## Test Matrix` 段引用。
+
+**full workflow 必须生成（MUST，非建议）**：契约声明 `## Test Matrix` 段 ∧ `test-matrix.md` 存在非空 ∧ `tf state rebuild` 捕获 hash。缺契约段或矩阵文件 → `test-matrix-ready` 阻断进入 executing（入口不查 hash）；三者任一缺失或 hash 不一致 → `test-matrix-complete` 阻断 closing（v0.13 §48/§49；C1-domain-policy 事件教训：矩阵生成曾是建议级，导致零测试通过全部门禁）。确无测试需求的 change 只有一条出路：显式 skip 并留理由（见 Hotfix/Tweak Exemption）。
 
 ### Generation Protocol
 
@@ -101,14 +98,14 @@ See `test-matrix.md` for the full test case matrix (附属产物, 独立 hash).
 
 ### Hotfix/Tweak Exemption
 
-hotfix/tweak workflow 不生成 test-matrix.md（guard 豁免）。设置：
+hotfix/tweak workflow 不生成 test-matrix.md（guard 豁免）；full workflow 确无自动化测试需求的特例（纯文档/纯配置）同理。设置显式 skip + 理由（v0.13 §48.2 可审计豁免，**不允许静默不生成**）：
 ```bash
-tf state set <change-dir> test_matrix_skipped true
+tf state set <change-dir> test_matrix_skipped true && tf state set <change-dir> test_matrix_skip_reason "<一句话说明>"
 ```
 
 ### GLAF4 Java 路由
 
-当项目技术栈为 GLAF4 Java（Spring Boot / JUnit 5 / Mockito）时，提示用户是否调用 `glaf4-test:glaf4-tests` 做精细矩阵设计。用户同意后由 glaf4-tests design stage 生成 `test-matrix.json`，再转换为 team-flow 格式的 `test-matrix.md`。
+当项目技术栈为 GLAF4 Java（Spring Boot / JUnit 5 / Mockito）时，提示用户是否调用 `glaf4-test:glaf4-tests` 做精细矩阵设计。用户同意后：`glaf4-tests-design` 生成 `test-matrix.json` → `glaf4-tests-validate` 校验 → `tf test-matrix-export <test-matrix.json> <change-dir>/test-matrix.md` 转换为 team-flow 格式。完整 7 步协议见 workflow-start `references/routing-rules.md`「Route to glaf4-tests」。
 
 ## Approval Model (DP-3)
 
@@ -126,6 +123,8 @@ Refresh if: scope changed in proposal, requirements changed in specs, constraint
 ## Hotfix Mode
 
 Generate minimal contract: Intent Lock (one sentence), Task List (numbered), Approval Gate (DP-3). Skip Scope Fence, Build Rules, Review Gates, Test Evidence. Still requires DP-3 approval.
+
+**非存量 hotfix/tweak 必须设置显式 skip（v0.13 §50）**：hotfix/tweak 不生成矩阵，但 closing 的 tests-passing 门禁仍考核非存量 change——生成最小契约后立即执行 Hotfix/Tweak Exemption 段的两条 `tf state set`（`test_matrix_skipped=true` + 理由），否则 release-archivist 轻量收尾会被门禁阻断。
 
 ## Guardrails
 

@@ -6,6 +6,51 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-08-03
+
+### Added（设计增强方案 v0.13 §47-§53 测试门禁硬化——C1-domain-policy 事件修复）
+
+#### 豁免键修正（v0.13 §48）
+- **scripts/lib/state-loader.mjs**：BUILTIN_DEFAULTS 新增 `test_matrix_skip_reason` / `test_evidence_path`；`schema_version` 不进 defaults（字段缺失 = 存量信号）；writeState 条件序列化 `schema_version`
+- **scripts/lib/cmd-state.mjs**：init 分支仅在 change 创建（状态文件尚不存在）时打戳 `schema_version: 1`（rebuild/set 不追加）；SETTABLE_FIELDS 移除 `test_result`、新增 `test_matrix_skip_reason`；`test_result`/`schema_version` 手工 set 被拒并给引导
+- **scripts/guard/checks/test-gate-exemptions.mjs**：新建共享豁免判定模块（legacy/skip 语义唯一真相源，防三个测试门禁漂移）
+- **scripts/guard/checks/test-matrix-complete.mjs**：重写——legacy/skip 双豁免；删除内容型豁免（contract 无 `## Test Matrix` 段即 PASS）与"无 contract → PASS"；删除 hash null 短路；skip 必附理由
+
+#### 门禁前移（v0.13 §49）
+- **scripts/guard/checks/test-matrix-ready.mjs**：新建入口维度（矩阵存在非空 + contract 声明段 OR 显式 skip 附理由；legacy 豁免）
+- **scripts/guard/guard.mjs**：full `approved-for-build:executing` 新增 `test-matrix-ready`（hotfix/tweak 沿用 §45.3 豁免不挂）
+
+#### tests-passing 证据程序化（v0.13 §50，BUG-A 政策修正）
+- **scripts/lib/test-record.mjs**：新建 `tf test record` 命令——maven-surefire（控制台汇总行 + XML 报告目录）/jest(--json)/pytest 解析器 + auto 识别；结构化 `test_result`（recorded-by=tf-test-record）+ 证据落盘 `.superpowers/test-evidence/`；fail 结果 exit 1；无手工自述通道
+- **scripts/guard/checks/tests-passing.mjs**：重写——非存量 change 只认程序化结构化记录 + 证据文件存在性；dp_6_result 去证据化（BUG-A 通道仅存量保留）；total=0 空真拒绝；skip 必附理由
+- **scripts/team-flow.mjs**：注册 `test` 命令 + HELP
+
+#### review 硬化 + 巡检扩展（v0.13 §51-§52）
+- **scripts/lib/execution-plan.mjs**：validateReviewRange 禁止 base==head（空 diff review 非法，C1 现场 6 个 receipt 全为空 diff）；receipt 新增可选 `tests` 统计字段（非负整数校验）
+- **scripts/lib/cmd-execution.mjs**：review 新增 `--tests-total/--tests-passed/--tests-failed`（须同时提供）
+- **scripts/lib/cmd-doctor.mjs**：新增 checkChangeTestGates 巡检（skip_reason 配对 + arch_review_report/test_evidence_path 引用完整性）
+- **scripts/lib/cmd-validate.mjs**：test-matrix 双向互锁（契约段↔矩阵文件，非存量非 skip 时 ERROR）+ hash 漂移警告
+
+### Changed（SOP 硬化批次，v0.13 §52）
+- **agents/contract-builder.md**：skills 补 test-strategy 预加载（修复矩阵生成者的预加载断点）+ test-matrix.md 所有权声明
+- **skills/contract-builder/SKILL.md**：Test Matrix Generation 升 MUST（full workflow）+ skip 必附理由
+- **skills/release-archivist/SKILL.md**：Step 1 零测试条款（0 tests ≠ PASS）+ tf test record 程序化记录；Step 2b 矩阵缺失对非存量 change FAIL（删除静默 SKIP）；dp_6 去证据化说明
+- **skills/workflow-start/SKILL.md**：build-executor 返回验证补测试文件检查（SDD/full）；contract-builder 路由声明矩阵必产；入口门禁前移引导
+- **skills/workflow-start/references/routing-rules.md**：Route to glaf4-tests 归位（触发主体 = contract-builder；可选的是工具选择，矩阵生成本身强制）
+- **skills/session-handoff/SKILL.md**：Guardrail #6 报告生成纪律（LLM 重构报告必须现场核对，C1 报告 10+ 处失真教训）
+
+### Fixed（P3 审查横展修复）
+- **skills/workflow-start/SKILL.md**：路由优先级块修正 v0.30.0 引入的存量矛盾——删除"hotfix/tweak 架构设计可跳过（自动写 skipped）"例外句（与 Fast-Path 5 处"不豁免"条款及 v0.9 §26 冲突，且无对应代码行为）；skill-reviewer F-1
+- **skills/release-archivist/SKILL.md** + **skills/contract-builder/SKILL.md**：Lightweight Closure / Hotfix Mode 补非存量 change tests-passing 门禁指引（skip+reason 或 tf test record），修复轻量收尾必然撞门禁的断点；skill-reviewer W-0
+- **agents/contract-builder.md**：DON'T 列表终态标记条款反向措辞修正；skill-reviewer W-2
+- **计数同步**：12 处 manifest/文档的 skill 计数修正为 24 skills（v0.31.0 新增 test-strategy 时漏更的遗留债）；plugin-validator
+
+### Tests
+- tests/lib/schema-version.test.mjs（打戳语义 5 例）、test-record.test.mjs（解析器 9 例 + CLI 6 例）、review-hardening.test.mjs（base==head 拒绝 + 统计字段 4 例）
+- tests/e2e/deterministic/guard-dimensions.test.mjs：test-matrix-complete 重写为 v0.13 六步判定（9 例）+ test-matrix-ready 新 describe（6 例）+ tests-passing 程序化/skip/负向用例
+- tests/lib/cmd-state.test.mjs：test_result/schema_version 拒设用例 + skip_reason 可设用例；tests/lib/guard.test.mjs：closing 前置夹具适配（legacy 夹具直写 yaml 模拟旧 CLI）
+- 全量回归：lib 486/486 + Tier1 e2e 67/67
+
 ## [0.31.0] - 2026-08-01
 
 ### Added（设计增强方案 v0.12 §40-§46 测试矩阵驱动开发 + 测试复利闭环）

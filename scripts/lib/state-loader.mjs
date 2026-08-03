@@ -61,9 +61,14 @@ const BUILTIN_DEFAULTS = {
   dp_a_adjustments: null,
   // Compound engineering capture gate (v0.24.0 复利贯穿强制化)
   compound_skipped: null,
-  // Test matrix gate (v0.12 §42.5 + §45.4)
+  // Test matrix gate (v0.12 §42.5 + §45.4; v0.13 §48 补 skip 理由字段)
   test_matrix_hash: null,
   test_matrix_skipped: null,
+  test_matrix_skip_reason: null,
+  // Test evidence (v0.13 §50：tf test record 落盘的 runner 输出证据路径)
+  test_evidence_path: null,
+  // 注意：schema_version 故意不在 BUILTIN_DEFAULTS 中（v0.13 §48.1）——
+  // 它只由 `tf state init` 在 change 创建时打戳，字段缺失本身就是"存量 change"信号。
 };
 
 /**
@@ -108,6 +113,11 @@ export function writeState(changeDir, state) {
   lines.push(`state: ${state.state || 'exploring'}`);
   lines.push(`workflow: ${state.workflow || 'auto'}`);
   lines.push(`revision: ${state.revision ?? 'null'}`);
+  // v0.13 §48.1：schema_version 仅由 tf state init 在 change 创建时打戳；
+  // 缺失 = 存量 change（测试门禁豁免键）。rebuild/set 不追加，故条件序列化。
+  if (state.schema_version != null) {
+    lines.push(`schema_version: ${state.schema_version}`);
+  }
   lines.push('');
   lines.push('# === Hashes (fast staleness detection) ===');
   lines.push(`artifacts_hash: ${state.artifacts_hash ?? 'null'}`);
@@ -166,9 +176,13 @@ export function writeState(changeDir, state) {
   lines.push('# === Compound engineering capture gate (v0.24.0) ===');
   lines.push(`compound_skipped: ${state.compound_skipped ?? 'null'}`);
   lines.push('');
-  lines.push('# === Test matrix gate (v0.12 §42.5) ===');
+  lines.push('# === Test matrix gate (v0.12 §42.5 + v0.13 §48) ===');
   lines.push(`test_matrix_hash: ${state.test_matrix_hash ?? 'null'}`);
   lines.push(`test_matrix_skipped: ${state.test_matrix_skipped ?? 'null'}`);
+  lines.push(`test_matrix_skip_reason: ${state.test_matrix_skip_reason ?? 'null'}`);
+  lines.push('');
+  lines.push('# === Test evidence (v0.13 §50) ===');
+  lines.push(`test_evidence_path: ${state.test_evidence_path ?? 'null'}`);
 
   fs.writeFileSync(filePath, lines.join('\n') + '\n', 'utf-8');
 }

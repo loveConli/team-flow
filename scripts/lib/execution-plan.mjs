@@ -132,12 +132,26 @@ export function recordReview(changeDir, waveId, receipt) {
   for (const field of ['base', 'head']) requireText(receipt?.[field], `receipt.${field}`);
   const report = validateReviewReportEvidence(changeDir, receipt?.report);
   const { base, head } = validateReviewRange(changeDir, receipt.base, receipt.head);
+  // v0.13 §51.2：测试统计为可选证据字段（提供时必须为非负整数）。
+  // 硬门禁在入口（test-matrix-ready）与 closing（tests-passing），此处只沉淀证据，
+  // 避免单 wave 零测试造成 BUG-A 式过严死锁（DDL/脚手架类 wave 可能合理无测试）。
+  let tests;
+  if (receipt?.tests !== undefined) {
+    if (!isObject(receipt.tests)) throw new Error('receipt.tests must be an object');
+    for (const key of ['total', 'passed', 'failed']) {
+      if (!Number.isInteger(receipt.tests[key]) || receipt.tests[key] < 0) {
+        throw new Error(`receipt.tests.${key} must be a non-negative integer`);
+      }
+    }
+    tests = { total: receipt.tests.total, passed: receipt.tests.passed, failed: receipt.tests.failed };
+  }
 
   const savedReceipt = {
     status: receipt.status,
     base,
     head,
     report,
+    ...(tests ? { tests } : {}),
     plan_hash: plan.hash,
     plan_revision: plan.revision,
     recorded_at: new Date().toISOString(),
@@ -252,6 +266,15 @@ function validateReviewRange(changeDir, base, head) {
   const gitRoot = getGitRoot(changeDir);
   const resolvedBase = resolveGitCommit(gitRoot, base, 'base');
   const resolvedHead = resolveGitCommit(gitRoot, head, 'head');
+  // v0.13 §51.1：禁止空 diff review（base === head）。
+  // C1-domain-policy 现场曾出现 6 个 receipt 全部 base==head==初始 commit，
+  // 即 review 对空 diff 进行。本校验同时强制"每 wave 落 commit"的纪律。
+  if (resolvedBase === resolvedHead) {
+    throw new Error(
+      'Review receipt base must differ from head — head must contain new commits over base; '
+      + 'commit the wave changes before recording a review'
+    );
+  }
   try {
     execFileSync('git', ['-C', gitRoot, 'merge-base', '--is-ancestor', resolvedBase, resolvedHead], {
       stdio: 'ignore',

@@ -258,6 +258,47 @@ function checkChangeStates(root) {
   return { pass: true, message: `${checked} change(s) have legal state values` };
 }
 
+// v0.13 §52 B4 测试门禁卫生巡检（C1-domain-policy 事件修复）：
+// 1. test_matrix_skipped=true 必须附 test_matrix_skip_reason（可审计豁免）；
+// 2. 状态引用的产物文件必须存在（arch_review_report / test_evidence_path）——
+//    C1 现场曾出现 arch_review_report 指向不存在的 auto-review.md。
+// DP 时间戳顺序检查评估后未纳入：closing 后的 DP-7 时间戳晚于 last_transition 属合法，
+//  blanket 检查会误报，收益不抵风险。
+function checkChangeTestGates(root) {
+  const changesDir = join(root, 'changes');
+  if (!existsSync(changesDir)) {
+    return { pass: true, message: 'no changes/ directory (skipped)' };
+  }
+  const dirs = readdirSync(changesDir).filter(f => {
+    try { return statSync(join(changesDir, f)).isDirectory(); } catch { return false; }
+  });
+  const issues = [];
+  let checked = 0;
+  for (const d of dirs) {
+    const changeDir = join(changesDir, d);
+    if (!existsSync(join(changeDir, '.team-flow.yaml'))) continue;
+    checked += 1;
+    const state = readState(changeDir);
+    if (state.test_matrix_skipped === 'true'
+      && !(typeof state.test_matrix_skip_reason === 'string' && state.test_matrix_skip_reason.trim())) {
+      issues.push(`${d}: test_matrix_skipped=true without test_matrix_skip_reason`);
+    }
+    for (const field of ['arch_review_report', 'test_evidence_path']) {
+      const ref = state[field];
+      if (typeof ref === 'string' && ref.trim() && !existsSync(join(changeDir, ref))) {
+        issues.push(`${d}: ${field} references missing file '${ref}'`);
+      }
+    }
+  }
+  if (checked === 0) {
+    return { pass: true, message: 'no state files under changes/ (skipped)' };
+  }
+  if (issues.length > 0) {
+    return { pass: false, message: issues.join('; ') };
+  }
+  return { pass: true, message: `${checked} change(s) pass test-gate hygiene (skip reasons + artifact references)` };
+}
+
 export async function run(args) {
   const root = process.cwd();
   const config = loadConfig(root);
@@ -275,6 +316,7 @@ export async function run(args) {
     ['Node.js', checkNodeVersion()],
     ['Docs', checkDocs(root)],
     ['Change states', checkChangeStates(root)],
+    ['Change test gates', checkChangeTestGates(root)],
   ];
 
   // Config check
@@ -303,4 +345,4 @@ export async function run(args) {
   }
 }
 
-export { checkVersionConsistency, checkHooks, checkCodexManifest, checkSkills, checkRuntimeDistribution, checkDist, checkRootPluginAuthor, checkNodeVersion, checkDocs, checkChangeStates };
+export { checkVersionConsistency, checkHooks, checkCodexManifest, checkSkills, checkRuntimeDistribution, checkDist, checkRootPluginAuthor, checkNodeVersion, checkDocs, checkChangeStates, checkChangeTestGates };
