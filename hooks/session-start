@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# v0.32.0: auto-sync CLI version with plugin version
+# v0.32.1: auto-sync CLI version with plugin version
 set -e
 
 # ═══════════════════════════════════════════════════════════════
 # Plugin version (update this when releasing new versions)
 # ═══════════════════════════════════════════════════════════════
-PLUGIN_VERSION="0.32.0"
+PLUGIN_VERSION="0.32.1"
 
 # ═══════════════════════════════════════════════════════════════
 # Step 1: Auto-sync CLI version with plugin version

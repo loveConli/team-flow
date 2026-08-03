@@ -6,7 +6,9 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
-## [0.32.0] - 2026-08-03
+## [0.32.1] - 2026-08-03
+
+> 版本号说明：0.32.0 因 `.npmignore` 缺失 `/tests/` 排除项，误将 61.8M e2e 基线归档打入 tarball（72MB），发布后 30 分钟内撤回；npm 版本号一经发布不可复用，故以 **0.32.1** 重发（内容完全一致 + 打包修复）。
 
 ### Added（设计增强方案 v0.13 §47-§53 测试门禁硬化——C1-domain-policy 事件修复）
 
