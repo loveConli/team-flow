@@ -93,6 +93,55 @@ const PARSERS = {
   pytest: parsePytest,
 };
 
+// ── Failure Analysis 分类法（v0.13 §57，来自 glaf4-test analyze-surefire-failures.py）────────
+
+/** 测试失败分类：assertion_failure / runtime_error / framework_error / compile_error / dependency_blocker / unknown */
+export function classifyFailure(text) {
+  const lower = text.toLowerCase();
+
+  // 1. 编译错误
+  if (lower.includes('compilation error') || lower.includes('cannot find symbol') ||
+      lower.includes('incompatible types') || lower.includes('method does not override') ||
+      lower.includes('syntaxerror') || lower.includes('indentationerror')) {
+    return 'compile_error';
+  }
+
+  // 2. 依赖阻塞
+  if (lower.includes('connection refused') || lower.includes('connection timed out') ||
+      lower.includes('unknownhostexception') || lower.includes('could not resolve host') ||
+      lower.includes('no such file or directory') || lower.includes('module not found') ||
+      lower.includes('package does not exist') || lower.includes('dependency') && lower.includes('failed')) {
+    return 'dependency_blocker';
+  }
+
+  // 3. 框架错误
+  if (lower.includes('applicationcontextexception') || lower.includes('beandefinitionstoreexception') ||
+      lower.includes('nosuchbeandefinitionexception') || lower.includes('unsatisfieddependencyexception') ||
+      lower.includes('spring') && lower.includes('failed to load') ||
+      lower.includes('contextconfiguration') || lower.includes('testcontext')) {
+    return 'framework_error';
+  }
+
+  // 4. 运行时异常
+  if (lower.includes('nullpointerexception') || lower.includes('illegalargumentexception') ||
+      lower.includes('indexoutofboundsexception') || lower.includes('classcastexception') ||
+      lower.includes('numberformatexception') || lower.includes('stackoverflowerror') ||
+      lower.includes('outofmemoryerror') || lower.includes('runtimeerror') ||
+      lower.includes('typeerror') || lower.includes('referenceerror')) {
+    return 'runtime_error';
+  }
+
+  // 5. 断言失败
+  if (lower.includes('assertionerror') || lower.includes('expected') && lower.includes('but was') ||
+      lower.includes('assertionfailederror') || lower.includes('expected :') && lower.includes('actual :') ||
+      lower.includes('expect(') || lower.includes('assert') && lower.includes('failed')) {
+    return 'assertion_failure';
+  }
+
+  // 6. 未知
+  return 'unknown';
+}
+
 /** auto 识别：按内容特征匹配 runner。 */
 export function detectRunner(text) {
   const trimmed = text.trim();
@@ -180,7 +229,18 @@ export async function run(args) {
   // 判定：failed==0 且 total>0 才算 pass（total=0 空真拒绝，v0.13 §50.2）
   const verdict = stats.failed === 0 && stats.total > 0 ? 'pass' : 'fail';
   const ts = new Date().toISOString();
-  const record = `${verdict}: total=${stats.total} passed=${stats.passed} failed=${stats.failed} skipped=${stats.skipped} runner=${runner} recorded-by=tf-test-record ts=${ts}`;
+
+  // Failure Analysis 分类（v0.13 §57，来自 glaf4-test）
+  let failureClass = null;
+  if (verdict === 'fail') {
+    const rawText = fromStat.isFile()
+      ? readFileSync(fromPath, 'utf-8')
+      : '';
+    failureClass = classifyFailure(rawText);
+  }
+
+  const failureInfo = failureClass ? ` failure_class=${failureClass}` : '';
+  const record = `${verdict}: total=${stats.total} passed=${stats.passed} failed=${stats.failed} skipped=${stats.skipped} runner=${runner} recorded-by=tf-test-record ts=${ts}${failureInfo}`;
 
   // 原始证据落盘（tests-passing 门禁与 doctor 巡检都要求该文件存在）
   const evidenceDir = join(changeDir, '.superpowers', 'test-evidence');
@@ -200,11 +260,14 @@ export async function run(args) {
   writeState(changeDir, state);
 
   if (values.json) {
-    console.log(JSON.stringify({ ok: true, verdict, ...stats, runner, test_result: record, test_evidence_path: evidenceRel }));
+    const jsonResult = { ok: true, verdict, ...stats, runner, test_result: record, test_evidence_path: evidenceRel };
+    if (failureClass) jsonResult.failure_class = failureClass;
+    console.log(JSON.stringify(jsonResult));
   } else {
     console.log(`${verdict === 'pass' ? '✅' : '❌'} test_result recorded (${runner}): total=${stats.total} passed=${stats.passed} failed=${stats.failed} skipped=${stats.skipped}`);
     console.log(`   evidence: ${evidenceRel}`);
     if (verdict === 'fail') {
+      console.log(`   failure_class: ${failureClass}`);
       console.log('   closing 将被 tests-passing 门禁阻断：修复失败后重新运行测试套件并再次 tf test record。');
     }
   }

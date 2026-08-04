@@ -6,6 +6,41 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-08-04
+
+### Added（测试能力增强——吸收 glaf4-test 通用能力 + conventions 机制，设计见工作区级文档 team-flow-workspace/docs/plan/test-capability-enhancement-design.md）
+
+#### P0：组合覆盖声明（test-strategy SKILL.md）
+- **§8 组合覆盖声明**：多参数方法（param_count > 1）必须声明 `pairwise`，有分支逻辑必须声明 `branch`；contract-builder 生成矩阵后强制对账
+
+#### P1：测试质量规则 + failure 分类法
+- **skills/test-strategy/references/test-quality-rules.md**：从 glaf4-test scan-generated-tests.py 抽取 16 条通用规则（断言质量、调试代码残留、测试状态、测试数据、测试结构、矩阵对账、语言特定）
+- **scripts/lib/test-record.mjs**：新增 `classifyFailure` 函数，测试失败时自动分类为 6 类（assertion_failure / runtime_error / framework_error / compile_error / dependency_blocker / unknown），记录到 test_result
+
+#### P2：社交测试契约 + 测试隔离分级
+- **skills/test-strategy/references/integration-test-contracts.md**：5 种契约类型（入口/协作者/数据/中间件/清理），集成测试的组织方法论
+- **skills/test-strategy/references/integration-test-isolation.md**：4 级隔离策略（L1 进程内 / L2 事务 / L3 手动清理 / L4 无隔离），基础设施隔离策略
+
+#### P2：conventions 机制建设（v0.34.0 核心特性）
+- **templates/conventions/**：plugin 内置 conventions 模板
+  - `glaf4-compliant/java-testing.md`：Java 测试规范（JUnit 5 + Mockito），符合 glaf4-test 要求
+  - `glaf4-compliant/spring-patterns.md`：Spring Boot 测试规范，符合 glaf4-test 要求
+  - `js-testing.md`：JavaScript 测试规范（Jest/Vitest）
+  - `python-testing.md`：Python 测试规范（Pytest）
+  - `_manifest.json`：模板清单（版本、描述、适用技术栈）
+- **scripts/lib/conventions-generator.mjs**：conventions 生成器脚本
+  - 技术栈自动检测（Java/JavaScript/Python）
+  - conventions 模板选择和生成
+  - 版本管理机制（.versions.json）
+  - team-flow.config.json 自动更新
+  - 支持存量项目（自动识别）和全新项目（交互式引导）
+- **skills/workflow-bootstrap/SKILL.md**：增加 B1.5 阶段（Conventions Generator）
+
+### Tests
+- **tests/lib/conventions-generator.test.mjs**：15 个测试（detectTechStack/selectTemplates/generateConventions/updateConfig）
+- 全量回归：571/571 通过（含 15 个新增测试）
+- check-versions ✅
+
 ## [0.33.0] - 2026-08-03
 
 ### Fixed（skills 注入恢复——frontmatter YAML 非法导致预加载静默失效，设计见工作区级文档 team-flow-workspace/docs/architecture-api-db-design-enhancement-v0.13.md §54）

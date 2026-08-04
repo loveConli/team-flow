@@ -68,3 +68,40 @@ user-invocable: false
 | **TDD** | 新功能/新行为 | RED→GREEN→REFACTOR |
 | **CHARACTERIZATION** | 遗留代码行为捕获 | 只写不改（不改生产代码） |
 | **REGRESSION** | 缺陷复现+修复 | 先复现再修 |
+
+## 8. 组合覆盖声明
+
+> 来源：glaf4-test design-worker 的 combination_coverage 机制（v0.13 §55）
+
+当目标方法满足以下条件之一时，矩阵中**必须声明**组合覆盖策略：
+
+### 触发条件
+
+1. **多参数方法**（param_count > 1）：声明 `pairwise`，要求至少一个 equivalence/boundary 用例覆盖参数组合
+2. **有分支逻辑**（if/case/switch）：声明 `branch`，要求至少一个 state/path 用例覆盖各分支
+
+### 声明格式
+
+在 test-matrix.md 的 description 列中声明：
+
+- `[pairwise] 已覆盖参数组合 A×B, A×C`
+- `[branch] 已覆盖 true/false 分支`
+- `[not_applicable] 单参数无分支，无需组合覆盖`
+
+### 对账规则
+
+contract-builder 生成矩阵后，必须校验：
+- 声明 `pairwise` 的目标，必须有至少 1 个 equivalence 或 boundary 用例覆盖参数组合
+- 声明 `branch` 的目标，必须有至少 1 个 state 或 path 用例覆盖各分支
+- 声明 `not_applicable` 的目标，必须提供理由（如"单参数无分支"）
+
+### 示例
+
+```markdown
+| ID | work_mode | test_tier | design_method | description | priority |
+|----|-----------|-----------|---------------|-------------|----------|
+| TC-001 | TDD | unit | equivalence | [pairwise] 正常查询：page=1, size=10 | P0 |
+| TC-002 | TDD | unit | boundary | [pairwise] 边界：page=0, size=10 | P1 |
+| TC-003 | TDD | unit | boundary | [pairwise] 边界：page=1, size=0 | P1 |
+| TC-004 | TDD | unit | error | [not_applicable] 单参数无分支，无需组合覆盖 | P1 |
+```

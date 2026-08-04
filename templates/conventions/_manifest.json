@@ -1,0 +1,39 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-08-04",
+  "description": "team-flow conventions 模板清单，符合 glaf4-test 要求",
+  "templates": [
+    {
+      "name": "java-testing.md",
+      "version": "1.0.0",
+      "description": "Java 测试规范（JUnit 5 + Mockito），符合 glaf4-test 要求",
+      "tech_stack": ["java", "junit5", "mockito"],
+      "glaf4_compliant": true,
+      "source": "glaf4-test references + team-flow test-strategy"
+    },
+    {
+      "name": "spring-patterns.md",
+      "version": "1.0.0",
+      "description": "Spring Boot 测试规范，符合 glaf4-test 要求",
+      "tech_stack": ["java", "spring-boot"],
+      "glaf4_compliant": true,
+      "source": "glaf4-test references"
+    },
+    {
+      "name": "js-testing.md",
+      "version": "1.0.0",
+      "description": "JavaScript 测试规范（Jest/Vitest）",
+      "tech_stack": ["javascript", "jest", "vitest"],
+      "glaf4_compliant": false,
+      "source": "team-flow test-strategy"
+    },
+    {
+      "name": "python-testing.md",
+      "version": "1.0.0",
+      "description": "Python 测试规范（Pytest）",
+      "tech_stack": ["python", "pytest"],
+      "glaf4_compliant": false,
+      "source": "team-flow test-strategy"
+    }
+  ]
+}

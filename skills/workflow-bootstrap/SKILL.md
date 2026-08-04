@@ -62,6 +62,43 @@ Do NOT invoke for:
 
 详细流程（脚本采集项、子代理维度表、侦察内容树、已有文档处理）见 `references/b1-reconnaissance.md`。
 
+### B1.5: Conventions Generator（测试规范生成，v0.34.0 新增）
+
+> 来源：test-capability-enhancement-design v1.0 §四
+> 目的：根据项目技术栈自动生成测试规范 conventions，符合 glaf4-test 要求
+
+**触发条件**：B1 侦察完成后，检查 `.team-flow/conventions/` 是否存在
+
+**存量项目路径**：
+1. 读取 B1 侦察结果中的技术栈信息（从 baseline.md 提取）
+2. 根据技术栈选择 conventions 模板
+3. 复制到项目 `.team-flow/conventions/` 目录
+4. 更新 `.team-flow/conventions/.versions.json`
+5. 更新 `team-flow.config.json` 的 conventions 字段
+
+**全新项目路径**（未检测到技术栈特征）：
+1. 交互式引导用户选择技术栈
+   - 编程语言：Java / JavaScript / Python
+   - 构建工具：Maven / Gradle / npm / yarn / pip / poetry
+   - 测试框架：JUnit 5 + Mockito / Jest / Pytest
+   - 应用框架：Spring Boot / Express / Django / 无框架
+2. 根据用户选择选择 conventions 模板
+3. （可选）生成项目骨架（pom.xml / package.json / requirements.txt）
+4. 生成 conventions 文件
+
+**conventions 模板来源**：
+- plugin 内置模板：`${CLAUDE_PLUGIN_ROOT}/templates/conventions/`
+- 符合 glaf4-test 要求的模板：`${CLAUDE_PLUGIN_ROOT}/templates/conventions/glaf4-compliant/`
+
+**产出**：
+- `.team-flow/conventions/*.md` — 测试规范文件
+- `.team-flow/conventions/.versions.json` — 版本信息
+- `.team-flow/team-flow.config.json` — conventions 路径映射（更新）
+
+**跳过条件**：
+- `.team-flow/conventions/` 已存在 → 提示用户"conventions 已存在，是否更新？"
+- 用户拒绝 → 跳过
+
 ### B2: Architecture Baseline（架构基线文档化）
 
 **条件**：如果 B1 侦察发现项目有一定复杂度（≥5 个模块或 ≥10 个源文件），执行此阶段。否则跳过。
@@ -173,10 +210,10 @@ Step 2: 确定性提取（兜底）
 ## Output Standard
 
 每次交互结束时说明：
-1. 已完成的阶段（B1-B5）
-2. 已产出的制品（baseline.md / ARCHITECTURE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / CONCEPTS.md / 目录结构）
+1. 已完成的阶段（B1-B1.5-B2-B3-B4-B5）
+2. 已产出的制品（baseline.md / conventions / ARCHITECTURE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / CONCEPTS.md / 目录结构）
 3. 下一步建议（调用哪个 skill）
 
 ## Success Output
 
-接入结束时输出：侦察模式、产出清单（baseline.md / ARCHITECTURE.md / DATABASE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / docs/architecture/CONCEPTS.md / 目录结构）、关键发现（技术栈/模块数/架构模式/测试覆盖）、下一步建议。完整模板见 `references/b1-reconnaissance.md`「Success Output 模板」。
+接入结束时输出：侦察模式、产出清单（baseline.md / conventions / ARCHITECTURE.md / DATABASE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / docs/architecture/CONCEPTS.md / 目录结构）、关键发现（技术栈/模块数/架构模式/测试覆盖）、下一步建议。完整模板见 `references/b1-reconnaissance.md`「Success Output 模板」。
