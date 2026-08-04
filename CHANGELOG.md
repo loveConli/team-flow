@@ -6,6 +6,28 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.34.1] - 2026-08-04
+
+### Added（工作空间支持——conventions-generator 支持多子项目扫描）
+
+#### 工作空间扫描（v0.34.1 核心特性）
+- **scripts/lib/conventions-generator.mjs**：新增工作空间模式
+  - `scanSubProjects(root)`：扫描工作空间中的所有子项目
+  - `aggregateTechStacks(subProjects)`：汇总所有子项目的技术栈
+  - `selectTemplatesForWorkspace(aggregatedTechStack)`：为工作空间选择 conventions 模板
+  - `run()` 函数支持自动检测工作空间模式（子项目 > 1 时进入）
+  - 输出模式标识：`mode: 'workspace'` 或 `mode: 'single'`
+
+#### 使用场景
+- **前后端分离项目**：Java 后端 + Vue 前端 → 生成 Java + JavaScript conventions
+- **多语言项目**：Java 后端 + Python 脚本 + JavaScript 前端 → 生成三种语言 conventions
+- **单项目兼容**：原有单项目逻辑完全保留
+
+### Tests
+- **tests/lib/conventions-generator.test.mjs**：新增 12 个测试（scanSubProjects: 4 / aggregateTechStacks: 3 / selectTemplatesForWorkspace: 5）
+- 全量回归：583/583 通过（含 27 个 conventions-generator 测试）
+- check-versions ✅
+
 ## [0.34.0] - 2026-08-04
 
 ### Added（测试能力增强——吸收 glaf4-test 通用能力 + conventions 机制，设计见工作区级文档 team-flow-workspace/docs/plan/test-capability-enhancement-design.md）

@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-// scripts/lib/conventions-generator.mjs — conventions 生成器（v0.34.0 新增）
+// scripts/lib/conventions-generator.mjs — conventions 生成器（v0.34.0 新增，v0.34.1 工作空间支持）
 //
 // 根据项目技术栈自动生成测试规范 conventions，符合 glaf4-test 要求。
-// 支持存量项目（自动识别）和全新项目（交互式引导）。
+// 支持存量项目（自动识别）、全新项目（交互式引导）和工作空间（多子项目）。
 //
 // 使用方式：
 //   node scripts/lib/conventions-generator.mjs --root <项目根目录> [--interactive]
 //
-// 设计来源：test-capability-enhancement-design v1.0 §四
+// 设计来源：test-capability-enhancement-design v1.0 §四 + §55.4
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import path, { join } from 'node:path';
@@ -96,6 +96,102 @@ export function detectTechStack(root) {
   }
 
   return result;
+}
+
+// ── 工作空间扫描 ─────────────────────────────────────────────────────────
+
+/**
+ * 扫描工作空间中的所有子项目
+ * @param {string} root 工作空间根目录
+ * @returns {Array<{ path: string, name: string, techStack: object }>}
+ */
+export function scanSubProjects(root) {
+  const subProjects = [];
+
+  // 扫描一级子目录
+  const entries = readdirSync(root, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+
+    const subProjectPath = join(root, entry.name);
+    const techStack = detectTechStack(subProjectPath);
+
+    // 如果检测到技术栈，记录为子项目
+    if (techStack.language) {
+      subProjects.push({
+        path: subProjectPath,
+        name: entry.name,
+        techStack,
+      });
+    }
+  }
+
+  return subProjects;
+}
+
+/**
+ * 汇总所有子项目的技术栈
+ * @param {Array<{ path: string, name: string, techStack: object }>} subProjects
+ * @returns {{ language: string|null, buildTool: string|null, testFramework: string|null, appFramework: string|null, languages: string[], appFrameworks: string[] }}
+ */
+export function aggregateTechStacks(subProjects) {
+  const languages = new Set();
+  const buildTools = new Set();
+  const testFrameworks = new Set();
+  const appFrameworks = new Set();
+
+  for (const { techStack } of subProjects) {
+    if (techStack.language) languages.add(techStack.language);
+    if (techStack.buildTool) buildTools.add(techStack.buildTool);
+    if (techStack.testFramework) testFrameworks.add(techStack.testFramework);
+    if (techStack.appFramework) appFrameworks.add(techStack.appFramework);
+  }
+
+  return {
+    // 主技术栈（第一个子项目）
+    language: subProjects[0]?.techStack.language || null,
+    buildTool: subProjects[0]?.techStack.buildTool || null,
+    testFramework: subProjects[0]?.techStack.testFramework || null,
+    appFramework: subProjects[0]?.techStack.appFramework || null,
+    // 汇总列表
+    languages: [...languages],
+    appFrameworks: [...appFrameworks],
+  };
+}
+
+/**
+ * 为工作空间选择 conventions 模板
+ * @param {{ languages: string[], appFrameworks: string[] }} aggregatedTechStack
+ * @returns {string[]} 模板文件名列表
+ */
+export function selectTemplatesForWorkspace(aggregatedTechStack) {
+  const templates = [];
+
+  // Java 相关
+  if (aggregatedTechStack.languages.includes('java')) {
+    if (existsSync(join(GLAF4_TEMPLATE_DIR, 'java-testing.md'))) {
+      templates.push('glaf4-compliant/java-testing.md');
+    }
+    if (aggregatedTechStack.appFrameworks.includes('spring-boot')) {
+      if (existsSync(join(GLAF4_TEMPLATE_DIR, 'spring-patterns.md'))) {
+        templates.push('glaf4-compliant/spring-patterns.md');
+      }
+    }
+  }
+
+  // JavaScript 相关
+  if (aggregatedTechStack.languages.includes('javascript')) {
+    templates.push('js-testing.md');
+  }
+
+  // Python 相关
+  if (aggregatedTechStack.languages.includes('python')) {
+    templates.push('python-testing.md');
+  }
+
+  return templates;
 }
 
 // ── 模板选择 ─────────────────────────────────────────────────────────────
@@ -290,54 +386,120 @@ export async function run(args) {
     process.exit(0);
   }
 
-  // 检测技术栈
-  let techStack = detectTechStack(root);
+  // 检测是否为工作空间（包含多个子项目）
+  const subProjects = scanSubProjects(root);
 
-  // 如果未检测到技术栈且启用交互式模式
-  if (!techStack.language && values.interactive) {
-    techStack = await interactiveSetup();
-  }
+  if (subProjects.length > 1) {
+    // 工作空间模式：扫描所有子项目
+    console.log(`\n=== 检测到工作空间（${subProjects.length} 个子项目）===\n`);
 
-  // 如果仍未检测到技术栈
-  if (!techStack.language) {
-    console.error('❌ 未检测到技术栈特征');
-    console.error('   请指定项目根目录，或使用 --interactive 模式手动配置');
-    process.exit(1);
-  }
-
-  // 选择模板
-  const templates = selectTemplates(techStack);
-
-  if (templates.length === 0) {
-    console.error('❌ 未找到匹配的 conventions 模板');
-    console.error(`   技术栈: ${JSON.stringify(techStack)}`);
-    process.exit(1);
-  }
-
-  // 生成 conventions
-  const result = generateConventions(root, techStack, templates);
-
-  // 更新配置
-  updateConfig(root, result.created);
-
-  // 输出结果
-  if (values.json) {
-    console.log(JSON.stringify({
-      ok: true,
-      techStack,
-      templates,
-      created: result.created,
-      skipped: result.skipped,
-      conventionsDir,
-    }));
-  } else {
-    console.log('✅ conventions 生成完成');
-    console.log(`   技术栈: ${techStack.language} + ${techStack.testFramework}`);
-    console.log(`   创建: ${result.created.join(', ')}`);
-    if (result.skipped.length > 0) {
-      console.log(`   跳过: ${result.skipped.join(', ')}`);
+    for (const { name, techStack } of subProjects) {
+      console.log(`  - ${name}: ${techStack.language}`);
     }
-    console.log(`   路径: ${conventionsDir}`);
+
+    // 汇总技术栈
+    const aggregatedTechStack = aggregateTechStacks(subProjects);
+
+    // 选择模板
+    const templates = selectTemplatesForWorkspace(aggregatedTechStack);
+
+    if (templates.length === 0) {
+      console.error('❌ 未找到匹配的 conventions 模板');
+      console.error(`   检测到的语言: ${aggregatedTechStack.languages.join(', ')}`);
+      process.exit(1);
+    }
+
+    // 生成 conventions
+    const result = generateConventions(root, aggregatedTechStack, templates);
+
+    // 更新配置
+    updateConfig(root, result.created);
+
+    // 输出结果
+    if (values.json) {
+      console.log(JSON.stringify({
+        ok: true,
+        mode: 'workspace',
+        subProjects: subProjects.map(p => ({ name: p.name, language: p.techStack.language })),
+        aggregatedTechStack: {
+          languages: aggregatedTechStack.languages,
+          appFrameworks: aggregatedTechStack.appFrameworks,
+        },
+        templates,
+        created: result.created,
+        skipped: result.skipped,
+        conventionsDir,
+      }));
+    } else {
+      console.log('\n✅ 工作空间级 conventions 生成完成');
+      console.log(`   检测到的语言：${aggregatedTechStack.languages.join(', ')}`);
+      console.log(`   创建：${result.created.join(', ')}`);
+      if (result.skipped.length > 0) {
+        console.log(`   跳过：${result.skipped.join(', ')}`);
+      }
+      console.log(`   路径：${conventionsDir}`);
+    }
+
+  } else {
+    // 单项目模式
+    let techStack;
+
+    if (subProjects.length === 1) {
+      // 从子项目检测
+      techStack = subProjects[0].techStack;
+      console.log(`\n=== 检测到单项目：${subProjects[0].name} ===\n`);
+    } else {
+      // 从根目录检测
+      techStack = detectTechStack(root);
+    }
+
+    // 如果未检测到技术栈且启用交互式模式
+    if (!techStack.language && values.interactive) {
+      techStack = await interactiveSetup();
+    }
+
+    // 如果仍未检测到技术栈
+    if (!techStack.language) {
+      console.error('❌ 未检测到技术栈特征');
+      console.error('   请指定项目根目录，或使用 --interactive 模式手动配置');
+      process.exit(1);
+    }
+
+    // 选择模板
+    const templates = selectTemplates(techStack);
+
+    if (templates.length === 0) {
+      console.error('❌ 未找到匹配的 conventions 模板');
+      console.error(`   技术栈: ${JSON.stringify(techStack)}`);
+      process.exit(1);
+    }
+
+    // 生成 conventions
+    const result = generateConventions(root, techStack, templates);
+
+    // 更新配置
+    updateConfig(root, result.created);
+
+    // 输出结果
+    if (values.json) {
+      console.log(JSON.stringify({
+        ok: true,
+        mode: 'single',
+        techStack,
+        templates,
+        created: result.created,
+        skipped: result.skipped,
+        conventionsDir,
+      }));
+    } else {
+      console.log('✅ conventions 生成完成');
+      console.log(`   技术栈: ${techStack.language} + ${techStack.testFramework}`);
+      console.log(`   创建: ${result.created.join(', ')}`);
+      if (result.skipped.length > 0) {
+        console.log(`   跳过: ${result.skipped.join(', ')}`);
+      }
+      console.log(`   路径: ${conventionsDir}`);
+    }
   }
 }
 
