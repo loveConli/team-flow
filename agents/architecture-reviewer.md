@@ -103,6 +103,7 @@ Dimensions requiring semantic understanding, marked as "advisory, false positive
    - Read global `ARCHITECTURE.md` → check naming conventions, BC boundaries
    - Read global `PHYSICAL-MODEL.md` → check table naming patterns, field conventions
    - Read global `API-INDEX.md` → check API routing patterns
+   - Read product snapshot `docs/architecture/iterations/<vN>/architecture.md`（若存在，v0.36.0）→ 对照产品级 BC 边界/聚合注册表（变更级增量不得与产品级决策矛盾）
    - Compare incremental design against baseline:
      - Aggregate naming conflicts with existing aggregates → Critical
      - Table naming conflicts with PHYSICAL-MODEL → Critical

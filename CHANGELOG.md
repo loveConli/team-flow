@@ -6,6 +6,11 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.36.2] - 2026-08-05
+
+### Fixed
+- **变更级架构设计输入链缺口修复**：0.36.0 在 architecture-design/SKILL.md 声明产品级快照（`iterations/vN/architecture.md`）为主输入，但 workflow-start 实际 dispatch 子代理的输入列表（`routing-rules.md`）未传该路径——变更级架构设计不会将产品级架构设计作为输入。已同步：routing-rules.md（architecture-design + architecture-reviewer dispatch 输入）、workflow-start/SKILL.md（Step 1）、architecture-reviewer（A5 基线一致性对照产品级快照）
+
 ## [0.36.1] - 2026-08-05
 
 ### Fixed

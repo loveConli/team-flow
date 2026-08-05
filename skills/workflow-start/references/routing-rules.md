@@ -14,8 +14,9 @@ Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before
 Dispatch `architecture-design` as sub-agent with inputs:
 - `change-brief.md`（scope / AC / 技术方向）
 - `prd/vN/plan.md` 高阶技术设计段
+- `docs/architecture/iterations/<vN>/architecture.md`（**产品级架构快照，主输入**，v0.36.0）——BC 边界/聚合所有权/全局契约唯一事实源；vN 从 change-brief 的 `upstream_plan_ref`（prd/vN/plan.md）推导；变更级只引用不重定义（触及产品级决策 → 架构修订决策门；仅 change 内细节 → 增量设计）
 - existing `specs/`
-- global `docs/architecture/`（As-Is 基线）
+- global `docs/architecture/`（As-Is 基线 + 已落地部分）
 
 **⛔ 子代理 ID 记录（v0.29.0 §37，必须执行）**：dispatch 后**立即记录**子代理 ID（Agent 工具返回的 `agentId` 或 task-notification 中的 `task-id`），后续 Step 2 审查循环和 Step 4 DP-A 调整**必须通过此 ID 恢复子代理**，不得启动新子代理。记录格式：
 ```
@@ -41,6 +42,7 @@ artifacts:                       # required 时必填
 When `decision: required`, dispatch `architecture-reviewer` as sub-agent with inputs:
 - `prd_path`, `plan_path`, `change_brief_path`
 - `architecture_dir`（Step 1 产出目录）
+- `product_snapshot_path`（`docs/architecture/iterations/<vN>/architecture.md`，v0.36.0——A5 基线一致性对照产品级决策）
 - `global_arch_dir`（`docs/architecture/`）
 - `conventions_config`（从 `team-flow.config.json` 读取）
 

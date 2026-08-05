@@ -76,7 +76,7 @@ Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before
 
 > **⛔ 串行约束（v0.30.0）**：四步严格串行。**修复子代理（architecture-design）完成前 MUST NOT dispatch 审查子代理（architecture-reviewer）**——并行会使审查跑在修复之前、误报"全部未修复"FAIL（来源：workflow-feedback 2026-08-01）。并行白名单：仅多个独立 change 的工作可并行；修复→审查、设计→审查必须串行。
 
-1. **Dispatch**: `architecture-design` as sub-agent → returns `decision` + `reason` + `artifacts`。**⛔ 记录子代理 ID**（后续循环修正和 DP-A 调整必须通过此 ID 恢复，禁止启动新子代理）
+1. **Dispatch**: `architecture-design` as sub-agent（**输入含 `docs/architecture/iterations/<vN>/architecture.md` 产品级架构快照**，v0.36.0——变更级只引用产品级聚合注册表，不重定义）→ returns `decision` + `reason` + `artifacts`。**⛔ 记录子代理 ID**（后续循环修正和 DP-A 调整必须通过此 ID 恢复，禁止启动新子代理）
 2. **Auto-review** (decision=required 时触发): 校验产物文件存在且非空 → dispatch `architecture-reviewer` sub-agent（**记录子代理 ID**）→ FAIL 则通过 **SendMessage 恢复原 architecture-design 子代理**修正（≤3 轮 + 收敛检测，不收敛转人工）→ 报告落盘 `changes/<name>/architecture/auto-review.md`
 3. **Reasonableness check + state write**: PASS/PASS_WITH_WARNINGS → write `arch_design_decision` + `arch_review_*` to yaml; skipped + brief 含架构关键词 → BLOCK; required + artifacts 缺失 → BLOCK; required + auto-review FAIL → BLOCK
 4. **DP-A 用户确认门（v0.29.0 §37）**: 输出架构决策摘要 → AskUserQuestion 确认 → 需要调整时**必须通过 SendMessage 恢复原子代理**修改（禁止主代理直接修改，禁止启动新子代理）→ 修改后 SendMessage 恢复原 reviewer 重新 auto-review → 回到本步骤重新确认。含项目规范变更提示（advisory）。详见 `references/routing-rules.md`「Step 4: DP-A」
