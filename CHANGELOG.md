@@ -6,7 +6,7 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
-## [0.35.0] - 2026-08-05
+## [0.36.0] - 2026-08-05
 
 ### Added（产品级架构设计增强——设计增强方案 v0.14 §57-§66）
 
@@ -32,6 +32,8 @@ The format loosely follows Keep a Changelog.
 #### 其他
 - 变更级输入联动：iterations/vN/ 快照为主输入 + 五项检查路由分流（产品级决策 vs change 内细节）
 - 旧项目逆向重建 `arch-reverse-analyst` + 全局三层数据面维护（L1 当前态 / L2 变更增量 / L3 迭代快照）
+
+## [0.35.0] - 2026-08-05
 
 ### Added（C1 workflow-feedback 根因修复——6 条 feedback 4 个根因聚类）
 
