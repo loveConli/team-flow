@@ -16,7 +16,7 @@ description: >-
 
 | 层级 | 编排器 | 管辖范围 |
 |------|--------|---------|
-| 产品级 | **workflow-orchestrator**（本 skill） | 路径路由 → PRD+原型循环 → 计划 → 拆分验证 → 分发 → 监控 |
+| 产品级 | **workflow-orchestrator**（本 skill） | 路径路由 → PRD+原型循环 → 计划 → **架构设计（ARCH，v0.36.0）** → 拆分验证 → 分发 → 监控 |
 | 变更级 | workflow-start（不变） | exploring → ... → closing（8 态状态机） |
 
 **分层原则**：本 skill 管「做什么、什么顺序」（产品级策略），workflow-start 管「怎么做」（变更级执行）。二者通过 change 目录 + `.team-flow.yaml` 衔接。
@@ -34,7 +34,7 @@ Do NOT invoke for:
 - 单一 change 的实施（用 `/build-executor`）
 - 独立工具操作（`/ce-ideate`、`/ce-strategy`、`/prototype`、`/architecture-design` 等）
 
-## Execution Flow（S1-S5）
+## Execution Flow（S1-S5 + ARCH 产品级架构设计）
 
 ### S1: 路径路由器
 **先做需求选择**（v0.15.0 多需求）：读 `.team-flow/registry.yaml`，确定 `active_requirement`（多需求则询问操作哪个/新建）。再判断 7 种入口路径之一；检查 baseline.md / CONCEPTS.md 并注入；复利注入（INDEX.md top-5）。**路由结果必须向用户显式确认**（路由是建议非决定）。详见 `references/s1-path-router.md`。
@@ -69,7 +69,21 @@ prd_draft → user_review → prototype_loop → prd_frozen → completed
 调用 `/ce-brainstorm`（mode: orchestrated）产出 PRD 草稿；**冻结前派 `prd-completeness-reviewer` 子代理做 PRD 完整性评审**（v0.15.0，管"说得全不全"）；原型循环由编排层直接编排（prototype skill 内部编排产出 → prototype-reviewer 自动评审 → 人工评审 → 冻结）；冻结语义为 `frozen_downstream`（迭代内变更不升版）。反馈环路检查点：scope 是否合理。详见 `references/s2-prd-prototype-loop.md`。
 
 ### S3: 计划阶段
-**入口一次性问定计划模式**（业务/一人公司），调用 `/ce-plan`（`pipeline_mode: orchestrator` + `plan_mode: business|solo`，跳过仪式开销、保留 repo research + change splitting + 依赖 DAG + 技术方向）产出 `prd/vN/plan.md`。plan 只到产品级策略 + 高阶技术设计，**不含接口清单**（属各 change 的 spec-writer）。反馈环路检查点：plan 是否暴露 PRD scope 问题（是→回退 S2）。详见 `references/s3-plan-pipeline.md`。
+**入口一次性问定计划模式**（业务/一人公司），调用 `/ce-plan`（`pipeline_mode: orchestrator` + `plan_mode: business|solo`，跳过仪式开销、保留 repo research + change splitting + 依赖 DAG + 技术方向）产出 `prd/vN/plan.md`。plan 只到产品级策略 + 高阶技术设计，**不含接口清单**（属各 change 的 spec-writer）。反馈环路检查点：plan 是否暴露 PRD scope 问题（是→回退 S2）。详见 `references/s3-plan-pipeline.md`。完成条件：plan.md 产出 + S3 状态 = completed，**下一步进 ARCH**（v0.36.0）。
+
+### ARCH: 产品级架构设计（v0.36.0 新增，S3 之后、S4 之前）
+
+**⛔ MANDATORY：执行 ARCH 阶段前，必须先读取 `references/state-model.md`「architecture 阶段」+ `architecture-design/references/s3.5-product-architecture.md`**
+
+产品级架构设计：基于迭代版本 vN 产出覆盖所有模块的整体详细架构（预测态快照，P1：只写快照不写全局）。
+
+**场景判定（入口三态）**：全新项目 → 正向设计（首轮不可跳过）；旧项目首轮（`arch_baseline` 缺失）→ 逆向重建 L0 骨架 → 渐进深化；已建档 + 迭代无结构性变更 → 跳过（**skip 必须物化**：写 `docs/architecture/iterations/vN/SKIPPED` 标记 + 理由，判定者=编排器+用户确认）。
+
+**执行**：调用 architecture-design skill 的 **product 模式**子代理（8 步设计：限界上下文/聚合注册表/指令事件/状态机/概念 ER/时序），产出 `docs/architecture/iterations/vN/architecture.md`（6 产物，provenance 标注）。
+
+**评审门**：产出经 architecture-reviewer product 视角（`review_mode: product`，A1-A6）评审，**PASS 才进 S4**。
+
+**输出契约**：`docs/architecture/iterations/vN/architecture.md` + 评审 verdict；`orchestrator.yaml` 中 ARCH phase 状态 = completed（`workflow_phase: architecture`）。
 
 ### S4: 拆分验证与分发
 
@@ -145,6 +159,8 @@ plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层�
 ## 反馈环路（保守策略：只允许相邻回退）
 
 - **S3 → S2**：plan 暴露 PRD scope 问题 → PRD vN 内修订（非升版）+ 变更履历，plan.md 归档为 .revN
+- **ARCH → S3**（v0.36.0）：架构设计暴露 plan 拆分问题 → 调整拆分策略，plan.md 归档为 .revN
+- **S4 → ARCH**（v0.36.0）：架构快照不覆盖 change 触及的 BC / 架构产物缺失 → 回 ARCH 补快照，change 拆分保留
 - **S4 → S3**：依赖图不可执行/粒度不合理 → 调整拆分策略，已建 change 目录保留增量调整
 - **S5 → S4**：跨 change 冲突需重新拆分 → 按在途 change 红/绿/灰区处置
 
@@ -156,15 +172,15 @@ plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层�
 |------|------|------|
 | 全新需求 | 无 PRD，需求模糊 | → S2 |
 | 续版需求 | 有 PRD vN，要加功能 | → S2（vN+1） |
-| 重新计划 | PRD 已冻结，plan 需调整 | → S3 |
-| 继续执行 | changes 已拆分，继续下一个 | → S4/S5（先输出状态恢复简报） |
+| 重新计划 | PRD 已冻结，plan 需调整 | → S3（完成后进 ARCH，v0.36.0） |
+| 继续执行 | changes 已拆分，继续下一个 | → S4/S5（先输出状态恢复简报；若 `workflow_phase: architecture` 则恢复 ARCH 阶段） |
 | 单 change 快速通道 | 需求极清晰、无 UI、无跨模块依赖的极小变更 | → 直接建 change → workflow-start |
 | 紧急修复（Hotfix） | bug/生产问题，最小范围修复 | → 建 change（type: hotfix）→ workflow-start |
 | **原型补跑/重跑**（v0.20.0） | PRD 已冻结（`frozen_downstream`）∧ `prototype/` 缺失/为空，或用户显式要求重做原型 | → 部分重入 S2 原型循环（S2 步骤 2→3→4）；PRD 不动，保留有效 S3/S4，闭环后恢复原 phase |
 
 ## 状态模型
 
-**多需求并行（v0.15.0）**：`.team-flow/registry.yaml`（需求注册表 + `active_requirement` 活跃指针）+ 每需求一份 `.team-flow/requirements/<req-id>/orchestrator.yaml`（持久化记忆 / checkpointer）。各需求状态天然隔离，支持并行。单需求 orchestrator.yaml 含 requirement_id / workflow_phase / phases / replan_log / change_dag / prd_version。双层冻结（frozen_downstream / frozen_absolute），frozen 以 PRD frontmatter 为单一真相源。迁移兼容：检测旧 `<root>/.workflow-orchestrator.yaml` 自动迁入。动态重规划（三级意图分类器 + 红/绿/灰区 + DP-R 确认）见 `references/state-model.md`。
+**多需求并行（v0.15.0）**：`.team-flow/registry.yaml`（需求注册表 + `active_requirement` 活跃指针）+ 每需求一份 `.team-flow/requirements/<req-id>/orchestrator.yaml`（持久化记忆 / checkpointer）。各需求状态天然隔离，支持并行。单需求 orchestrator.yaml 含 requirement_id / workflow_phase / phases / replan_log / change_dag / prd_version。**v0.36.0：phases 增加 ARCH（产品级架构设计）阶段，`workflow_phase: architecture`**；项目级架构基线状态存 `.team-flow/arch-state.json`（`arch_baseline`，`tf arch init` 打戳，缺失 = 存量 → arch 门禁 WARN 不 FAIL）。双层冻结（frozen_downstream / frozen_absolute），frozen 以 PRD frontmatter 为单一真相源。迁移兼容：检测旧 `<root>/.workflow-orchestrator.yaml` 自动迁入。动态重规划（三级意图分类器 + 红/绿/灰区 + DP-R 确认）见 `references/state-model.md`。
 
 ## Guardrails
 
@@ -173,6 +189,7 @@ plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层�
 - **后台子代理等待范式（v0.20.0）**：派发后台子代理（prototype-builder / reviewer / architecture-design 等长任务）后**依赖完成通知（`<task-notification>`）再行动**，**禁止反复 `TaskOutput(block=true)` 阻塞轮询**——其对长任务超时返回会倾泻完整子代理 transcript，撑爆主上下文、抵消"只编排"的轻上下文优势。长任务派发后可先处理可并行工作或结束本轮等待通知，**不空转死等**；确需中途观察用 `block=false` 轻量查询（仍返转录，尽量不用）。（设计 §22.2）
 - **不跳过 PRD 冻结**：PRD 必须经原型循环（或显式跳过）后才能进 ce-plan
 - **不跳过拆分审计**：change-split-auditor 审计 verdict = PASS 是创建 change 脚手架的前置条件（S4 必选门禁）
+- **架构门禁（v0.36.0）**：ARCH 阶段 skip 必须物化（`iterations/vN/SKIPPED` + 理由）；arch-readiness（S4 拆分：快照覆盖 change 触及 BC）与 arch-snapshot（change closing）为 guard 门禁，`arch_baseline` 缺失 → WARN 不 FAIL（存量豁免）
 - **路由是建议非决定**：S1 路由判断必须用户确认；重规划必须 DP-R 阻塞确认
 - **回退必写 replan_log**：active → pending 回退必须记录；受影响制品归档为 .revN，重入不读旧制品
 - **不阻断流程**：所有复利操作为 advisory 级，INDEX.md 读取失败时静默跳过
@@ -181,7 +198,7 @@ plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层�
 ## Output Standard
 
 每次交互结束时说明：
-1. 当前所处阶段（S1-S5）与 `.team-flow/requirements/<req-id>/orchestrator.yaml` 状态
+1. 当前所处阶段（S1-S5 / ARCH）与 `.team-flow/requirements/<req-id>/orchestrator.yaml` 状态
 2. 已产出的制品（PRD/原型/plan/changes）
 3. 下一步建议（调用哪个 skill / 进入哪个 change）
 

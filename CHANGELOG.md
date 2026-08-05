@@ -6,6 +6,11 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.36.1] - 2026-08-05
+
+### Fixed
+- **workflow-orchestrator 流程缺口修复**：0.36.0 的 `references/state-model.md` 已定义 ARCH（S3.5 产品级架构设计）阶段，但 SKILL.md 主体 Execution Flow（S1-S5）/ AGENTS.md / README 未同步该阶段——LLM 执行 orchestrator 会走 S3→S4 跳过架构设计。已同步 11 处：SKILL.md（定位表/Execution Flow 标题/ARCH 阶段节/反馈环路/增量入口/状态模型/Guardrails/Output Standard）+ AGENTS.md（产品级工作流/SOP）+ README（SOP）
+
 ## [0.36.0] - 2026-08-05
 
 ### Added（产品级架构设计增强——设计增强方案 v0.14 §57-§66）

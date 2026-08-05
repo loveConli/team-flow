@@ -60,7 +60,7 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 - 用法：`/e2e [原型|集成|验收] [spec路径]`
 
 ### 6. workflow-orchestrator（1 skill，产品级编排，v0.7 重设计 + v0.15.0 多需求）
-- 编排产品级工作流：S1 路径路由（含需求选择）→ S2 PRD+原型（循环上提，orchestrator 直接编排，**冻结前 PRD 完整性评审**）→ S3 ce-plan（pipeline 快速路径，**入口问定 plan_mode**）→ S4 拆分验证+分发 → S5 全局监控
+- 编排产品级工作流：S1 路径路由（含需求选择）→ S2 PRD+原型（循环上提，orchestrator 直接编排，**冻结前 PRD 完整性评审**）→ S3 ce-plan（pipeline 快速路径，**入口问定 plan_mode**）→ **ARCH 产品级架构设计（v0.36.0：architecture-design product 模式 8 步 → iterations/vN/architecture.md 快照 → 评审门 PASS 才进 S4）** → S4 拆分验证+分发 → S5 全局监控
 - v0.7 关键变更：原型循环从 ce-brainstorm 内部上提到 orchestrator 层直接编排；新增反馈环路（vN 内修订+变更履历，非升版）；新增增量入口（S1 路径路由器，**7 种入口路径**，v0.20.0 增「原型补跑/重跑」）；S5 多 change 并行时必选
 - **v0.20.0**：S1 路由新增第 7 种入口「原型补跑/重跑」（PRD 冻结 ∧ prototype 缺失/需重做 → 部分重入 S2 原型循环，PRD 不动、保留有效 S3/S4）；后台子代理等待范式（依赖完成通知，禁 TaskOutput 轮询）（设计 §22）
 - **v0.15.0 多需求并行**：`.team-flow/registry.yaml` 注册表 + 每需求一份 `.team-flow/requirements/<req-id>/orchestrator.yaml`，状态天然隔离
@@ -136,7 +136,10 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
   S3 计划阶段 → ce-plan（pipeline 快速路径，入口问定 plan_mode）
      plan.md：change 拆分 + 依赖 DAG + 高阶技术方向（不含接口清单）
      反馈环路：plan 暴露 PRD 问题可回退 S2
-  S4 拆分验证与分发 → change-split-auditor 审计（必选门禁）→ 创建 change → 进入 team-flow
+  [ARCH 产品级架构设计（v0.36.0）] → architecture-design product 模式 8 步设计
+     → docs/architecture/iterations/vN/architecture.md（6 产物快照，预测态不写全局）→ 评审门 PASS 才进 S4
+     skip 须物化（iterations/vN/SKIPPED）；旧项目首轮 arch_baseline 缺失 → 逆向重建
+  S4 拆分验证与分发 → arch-readiness 门（快照覆盖 change 触及 BC）→ change-split-auditor 审计（必选门禁）→ 创建 change → 进入 team-flow
      并行策略建议 + 验收标准预分配；反馈环路：依赖图不可执行可回退 S3
   S5 全局监控（change≥2 必选）→ 跨 change 一致性 + 复利晋升 + 动态重规划
   │
