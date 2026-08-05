@@ -201,6 +201,20 @@ tf solutions capture \
 
 This check is advisory — skip silently if no learnable moments are detected.
 
+### Worktree Deisolation (v0.35.0) — advisory
+
+After compound promotion, check if worktree isolation exists for this change:
+
+```bash
+tf deisolate <change-dir>
+```
+
+If worktrees exist (output shows `found: true` or ahead/behind stats), include the deisolation report in the closing summary. **Do NOT auto-merge** — the orchestrator or user decides the merge strategy. Mark `Worktree deisolation` in the Step 5 report as:
+- `PENDING` — worktrees detected, user action required
+- `N/A` — no worktrees found (single-repo or already cleaned)
+
+This step is advisory — skip silently when `tf deisolate` reports no worktrees.
+
 ### Workflow Feedback Check (v0.16.0)
 
 Before finalizing the closing, ask the user if they encountered any workflow issues during this change:

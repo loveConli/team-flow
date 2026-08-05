@@ -534,7 +534,10 @@ async function main(argv, projectRoot) {
   console.log(`\n🎉 test-merge complete for ${changeName}`);
 }
 
-main().catch(err => {
-  console.error('test-merge error:', err.message);
-  process.exit(1);
-});
+// 直接运行（v0.35.0 修复：main() 无参自调用崩溃 → 调用 run() 走正确参数解析）
+if (import.meta.url === `file://${process.argv[1]}`) {
+  run(process.argv.slice(2)).catch(err => {
+    console.error('test-merge error:', err.message);
+    process.exit(1);
+  });
+}

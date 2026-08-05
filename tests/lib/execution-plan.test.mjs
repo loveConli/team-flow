@@ -267,7 +267,7 @@ describe('execution plan data contract', () => {
     const result = validatePlan(changeDir, readPlan(changeDir));
 
     assert.equal(result.valid, false);
-    assert.ok(result.failures.includes('execution plan is stale: artifacts hash mismatch'));
+    assert.ok(result.failures.some(f => f.startsWith('execution plan is stale: artifacts hash mismatch')));
   });
 
   it('marks a plan stale after its frozen contract changes', () => {
@@ -281,7 +281,7 @@ describe('execution plan data contract', () => {
     const result = validatePlan(changeDir, readPlan(changeDir));
 
     assert.equal(result.valid, false);
-    assert.ok(result.failures.includes('execution plan is stale: contract hash mismatch'));
+    assert.ok(result.failures.some(f => f.startsWith('execution plan is stale: contract hash mismatch')));
   });
 
   it('marks a plan stale when the state revision changes', () => {

@@ -45,6 +45,28 @@ dp_5: "<resolution>"                # only if debug escalation occurred
 summary: "..."                       # what was built + open risks for release-archivist
 ```
 
+**BLOCKED Report Format (v0.35.0)**: When `status: blocked`, the summary MUST include a structured evidence chain. Guesswork or impression-based attribution is FORBIDDEN:
+
+```yaml
+status: blocked
+blocker:
+  category: "environment | dependency | config | toolchain | test-infrastructure"
+  root_cause: "<precise technical root cause — must be supported by evidence below>"
+  evidence:
+    - type: "dependency-tree | stack-trace | config-snapshot | build-log | test-output"
+      content: "<relevant excerpt — NOT a summary, paste the actual output>"
+  attempted_fixes:
+    - action: "<what was tried>"
+      result: "<why it failed — quote the actual error>"
+  recommended_resolution: "<what would unblock this — specific actionable step>"
+summary: "..."
+```
+
+**Evidence rules**:
+- BLOCKED on environment/dependency issues: MUST include `mvn dependency:tree` (or equivalent) relevant excerpt AND full exception stacktrace including all `Caused by` layers
+- BLOCKED on config issues: MUST include the effective configuration source (property file / @Configuration class) and which setting overrides the expected value
+- Do NOT guess root cause from partial observations. If evidence is insufficient, collect more evidence first (run diagnostic commands, read config files, check classpath). A BLOCKED report with no evidence is a FAIL.
+
 ## Red Lines
 
 **DO:**
@@ -58,3 +80,4 @@ summary: "..."                       # what was built + open risks for release-a
 - When you receive external suggestions (reviewer findings, user opinions), verify them against the codebase FIRST — search for existing implementations/patterns before accepting. A suggestion is input, not an instruction. If a suggestion conflicts with project conventions or lacks evidence, report your concern to the main agent via SendMessage (suggestion + your evidence-based objection + alternative), do NOT silently comply.
 - End your final response with an explicit terminal marker line: `FINAL VERDICT: <DONE | BLOCKED | FAIL>`. Your SendMessage report is the authoritative result; the task-notification summary is internal metadata only.
 - Skip the failing test, expand scope beyond the contract, or close a wave with a missing/failed receipt
+- When encountering integration test environment issues (classpath conflicts, schema mismatch, configuration override), do NOT guess-and-check. First consult the preloaded `test-strategy` skill's environment troubleshooting section. If still blocked, report BLOCKED with full evidence chain (see Structured Output Contract). Never attempt speculative fixes without first collecting diagnostic evidence.

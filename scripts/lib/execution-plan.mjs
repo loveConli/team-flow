@@ -53,9 +53,17 @@ export function writePlan(changeDir, plan) {
   mkdirSync(paths.root, { recursive: true });
   const previousPlan = readPlan(changeDir);
   if (previousPlan && (previousPlan.revision !== plan.revision || previousPlan.hash !== plan.hash)) {
-    // Review evidence is scoped to exactly one plan revision. Removing it on
-    // revision prevents an old wave ID from satisfying a changed plan.
-    rmSync(paths.reviews, { recursive: true, force: true });
+    // v0.35.0: Review receipts are RETAINED across revisions — readCurrentReview
+    // validates plan_hash/plan_revision matching, so stale receipts are
+    // automatically invalidated without losing evidence (base/head/report SHA).
+    // This prevents legitimate artifact updates (e.g., design.md 横展结论) from
+    // causing cascading receipt loss. See workflow-feedback 20260805.
+    //
+    // Recommendation receipt is revision-scoped and must be cleaned:
+    const recommendationFile = paths.executionRecommendation;
+    if (recommendationFile && existsSync(recommendationFile)) {
+      rmSync(recommendationFile, { force: true });
+    }
   }
   atomicWrite(paths.executionPlan, `${JSON.stringify(plan, null, 2)}\n`);
   writeExecutionPlanSummary(changeDir, plan);
@@ -76,10 +84,16 @@ export function validatePlan(changeDir, plan) {
     failures.push('execution plan mode does not match state');
   }
   if (plan?.artifacts_hash !== computeArtifactsHash(changeDir)) {
-    failures.push('execution plan is stale: artifacts hash mismatch');
+    const actual = computeArtifactsHash(changeDir);
+    const planPrefix = plan?.artifacts_hash?.slice(0, 12) ?? 'null';
+    const actualPrefix = actual?.slice(0, 12) ?? 'null';
+    failures.push(`execution plan is stale: artifacts hash mismatch (plan: ${planPrefix}…, current: ${actualPrefix}…)`);
   }
   if (plan?.contract_hash !== computeContractHash(changeDir)) {
-    failures.push('execution plan is stale: contract hash mismatch');
+    const actual = computeContractHash(changeDir);
+    const planPrefix = plan?.contract_hash?.slice(0, 12) ?? 'null';
+    const actualPrefix = actual?.slice(0, 12) ?? 'null';
+    failures.push(`execution plan is stale: contract hash mismatch (plan: ${planPrefix}…, current: ${actualPrefix}…)`);
   }
   if (plan?.workflow !== state.workflow) {
     failures.push('execution plan workflow does not match state');
@@ -440,6 +454,24 @@ function hasDependencyCycle(waves) {
 function hashPlan(plan) {
   const { hash, ...content } = plan;
   return `sha256:${createHash('sha256').update(stableJson(content)).digest('hex')}`;
+}
+
+/**
+ * v0.35.0: Refresh plan's artifacts_hash and contract_hash without bumping revision.
+ * Returns the updated plan (already persisted via writePlan), or null if no change needed.
+ */
+export function refreshPlanHash(changeDir) {
+  const plan = readPlan(changeDir);
+  if (!plan) return null;
+  const newArtifactsHash = computeArtifactsHash(changeDir);
+  const newContractHash = computeContractHash(changeDir);
+  if (plan.artifacts_hash === newArtifactsHash && plan.contract_hash === newContractHash) {
+    return null; // no change needed
+  }
+  plan.artifacts_hash = newArtifactsHash;
+  plan.contract_hash = newContractHash;
+  plan.hash = hashPlan(plan);
+  return writePlan(changeDir, plan);
 }
 
 function tryHashPlan(plan) {

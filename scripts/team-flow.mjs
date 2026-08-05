@@ -17,6 +17,7 @@ const COMMANDS = {
   checkpoint:     () => import('./lib/cmd-checkpoint.mjs'),
   handoff:        () => import('./lib/cmd-handoff.mjs'),
   isolate:        () => import('./lib/cmd-isolate.mjs'),
+  deisolate:      () => import('./lib/cmd-deisolate.mjs'),
   execution:      () => import('./lib/cmd-execution.mjs'),
   runtime:        () => import('./lib/cmd-runtime.mjs'),
   solutions:      () => import('./lib/cmd-solutions.mjs'),
@@ -88,6 +89,8 @@ Commands:
                         Upgrade inline/batch to SDD, or replan existing SDD waves, as a new revision
   execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict pass|fail
                         Record one review receipt for a planned wave
+  deisolate <change-dir> [--merge] [--clean] [--json]
+                        Show worktree status / merge branch back / clean worktree
   runtime check-update  Run a portable update check for canonical skills
   runtime infer <dir>   Infer workflow mode without a plugin-root path
   runtime guard ...     Run a portable phase-transition guard

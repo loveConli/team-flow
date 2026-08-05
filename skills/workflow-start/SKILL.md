@@ -61,6 +61,7 @@ Validate mode against artifact content. If hotfix/tweak criteria not met → upg
 产出型路由（spec-writer / contract-builder / build-executor / release-archivist）通过 `Agent(subagent_type: "team-flow:<name>")` **dispatch 子代理**执行——agent 定义经 `skills:` 预加载对应 SKILL.md，主代理**不得**凭记忆手写产物格式 prompt。need-explorer 为交互式澄清，**主进程执行**（需与用户对话；其 agent 定义 `team-flow:need-explorer` 仅作可 dispatch 后备）。
 
 - **记录 agentId**：dispatch 后立即记录子代理 ID；修复一律 SendMessage 恢复原子代理（禁启动新子代理，见 v0.29.0 §37）
+  - **上下文水位例外（v0.35.0）**：当原子代理 transcript 超过 2MB 或累计 token 消耗超过 200 万时，主代理可以启动新代理替代恢复。新代理必须接收完整交接文档（当前进度、已完成 wave 列表、未解决问题、artifact 位置、已知 blocker），以保证连续性。此为 SendMessage 恢复原则的唯一补充例外
 - **返回即验证（validation gate）**：子代理返回产物后**立即** `tf validate <change-dir>`；FAIL → SendMessage 回**原**子代理修复，通过后才能继续/转换。把格式失败拦截在返回时，而非状态转换时（避免浪费整次执行后再失败）。**build-executor 附加验证（v0.13 §52 B3，SDD/full 模式）**：返回的 diff 中必须包含测试文件（src/test/ 或项目测试目录）；零测试文件的实现返回一律 BLOCK，SendMessage 回原子代理按 test-matrix.md / TDD Iron Law 补齐——不得以"手动验证"替代（C1-domain-policy 事件教训）。例外：已显式记录 `test_matrix_skipped=true` + 理由的 change（纯文档/配置类）不要求测试文件
 - **结果协议**：子代理终态须标注 `FINAL VERDICT: <DONE|BLOCKED|FAIL>`（审查类用 PASS/PASS_WITH_WARNINGS/FAIL）；**SendMessage 报告为权威结果**，task-notification.result 仅内部元数据
 - **子代理状态边界**：子代理 MUST NOT 修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段（状态转换是主代理专有职责，经 `tf state transition` 执行），只写自己的 `dp_N_*` 决策字段

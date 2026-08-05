@@ -69,6 +69,7 @@ reviewer 报告 → PASS / PASS_WITH_WARNINGS → 进入 Step 3
 - 重新审查：`SendMessage(to: arch_reviewer_agent_id, message: "第 {N} 轮审查，架构产物已修正。请重新执行 6 维度审查。")`
 - **禁止**在循环中启动新的 architecture-design 或 architecture-reviewer 子代理——原子代理拥有完整的设计上下文和审查历史，新子代理需要重新加载全部上下文（浪费 10-20K tokens 且可能丢失修正连贯性）
 - **唯一例外**：SendMessage 恢复失败（子代理 transcript 不可用）时，启动新子代理作为 fallback，但必须在 dispatch prompt 中传入：原产物路径 + auto-review 报告 + 历次修正记录
+- **上下文水位例外（v0.35.0）**：当原子代理 transcript 超过 2MB 或累计 token 消耗超过 200 万时，主代理可以启动新代理替代恢复。新代理必须接收完整交接文档（当前进度、已完成 wave 列表、未解决问题、artifact 位置、已知 blocker），以保证连续性
 
 报告落盘到 `changes/<name>/architecture/auto-review.md`。
 

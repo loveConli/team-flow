@@ -6,6 +6,36 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-08-05
+
+### Added（C1 workflow-feedback 根因修复——6 条 feedback 4 个根因聚类）
+
+#### 新命令
+- **tf deisolate**：worktree 生命周期管理（与 `tf isolate` 对称）
+  - 支持 Case A（多仓库工作区）和 Case B（单仓库）布局检测
+  - `--dry-run`（默认）：输出 worktree 状态报告（分支、ahead/behind、未提交改动）
+  - `--merge`：合并 worktree 分支回 master
+  - `--clean`：删除 worktree + 分支
+- **tf execution refresh-hash**：独立刷新 plan 的 artifacts_hash/contract_hash，不升 revision、不清 receipts
+
+#### Bug Fixes
+- **test-merge.mjs**：修复顶层 `main()` 无参自调用崩溃（→ `run()` + `import.meta.url` 守卫）
+- **execution-plan.mjs**：`writePlan` revise 时保留 reviews/ 目录（旧 receipt 通过 plan_hash/plan_revision 校验自动失效，不丢证据）
+- **execution-plan.mjs**：stale plan 报错信息附 hash 前缀，便于定位是哪个产物变更导致
+
+#### Agent 质量增强
+- **build-executor**：BLOCKED 报告强制结构化证据链（blocker.category/root_cause/evidence/attempted_fixes）
+- **build-executor**：集成测试环境问题优先走 test-strategy skill，禁止 guess-and-check
+- **原子代理协议**：增加"上下文水位例外"（transcript >2MB 或 token >200 万时允许启动新代理替代恢复）
+
+#### Closing 流程增强
+- **release-archivist**：Post-Verification 新增 Worktree Deisolation advisory 步骤
+- **workflow-start**：§37 原子代理协议更新
+
+#### 来源
+- workflow-feedback 2026-08-05（6 条：P1-1~P1-4 + P2-1~P2-2）
+- 交叉验证：4 个独立专家验证，16/16 断言通过
+
 ## [0.34.1] - 2026-08-04
 
 ### Added（工作空间支持——conventions-generator 支持多子项目扫描）

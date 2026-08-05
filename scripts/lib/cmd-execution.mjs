@@ -1,5 +1,5 @@
 import { parseArgs } from 'node:util';
-import { createPlan, describeWaves, EXECUTION_MODES, readPlan, recordReview, validatePlan, writePlan } from './execution-plan.mjs';
+import { createPlan, describeWaves, EXECUTION_MODES, readPlan, recordReview, refreshPlanHash, validatePlan, writePlan } from './execution-plan.mjs';
 import {
   createRecommendationReceipt,
   readCurrentRecommendationReceipt,
@@ -7,7 +7,7 @@ import {
 } from './execution-recommendation.mjs';
 import { readState, writeState } from './state-loader.mjs';
 
-const SUBCOMMANDS = ['recommend', 'plan', 'show', 'revise', 'review'];
+const SUBCOMMANDS = ['recommend', 'plan', 'show', 'revise', 'review', 'refresh-hash'];
 
 export async function run(args) {
   const { positionals, values } = parseArgs({
@@ -52,6 +52,8 @@ export async function run(args) {
       return createAndPrintPlan(changeDir, values, true);
     case 'review':
       return recordAndPrintReview(changeDir, values);
+    case 'refresh-hash':
+      return refreshHash(changeDir, values.json);
   }
 }
 
@@ -203,6 +205,16 @@ function parseTestsStats(values) {
   return parsed;
 }
 
+function refreshHash(changeDir, json) {
+  const result = refreshPlanHash(changeDir);
+  if (!result) {
+    print(json, { refreshed: false }, 'Artifacts hash is already up to date.');
+    return;
+  }
+  print(json, { refreshed: true, artifacts_hash: result.artifacts_hash, contract_hash: result.contract_hash },
+    `Refreshed artifacts hash: ${result.artifacts_hash?.slice(0, 12)}…`);
+}
+
 function requireSafeReason(reason) {
   if (/[\p{Cc}\p{Zl}\p{Zp}]/u.test(reason)) {
     throw new Error('--reason must not contain control characters or line separators');
@@ -225,5 +237,6 @@ function printHelp() {
   tf execution plan <dir> --mode <mode> --confirm --reason <text> --wave <id>:<strategy>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]
   tf execution show <dir> [--json]
   tf execution revise <dir> --mode sdd --confirm --reason <text> --wave <id>:<strategy>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]
-  tf execution review <dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict pass|fail [--tests-total N --tests-passed N --tests-failed N]`);
+  tf execution review <dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict pass|fail [--tests-total N --tests-passed N --tests-failed N]
+  tf execution refresh-hash <dir> [--json]   # refresh artifacts/contract hash without bumping revision`);
 }
