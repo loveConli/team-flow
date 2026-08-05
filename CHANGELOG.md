@@ -6,6 +6,16 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.37.0] - 2026-08-05
+
+### Added（阶段同步 + 原型版本隔离，设计增强方案 v0.15 §68）
+
+- **CLI 新命令 `tf publish`**：阶段产物白名单提交 + 可选推送（`--prd / --arch / --changes <dir> / --all` + `--push` 确认制 + `--dry-run`）；复用 arch-merge 白名单 commit 模式 + 外部脏文件检测 + 独立写锁（`.publish.lock`）
+- **CLI 新命令 `tf prototype branch` / `tf prototype deisolate`**：原型仓库（独立 + 远程）PRD 版本 worktree 隔离——`branch <prd-vN>` 创建/复用版本 worktree（隔离 + 团队一键拉取）；`deisolate <prd-vN> --merge --clean` 版本收尾 merge 回主干 + 清理（方案 A：merge 时机 = 版本收尾）
+- **5 个同步门禁点（G1-G5，§68.2）**：S2 冻结 / ARCH 完成 / orchestrator 结束 / execution-contract 完成 / change closing——各点 AskUserQuestion 三选项（提交并推送 / 仅提交 / 暂不同步），团队协作阶段产物同步
+- **制品链路径版本化修正（§68.5）**：原型引用 = 语义相对 + 版本绑定；spec-writer / build-executor / e2e / contract-builder 声明原型版本 worktree 路径；`prototype-sync --prototype-dir` 缺省按版本解析 worktree（`derivePrdVersion`/`resolvePrototypeDir`，change-brief `upstream_plan_ref` 推导，worktree 缺失回退主仓库并提示）
+- **文档**：设计增强方案 v0.15（§68 阶段同步 + 原型版本隔离 + §69 决策落实状态）
+
 ## [0.36.4] - 2026-08-05
 
 ### Added（Wave 审查纪律 + 上下文轮转）

@@ -36,6 +36,19 @@ Before finalizing:
 
 Must make obvious: approved behavior, out-of-scope, constraints, batches, test obligations, review gates, and conditions that force a rewind to planning. Prefer compression over repeating planning details.
 
+## UI UX Delta Prototype Reference (v0.37.0 §68.5)
+
+When the change involves UI (design.md has a `## UI Contract` section), the execution-contract's `## UX 增量` section (consumed by `tf prototype-sync`) must **state the prototype version worktree path** in its first line:
+
+```markdown
+## UX 增量
+原型目标：<workspace>/.worktrees/prd-vN/prototype/（PRD 版本 vN，从 change-brief `upstream_plan_ref` 推导）
+[ADD] pages/xxx.html
+[MODIFY] pages/yyy.html
+```
+
+`[ADD]/[MODIFY]` relative paths stay prototype-root-relative; the stated worktree is what `prototype-sync` resolves to when `--prototype-dir` is absent (v0.37.0 §68.5 制品链路径版本化).
+
 ## Test Matrix Generation (v0.12 §42, v0.13 §52 B1 强制化)
 
 `test-matrix.md` 是 `execution-contract.md` 的**附属产物**（不是独立第 6 核心产物），在 contract 的 `## Test Matrix` 段引用。

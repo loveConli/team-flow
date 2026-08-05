@@ -1,6 +1,6 @@
 {
   "name": "team-flow",
-  "version": "0.36.4",
+  "version": "0.37.0",
   "description": "Spec-first workflow that bridges OpenSpec-style planning and Superpowers-style execution discipline.",
   "author": {
     "name": "MageByte",

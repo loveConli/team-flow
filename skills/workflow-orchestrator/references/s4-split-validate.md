@@ -137,6 +137,15 @@ Change C1 已就绪，运行 /workflow-start 进入变更级流程。
 执行顺序建议：C1 → (C2 ∥ C3) → C4（C2/C3 可并行）
 ```
 
+### 5.5 阶段产物同步门禁点（v0.37.0 §68.2 G3）
+
+S4 分发完成（orchestrator 结束）后，**阻塞确认**（AskUserQuestion）是否同步阶段产物（团队协作：成员领取任务的前提）：
+- **A 提交并推送**：`tf publish --changes --push`
+- **B 仅提交不推送**：`tf publish --changes`
+- **C 暂不同步**：结束编排，后续可补
+
+同步对象：`changes/*/`（脚手架 + change-brief.md）+ `.team-flow/`（change_dag / orchestrator.yaml）= 任务分发（成员领取）。
+
 ## 完成条件
 
 - change-split-auditor 审计 verdict = PASS（必选门禁已通过，含 v0.9 D5 拆分维度合规）

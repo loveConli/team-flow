@@ -15,7 +15,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, cpSync, mkdirSync } from 'node:fs';
-import { join, basename, relative } from 'node:path';
+import { join, basename, relative, sep, resolve } from 'node:path';
 
 /**
  * 解析 CLI 参数数组为结构化对象
@@ -37,6 +37,45 @@ function parseArgv(argv) {
 }
 
 /**
+ * 推导 change 所属 PRD 版本（v0.37.0 §68.5）。
+ * 优先级：change-brief.md 的 upstream_plan_ref → change 目录名 v{N}- 前缀。
+ * @returns {string|null} 如 'v2'；无法推导返回 null
+ */
+function derivePrdVersion(changeDir) {
+  const briefPath = join(changeDir, 'change-brief.md');
+  try {
+    if (existsSync(briefPath)) {
+      const content = readFileSync(briefPath, 'utf-8');
+      const m = content.match(/upstream_plan_ref:\s*prd\/(v\d+)\//);
+      if (m) return m[1];
+    }
+  } catch { /* ignore */ }
+  const m = basename(changeDir).match(/^v(\d+)-/);
+  if (m) return `v${m[1]}`;
+  return null;
+}
+
+/**
+ * 解析原型目录（v0.37.0 §68.5 制品链路径版本化）：
+ * --prototype-dir 显式指定优先；否则从 change 推导 PRD 版本 → 定位版本 worktree 的 prototype/。
+ * worktree 不存在时回退主仓库 prototype/ 并提示。
+ */
+function resolvePrototypeDir(changeDir, prototypeDirArg) {
+  if (prototypeDirArg) return prototypeDirArg;
+  const version = derivePrdVersion(changeDir);
+  if (!version) return 'prototype'; // 无法推导版本 → 回退主仓库 prototype/
+  const abs = resolve(changeDir);
+  const changesIdx = abs.lastIndexOf(sep + 'changes' + sep);
+  const workspaceRoot = changesIdx > 0 ? abs.slice(0, changesIdx) : process.cwd();
+  const branchName = `prd-${version}`;
+  const wt = join(workspaceRoot, '.worktrees', branchName, 'prototype');
+  if (existsSync(join(wt, '.git'))) return wt;
+  const fallback = join(workspaceRoot, 'prototype');
+  console.log(`ℹ️  原型版本 worktree 不存在（${wt}），回退 ${fallback}。原型独立仓库场景请先 \`tf prototype branch ${branchName}\`。`);
+  return fallback;
+}
+
+/**
  * 执行 prototype-sync 合并
  * @param {string[]|object} args - CLI 参数数组（从 tf 框架传入）或已解析的对象
  * @returns {{ synced: boolean, pages?: number, components?: number, designSystem?: boolean, conflicts?: string[], reason?: string }}
@@ -49,7 +88,7 @@ export function run(args = {}) {
 
   const changeDir = args._?.[0] || args.changeDir;
   const sourcePath = args.source;
-  const prototypeDir = args.prototypeDir || 'prototype';
+  const prototypeDir = resolvePrototypeDir(changeDir, args.prototypeDir);
 
   if (!changeDir) {
     console.error('Usage: tf prototype-sync <change-dir> [--source <ux-delta-path>] [--prototype-dir <path>]');

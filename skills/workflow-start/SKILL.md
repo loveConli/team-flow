@@ -93,6 +93,15 @@ Guard: `... check <dir> specifying bridging --json` → fail = BLOCK. Artifacts 
 ### Route to build-executor (dispatch sub-agent)
 Contract exists and approved, contract matches artifacts. Include `DP-4: 执行模式选择`: propose waves, run `tf execution recommend <change-dir> [--wave ...]`, show the user every available mode plus evidence and the recommendation, then obtain a clear selection. The command saves a current receipt; before the first implementation edit, `build-executor` must run `tf execution plan <change-dir> --mode <selected> --confirm ...` (and `--acknowledge-recommendation` when the selected mode differs from the recommendation) using matching artifacts, contract, and waves, then `tf execution show <change-dir> --json`; report the saved revision, selected mode, recommendation alignment, ordered waves, and actual concurrent-dispatch capability. A revision must repeat recommend and confirmation. Do not transition to `executing` until `show` reports `current: true`; then run `... check <dir> approved-for-build executing --json` → fail = BLOCK. **v0.13 §49 门禁前移**：该 guard 含 `test-matrix-ready` 维度——full 模式非存量 change 必须"带着矩阵开工"（矩阵存在非空 OR 显式 skip 附理由）；FAIL 时回 bridging 让 contract-builder 补矩阵，或按指引显式 skip，禁止绕过。
 
+### 阶段产物同步门禁点（v0.37.0 §68.2 G4）
+
+契约批准（DP-3）后、进入实施（DP-4）前，**阻塞确认**（AskUserQuestion）是否同步 change 规划制品（团队协作：契约是实施授权）：
+- **A 提交并推送**：`tf publish --changes <change-dir> --push`
+- **B 仅提交不推送**：`tf publish --changes <change-dir>`
+- **C 暂不同步**：直接进入实施，后续可补
+
+同步对象：change 规划制品 4+1（proposal / specs / design / tasks / execution-contract）+ `architecture/`。
+
 ### Route to bug-investigator
 Execution hit blockage: test failure, unexpected behavior, build error, task cannot proceed. After debugging, route back to build-executor.
 

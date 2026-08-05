@@ -87,6 +87,7 @@ prototype/
 ## 分支约定
 - 原型随 **PRD 当前版本分支**维护（如 `prd-v2` 分支的 `prototype/` = v2 产品原型）。
 - change 引用其所在 PRD 版本分支的 `prototype/`。
+- **版本 worktree 管理（v0.37.0 §68.4）**：原型为独立仓库（有远程），版本分支的 worktree 由 `tf prototype branch <prd-vN>` 创建/复用（隔离 + 团队拉取入口）；版本收尾（change_dag 该版本全部 closing）由 `tf prototype deisolate <prd-vN> --merge --clean` merge 回主干 + 清理（方案 A：merge 时机 = 版本收尾）。原型 worktree 布局 `<workspace>/.worktrees/prd-vN/prototype/`（与代码实施 `.worktrees/` 统一隔离区）。
 
 ## prototype-sync（change 完成回写，release-archivist 自动触发，v0.24.0 升级）
 

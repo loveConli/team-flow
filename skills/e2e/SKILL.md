@@ -52,5 +52,7 @@ user-invocable: true
 ## 复用机制
 单一 `e2e/` + `playwright.config.ts` `projects`(baseURL)：`prototype` project → http-server 托管 HTML；`integration` project → 真实应用。脚本一致，仅切地址 + 少量选择器/断言适配（高重叠复用，非零触碰；原型绿 ≠ 集成绿）。
 
+**原型期托管（v0.37.0 §68.5）**：`prototype` project 托管的原型 = 对应 PRD 版本 worktree 的 `prototype/`（`<workspace>/.worktrees/prd-vN/prototype/`，版本从 change-brief `upstream_plan_ref` 推导）；baseURL 指向该 worktree 的 http-server，**不指向主干旧版本原型**。该 worktree 缺失时回退 `<workspace>/prototype/` 并提示 `tf prototype branch <prd-vN>` 创建（与 prototype-sync 回退语义一致）。
+
 ## 与 release-archivist 衔接
 e2e 报告 + 4 级制品比对（L1 存在 / L2 实质 / L3 接线 / L4 数据流）作为 closing 验收 gate 的验证维度，由 `release-archivist` 接入（`ce-proof` 是 Proof 编辑器，与此无关）。

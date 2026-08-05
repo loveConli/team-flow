@@ -49,6 +49,7 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 
 ### 4. prototype（1 skill，本地 HTML 原型，v0.15.0 内部编排重构）
 - 全局一份 `prototype/`（与 PRD 同级，git 分支隔离），零外部依赖、可离线
+- **v0.37.0 版本 worktree 隔离**：原型独立仓库（有远程），版本分支 `prd-vN` 的 worktree 由 `tf prototype branch <prd-vN>` 创建/复用（隔离 + 团队拉取），版本收尾 `tf prototype deisolate <prd-vN> --merge --clean` merge 回主干（§68.4）；原型 worktree 布局 `<workspace>/.worktrees/<prd-vN>/prototype/`
 - **内部编排器（v0.15.0）**：主代理只编排不实施——环境探查(`prototype-env-scout`)→方案/人工评审→绘制(`prototype-builder`)→评审(`prototype-reviewer`)→循环→人工路由
 - **v0.20.0 产出质量闸门**：builder→reviewer 间主代理强制 `test -f && test -s` 校验入口产物落盘（不信 status=done 字面值，缺失则 resume，不空转评审）；后台子代理依赖 `<task-notification>` 完成通知，禁反复 `TaskOutput(block=true)` 轮询（设计 §22）
 - **v0.21.0 决策点中继（stop-and-resume）**：子代理（无 AskUserQuestion）决策点经 `SendMessage(to: main)` 发问即停，主代理收 task-notification 代问用户、回传自动 resume 子代理续跑；主代理须维护请求-应答匹配（设计 §22.1.1，修订 §18.1.2，LT 实证确认）

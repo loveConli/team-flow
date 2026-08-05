@@ -82,6 +82,15 @@ PRD草稿生成后：
 
 设置 `frozen_downstream`（见 state-model.md「双层冻结」）。冻结后，**迭代内变更不升版**，在 vN 内修订 + 记录决策/变更履历。
 
+### 4.5 阶段产物同步门禁点（v0.37.0 §68.2 G1）
+
+S2 冻结后，**阻塞确认**（AskUserQuestion）是否同步阶段产物（团队协作：PRD+原型是需求讨论基线）：
+- **A 提交并推送**：`tf publish --prd --push`；原型为独立仓库时先 `tf prototype branch <prd-vN>` 确认/创建版本 worktree（迭代完成 push `prd-vN` 分支供团队查看者 `tf prototype branch <prd-vN>` 一键拉取）
+- **B 仅提交不推送**：`tf publish --prd`
+- **C 暂不同步**：继续 S3，后续可补
+
+同步对象：`prd/vN/` + 原型（push `prd-vN` 分支）+ `.team-flow/`（orchestrator.yaml / registry.yaml）。
+
 ### 5. 复利捕获
 
 检测可复利时刻（需求矛盾、原型返工、自动评审发现不一致并修正等）。每次自动评审发现不一致并修正后触发：

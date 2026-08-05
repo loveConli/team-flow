@@ -203,6 +203,15 @@ tf solutions capture \
 
 This check is advisory — skip silently if no learnable moments are detected.
 
+### 阶段产物同步门禁点（v0.37.0 §68.2 G5）
+
+回写链（arch-merge → prototype-sync → test-merge → compound promotion）全部完成后、`tf state transition closing` 之前，**阻塞确认**（AskUserQuestion）是否同步 change 实施结果（团队协作：落地结果是团队最需要看的内容）：
+- **A 提交并推送**：`tf publish --changes <change-dir> --push`
+- **B 仅提交不推送**：`tf publish --changes <change-dir>`（arch-merge/test-merge 已自动 commit，此步补 push）
+- **C 暂不同步**：继续 closing，后续可补
+
+同步对象：实施代码 `changes/<change-dir>/` + arch-merge 回写（docs/architecture/）+ test-ledger（docs/test-ledger/）。**原型独立仓库场景**：若本 change 有 UX 增量回写原型，push 对应 `prd-vN` 分支（`tf prototype branch <prd-vN>` 确认/创建 worktree）。
+
 ### Worktree Deisolation (v0.35.0) — advisory
 
 After compound promotion, check if worktree isolation exists for this change:

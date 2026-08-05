@@ -34,6 +34,8 @@ const COMMANDS = {
   'install-qoder':    () => import('./lib/cmd-install-qoder.mjs'),
   'install-zcode':     () => import('./lib/cmd-install-zcode.mjs'),
   'prototype-sync':    () => import('./lib/prototype-sync.mjs'),
+  prototype:           () => import('./lib/cmd-prototype.mjs'),
+  publish:             () => import('./lib/cmd-publish.mjs'),
   'arch-merge':        () => import('./lib/arch-merge.mjs'),
   arch:                () => import('./lib/cmd-arch.mjs'),
   'test-merge':        () => import('./lib/test-merge.mjs'),
@@ -53,6 +55,12 @@ Commands:
   sync <change-dir>     Merge delta specs into main specs
   prototype-sync <change-dir> [--source <path>] [--prototype-dir <path>]
                         Merge UX delta into global prototype/ + design-system.md
+  publish <--prd|--arch|--changes <dir>|--all> [--push] [--dry-run]
+                        Commit stage artifacts (whitelist) + optional push (v0.37.0 §68.3)
+  prototype branch <prd-vN>
+                        Create/reuse prototype version worktree (v0.37.0 §68.4)
+  prototype deisolate <prd-vN> [--merge] [--clean]
+                        Version wrap-up: merge prototype branch back + clean worktree
   arch init [--mode reconstruction|design] [--baseline-ref <prd/vN/>]
                         Stamp project-level arch_baseline into .team-flow/arch-state.json (v0.35.0 §59.4)
   arch show             Show current project architecture baseline state

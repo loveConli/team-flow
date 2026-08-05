@@ -11,15 +11,19 @@ Create or refine planning artifacts when the change has moved beyond exploration
 
 Read `.team-flow.yaml` (especially `dp_0_decisions`, `dp_0_confirmed`) and any existing planning artifacts. If `dp_0_confirmed` is not `true`, stop and route back to `workflow-start` for DP-0.
 
-### Global Prototype Reading (v0.5)
+### Global Prototype Reading (v0.5, v0.37.0 版本化)
 
-Before generating artifacts, check if a global prototype exists:
-1. Read `prototype/flow.md` if it exists — this defines page navigation and user flows
-2. List `prototype/pages/` directory — these are the UI contract pages
-3. Read `prototype/design-system.md` if it exists — component and token definitions
-4. Store as UI contract context for design.md and tasks.md generation
+Before generating artifacts, **resolve the PRD version and locate the prototype worktree**:
+1. **版本推导（v0.37.0 §68.5）**：读 `change-brief.md` 的 `upstream_plan_ref: prd/vN/plan.md`（无 brief 时从 change 目录名 `v{N}-` 前缀推导）→ PRD 版本 vN
+2. **原型定位**：原型为独立仓库（有远程），版本 worktree = `<workspace>/.worktrees/prd-vN/prototype/`（该 worktree 不存在时回退 `<workspace>/prototype/` 并提示"原型应位于版本 worktree，`tf prototype branch <prd-vN>` 创建"）
+3. Read `prototype/flow.md` if it exists — this defines page navigation and user flows
+4. List `prototype/pages/` directory — these are the UI contract pages
+5. Read `prototype/design-system.md` if it exists — component and token definitions
+6. Store as UI contract context for design.md and tasks.md generation
 
-If `prototype/` does not exist or is empty, skip silently — not all projects have prototypes.
+If no prototype exists or it is empty, skip silently — not all projects have prototypes.
+
+**制品引用约定（v0.37.0 §68.5）**：design.md / tasks.md 中引用原型保留 `prototype/<rel>` 相对写法（可读性），但 `## UI Contract` / `**Prototype:**` 段必须**声明本 change 所属 PRD 版本 vN + 原型 worktree 路径**——实施阶段（build-executor）据此定位同一份原型，避免指向主干旧版本或空目录。
 
 ### Solutions Index (v0.5)
 

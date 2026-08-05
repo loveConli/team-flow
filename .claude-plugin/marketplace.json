@@ -9,7 +9,7 @@
     {
       "name": "team-flow",
       "description": "8-state spec workflow + compound global compounding + architecture-design (4A/DDD) + local HTML prototype + product-level orchestration + bootstrap + e2e + session handoff + workflow feedback. 24 skills + 15 agents with embedded TDD, SDD, code review, debugging, delta spec sync, and design-system-driven prototyping.",
-      "version": "0.36.4",
+      "version": "0.37.0",
       "source": "./",
       "author": {
         "name": "LT",
