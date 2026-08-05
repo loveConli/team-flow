@@ -1,6 +1,6 @@
 # team-flow
 
-> 当前版本：`v0.36.2`
+> 当前版本：`v0.36.3`
 
 > 统一插件：**team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同。
 
@@ -64,7 +64,7 @@ cp -r <plugin>/skills/prototype/references/prototype-scaffold/ <project>/prototy
 prd/               PRD + 实施方案 + 原型审查记录（v1→v2，分支隔离）
 prototype/         全局原型（UI 契约真相源）
 docs/
-  ├── architecture/  全局架构锚点（ARCHITECTURE.md / DATABASE.md / <bc>/ / baseline.md）
+  ├── architecture/  全局架构三层（v0.36.0）：ARCHITECTURE.md / PHYSICAL-MODEL.md / DATABASE.md / API-INDEX.md / INDEX.md / domains/<bc>.md / iterations/vN/（产品级快照）/ baseline.md
   └── solutions/     复利经验库（三层索引：INDEX.md → 分阶段目录 → 经验文件）
 specs/<cap>/        每变更设计/任务/契约 + learnings.md
 STRATEGY.md CONCEPTS.md 策略 / 领域词汇

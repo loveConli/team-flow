@@ -83,7 +83,7 @@ prd_draft → user_review → prototype_loop → prd_frozen → completed
 
 **评审门**：产出经 architecture-reviewer product 视角（`review_mode: product`，A1-A6）评审，**PASS 才进 S4**。
 
-**输出契约**：`docs/architecture/iterations/vN/architecture.md` + 评审 verdict；`orchestrator.yaml` 中 ARCH phase 状态 = completed（`workflow_phase: architecture`）。
+**输出契约**：`docs/architecture/iterations/vN/architecture.md` + 评审 verdict；`orchestrator.yaml` 中 ARCH phase 状态 = completed（`workflow_phase: architecture`）。**首轮项目（`arch_baseline` 缺失）评审 PASS 后执行 `tf arch init --mode reconstruction|design --baseline-ref prd/vN/` 打戳**（v0.36.3）——arch 门禁豁免键由此建立，项目进入「已建档」正轨。
 
 ### S4: 拆分验证与分发
 

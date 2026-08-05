@@ -6,6 +6,22 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.36.3] - 2026-08-05
+
+### Fixed（v0.14 全链路缺口修复——27 项，复利链路 + agent 契约 + 门禁时序 + 交接/决策门 + guard hook + 快照生命周期 + 旧项目 + 文档同步 + 横展）
+
+- **复利链路（严重 #4）**：solutions PHASES 加 architecture；architecture-design 加载协议加复利注入（`tf solutions inject --phase architecture`）；S3.5 SOP 加复利捕获（Step 9）；ce-compound 补架构自动捕获场景
+- **agent 契约（严重 #1 #2）**：architecture-design / architecture-reviewer agent 加 product 模式（mode 参数/快照输入/INPUT_ERROR 分 mode/Phase1-A3 分叉/报告落盘 iterations/vN/auto-review.md）
+- **门禁触发点（严重 #3）**：`tf arch init` 打戳加 SOP 触发点（S3.5 完成条件 + orchestrator ARCH 节）——arch_baseline 从此可建立，arch 门禁不再永久空转
+- **门禁时序（重要 #5 + 一般 #16 #21）**：skip 物化限定最新迭代（防旧 SKIPPED 错误豁免）；iterations 数字排序（v10+）；FAIL 提示文案修正
+- **arch 门禁测试（重要 #10）**：新增 tests/lib/guard-arch-gates.test.mjs（7 例）；guard-dimensions 更新 16 维度 + arch-readiness 断言
+- **交接/决策门（重要 #12 #7 #6）**：change-brief 加 upstream_arch_ref；架构修订决策门 SOP 定义（deviation 登记）；API-INDEX 只扫已关闭 change；首轮特例状态标注；arch-snapshot 在途兜底
+- **guard hook + 门禁说明（重要 #9 #11）**：pre-tool-use-guard 豁免 docs/architecture/iterations/ + .team-flow/；workflow-start/release-archivist 补 arch 门禁说明 + FAIL 升级路径
+- **快照生命周期（重要 #8 + 一般 #17）**：s5-monitoring 迭代收尾标 archived；S3.5 补 domains/ + diagrams/ 产出 SOP
+- **旧项目链路（重要 #14 + 一般 #22）**：workflow-bootstrap 感知 arch-reverse-analyst/逆向重建（B5 + 修正陈旧指引）；recon-probe.sh 路径修正
+- **文档同步（一般 #15 #19 #20）**：AGENTS.md/README 目录树三层化；ch06/state-model/loading-protocol/模板 marker 陈旧修正；workspace 登记（design-doc-system/roadmap）
+- **横展（一般 #13 + 建议 #24 #25）**：arch-merge 白名单补 changelog/；doctor 加 arch-state 体检；cross-change 对照产品级注册表
+
 ## [0.36.2] - 2026-08-05
 
 ### Fixed

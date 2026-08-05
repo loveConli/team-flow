@@ -111,7 +111,7 @@ phases:
 | 门禁 | 挂点 | 校验 | 豁免 |
 |------|------|------|------|
 | 产品级评审门 | ARCH→S4 | architecture-reviewer product 视角 PASS | skip 时仍要物化标记 |
-| arch-readiness | S4 拆分 | iterations/vN/ 快照覆盖 change 触及的 BC | arch_baseline 缺失 → WARN 不 FAIL |
+| arch-readiness | exploring:specifying（guard 存在性）+ S4 拆分（LLM 覆盖校验） | iterations/vN/ 快照覆盖 change 触及的 BC | arch_baseline 缺失 → WARN 不 FAIL |
 | arch-snapshot | executing→closing | 本轮快照已落盘 | 在途 change legacy 豁免 |
 
 ## arch_baseline 豁免键（v0.35.0 新增）

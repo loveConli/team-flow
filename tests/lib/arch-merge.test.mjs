@@ -54,6 +54,8 @@ ${epRows}
 | sql/ddl/001.sql | CREATE TABLE | t_order | 订单表 |
 `);
   if (ddl) fs.writeFileSync(path.join(dir, 'sql', 'ddl', '001.sql'), ddl);
+  // v0.36.3：change 需带 state: closed 才能被 API-INDEX 扫描（isChangeClosed 过滤在途 change）
+  fs.writeFileSync(path.join(root, 'changes', name, '.team-flow.yaml'), 'state: closed\n');
   return path.join(root, 'changes', name);
 }
 

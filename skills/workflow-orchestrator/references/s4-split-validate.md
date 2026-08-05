@@ -84,6 +84,7 @@ tf state init changes/v1-C2-policy-management
 upstream_source: orchestrator          # orchestrator | manual | null
 upstream_req_id: <req-id>              # 对应 .team-flow/requirements/<req-id>/
 upstream_plan_ref: prd/vN/plan.md      # hotfix/快速通道为 null
+upstream_arch_ref: docs/architecture/iterations/vN/architecture.md  # 产品级架构快照（v0.36.3）；ARCH skip 或 hotfix 为 null
 upstream_change_id: C2                 # 对应 change_dag.id
 plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层未同步
 ---
@@ -99,7 +100,7 @@ plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层�
 <取自 auditor 报告 Dim1 覆盖矩阵中映射到本 change 的 AC，逐条列出>
 
 ## 全局技术方向
-<取自 plan.md 高阶技术设计段的要点指针：模块边界/技术选型/数据流方向，供 spec-writer 作 design.md 约束>
+<取自 plan.md 高阶技术设计段的要点指针：模块边界/技术选型/数据流方向，供 spec-writer 作 design.md 约束；**BC 边界/聚合所有权以 `upstream_arch_ref` 产品级快照为准**（v0.36.3），plan.md 仅高阶方向>
 
 ## PRD & plan 引用
 - PRD: prd/vN/prd.md §<相关章节>

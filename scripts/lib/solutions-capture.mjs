@@ -14,7 +14,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync, appendFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const PHASES = ['prd', 'plan', 'prototype', 'spec', 'build', 'review', 'cross-phase'];
+const PHASES = ['prd', 'plan', 'architecture', 'prototype', 'spec', 'build', 'review', 'cross-phase'];
 const MAX_INDEX_LINES = 150;
 
 function slugify(text) {

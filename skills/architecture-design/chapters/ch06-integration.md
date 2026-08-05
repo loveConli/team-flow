@@ -38,14 +38,14 @@ changes/<name>/              # change 容器
 
 ## 复利回写（借鉴 ce-compound，已正名）
 - **one change per run**：一次回写一个变更 delta，可追溯、不混杂。
-- 全局 ARCHITECTURE.md 维护双视图：`## 当前态`（覆盖式，每 BC/聚合仅留最新有效定义）+ `## 演进日志`（append-only，含 change_id+来源）。
+- 全局 ARCHITECTURE.md 维护双视图（v0.36.0 实现为 marker 区 + 演进日志）：`<!-- arch:current-state:begin/end -->` marker 区（覆盖式，arch-merge 代码独占写 + 成对校验，每 BC/聚合仅留最新有效定义）+ `## 演进日志`（changeName 去重，替代原 append-only 重复标题）。
 - **架构一致性/漂移检查**（独立于 Discoverability）：①结构冲突（重复 BC/聚合 key）②语义冲突（同义异名，如客户vs用户）③跨域一致性门禁（AA≥1 IA 实体，反之亦然）。
 - **Discoverability 正名**：在 AGENTS.md/CLAUDE.md 暴露 `docs/architecture/`，使代理设计前"发现并查阅"（存在/结构/何时检索）——这是 compound 原义，勿与内容冲突检查混淆。
 - 下游检索复用：下一 change 设计前从 `docs/architecture/` 检索相关上下文/聚合（grounding 用 CONCEPTS.md）。
 
 ## 集成纪律（来自 team-flow 源码事实）
 - **design.md 不可变**：原型覆盖层 never mutate design.md/tasks.md。原型结论走 `handoff --type prototype` → 新 requirement delta → 正常 `specifying→closing→spec-merger` 闭环，不得直接改 design.md。
-- **guard 软集成**：三份增量文档为推荐产出、非阻断；全局回写经独立 `arch-compound` skill/overlay，不进状态机硬矩阵；frontmatter 校验仅 advisory 脚本（正则提取 key，不引第三方 YAML 依赖），保全零依赖。
+- **guard 软集成**：三份增量文档为推荐产出、非阻断；全局回写经 `tf arch-merge` 命令（v0.36.0 重构：当前态幂等 upsert + 生成式 PHYSICAL-MODEL/DATABASE/API-INDEX + 冲突预检 + 并发安全，原 arch-compound skill/overlay 概念已由该命令承接）；frontmatter 校验仅 advisory 脚本（正则提取 key，不引第三方 YAML 依赖），保全零依赖。
 - **术语正名**：IA/AA 非"技术架构"（仅 TA 是）；4A 是四域非三层；技术架构对 STRATEGY.md 是"补位 compound 缺位"而非"修正其错误"，且 ARCHITECTURE.md 是 anchor 而非评审巨著。
 
 ## 第二大脑整合（ima「LT的知识库」）

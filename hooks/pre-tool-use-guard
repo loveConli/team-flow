@@ -142,6 +142,21 @@ if [ -n "$file_path" ] && [ "${file_path##*/}" != ".team-flow.yaml" ]; then
   esac
 fi
 
+# --- v0.36.3 (§7.3): product-level architecture dir exemption ---------------
+# ARCH 阶段（S3.5）写 docs/architecture/iterations/ 快照、SKIPPED 标记、
+# .team-flow/ 产品级状态（orchestrator.yaml）是合法非 build 态写入。
+# .team-flow.yaml（change 状态）不在豁免内（state 禁写红线保留）。
+if [ -n "$file_path" ]; then
+  case "$file_path" in
+    */docs/architecture/iterations/*) allow ;;
+    */.team-flow/*) allow ;;
+  esac
+  case "${file_path#/private}" in
+    */docs/architecture/iterations/*) allow ;;
+    */.team-flow/*) allow ;;
+  esac
+fi
+
 # --- decision --------------------------------------------------------------
 case "$state" in
   approved-for-build|executing|debugging)

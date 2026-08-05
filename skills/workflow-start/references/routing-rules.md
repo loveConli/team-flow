@@ -9,6 +9,8 @@ Change is fuzzy, scope unclear, comparing options, no stable change name.
 
 Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before spec-writer.
 
+**架构门禁（v0.36.0 / v0.36.3）**：`exploring→specifying` 还挂 `arch-readiness` 维度（产品级架构快照 `iterations/vN/architecture.md` 存在 或 ARCH skip 物化 或 在途兜底）。**FAIL 升级路径**：回 orchestrator 的 ARCH 阶段补快照（或确认 ARCH skip 物化）；`arch_baseline` 缺失（存量项目）→ WARN 不阻断。判定逻辑见 `scripts/guard/checks/arch-gate-exemptions.mjs`。
+
 ### Step 1: Dispatch architecture-design sub-agent
 
 Dispatch `architecture-design` as sub-agent with inputs:

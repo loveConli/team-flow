@@ -120,9 +120,10 @@ function buildCurrentStateSection(aggregates, changeName) {
     lines.push(`| ${bc} | ${aggs.length} |`);
   }
   lines.push('', '### 聚合注册表');
-  lines.push('| 聚合ID | 上下文 | 根实体 | 来源 | 关键不变量 |', '|--------|--------|--------|------|-----------|');
+  // v0.36.3 §62.1 首轮特例：全局聚合全部来自已合并 change（=已落地态）；状态列标注
+  lines.push('| 聚合ID | 上下文 | 根实体 | 来源 | 状态 | 关键不变量 |', '|--------|--------|--------|------|------|-----------|');
   for (const a of aggregates) {
-    lines.push(`| ${a.id} | ${a.context} | ${a.root} | change:${changeName} | ${a.invariants || '—'} |`);
+    lines.push(`| ${a.id} | ${a.context} | ${a.root} | change:${changeName} | 已落地 | ${a.invariants || '—'} |`);
   }
   return lines.join('\n');
 }
@@ -224,10 +225,19 @@ function generateDatabase(globalArchDir, schemaPath) {
   return { generated: true, file: 'DATABASE.md', tables: tables.length };
 }
 
+/** v0.36.3 §62.4：判断 change 是否已关闭（读 .team-flow.yaml state）。 */
+function isChangeClosed(changeRoot) {
+  const stateFile = join(changeRoot, '.team-flow.yaml');
+  if (!existsSync(stateFile)) return false;
+  const m = readFileSync(stateFile, 'utf-8').match(/^state:\s*(.*)$/m);
+  const state = m ? m[1].trim() : '';
+  return state === 'closed' || state === 'closing';
+}
+
 /**
  * Step 6: API-INDEX.md 生成式（api-scan 核心）。
  * 扫描项目根下所有已关闭 change 的 architecture/api.md + domains/，归一化端点重建。
- * 保护：重建结果为空 → 拒绝覆盖（防历史手工端点被抹）。
+ * 保护：①重建结果为空 → 拒绝覆盖（防历史手工端点被抹）；②只扫已关闭 change（v0.36.3，在途半成品端点不得入全局）。
  */
 function generateApiIndex(projectRoot, globalArchDir, changeName) {
   const changesDir = join(projectRoot, 'changes');
@@ -237,7 +247,9 @@ function generateApiIndex(projectRoot, globalArchDir, changeName) {
   const endpoints = [];
   if (existsSync(changesDir)) {
     for (const changeDirName of readdirSync(changesDir)) {
-      const apiPath = join(changesDir, changeDirName, 'architecture', 'api.md');
+      const changeRoot = join(changesDir, changeDirName);
+      if (!isChangeClosed(changeRoot)) continue; // v0.36.3：只扫已关闭 change
+      const apiPath = join(changeRoot, 'architecture', 'api.md');
       if (!existsSync(apiPath)) continue;
       const ep = extractEndpoints(readFileSync(apiPath, 'utf-8'));
       for (const e of ep) endpoints.push({ ...e, source: changeDirName });
@@ -378,14 +390,17 @@ function preCheck(changeDir, archDir, projectRoot) {
 /* ============ Step 5: 变更脚本归档（保留） ============ */
 
 function archiveChangeScripts(changeDir, archDir, globalArchDir, changeName) {
-  const report = { ddl: 0, migration: 0 };
+  const report = { ddl: 0, migration: 0, files: [] };
   for (const subDir of ['ddl', 'migration']) {
     const srcDir = join(archDir, 'sql', subDir);
     const dstDir = join(globalArchDir, 'changelog', subDir);
     if (!existsSync(srcDir)) continue;
     if (!existsSync(dstDir)) makeDir(dstDir);
     const files = readdirSync(srcDir).filter(f => f.endsWith('.sql'));
-    for (const f of files) copyFile(join(srcDir, f), join(dstDir, f));
+    for (const f of files) {
+      copyFile(join(srcDir, f), join(dstDir, f));
+      report.files.push(join(dstDir, f)); // v0.36.3：changelog 文件入白名单（防自我制造脏文件告警）
+    }
     report[subDir] += files.length;
   }
   return report;
@@ -513,6 +528,7 @@ export function run(args = {}) {
       join(globalArchDir, 'schema-baseline.sql'),
       join(globalArchDir, 'API-INDEX.md'),
       join(globalArchDir, 'INDEX.md'),
+      ...(archiveResult.files || []),  // v0.36.3：changelog/ 复制文件入白名单
     ].filter(p => existsSync(p));
     const dirty = detectUntouchedDirtyFiles(globalArchDir, touchedFiles);
     if (dirty.length > 0) {

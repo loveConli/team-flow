@@ -90,6 +90,16 @@ description: 基于 4A 企业架构 + DDD 领域驱动设计的架构/API/DB 设
 
 变更级聚合动作限三类：`extend`（既有聚合加字段/指令/事件/状态）、`new`（新增聚合，flag 登记待产品级晋升）、`refactor`（需决策门）。聚合 id 一律引用产品级注册表，不重定义（防重发明，v0.14 §61.3）。
 
+### 架构修订决策门（v0.36.3 定义，v0.14 §61.3/§61.4）
+
+**触发**：change 级设计触及产品级决策（BC 边界变更 / 聚合所有权变更 / 全局契约变更），或 arch-merge 冲突预检阻断聚合重定义。
+
+**流程**（不硬阻断，显式确认 + 登记 deviation）：
+1. **呈现变更摘要**：涉及的产品级决策 + 影响范围（引用快照章节）
+2. **用户确认**（阻塞问题工具）：接受 → 执行变更；拒绝 → 保持产品级定义，change 内走增量
+3. **登记 deviation**：确认后写入 `orchestrator.yaml` 的 `replan_log`（`seq/trigger: arch-deviation/before/after/approved_by`）+ 在 `iterations/vN/architecture.md` 演进日志追加修订记录（迭代收尾 S3.5 确认晋升）
+4. **`new` 聚合 flag**：在 `iterations/vN/architecture.md` 聚合注册表标注 `[pending-promotion]`，待下一迭代产品级晋升
+
 ### 执行流程
 
 ```
@@ -181,6 +191,10 @@ architecture-design 执行时的上下文组装：
 2. 按 phase 过滤：`database` / `backend` / `api`
 3. 读取匹配的 `.team-flow/conventions/*.md` 文件
 4. 注入为架构决策约束（advisory 级）
+
+**架构复利注入（v0.36.3，复利链路修复）**：
+1. 执行 `tf solutions inject --phase architecture`（失败静默）——注入 `docs/solutions/` 中 phase=architecture 的历史架构决策经验（BC 边界取舍/聚合划分理由/事件投影设计踩坑）
+2. 读取失败 / 无条目 → 静默跳过，不阻断（advisory 级，与 S1 复利注入同语义）
 
 **始终加载**：
 1. `Read docs/architecture/INDEX.md`（~50行摘要）

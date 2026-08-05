@@ -100,13 +100,13 @@ prd/                    PRD（有版本 v1→v2→v3，git 分支隔离）
       ├── prd-completeness-review.md # PRD 完整性评审报告（prd-completeness-reviewer 产出，v0.15.0 新增）
 prototype/             全局原型系统（UI 契约真相源）：index.html / pages / components / assets / design-system.md / flow.md
 docs/
-  ├── architecture/    全局架构锚点：ARCHITECTURE.md / DATABASE.md / <bc>/（限界上下文目录）/ baseline.md（v0.6 新增）
+  ├── architecture/    全局架构三层（v0.36.0）：L1 当前态（ARCHITECTURE.md marker 区 / PHYSICAL-MODEL.md / DATABASE.md / API-INDEX.md / INDEX.md / domains/<bc>.md / diagrams/ / schema-baseline.sql / baseline.md）+ L2 changelog/ + L3 iterations/vN/architecture.md（产品级快照，archived 退役）
   └── solutions/       复利经验库（v0.5 新增，三层索引）
       ├── INDEX.md     # L1 轻量索引（≤150行，每条一行摘要+标签）
-      ├── prd/ plan/ prototype/ spec/ build/ review/ cross-phase/  # L2 分阶段目录
+      ├── prd/ plan/ architecture/ prototype/ spec/ build/ review/ cross-phase/  # L2 分阶段目录（v0.36.0 加 architecture）
       └── <file>.md    # L3 经验文件（YAML frontmatter: phase/domain/type/severity）
-changes/<name>/        变更脚手架（S4 创建）：.team-flow.yaml（变更级状态文件，P1-6 第二阶段改名 .team-flow.yaml）
-specs/<cap>/            每变更设计/任务/契约：spec.md / design.md / tasks.md / execution-contract.md / architecture.md / database.md / api.md / learnings.md
+changes/<name>/        变更脚手架（S4 创建）：.team-flow.yaml（变更级状态文件）/ change-brief.md（产品级交接物，含 upstream_arch_ref）/ architecture/（变更级三件套 + sql/）
+specs/<cap>/            每变更设计/任务/契约：spec.md / design.md / tasks.md / execution-contract.md / learnings.md（v0.9 起 architecture/ 三件套已迁至 changes/<name>/architecture/）
 STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 ```
 

@@ -1,5 +1,5 @@
 // tests/e2e/deterministic/guard-dimensions.test.mjs
-// Tier 1 确定性：14 个 guard 维度正负向（用 checks[] 逐维度解耦断言，互不干扰）。
+// Tier 1 确定性：16 个 guard 维度正负向（含 v0.36.0 arch-readiness / arch-snapshot；用 checks[] 逐维度解耦断言，互不干扰）。
 // 来源：设计 §七 Tier1 矩阵 + 评审 #1 1a（全维度覆盖）+ #2（负向）+ #3 M1（test-matrix-complete）。
 // guard 不校验目录实际 state 是否等于 from，只按 from:to 跑维度并读取产物/字段——
 // 故可在任意 state 的 fixture 上对任意 from:to 检视特定维度。
@@ -39,14 +39,15 @@ describe('T1 guard: artifacts-exist 维度（specifying→bridging）', () => {
   });
 });
 
-// ── exploring → specifying：arch-design（v0.32.2 P3-10 起仅此维度）──────────
+// ── exploring → specifying：arch-design + arch-readiness（v0.36.0 增 arch-readiness）──
 describe('T1 guard: exploring→specifying 维度', () => {
-  it('维度清单仅含 arch-design（artifacts-exist 已移走，P3-10）', () => {
+  it('维度含 arch-design + arch-readiness（artifacts-exist 已移走，P3-10）', () => {
     const fix = track(makeChange({ state: 'exploring', artifacts: false })); // 无产物也过——产物不再是本转换的判据
     const r = guardCheck(fix.changeDir, 'exploring', 'specifying');
     assert.equal(r.error, null);
     const dims = r.checks.map(c => c.dimension);
     assert.ok(dims.includes('arch-design'), `应含 arch-design，实际: ${dims.join(',')}`);
+    assert.ok(dims.includes('arch-readiness'), `应含 arch-readiness（v0.36.0），实际: ${dims.join(',')}`);
     assert.ok(!dims.includes('artifacts-exist'), 'artifacts-exist 不应再挂 exploring→specifying');
   });
 

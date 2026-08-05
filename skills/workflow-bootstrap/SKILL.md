@@ -56,7 +56,7 @@ Do NOT invoke for:
 > **硬原则**：主代理只编排（派发 + 汇总 + 写 baseline.md），侦察执行下沉子代理（§18.1 交接协议）。先跑确定性脚本固定化采集基底，再派子代理做语义增强——**可复现、可横展对比**。
 
 - **模式**（询问用户）：Quick（默认，技术栈+模块+架构模式+测试文档，~2 分钟）/ Deep（+数据模型+API 表面，~10 分钟）。
-- **B1.1 脚本采集**：`bash scripts/recon-probe.sh --root <根> --out /tmp/recon-<slug>.json`（固定化，两次接入结果一致）。
+- **B1.1 脚本采集**：`bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --root <根> --out /tmp/recon-<slug>.json`（固定化，两次接入结果一致）。
 - **B1.2 并行子代理**：读 `references/agents/codebase-recon-analyst.md`，把 JSON 路径作 `recon_json` 入参，按维度并行派发（§18.1 返回）。
 - **B1.3 主代理汇总**：只汇总不重新侦察，整合已有文档（合并而非覆盖，标注来源），写 `docs/architecture/baseline.md`。
 
@@ -124,7 +124,7 @@ Step 1: 询问用户是否有既有成果物
 
 Step 2: 确定性提取（兜底）
   ├── recon-probe.sh DDL 提取能力（v0.24.0 已实现：SQL 文件 / Java Entity / 占位）
-  │   bash scripts/recon-probe.sh --root <根> --ddl-out docs/architecture/schema-baseline.sql
+  │   bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --root <根> --ddl-out docs/architecture/schema-baseline.sql
   ├── 从 schema-baseline.sql 反向生成 PHYSICAL-MODEL.md
   └── 扫描 Controller/Router 类 → 生成 API-INDEX.md
 
@@ -142,8 +142,8 @@ Step 2: 确定性提取（兜底）
 
 **轻量 vs 完整**：
 - bootstrap 产出的是**基线快照**（As-Is 当前态），不是完整的 4A+DDD 设计
-- 完整的架构演进仍走 `/architecture-design` 的标准增量流程
-- 如果用户需要完整架构设计，B2 结束后建议："基线已建立。如需完整架构设计，请运行 `/architecture-design`"
+- 完整的架构演进：既有代码库的**逆向重建**走 workflow-orchestrator 的 ARCH 阶段（S3.5 reconstruction 模式，`arch-reverse-analyst`，v0.36.0）；全新架构设计走 ARCH 正向设计
+- 如果用户需要完整架构设计，B2 结束后建议："基线已建立。如需完整架构设计（逆向重建或正向设计），请进入 workflow-orchestrator 的 ARCH 阶段"（v0.36.3 修正——原指引导向 change 级 skill 已过时）
 
 **已有架构文档处理**：
 - 如果 `docs/architecture/ARCHITECTURE.md` 已存在 → 读取并整合，不覆盖
@@ -190,9 +190,12 @@ Step 2: 确定性提取（兜底）
 询问用户：
 
 > 您希望从哪个需求开始使用 team-flow？
-> - A) 我有一个具体的功能需求（→ 进入 workflow-orchestrator S1）
+> - A) 我有一个具体的功能需求（→ 进入 workflow-orchestrator S1，S3 后进 ARCH 产品级架构设计）
 > - B) 我有一个模糊的产品方向（→ ce-brainstorm）
 > - C) 我只是想建立架构基线，暂不开发新需求（→ 结束）
+> - D) 我想从既有代码逆向重建完整架构（→ 进入 workflow-orchestrator ARCH 阶段 reconstruction 模式，arch-reverse-analyst，v0.36.0；重建 PASS 后 `tf arch init` 打戳）
+
+**逆向重建衔接（v0.36.3）**：ARCH 阶段 reconstruction 模式复用本 bootstrap 的 recon-probe.sh（--ddl-out）+ codebase-recon-analyst，并派发 `arch-reverse-analyst` 补 BC/状态/指令事件维度（见 `references/agents/arch-reverse-analyst.md`）。
 
 **上下文传递**：
 - 将 `docs/architecture/baseline.md` 和 `docs/architecture/CONCEPTS.md` 的路径传递给 workflow-orchestrator S1

@@ -20,6 +20,7 @@ You are a read-only checker. You did NOT implement any change. You read all chan
 |-----------|-------------|
 | `change_dirs[]` | 多个 change 目录路径（e.g., `changes/change-1/`, `changes/change-2/`） |
 | `arch_path` | 全局架构目录（e.g., `docs/architecture/`，含 ARCHITECTURE.md / DATABASE.md） |
+| `product_snapshot_path` | 产品级架构快照 `docs/architecture/iterations/vN/architecture.md`（v0.36.3；聚合注册表唯一事实源，若存在） |
 | `prototype_path` | 全局原型目录（e.g., `prototype/`） |
 
 If `change_dirs` has fewer than 2 entries, Dim 1/2 are skipped (single change has no cross-change conflict). If `arch_path` or `prototype_path` is missing, the corresponding dimension is skipped with a note.
@@ -81,7 +82,7 @@ Use `grep` to search for API references across change specs and design docs.
 1. **Enumerate changes**: read each change directory's spec/design/tasks files
 2. **Dim 1**: Extract modified domain files per change, build mutation map, identify overlaps
 3. **Dim 2**: Extract API surface changes per change, cross-reference dependencies
-4. **Dim 3**: Read architecture anchors, compare each change against them
+4. **Dim 3**: Read architecture anchors **+ 产品级快照聚合注册表**（`product_snapshot_path`，v0.36.3——聚合注册表是唯一事实源，跨 change 冲突检测以它为准），compare each change against them
 5. **Dim 4**: Scan prototype testids, compare against change implementations
 6. **Aggregate**: collect all findings, grade by severity, produce report
 

@@ -39,30 +39,45 @@ export function isLegacyArch(state) {
   return state?.arch_baseline == null;
 }
 
-/** 项目级显式 skip 是否已物化（iterations/vN/SKIPPED 标记存在）。 */
-export function isArchSkipMaterialized(root) {
+/** 列出所有迭代目录（数字排序，v10 正确处理——字典序 v10 < v2 会取错最新）。 */
+export function listIterationDirs(root) {
   const iterationsDir = root && path.join(root, 'docs', 'architecture', 'iterations');
-  if (!iterationsDir || !fs.existsSync(iterationsDir)) return false;
+  if (!iterationsDir || !fs.existsSync(iterationsDir)) return [];
   return fs.readdirSync(iterationsDir, { withFileTypes: true })
     .filter(d => d.isDirectory())
-    .some(d => fs.existsSync(path.join(iterationsDir, d.name, 'SKIPPED')));
+    .map(d => d.name)
+    .sort((a, b) => {
+      const na = parseInt(a.replace(/\D/g, ''), 10) || 0;
+      const nb = parseInt(b.replace(/\D/g, ''), 10) || 0;
+      return na - nb;
+    });
+}
+
+/** 最新迭代目录路径（数字排序后最后）。无迭代 → null。 */
+export function findLatestIterationDir(root) {
+  const dirs = listIterationDirs(root);
+  if (dirs.length === 0) return null;
+  return path.join(root, 'docs', 'architecture', 'iterations', dirs[dirs.length - 1]);
+}
+
+/**
+ * skip 物化检查：只认最新迭代目录的 SKIPPED（v0.36.3 修复——防旧迭代陈旧标记
+ * 错误豁免新迭代的结构性变更，P3 原则要防的失效模式）。
+ */
+export function isArchSkipMaterialized(root) {
+  const latest = findLatestIterationDir(root);
+  if (!latest) return false;
+  return fs.existsSync(path.join(latest, 'SKIPPED'));
 }
 
 /** 最近一个迭代的产品级架构快照路径（iterations/<latest>/architecture.md）。不存在 → null。 */
 export function findLatestIterationSnapshot(root) {
-  const iterationsDir = root && path.join(root, 'docs', 'architecture', 'iterations');
-  if (!iterationsDir || !fs.existsSync(iterationsDir)) return null;
-  const dirs = fs.readdirSync(iterationsDir, { withFileTypes: true })
-    .filter(d => d.isDirectory())
-    .map(d => d.name)
-    .sort();
-  for (let i = dirs.length - 1; i >= 0; i--) {
-    const snap = path.join(iterationsDir, dirs[i], 'architecture.md');
-    if (fs.existsSync(snap)) return snap;
-  }
-  return null;
+  const latest = findLatestIterationDir(root);
+  if (!latest) return null;
+  const snap = path.join(latest, 'architecture.md');
+  return fs.existsSync(snap) ? snap : null;
 }
 
 export const ARCH_READINESS_FAIL_HINT =
-  'iterations/vN/architecture.md missing — 回 ARCH 阶段补快照，'
-  + '或显式 skip 物化（iterations/vN/<vN>/SKIPPED 标记 + 理由）';
+  'iterations/<vN>/architecture.md missing — 回 ARCH 阶段补快照，'
+  + '或显式 skip 物化（iterations/<vN>/SKIPPED 标记 + 理由）';

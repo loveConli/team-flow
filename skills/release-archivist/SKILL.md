@@ -125,6 +125,8 @@ If implementation diverged from the contract, return to `bridging` before closur
 
 Run `tf state transition <change-dir> closing`. If delta specs exist, route to `spec-merger`.
 
+**架构快照门禁（arch-snapshot，v0.36.0 / v0.36.3）**：`executing→closing` 挂 `arch-snapshot` 维度——本轮迭代产品级架构快照 `iterations/vN/architecture.md` 必须已落盘（"先快照后回写"强制化）。**FAIL 升级路径**：回 orchestrator 的 ARCH 阶段补快照；存量升级在途 change（快照缺失但 change 有增量产物）→ WARN 兜底放行；`arch_baseline` 缺失 → WARN 不阻断。hotfix/tweak 豁免（不挂该维度）。判定逻辑见 `scripts/guard/checks/arch-gate-exemptions.mjs`。
+
 ### Architecture Merge (v0.10 §28-§31) — MUST run first
 
 Merge change-level architecture artifacts to the global `docs/architecture/` baseline **before** any other post-verification step:

@@ -58,4 +58,5 @@ S5 是动态重规划的主要触发点。当检测到需要重新拆分（跨 c
 - 所有 change closed
 - 复利晋升已完成
 - 跨 change 一致性已确认（无未解决冲突）
+- **架构迭代收尾（v0.36.3，快照生命周期）**：本轮迭代 `docs/architecture/iterations/vN/architecture.md` 的 `snapshot_status` 标 `archived`（预测态退役，全局当前态 = 唯一权威，P1）——已建档项目的迭代收尾动作
 - S5 状态 = completed

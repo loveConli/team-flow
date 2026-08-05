@@ -299,6 +299,32 @@ function checkChangeTestGates(root) {
   return { pass: true, message: `${checked} change(s) pass test-gate hygiene (skip reasons + artifact references)` };
 }
 
+// v0.36.3 建议项：arch-state / iterations 一致性体检
+// 1. arch_baseline 已打戳但 iterations/ 无任何产品级快照 → arch 门禁将 FAIL（需回 ARCH 补快照）
+// 2. SKIPPED 与快照并存 → 语义矛盾
+function checkArchState(root) {
+  const warnings = [];
+  const archStatePath = join(root, '.team-flow', 'arch-state.json');
+  const iterationsDir = join(root, 'docs', 'architecture', 'iterations');
+  if (existsSync(archStatePath)) {
+    const hasSnapshot = existsSync(iterationsDir)
+      && readdirSync(iterationsDir, { withFileTypes: true })
+        .filter(d => d.isDirectory())
+        .some(d => existsSync(join(iterationsDir, d.name, 'architecture.md')));
+    if (!hasSnapshot) {
+      warnings.push('arch_baseline 已打戳但 iterations/ 无产品级快照——arch-readiness/arch-snapshot 门禁将 FAIL，需回 ARCH 阶段补快照');
+    }
+  }
+  if (existsSync(iterationsDir)) {
+    for (const d of readdirSync(iterationsDir, { withFileTypes: true }).filter(x => x.isDirectory())) {
+      const hasSkip = existsSync(join(iterationsDir, d.name, 'SKIPPED'));
+      const hasSnap = existsSync(join(iterationsDir, d.name, 'architecture.md'));
+      if (hasSkip && hasSnap) warnings.push(`${d}: SKIPPED 与快照并存，语义矛盾`);
+    }
+  }
+  return { pass: warnings.length === 0, message: warnings.length ? warnings.join('; ') : 'arch-state/iterations 一致' };
+}
+
 export async function run(args) {
   const root = process.cwd();
   const config = loadConfig(root);
@@ -317,6 +343,7 @@ export async function run(args) {
     ['Docs', checkDocs(root)],
     ['Change states', checkChangeStates(root)],
     ['Change test gates', checkChangeTestGates(root)],
+  ['Arch state', checkArchState(root)],
   ];
 
   // Config check

@@ -10,7 +10,7 @@
 ## B1.1 确定性脚本采集（先跑，固定化探查）
 
 ```bash
-bash scripts/recon-probe.sh --root <项目根> --out /tmp/recon-<slug>.json
+bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --root <项目根> --out /tmp/recon-<slug>.json
 ```
 
 固定采集（不依赖 LLM，两次接入结果一致）：目录树（限深 4 层）、依赖清单（pom/package.json/requirements/go.mod/build.gradle）、LOC 与文件类型分布、测试文件计数（含 `.test.mjs`/`.spec.mjs`）、DB 迁移文件清单、README/docs 探测。输出结构化 JSON 供子代理消费。脚本只做确定性机械采集（§17.8 第四类载体），语义判断交给子代理 LLM。
@@ -25,7 +25,7 @@ bash scripts/recon-probe.sh --root <项目根> --out /tmp/recon-<slug>.json
 
 **用法**：
 ```bash
-bash scripts/recon-probe.sh --root <根> --ddl-out docs/architecture/schema-baseline.sql --out /tmp/recon-<slug>.json
+bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --root <根> --ddl-out docs/architecture/schema-baseline.sql --out /tmp/recon-<slug>.json
 ```
 
 **JSON 输出字段**：`ddl_extraction.source`（sql_files / java_entity / none）、`ddl_extraction.table_count`、`ddl_extraction.tables[]`、`ddl_extraction.ddl_statements`
