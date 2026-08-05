@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Unified workflow plugins and skills for AI coding agents (team-flow: team-flow + compound + architecture-design + prototype).",
-    "version": "0.36.3"
+    "version": "0.36.4"
   },
   "plugins": [
     {
       "name": "team-flow",
       "description": "Unified workflow with planning artifacts, execution contracts, TDD, review gates, systematic debugging, delta spec sync, architecture-design, and local HTML prototyping.",
-      "version": "0.36.3",
+      "version": "0.36.4",
       "source": ".",
       "author": {
         "name": "LT",

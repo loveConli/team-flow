@@ -6,6 +6,13 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.36.4] - 2026-08-05
+
+### Added（Wave 审查纪律 + 上下文轮转）
+
+- **workflow-start SKILL.md**：Route to code-reviewer 增加逐 wave 审查纪律——每次 code-reviewer dispatch 只审查一个 wave，禁止合并多 wave 审查（vrm4teamflow C1 事件修复）
+- **workflow-start SKILL.md**：Sub-agent Dispatch Protocol 增加 build-executor 交互轮次轮转——累计 ≥6 轮 SendMessage 交互时启动新 build-executor 子代理（交接文档必须含已完成 waves + 累积决策 + worktree SHA）
+
 ## [0.36.3] - 2026-08-05
 
 ### Fixed（v0.14 全链路缺口修复——27 项，复利链路 + agent 契约 + 门禁时序 + 交接/决策门 + guard hook + 快照生命周期 + 旧项目 + 文档同步 + 横展）

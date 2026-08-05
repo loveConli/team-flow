@@ -62,6 +62,7 @@ Validate mode against artifact content. If hotfix/tweak criteria not met → upg
 
 - **记录 agentId**：dispatch 后立即记录子代理 ID；修复一律 SendMessage 恢复原子代理（禁启动新子代理，见 v0.29.0 §37）
   - **上下文水位例外（v0.35.0）**：当原子代理 transcript 超过 2MB 或累计 token 消耗超过 200 万时，主代理可以启动新代理替代恢复。新代理必须接收完整交接文档（当前进度、已完成 wave 列表、未解决问题、artifact 位置、已知 blocker），以保证连续性。此为 SendMessage 恢复原则的唯一补充例外
+  - **build-executor 交互轮次轮转（v0.36.4）**：主代理通过 SendMessage 恢复 build-executor 时，累计交互轮次。当累计 ≥6 轮（~3 wave 的典型交互量：放行→实施→审查→FAIL→修→复评）时，checkpoint 当前进度并启动新 build-executor 子代理。交接文档必须包含：已完成 waves 及 receipt 状态、累积技术决策（如命名约定、架构选型）、worktree commit SHA、剩余 waves 及依赖关系。此规则独立于上下文水位例外——两者取先触发者
 - **返回即验证（validation gate）**：子代理返回产物后**立即** `tf validate <change-dir>`；FAIL → SendMessage 回**原**子代理修复，通过后才能继续/转换。把格式失败拦截在返回时，而非状态转换时（避免浪费整次执行后再失败）。**build-executor 附加验证（v0.13 §52 B3，SDD/full 模式）**：返回的 diff 中必须包含测试文件（src/test/ 或项目测试目录）；零测试文件的实现返回一律 BLOCK，SendMessage 回原子代理按 test-matrix.md / TDD Iron Law 补齐——不得以"手动验证"替代（C1-domain-policy 事件教训）。例外：已显式记录 `test_matrix_skipped=true` + 理由的 change（纯文档/配置类）不要求测试文件
 - **结果协议**：子代理终态须标注 `FINAL VERDICT: <DONE|BLOCKED|FAIL>`（审查类用 PASS/PASS_WITH_WARNINGS/FAIL）；**SendMessage 报告为权威结果**，task-notification.result 仅内部元数据
 - **子代理状态边界**：子代理 MUST NOT 修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段（状态转换是主代理专有职责，经 `tf state transition` 执行），只写自己的 `dp_N_*` 决策字段
@@ -97,6 +98,8 @@ Execution hit blockage: test failure, unexpected behavior, build error, task can
 
 ### Route to code-reviewer
 The current planned wave is implemented and ready for spec-compliance + code-quality verification. A reviewer must write an `tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>` receipt before any dependent wave or closing transition.
+
+**逐 wave 审查纪律（v0.36.4）**：每次 code-reviewer dispatch 只审查**一个** wave。禁止将多个 wave 合并为一次审查（vrm4teamflow C1 事件：W1-W4 合并审查导致设计约定类问题在 W4 才发现，修复范围扩大到 8 个 batch）。parallel wave 内的多个 task 作为整体审查一次（receipt 是 wave 级别），但审查 prompt 必须包含每个 task 的独立 diff。
 
 ### Route to release-archivist (dispatch sub-agent)
 Guard: `... check <dir> executing closing --json` → fail = BLOCK. Implementation complete, verification complete/nearly complete. Include `DP-7: 归档确认`.
