@@ -67,8 +67,9 @@ description: 基于 4A 企业架构 + DDD 领域驱动设计的架构/API/DB 设
 
 - `change-brief.md`（scope / AC / 技术方向）
 - `prd/vN/plan.md` 高阶技术设计段（模块边界/技术选型/数据流/关键聚合划分）
+- `docs/architecture/iterations/vN/architecture.md`（产品级架构快照，**主输入**，v0.35.0）——BC 边界/聚合所有权/全局契约的唯一事实源
+- 全局 `docs/architecture/`（As-Is 实际态基线，已落地部分）
 - 现有 `specs/`（若有）
-- 全局 `docs/architecture/`（As-Is 基线）
 
 ### 五项检查（架构变更判定）
 
@@ -79,6 +80,15 @@ description: 基于 4A 企业架构 + DDD 领域驱动设计的架构/API/DB 设
 3. **读写模型变更**：是否涉及 CQRS 写模型或读模型变化
 4. **API 变更**：是否涉及 API 新增/变更（端点、方法签名、请求响应 schema）
 5. **DB schema 变更**：是否涉及数据库表结构、字段、索引变更
+
+### 路由分流（v0.35.0 新增）
+
+当产品级架构快照存在时（已建档项目），判定结果再按"产品级决策 vs change 内实现细节"分流：
+
+- 触及**产品级决策**（BC 边界变更 / 聚合所有权变更 / 全局契约变更）→ 引用快照 + 走**架构修订决策门**（不硬阻断，显式确认 + 登记 deviation，P3）
+- 仅 **change 内实现细节**（字段 / 端点 / 状态增量）→ 增量设计，不触发产品级变更
+
+变更级聚合动作限三类：`extend`（既有聚合加字段/指令/事件/状态）、`new`（新增聚合，flag 登记待产品级晋升）、`refactor`（需决策门）。聚合 id 一律引用产品级注册表，不重定义（防重发明，v0.14 §61.3）。
 
 ### 执行流程
 
@@ -149,6 +159,15 @@ changes/<name>/
 
 change 进入 closing 阶段时，由 release-archivist 调用 `tf arch-merge` CLI 命令，将 `changes/<name>/architecture/` 下的增量制品合并回全局 `docs/architecture/`，完成 As-Is → To-Be 基线更新。architecture-design 本身不执行合并，只负责产出增量制品。
 
+### 调用模式（v0.35.0：变更级 / 产品级）
+
+| 模式 | 编排入口 | 判定 | 产出 | owner |
+|------|---------|------|------|-------|
+| 变更级（默认） | workflow-start（exploring→specifying） | 五项检查 | `changes/<name>/architecture/` 三件套 + sql/ | architecture-design 子代理 |
+| 产品级（product 模式） | workflow-orchestrator S3.5（architecture 阶段） | 8 步全系统结构级设计（无五项检查） | `docs/architecture/iterations/vN/architecture.md`（6 产物快照） | architecture-design product 模式子代理（唯一 owner） |
+
+**产品级模式执行**：按 `references/s3.5-product-architecture.md` SOP（8 步），模板用 `references/s3.5-architecture-template.md`，加载协议用 `references/s3.5-loading-protocol.md`。产出经 architecture-reviewer product 视角评审（`review_mode: product`）PASS 才进 S4。时序遵守 P1：只写快照不写全局。
+
 ### 独立调用
 
 除 workflow-start 编排调用外，本 skill 仍支持用户显式独立调用（`/team-flow:architecture-design`），此时不走五项检查判定门，直接执行完整 4A+DDD 设计。
@@ -181,6 +200,8 @@ architecture-design 执行时的上下文组装：
 - 历史变更脚本（`changelog/`）
 
 **上下文预算**：单次执行 ~2K tokens（L1 INDEX + 1-2 个 L2 域段 + L3 变更层）
+
+**产品级三段式加载（v0.35.0，有产品级快照时）**：按 `references/s3.5-loading-protocol.md` 三段式——① 索引层（INDEX + ARCHITECTURE §1-2 厚锚点）② 按域加载（change 触及的 `domains/<bc>.md`）③ 变更增量。迭代中读 `iterations/vN/` 快照（in-flight），迭代收尾读全局当前态（P1）。
 
 ## Scope & Limits
 本 skill 覆盖 4A+DDD 架构设计方法及其与 team-flow/compound-engineering 的衔接。落地实现结合项目具体工具；超出本范围见相关 skill 或直接问 agent。

@@ -14,9 +14,19 @@
 
 ## 步骤
 
+### 0. 架构就绪门禁（arch-readiness，v0.35.0 新增）
+
+> 设计依据：v0.14 §59.4。产品级架构快照必须覆盖 change 拆分触及的限界上下文，拆分审计才有架构依据。
+
+进入拆分前先校验：
+
+- **项目 arch_baseline 缺失（存量/重建未完成）** → WARN 不阻断（reason: 'project architecture baseline not established — S3.5 reconstruction pending'），提示先跑 S3.5 重建产出 L0 骨架。
+- **已建档项目** → 校验 `docs/architecture/iterations/vN/architecture.md` 存在且覆盖 plan.md 各 change 触及的全部 BC。不覆盖 → FAIL，回退 ARCH 阶段补快照（feedback-loops.md「S4 → ARCH」）。
+- **skip 物化**：ARCH 阶段显式跳过（iterations/vN/ 占位含 skipped 标记 + 理由）→ PASS。
+
 ### 1. 拆分质量审计（必选门禁，不可跳过）
 
-调用 `change-split-auditor` agent 对 `plan.md` 做拆分质量审计，输出审计报告（覆盖矩阵 / DAG 无环 / 粒度均衡 / 字段完整 / **拆分维度合规**）。质量自检清单：
+调用 `change-split-auditor` agent 对 `plan.md`（**+ `docs/architecture/iterations/vN/architecture.md` 作为架构依据**，v0.35.0）做拆分质量审计，输出审计报告（覆盖矩阵 / DAG 无环 / 粒度均衡 / 字段完整 / **拆分维度合规**）。质量自检清单：
 
 **必选约束**：审计 verdict = PASS 是 Step 3（创建脚手架）的前置条件。
 verdict = FAIL → 必须回退 S3 调整拆分后重新审计，不可绕过直接创建 change。

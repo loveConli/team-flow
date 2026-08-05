@@ -35,6 +35,7 @@ const COMMANDS = {
   'install-zcode':     () => import('./lib/cmd-install-zcode.mjs'),
   'prototype-sync':    () => import('./lib/prototype-sync.mjs'),
   'arch-merge':        () => import('./lib/arch-merge.mjs'),
+  arch:                () => import('./lib/cmd-arch.mjs'),
   'test-merge':        () => import('./lib/test-merge.mjs'),
   'test-matrix-export': () => import('./lib/test-matrix-export.mjs'),
   test:                () => import('./lib/test-record.mjs'),
@@ -52,6 +53,9 @@ Commands:
   sync <change-dir>     Merge delta specs into main specs
   prototype-sync <change-dir> [--source <path>] [--prototype-dir <path>]
                         Merge UX delta into global prototype/ + design-system.md
+  arch init [--mode reconstruction|design] [--baseline-ref <prd/vN/>]
+                        Stamp project-level arch_baseline into .team-flow/arch-state.json (v0.35.0 §59.4)
+  arch show             Show current project architecture baseline state
   arch-merge <change-dir> [--project-root <path>] [--dry-run]
                         Merge architecture delta into global docs/architecture/
   test-merge <change-dir> [--project-root <path>] [--dry-run]

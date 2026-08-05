@@ -11,7 +11,7 @@ type: session-handoff
 version: 1
 created_at: <ISO 8601>
 requirement_id: <req-id | null>
-workflow_phase: <S1-S5 | change-level | null>
+workflow_phase: <S1-S5 | architecture | change-level | null>
 state_machine: <8态之一 | null>
 change_dir: <path | null>
 ---
@@ -26,7 +26,7 @@ change_dir: <path | null>
 ### §2 工作流状态（自动检测，引用不复制）
 
 - 活跃需求：`<req-id>` — `<title>`
-- 产品级阶段：`<S1-S5>`（详见 `.team-flow/requirements/<req-id>/orchestrator.yaml`）
+- 产品级阶段：`<S1-S5 | architecture>`（详见 `.team-flow/requirements/<req-id>/orchestrator.yaml`）
 - 变更级状态：`<state>`（详见 `<change>/.team-flow.yaml`）
 - PRD 版本：`<vN>`，冻结状态：`<frozen_downstream | frozen_absolute | unfrozen>`
 

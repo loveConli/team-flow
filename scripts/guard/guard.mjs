@@ -16,6 +16,8 @@ import { checkExecutionReviewsPassed } from './checks/execution-reviews-passed.m
 import { checkCompoundCaptured } from './checks/compound-captured.mjs';
 import { checkTestMatrixComplete } from './checks/test-matrix-complete.mjs';
 import { checkTestMatrixReady } from './checks/test-matrix-ready.mjs';
+import { checkArchReadiness } from './checks/arch-readiness.mjs';
+import { checkArchSnapshot } from './checks/arch-snapshot.mjs';
 
 // Transition matrix: <from>:<to> → required check dimensions
 const TRANSITION_CHECKS = {
@@ -25,13 +27,17 @@ const TRANSITION_CHECKS = {
   // so requiring them before the transition was a chicken-and-egg deadlock
   // (C1 事件：主代理被此门禁逼出绕行行为)。Artifact completeness is enforced
   // by specifying:bridging (artifacts-exist remains there, single owner).
-  'exploring:specifying':           ['arch-design'],
+  // v0.35.0 (v0.14 §59.4): arch-readiness 新增——产品级架构快照须在 specifying 前就绪
+  //（arch_baseline 缺失 → WARN 不 FAIL，项目级豁免）。
+  'exploring:specifying':           ['arch-design', 'arch-readiness'],
   'specifying:bridging':            ['artifacts-exist', 'schema-valid'],
   'bridging:approved-for-build':    ['artifacts-exist', 'schema-valid', 'contract-fresh', 'dp-gate-passed'],
   // v0.13 §49：test-matrix-ready 门禁前移——full 模式进入 executing 前强制测试准备度
   //（矩阵存在非空 OR 显式 skip 附理由；legacy 豁免）。hotfix/tweak 沿用 §45.3 豁免，不挂。
   'approved-for-build:executing':   ['artifacts-exist', 'contract-fresh', 'dp-gate-passed', 'execution-plan-ready', 'test-matrix-ready'],
-  'executing:closing':              ['tasks-complete', 'tests-passing', 'specs-merged', 'execution-plan-ready', 'execution-reviews-passed', 'compound-captured', 'test-matrix-complete'],
+  // v0.35.0 (v0.14 §59.4): arch-snapshot 新增——"先快照后回写"的强制化（legacy 豁免）。
+  // 仅在 full workflow 挂；hotfix/tweak 沿用 §59.4 豁免（紧急/微调不挂）。
+  'executing:closing':              ['tasks-complete', 'tests-passing', 'specs-merged', 'execution-plan-ready', 'execution-reviews-passed', 'compound-captured', 'test-matrix-complete', 'arch-snapshot'],
 
   // Debugging side-path
   'executing:debugging':            [],
@@ -180,6 +186,8 @@ async function main() {
     'compound-captured': (dir) => checkCompoundCaptured(dir),
     'test-matrix-complete': (dir) => checkTestMatrixComplete(dir),
     'test-matrix-ready': (dir) => checkTestMatrixReady(dir),
+    'arch-readiness': (dir) => checkArchReadiness(dir),
+    'arch-snapshot': (dir) => checkArchSnapshot(dir),
   };
 
   const checks = [];

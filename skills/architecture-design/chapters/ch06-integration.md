@@ -28,10 +28,10 @@ changes/<name>/              # change 容器
 
 > **语义分离**：架构产出独立 `architecture/` 目录，不混入 `specs/`（行为规格）。目录存在 = 有架构产出，目录不存在 = 判定为不需要。下游消费方（spec-writer / release-archivist）显式读取此目录。
 
-## 每变更增量设计（SOP 步骤）
-1. (LLM) 读全局 ARCHITECTURE.md 作 grounding；用活动对象矩阵识别限界上下文/聚合。
-2. (LLM) 出 To-Be：新增/调整聚合、Context Map 关系、CQRS 读写模型、4A 跨域对齐。
-3. **As-Is 冻结**（核心修正）：复制全局相关章节**当前原文** + 记版本锚点（`ARCHITECTURE.md@<change_id>#<章节>`），变更内不可变——杜绝活引用漂移。
+## 每变更增量设计（SOP 步骤，v0.35.0 更新：产品级快照为输入）
+1. (LLM) 读全局 ARCHITECTURE.md **+ 产品级快照 `iterations/vN/architecture.md`**（v0.35.0，BC 边界/聚合注册表唯一事实源）作 grounding；识别本 change 触及的 BC → 按 `references/s3.5-loading-protocol.md` 三段式装载对应域；用活动对象矩阵识别限界上下文/聚合（变更级只引用产品级注册表，不重定义）。
+2. (LLM) 出 To-Be：**本 change 增量**（extend/new/refactor 三类动作）——新增/调整聚合、Context Map 关系、CQRS 读写模型、4A 跨域对齐；触及产品级决策走架构修订决策门。
+3. **As-Is 冻结**（核心修正）：复制产品级快照/全局相关章节**当前原文** + 记版本锚点（`iterations/vN/architecture.md@<change_id>#<章节>`），变更内不可变——杜绝活引用漂移。
 4. (脚本) 填 frontmatter 并校验：`cap_id/date/change_type/bounded_contexts/aggregates_affected/cqrs`。
 5. (LLM) 写 ADR 理由；API 标 Command/Read/Query + 阻断测试归属。
 6. (脚本) 回写全局 + 生成 API 索引。

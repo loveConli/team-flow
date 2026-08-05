@@ -8,6 +8,31 @@ The format loosely follows Keep a Changelog.
 
 ## [0.35.0] - 2026-08-05
 
+### Added（产品级架构设计增强——设计增强方案 v0.14 §57-§66）
+
+#### 新阶段
+- **architecture 阶段（S3.5）**：S3 计划之后、S4 拆分之前的产品级架构设计
+  - 场景判定（全新=正向设计 / 旧项目首轮=逆向重建 / 无结构性变更=可跳过，skip 须物化）
+  - 产出 `docs/architecture/iterations/vN/architecture.md`（6 产物：BC/聚合注册表/指令事件/状态机/概念 ER/时序），预测态快照不写全局
+  - 产品级评审门（architecture-reviewer `review_mode: product`，PASS 才进 S4）
+
+#### 新命令
+- **tf arch init/show**：项目级 `arch_baseline` 打戳（`.team-flow/arch-state.json`，防污染复刻 v0.13 schema_version 模式）
+
+#### guard 门禁
+- **arch-readiness**（exploring:specifying）+ **arch-snapshot**（executing:closing），arch_baseline 缺失 → WARN 不 FAIL（存量豁免）
+
+#### arch-merge 重构（v0.14 §62）
+- 当前态幂等 upsert 替代 append（marker 区代码独占写 + 成对校验，缺失/重复硬失败）
+- 演进日志 changeName 去重 + schema-baseline 幂等追加
+- 生成式 PHYSICAL-MODEL / DATABASE / API-INDEX（结构化解析，替代正则扫 markdown）
+- 冲突预检（端点冲突 / 聚合重定义转产品级决策门）
+- 并发安全：全局写锁 + 白名单 git add + 脏文件告警；dry-run 不落盘
+
+#### 其他
+- 变更级输入联动：iterations/vN/ 快照为主输入 + 五项检查路由分流（产品级决策 vs change 内细节）
+- 旧项目逆向重建 `arch-reverse-analyst` + 全局三层数据面维护（L1 当前态 / L2 变更增量 / L3 迭代快照）
+
 ### Added（C1 workflow-feedback 根因修复——6 条 feedback 4 个根因聚类）
 
 #### 新命令

@@ -7,6 +7,8 @@
 | 回退路径 | 触发条件 | 操作 | 制品处置 |
 |---------|---------|------|---------|
 | **S3 → S2** | plan 暴露 PRD scope 问题 | PRD vN 内修订 + 记录变更履历（临时解除 frozen_downstream） | plan.md → plan.md.revN（归档），S3 重入时从零产出 |
+| **ARCH → S3** | 架构设计暴露 plan 拆分问题（v0.35.0 新增） | 调整拆分策略 | plan.md → plan.md.revN（归档）；iterations/vN/ 快照未完成部分丢弃 |
+| **S4 → ARCH** | 架构快照不覆盖 change 触及的 BC / 架构产物缺失（v0.35.0 新增） | 回 ARCH 阶段补快照 | iterations/vN/ 增量调整，change 拆分保留 |
 | **S4 → S3** | 依赖图不可执行/粒度不合理 | 调整拆分策略 | 已创建的 change 目录保留，重新拆分后增量调整 |
 | **S5 → S4** | 跨 change 冲突需要重新拆分 | 重新评估拆分方案 | 见下方「在途 change 处置」 |
 

@@ -137,6 +137,7 @@ Generate one at a time. Confirm each before next. This prevents scope drift — 
 
 ### tasks.md
 - `## File Structure`, `## Interfaces`, numbered tasks, exact file paths, TDD phases, ≤5 min steps, no placeholders, every requirement mapped, explicit dependencies
+- **接口交叉核对（v0.35.0，v0.14 §61.1）**：若 `architecture/api.md` 存在，机械比对 `tasks.md` `## Interfaces` 声明的端点集合与 `api.md` 架构路由表端点集合——tasks 引用了 api.md 未声明的端点、或 api.md 声明的关键端点 tasks 未落地 → 告警修正（traceability 从自报升级为机械比对）
 
 **If any artifact fails validation, fix before handing off to contract-builder.**
 

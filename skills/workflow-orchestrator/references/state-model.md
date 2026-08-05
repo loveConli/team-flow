@@ -16,6 +16,7 @@
 
 - **迁移兼容**：检测到旧 `<root>/.workflow-orchestrator.yaml` 存在时，自动迁移到 `.team-flow/requirements/<req-id>/orchestrator.yaml` 并提示用户（一次性）。
 - **变更级状态**：各 change 的状态文件**当前仍为** `<change>/.team-flow.yaml`，检测逻辑不动；**计划 v1.0.0（P1-6 第二阶段）改名**为 `.team-flow.yaml`（对齐设计增强方案 v0.8 §18.3）。改名落地前，编排层与变更层一律以 `.team-flow.yaml` 为准。
+- **项目级架构状态（v0.35.0 新增）**：`.team-flow/arch-state.json`（架构阶段是产品/迭代级，不放 change 状态）。见下文「architecture 阶段」与「arch_baseline 豁免键」。
 
 ## registry.yaml Schema
 
@@ -42,6 +43,8 @@ phases:                               # 各阶段状态
   - { id: S1, status: completed, started_at: "...", completed_at: "...", artifacts: [...] }
   - { id: S2, status: active, started_at: "...", artifacts: [...] }
   - { id: S3, status: pending }
+  - { id: ARCH, name: 产品级架构设计, status: pending, skip: <迭代无结构性变更|null>, artifacts: [docs/architecture/iterations/vN/architecture.md] }
+  - { id: S4, status: pending }
 custom_phases: []                     # reserved
 replan_log:                           # 重规划履历
   - { seq: 1, trigger: "用户要求跳过原型", before: "S2→S3", after: "S2(skip-proto)→S3", approved_by: user }
@@ -70,6 +73,55 @@ prd_version: v1                       # PRD 版本
 - **回退**：active → pending（**必须写 replan_log**）
 - **阻塞**：active → blocked → active（S5 检测到 change 卡死）或 blocked → aborted
 - **终止**：任何非 completed 状态 → aborted（用户放弃编排）
+
+## architecture 阶段（S3.5，v0.35.0 新增）
+
+> 产品级架构设计阶段，位于 S3 计划之后、S4 拆分之前。设计依据：设计增强方案 v0.14 §59。
+
+**phase id**：`ARCH`；顶层 `workflow_phase: architecture`（语义 kebab-case）。
+**命名约定**：新阶段一律用 kebab-case 语义名（历史值保留不迁移，避免无价值 churn）。
+
+```yaml
+phases:
+  - { id: S3, status: completed }
+  - { id: ARCH, name: 产品级架构设计, workflow_phase: architecture,
+      status: completed, skip: null,
+      artifacts: [docs/architecture/iterations/vN/architecture.md] }
+  - { id: S4, status: pending }
+```
+
+**场景判定（入口三态）**：
+| 场景 | 判定输入 | S3.5 模式 |
+|------|---------|----------|
+| S0 全新项目 | 无代码库 | 正向设计（首轮不可跳过） |
+| S1 存量代码+无基线 | 有 src/，无 baseline.md | 先 workflow-bootstrap → 逆向重建 |
+| S2 存量+瘦锚点 | baseline.md + ARCHITECTURE 无 BC/聚合层 | 逆向重建（深化） |
+| S3 存量+跑过迭代 | baseline + changes/ + prd/vN/，无 arch_baseline | 逆向重建（首轮强制） |
+| S4 已有产品级架构 | arch_baseline 已打戳 + iterations/ | 正向设计（正轨） |
+
+**skip 条件（须物化）**：迭代无结构性变更（纯 bugfix/重构/不新增 BC 或聚合/不改变聚合边界或全局契约）。判定者 = **编排器 + 用户确认**（非 LLM 自判，防 v0.13 §54 绕过教训）。**skip 必须物化**：写入 `docs/architecture/iterations/vN/` 占位（含 skipped 标记 + 理由），guard 才放行——否则 hotfix/快速通道 change 会卡在 arch-readiness 上（v0.32.2 C1 死锁链同类）。
+
+**时间盒 + 深度分层**：时间盒 ≤1 天；非触及 BC 只维护锚点行，触及 BC 才做按域深化（v0.14 §60.4）。
+
+**输入输出契约**：
+- 输入：prd/vN/prd.md（frozen_downstream）+ plan.md + prototype/ + baseline.md + CONCEPTS.md + 现有全局基线（旧项目）
+- 输出：`docs/architecture/iterations/vN/architecture.md`（6 产物权威快照，预测态，provenance 标注）+ 产品级评审 verdict；**不触发全局覆盖写**（P1：预测态不进实际态）
+
+**门禁**（v0.14 §59.4）：
+| 门禁 | 挂点 | 校验 | 豁免 |
+|------|------|------|------|
+| 产品级评审门 | ARCH→S4 | architecture-reviewer product 视角 PASS | skip 时仍要物化标记 |
+| arch-readiness | S4 拆分 | iterations/vN/ 快照覆盖 change 触及的 BC | arch_baseline 缺失 → WARN 不 FAIL |
+| arch-snapshot | executing→closing | 本轮快照已落盘 | 在途 change legacy 豁免 |
+
+## arch_baseline 豁免键（v0.35.0 新增）
+
+完全复刻 v0.13 §48.1 schema_version 防污染模式（设计增强方案 v0.14 §59.4/§63.1）：
+
+- **位置**：`.team-flow/arch-state.json`（项目级状态；架构阶段是产品/迭代级，不放 change 的 `.team-flow.yaml`）
+- **内容**：`{ arch_baseline: "v0", established_at: "<date>", mode: "reconstruction" | "design", snapshot_root: "iterations/", baseline_prd_ref: "prd/vN/" }`
+- **防污染**：仅 `tf arch init` 写入；`tf state set`/rebuild/doctor 一律不得追加（缺失 = 存量信号）
+- **判定**：`arch_baseline == null` → arch-readiness/arch-snapshot 均 PASS + WARN（reason: 'project architecture baseline not established — S3.5 reconstruction pending'）
 
 ## 双层冻结语义（解决 §17.3 与 §17.9.1 矛盾）
 

@@ -42,9 +42,10 @@ ce-plan 在 orchestrator pipeline 上下文中减少仪式开销，但**保留�
 
 - plan 是否暴露了 PRD 的范围问题？
   - **是** → 回退 S2，触发 PRD vN 内修订（记录变更原因）。详见 feedback-loops.md「S3 → S2」
-  - **否** → 进 S4
+  - **否** → 进 ARCH（architecture 阶段，v0.35.0 产品级架构设计，见 state-model.md「architecture 阶段」）
 
 ## 完成条件
 
 - `prd/vN/plan.md` 已产出，含 change 拆分 + 依赖 DAG + 技术方向
 - `.team-flow/requirements/<req-id>/orchestrator.yaml` 中 S3 状态 = completed
+- 下一步：进入 ARCH 阶段，产出 `docs/architecture/iterations/vN/architecture.md` 后进 S4（v0.35.0）
