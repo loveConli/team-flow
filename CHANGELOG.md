@@ -16,6 +16,11 @@ The format loosely follows Keep a Changelog.
 - **LLM 消费点 e2e 豁免（防断链）**：release-archivist Step 2b / build-executor implementer / code-reviewer 三个消费点的 coverage 分母与金字塔配比排除 `test_tier=e2e`
 - **生成器/上游同步**：contract-builder Generation Protocol 第 7 步 E2E 评估 + Summary/契约段 E2E 行；test-matrix-export `TEST_KIND_TO_TIER` 加 `playwright_prototype`/`playwright_integration` → e2e；spec-writer Scenario 标签补 `##### E2E:`；design-methods-detail test_tier 表补 e2e；test-quality-rules 规则 11 明确 e2e case 合法落点 `e2e/`
 
+### Added（审查类 agent 改造——reviewer 直接写报告文件）
+
+- **6 个 reviewer agent 从只读改为直接写审查报告文件**：architecture-reviewer / change-split-auditor / code-reviewer / cross-change-consistency-checker / prd-completeness-reviewer / prototype-reviewer——`tools` 加 `Write`，Iron Law 从"返回报告由编排层持久化"改为"agent 直接写报告到 `changes/<name>/architecture/auto-review.md`（change 模式）/ `docs/architecture/iterations/vN/auto-review.md`（product 模式）+ 返回摘要与文件路径"
+- **配套 skill 调用说明同步**：workflow-start（architecture-reviewer 直接写 auto-review.md）/ prototype + orchestration-flow（prototype-reviewer）/ ce-brainstorm prototype-loop（prd-completeness-reviewer）/ workflow-orchestrator s2-prd-prototype-loop（prototype-reviewer）
+
 ### Bug Fixes（feedback 2026-08-05，test-merge 五 bug）
 
 - **resolveDeferred 误删 Current Cases**：原全文件 regex `\|<caseId>\|[^\n]*\n` 把 baselines Current Cases 表正常 case 行全部误删（表体清空、Evolution Log 计数保留）→ 改为仅删除 `## Deferred Items` 段内被新 case 覆盖的行
