@@ -19,7 +19,7 @@ Brainstorming answers **WHAT** to build through collaborative dialogue, producin
 
 > **显式参数规约**：orchestrator 调用时必须传入 `mode: orchestrated`。ce-brainstorm 检测到该参数即跳过 Phase 3.5 并在输出中回执"原型循环已委托编排层"。未收到该参数时默认为 standalone 模式。
 >
-> **重要：`orchestrated` 模式仅跳过 Phase 3.5（原型内循环），Phase 0（含 PRD 模板选择）、Phase 1、Phase 2、Phase 3 均正常执行，不可跳过。**
+> **重要：`orchestrated` 模式仅跳过 Phase 3.5（原型内循环）。Phase 0（含 PRD 模板选择）、Phase 1（含 1.4/1.5/1.6）、Phase 2、Phase 3、QA-4、Phase 3.6、版本归档均正常执行，不可跳过。**
 
 ## Core Principles
 
@@ -119,6 +119,12 @@ For detailed routing logic, read `references/phase0-routing.md`. Summary:
 
 **1.3 Dialogue** — Follow Interaction Rules. Fire blindspot gate (if tripwire armed) and visual-probe gate (before first shape decision). Rigor probes fire as open-ended questions before Phase 2. Before exit: integration check for non-obvious consequences. **Exit when**: primary actor, outcome, scope, success criteria all known or recorded as assumptions.
 
+**1.4 Dialogue Log Persistence** — Automated step, no user interaction. Trigger: Phase 1.3 dialogue exits. Traverse each Q&A round extracting original text + decisions, generate dialogue summary and decision summary table. Write to `requirement/vN/dialogue-log.md` (create or append). No ledger update.
+
+**1.5 Business Scenario Analysis** — Read `references/business-scenarios.md` for methodology. Trigger: Phase 1.4 completed. Extract business scenarios from dialogue and context, produce QA-1 quality check, then **blocking question** for user confirmation. Output: `requirement/vN/business-analysis.md` (requirements + scenarios sections). Status marked 🔵 pending confirmation, ✅ confirmed on user approval. No ledger update at this stage.
+
+**1.6 Business Process Analysis** — Read `references/business-processes.md` for methodology. Trigger: Phase 1.5 confirmed (✅). Extract business processes, produce QA-2 quality check, then **blocking question** for user confirmation. Output: update `requirement/vN/business-analysis.md` (processes section + scenario/requirement association fields). Status marked 🔵 pending, ✅ confirmed on approval. No ledger update at this stage.
+
 ### Phase 2: Explore Approaches
 
 **Load brainstorm profile.** If `BRAINSTORM_PROFILE_PATH` is set, read it. Each approach must address core thinking dimensions; note irrelevant dimensions.
@@ -133,7 +139,14 @@ Propose **2-3 approaches** (or recommend directly if one is clearly best). Use n
 
 **Read `references/synthesis-summary.md` before composing.** Surface scoping synthesis — user's last chance to correct scope. Fires for all tiers. Path A (announce-only) for Lightweight + no blocking questions; Path B (confirmation gate) for all others. 2.6: dispatch claim verifier during Path B confirmation wait.
 
+**QA-3 quality check** fires after synthesis draft is complete, before the blocking question. Synthesis must reference confirmed scenario IDs (SC-xxx) and process IDs (BP-xxx) as evidence anchors. Unconfirmed (🔵) items are flagged in Call outs section.
+
 ### Phase 3: Generate PRD Document
+
+**Inputs** (read before generating PRD):
+- `requirement/ledger.md` — all requirement/scenario/process items and their associations
+- `requirement/vN/dialogue-log.md` — §1.2 revision record reference path
+- `requirement/vN/business-analysis.md` — data source for §2/§3/§7/§8
 
 **⛔ MANDATORY：生成PRD文档前，必须先读取 `references/brainstorm-sections.md`**
 
@@ -151,12 +164,62 @@ Propose **2-3 approaches** (or recommend directly if one is clearly best). Use n
 - **⛔ 错误行为**：只提取输入/输出/业务规则，丢失原始需求文档中的大量关键细节
 - **⛔ 正确行为**：充分利用原始需求文档的详细内容，保持信息完整性
 
-Read `references/brainstorm-sections.md` for doc-warranted criteria. If warranted: read template from `PRD_TEMPLATE_PATH`, fill via `references/prd-mapping.md`, write to `prd/{ITERATION_VERSION}/prd.md`. Vocabulary capture: update `CONCEPTS.md` with resolved domain terms (only if it exists).
+Read `references/brainstorm-sections.md` for doc-warranted criteria. If warranted: read template from `PRD_TEMPLATE_PATH`, fill via `references/prd-mapping.md`, write to `requirement/{ITERATION_VERSION}/prd.md`. Vocabulary capture: update `CONCEPTS.md` with resolved domain terms (only if it exists).
 
 ### Phase 3.5: Prototype Inner Loop
 
 **`orchestrated` mode skips this phase.** For standalone: read `references/prototype-loop.md`. Trigger: PRD has UI functions. Steps: produce prototype → review vs PRD → fix loop (max 3) → completeness review → freeze PRD.
 
+### QA-4: PRD Quality Check
+
+Fires after Phase 3 (or Phase 3.5 if prototype loop ran). Read `references/evidence-chain-validation.md` for QA-4 criteria. Evaluates PRD completeness and traceability against business analysis artifacts.
+
+### Phase 3.6: PRD ↔ Scenario/Process Bidirectional Validation
+
+**Read `references/evidence-chain-validation.md` for full methodology.** Automated validation; CONDITIONAL_PASS requires user annotation of exempt items. Performs five validation dimensions (V1–V5) ensuring every requirement traces to scenarios and processes, and vice versa.
+
+**Routing**: PASS → proceed to version archiving; CONDITIONAL_PASS → proceed with documented caveats; FAIL → return to Phase 3 for revision.
+
+### Version Archiving
+
+Automated step, no user interaction. Trigger: Phase 3.6 result is PASS or CONDITIONAL_PASS.
+
+**Pre-checks** (all must pass, otherwise abort):
+1. All requirements (REQ-xxx) confirmed ✅
+2. All scenarios (SC-xxx) confirmed ✅
+3. All processes (BP-xxx) confirmed ✅
+4. Phase 3.6 result is PASS or CONDITIONAL_PASS
+
+**Processing**: batch-write all confirmed items to `requirement/ledger.md`; add archiving record with `archived` frontmatter; update `doc/active-registry/active-items.md` with current active items. Exit → ce-plan.
+
 ### Phase 4: Handoff
 
 Read `references/handoff.md` — option set, visibility conditions, dispatch instructions all live there. Pass PRD path + prototype path (if loop ran) to `ce-plan`.
+
+## Artifact Structure
+
+```
+requirement/
+├── ledger.md                          # Master ledger (all items, cross-version summary)
+├── vN/                                # Iteration version
+│   ├── prd.md                         # PRD document
+│   ├── dialogue-log.md                # Dialogue log (Phase 1.4 output)
+│   └── business-analysis.md           # Business analysis (requirements + scenarios + processes)
+doc/
+└── active-registry/
+    └── active-items.md                # Current active items full view
+```
+
+## Status Management
+
+Two statuses only: 🔵 pending confirmation / ✅ confirmed.
+
+- Phase 1.5/1.6 confirmation: writes `business-analysis.md` only, no ledger update.
+- Version archiving: batch-writes to `ledger.md`.
+
+## Deprecation Handling
+
+When a requirement/scenario/process is deprecated:
+1. Remove the entry from `requirement/ledger.md`
+2. Remove the entry details from `requirement/vN/business-analysis.md`
+3. Update `doc/active-registry/active-items.md`

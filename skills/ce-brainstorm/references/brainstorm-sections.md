@@ -164,13 +164,42 @@ Extension dimensions follow the normal conditional-fill rules below.
   of what was brainstormed.
 - **§2 业务流程一览** — filled from brainstorm's Key Flows and Actors. Each
   identified business process gets a row in the flow overview table.
+
+  **数据来源**：`requirement/vN/business-analysis.md` 业务流程一览表。
+  流程按四级层级组织：
+  - **L1 流程分组**：顶层业务域（如"采购管理""销售管理"）
+  - **L2 业务过程**：分组下的端到端业务过程
+  - **L3 业务活动**：过程中的关键活动节点
+  - **L4 子流程/操作步骤**：活动内的具体操作
+
+  §2 总览表必须覆盖 business-analysis.md 中识别的全部 L1–L4 流程条目，
+  每个条目一行，保留原始层级编号（BP-xxx）。
 - **§7 D7.5_系统功能清单** — filled from brainstorm's Requirements. Each
   requirement maps to a system function entry.
+
+  **三 ID 关联规则**：每个系统功能条目必须标注三个关联 ID：
+  | 字段 | 说明 | 示例 |
+  |------|------|------|
+  | 关联需求 ID | 对应 PRD 中的需求编号 | REQ-xxx |
+  | 关联场景 ID | 对应的业务场景编号 | SC-xxx |
+  | 关联流程步骤 | 对应的业务流程活动编号 | BP-xxx |
+
+  三 ID 完整是 §7 的最低质量门槛——缺失任一 ID 的条目视为不完整，
+  需回溯 brainstorm 对话或 business-analysis.md 补齐。
 
 ### Conditionally filled (when dialogue covers the topic)
 
 - **§3 D7.1_业务流程** — filled when brainstorm produced multi-step Key Flows
   with enough detail for process diagrams.
+
+  **数据来源**：`requirement/vN/business-analysis.md` 流程详情部分。
+  每个流程包含：
+  - **Mermaid 流程图**：从 business-analysis.md 提取对应流程的 mermaid 定义，
+    保持活动节点与 BP-xxx 编号一致。
+  - **活动一览表**：列出该流程下所有活动节点，包含活动编号（BP-xxx）、
+    活动名称、触发条件、执行角色、输入/输出、业务规则。
+
+  §3 按流程逐一展开，流程编号与 §2 总览表对齐。
 - **§4 D7.2_画面原型及设计** — filled when brainstorm involves UI/visual
   components. Prototype references go here.
 - **§6 D7.4_业务术语字典** — filled with domain terms defined during brainstorm
@@ -179,6 +208,17 @@ Extension dimensions follow the normal conditional-fill rules below.
   (permissions, interactions, exceptions) from Key Decisions and constraints;
   §8.4 功能模块 from Requirements. Hardware/network/performance sections
   retain placeholders.
+
+  **按流程组织结构**：§8 的功能模块按业务流程分组（BP-xxx），而非按
+  功能域平铺。每个功能模块必须标注所属流程：
+  ```
+  ### 8.4.x [功能模块名]
+  - **所属流程**：BP-xxx [流程名称]
+  - **关联需求**：REQ-xxx, REQ-xxx
+  - **关联场景**：SC-xxx
+  ```
+  流程分组顺序与 §2 总览表、§3 流程详情保持一致。同一流程下的功能
+  模块紧邻排列，便于按流程维度审阅功能完整性。
 
 ### Always placeholder (belong to later processes)
 
@@ -198,13 +238,15 @@ dialogue. Filling a chapter with placeholder content is worse than leaving it
 as template placeholder.
 
 - **§2 业务流程一览** — fill when brainstorm identified business processes,
-  user journeys, or system interactions. Each distinct process gets a row. Skip
-  rows for processes not discussed.
+  user journeys, or system interactions. Data source: `requirement/vN/business-analysis.md`
+  流程清单 L1–L4 层级表。Each distinct process gets a row with its BP-xxx
+  编号, preserving the four-level hierarchy. Skip rows for processes not discussed.
 
 - **§3 D7.1_业务流程** — fill when brainstorm produced detailed multi-step
-  flows with enough granularity for process diagrams. Include the flow diagram
-  placeholder and step-by-step descriptions. Skip when flows are high-level
-  only.
+  flows with enough granularity for process diagrams. Data source:
+  `requirement/vN/business-analysis.md` 流程详情（mermaid 流程图 + 活动一览表）。
+  Include the mermaid flow diagram and activity table per process. Skip when
+  flows are high-level only.
 
 - **§4 D7.2_画面原型及设计** — fill when brainstorm involves UI changes.
   Include module names, page names, and prototype references. Skip entirely
@@ -216,12 +258,14 @@ as template placeholder.
 
 - **§7 D7.5_系统功能清单** — fill from brainstorm Requirements. Each R-ID
   maps to a system function entry with the requirement's intent as the function
-  description.
+  description. Each entry must annotate three IDs: 关联需求 ID (REQ-xxx) +
+  关联场景 ID (SC-xxx) + 关联流程步骤 (BP-xxx).
 
 - **§8 D7.6_系统功能处理说明书** — partially fill §8.2 when dialogue covered
-  permissions, interactions, or exception handling. Fill §8.4 from Requirements.
-  Skip §8.3 (hardware/network) and §8.5 (non-functional) unless the brainstorm
-  explicitly covered these.
+  permissions, interactions, or exception handling. Fill §8.4 from Requirements,
+  organized by process (BP-xxx grouping): each function module annotates its
+  所属流程 (BP-xxx). Skip §8.3 (hardware/network) and §8.5 (non-functional)
+  unless the brainstorm explicitly covered these.
 
   **§8.4 功能模块提取规则**：
   - **详细程度**：保留原始需求文档中的关键细节，不要过度概括

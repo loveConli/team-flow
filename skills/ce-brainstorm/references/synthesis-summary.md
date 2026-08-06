@@ -22,6 +22,15 @@ The internal draft is structured in three labeled buckets. Items may appear in t
 
 A session-settled decision (per `references/settled-decisions.md`) is **Stated with provenance** — record it in the Stated bucket with its class, rejected alternative, and one-line reason, never in Inferred: it is the user's confirmed choice, not an agent bet.
 
+**Evidence anchor references (SC-xxx / BP-xxx).** When dialogue content references a specific scenario or business flow that has an assigned ID in the scenario ledger or flow catalog, cite the ID as an evidence anchor rather than relying on prose description alone. Rules:
+
+- Use `SC-xxx` for scenarios, `BP-xxx` for flows — always with the confirmation status tag (✅ confirmed / 🔵 pending).
+- An item that touches multiple scenarios or flows lists all relevant IDs.
+- Prefer ID anchors over prose re-description: "user checkout flow (BP-012 ✅)" is more precise and more traceable than re-describing the flow in words.
+- When no ID exists for a referenced scenario or flow, note it as `(no ID assigned)` so the gap is visible — downstream spec-writing may need to create one.
+
+This keeps internal-draft claims traceable to the source evidence that synthesis-quality-checker C3/C4 verify.
+
 This draft is internal. Do not paste it verbatim into chat. Compose it as a thinking step, then derive stage 2 from it.
 
 ---
@@ -31,6 +40,12 @@ This draft is internal. Do not paste it verbatim into chat. Compose it as a thin
 The scoping synthesis is what the user actually sees. It reflects the dialogue's substance back so the user can pattern-match — long enough to serve a multi-turn conversation, short enough to be high-impact only. The reference shape is what two product collaborators would say to each other after a real discussion: "OK, so we're doing X, with Y trade-off, deferring Z, and one thing I want to double-check is W. Sound right?"
 
 The scoping synthesis has up to four named sections, each **render-conditional** on having something to say. Empty sections are omitted, not padded.
+
+**Scenario / flow ID references.** When any section below refers to a scenario or business flow that carries an `SC-xxx` or `BP-xxx` ID, include the ID inline — e.g., "…covers the support mute flow (BP-012 ✅)." Conventions:
+
+- ✅ confirmed IDs need no further action in the synthesis.
+- 🔵 pending IDs must surface in the **Call outs** section (see below) so the user knows which scope dependencies are not yet validated.
+- When multiple IDs cluster under one bullet, list them all — partial ID coverage defeats traceability.
 
 1. **What we're building** (always present) — 1–3 sentences. The shape that emerged from dialogue, forward-looking, plain words. Not a transcript of "you said X."
 2. **Key trade-offs** (conditional) — 1–3 bullets, each with a brief why. Render only when real trade-offs were made in dialogue.
@@ -78,6 +93,12 @@ Each conditional section has its own keep test. Sections are render-conditional 
 - **Non-obvious scope exclusion** — an item the agent moved to deferred that the user might want in scope
 - **Cheap-now-expensive-later correction** — a scope bet that's cheap to fix now but expensive after the Product Contract lands and ce-plan consumes it
 - **Non-obvious consequence of multi-turn answers** — a downstream effect of combining user-stated answers that the user is unlikely to have tracked through dialogue. Surfaced forward-looking ("X means Y for the doc"), not retrospectively ("you said X"). This category is the multi-turn-dialogue reason call-outs exist at all in ce-brainstorm; do not filter these as "already implied by Stated"
+
+**Unconfirmed (🔵) scenario / flow annotation.** Any scenario (SC-xxx) or flow (BP-xxx) referenced in the synthesis that still carries 🔵 pending status in the ledger must appear as a call-out — even when no other keep-test category applies.
+
+- Format: `🔵 <ID> (<name>) — not yet confirmed by user; scope depends on confirmation.`
+- Example: `🔵 SC-007 (guest checkout) — not yet confirmed; notification scope depends on whether guests are included.`
+- This bypasses the normal keep test: a 🔵 ID always surfaces regardless of other keep-test categories. Confirmed (✅) IDs never appear as call-outs on this basis alone.
 
 Cut anything that doesn't match a keep-test category, including:
 

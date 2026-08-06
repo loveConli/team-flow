@@ -11,6 +11,8 @@ If the user references an existing brainstorm topic or document, or there is an 
 - If resuming, summarize the current state briefly, continue from its existing decisions and outstanding questions, and update the existing document instead of creating a duplicate
 - **Resume preserves the existing artifact's format, except pipeline mode.** Write back in whatever format the existing artifact uses — markdown if `.md`, HTML if `.html`. Explicit `output:` arguments override. Pipeline mode always forces `OUTPUT_FORMAT=md`.
 
+**`requirement/` directory scan (v0.38.0+).** In addition to `prd/`, also scan `requirement/` for existing iteration versions (v1, v2, …). If `requirement/ledger.md` exists, read it to understand cross-iteration context — archived versions, entry statuses, and the overall requirement trajectory. When both `prd/` and `requirement/` exist, merge signals from both; when only `requirement/` exists (no `prd/`), treat `requirement/` as the authoritative source for resume decisions.
+
 Historical `docs/brainstorms/*-requirements.{md,html}` files remain legacy inputs for `ce-plan`, but new outputs write to `prd/{ITERATION_VERSION}/prd.md`.
 
 ## 0.1b Classify Task Domain
@@ -88,9 +90,13 @@ The spine is five tasks, in order:
 ## 0.5 Resolve Iteration Version
 
 Scan the `prd/` directory to detect existing iteration versions (v1, v2, v3, ...).
-- If no iterations exist: suggest creating v1, ask user to confirm
+- Also scan `requirement/` for iteration versions — the directory may contain v-prefixed subdirectories (v1, v1.1, v2, …) representing past or parallel iterations.
+- When both `prd/` and `requirement/` exist, union the detected versions and pick the highest as baseline for the next version number.
+- If only `requirement/` exists, derive the new version from its latest entry (e.g., `requirement/v2/` → suggest v3).
+- If no iterations exist in either directory: suggest creating v1, ask user to confirm
 - If iterations exist: suggest the latest iteration, offer to continue or create new
 - User confirms the target iteration version
 - Store as `ITERATION_VERSION` (e.g., "v1", "v2")
 - Target PRD path: `prd/{ITERATION_VERSION}/prd.md`
+- **Legacy `prd/` compatibility:** projects migrating from `prd/` to `requirement/` may have both directories. Treat `prd/v1` and `requirement/v1` as the same logical iteration; do not create a duplicate version number.
 - Scan `prototype/` directory to confirm prototype branch aligns with PRD iteration version (if prototype exists).
