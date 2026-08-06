@@ -106,8 +106,8 @@ tf solutions capture --phase prd --domain <domain> --type pitfall --severity <se
 
 ## 原型自动评审（§17.10）
 
-**实现形式**：独立 `prototype-reviewer` agent（只读审查员，对齐 code-reviewer 模式）。
-- tools: Read, Bash, Grep, Glob（**无 Write**，报告写在 final response，编排层落盘）
+**实现形式**：独立 `prototype-reviewer` agent（对齐 code-reviewer 模式）。
+- tools: Read, Bash, Grep, Glob, Write（直接写审查报告文件）
 - 独立上下文运行，未参与 PRD/原型产出（规避锚定效应）
 - 两阶段检查：Pre-check（Bash 结构化预检，D1/D4 机械化）+ Deep-check（LLM 六维度语义对比，D2/D3/D5/D6 标注为「建议级，误报可被人工推翻」）
 

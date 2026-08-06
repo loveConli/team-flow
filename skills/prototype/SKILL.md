@@ -23,7 +23,7 @@ description: 本地 HTML 原型设计与维护 skill（零外部依赖、可离�
 ① 环境探查 + 方案设计   → sub: prototype-env-scout（只读，产出环境简报+2-3 个差异化方向，v0.18.0）
 ② 方案评审 + 人工评审   → 主代理（方向选定+方案确认 → AskUserQuestion）
 ③ 原型绘制             → sub: prototype-builder（有 Write，种子优先：template.html+layouts.md 组合，v0.18.0）
-④ 原型评审             → sub: prototype-reviewer（只读，PRD 6 维度+P0 grep+craft 4 席 rubric，v0.18.0）
+④ 原型评审             → sub: prototype-reviewer（PRD 6 维度+P0 grep+craft 4 席 rubric，v0.18.0，直接写审查报告）
 ⑤ 循环编排             → 主代理：FAIL→回③修正(≤3轮,收敛检测)；PASS/PASS_WITH_WARNINGS→⑥
 ⑥ 人工评审路由         → 主代理 AskUserQuestion：
                           - PRD 有问题 → 回 orchestrator S2 修订 PRD（vN 内修订，非升版）→ 再更新原型
@@ -38,8 +38,8 @@ description: 本地 HTML 原型设计与维护 skill（零外部依赖、可离�
 | ①环境探查+方案设计 | sub `prototype-env-scout`（插件 agent，只读） | 无（简报+方向写 response） |
 | ②方案/人工评审 | 主代理（含方向选定，v0.18.0） | 无 |
 | ③绘制 | sub `prototype-builder`（插件 agent，种子优先） | prototype/ 全部 |
-| ④评审 | sub `prototype-reviewer`（插件 agent，只读，含 craft rubric） | 无（报告写 response，主代理落盘） |
-| ⑤循环编排 | 主代理 | 落盘评审报告 |
+| ④评审 | sub `prototype-reviewer`（插件 agent，含 craft rubric） | 审查报告（直接写文件） |
+| ⑤循环编排 | 主代理 | 无 |
 | ⑥人工路由 | 主代理 | 无 |
 
 ## 内核（零外部依赖）

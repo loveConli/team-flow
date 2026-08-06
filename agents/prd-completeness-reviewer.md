@@ -94,7 +94,7 @@ Aggregate findings → final verdict per the Judgment Criteria.
 - **PRD**: {prd_path}
 - **CONCEPTS**: {concepts_path or "N/A"}
 - **Review round**: {N}
-- **Reviewer**: prd-completeness-reviewer agent (independent, read-only)
+- **Reviewer**: prd-completeness-reviewer agent (independent)
 - **Timestamp**: {ISO 8601}
 
 ## Verdict: {PASS | PASS_WITH_WARNINGS | FAIL}

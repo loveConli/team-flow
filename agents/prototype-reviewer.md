@@ -108,7 +108,7 @@ If either path is missing or unreadable, report `FAIL` with reason `INPUT_ERROR`
 - **PRD**: {prd_path}
 - **Prototype**: {prototype_path}
 - **Review round**: {N}
-- **Reviewer**: prototype-reviewer agent (independent, read-only)
+- **Reviewer**: prototype-reviewer agent (independent)
 - **Timestamp**: {ISO 8601}
 
 ## Verdict: {PASS | PASS_WITH_WARNINGS | FAIL}

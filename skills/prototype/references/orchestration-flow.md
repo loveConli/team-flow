@@ -83,12 +83,12 @@ test -f <prototype_path>/index.html && test -s <prototype_path>/index.html && ec
 
 ## 步骤 ④ 原型评审（子代理）
 
-派发插件 agent `prototype-reviewer`（只读，独立上下文），**传入：`prd_path`、`prototype_path`（及当前轮次 N）**，执行：
+派发插件 agent `prototype-reviewer`（独立上下文），**传入：`prd_path`、`prototype_path`（及当前轮次 N）**，执行：
 - PRD 6 维度（D1-D6，D6 含五状态契约）
 - **P0 工艺机械检查（v0.18.0）**：裸 hex / 靛蓝黑名单 / emoji / 填充文案 / scrollIntoView / data-testid / accent 超限——P0 违规 = Critical
 - **Craft Quality 4 席 rubric（v0.18.0）**：工艺(×0.4)+品牌(×0.2)+无障碍(×0.2)+文案(×0.2) 加权合成
 
-报告写 response，主代理落盘到 `prd/vN/prototype-auto-review.md`。
+agent 直接写审查报告到 `prd/vN/prototype-auto-review.md`。
 
 判定（v0.18.0 升级）：
 - **PASS**：Critical=0 且 Important=0 且 craft 合成 ≥6.0

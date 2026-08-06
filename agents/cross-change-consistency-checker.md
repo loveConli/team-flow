@@ -106,7 +106,7 @@ Use `grep` to search for API references across change specs and design docs.
 - **Changes analyzed**: {change-1, change-2, ...}
 - **Architecture anchors**: {arch_path}
 - **Prototype**: {prototype_path}
-- **Checker**: cross-change-consistency-checker agent (independent, read-only)
+- **Checker**: cross-change-consistency-checker agent (independent)
 
 ## Result: {CLEAN | CONFLICTS_FOUND}
 

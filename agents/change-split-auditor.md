@@ -139,7 +139,7 @@ FAIL → orchestration layer returns findings to ce-plan for deepening, then re-
 - **PRD**: {prd_path}
 - **Changes found**: {n}
 - **PRD requirements found**: {m}
-- **Auditor**: change-split-auditor agent (independent, read-only)
+- **Auditor**: change-split-auditor agent (independent)
 
 ## Verdict: {PASS | FAIL}
 

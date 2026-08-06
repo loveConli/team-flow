@@ -153,7 +153,7 @@ Aggregate all findings and determine verdict.
 - **Architecture Dir**: {architecture_dir}
 - **Global Arch Dir**: {global_arch_dir}
 - **Review round**: {N}
-- **Reviewer**: architecture-reviewer agent (independent, read-only)
+- **Reviewer**: architecture-reviewer agent (independent)
 - **Timestamp**: {ISO 8601}
 
 ## Verdict: {PASS | PASS_WITH_WARNINGS | FAIL}

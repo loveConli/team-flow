@@ -39,10 +39,10 @@ PRD 文档写入后、Handoff 之前，执行原型内循环。原型是 PRD 的
 
 ## 3.5.5 PRD 完整性评审（冻结前门禁）
 
-原型审查通过后、冻结前，派发 `prd-completeness-reviewer` 子代理（只读，独立上下文），评审 PRD「是否完整到能支撑后续 plan/spec 实施」（区别于 Phase 2.6 claim verifier——后者管"说得对不对"，本评审管"说得全不全"）。
+原型审查通过后、冻结前，派发 `prd-completeness-reviewer` 子代理（独立上下文），评审 PRD「是否完整到能支撑后续 plan/spec 实施」（区别于 Phase 2.6 claim verifier——后者管"说得对不对"，本评审管"说得全不全"）。
 
 - 派发：按名派发插件 agent `prd-completeness-reviewer`（定义见插件 `agents/prd-completeness-reviewer.md`），传入 PRD 路径 + CONCEPTS.md 路径。
-- 子代理按 §18.1 交接协议返回。报告落盘到 `prd/{ITERATION_VERSION}/prd-completeness-review.md`。
+- agent 直接写审查报告到 `prd/{ITERATION_VERSION}/prd-completeness-review.md`。
 - 判定（柔性）：PASS / PASS_WITH_WARNINGS → 进入冻结；**FAIL（Critical>0）→ 回 Phase 1.3 补充**后重审。
 - 5 维度：用户故事完整性(Critical)/验收标准(Critical)/边界与非功能(Important)/术语一致性(Minor)/范围闭环(Important)。
 
