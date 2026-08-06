@@ -84,6 +84,16 @@ argument-hint: "[问题简述] [--category <分类>] [--severity <P0-P3>]"
 - 涉及的 skill / agent / CLI 命令
 - 涉及的产物路径
 
+**环境版本采集**（写入 feedback frontmatter 的 `environment` 字段）：
+
+| 字段 | 采集命令 | 说明 |
+|------|---------|------|
+| `plugin_version` | `cat team-flow/package.json \| grep '"version"' \| head -1` | team-flow 插件版本 |
+| `node_version` | `node -v` | Node.js 运行时版本 |
+| `npm_version` | `npm -v` | npm 版本 |
+| `platform` | `uname -s \| tr '[:upper:]' '[:lower:]'` | 操作系统平台 |
+| `shell` | `basename "$SHELL"` | 当前 shell |
+
 ### Step 3：结构化记录
 
 按 `references/feedback-template.md` 格式输出：

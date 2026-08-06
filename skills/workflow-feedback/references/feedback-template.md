@@ -8,7 +8,7 @@
 ```yaml
 ---
 type: workflow-feedback
-version: 1
+version: 2
 created_at: <ISO 8601>
 category: <skill-trigger | sop-flow | artifact-quality | state-management | agent-quality | cli-command | ux-interaction | performance | cross-platform | documentation>
 severity: <P0 | P1 | P2 | P3>
@@ -16,6 +16,12 @@ status: open
 related_skill: <skill-name | null>
 related_phase: <S1-S5 | change-level | null>
 related_requirement: <req-id | null>
+environment:
+  plugin_version: <team-flow 插件版本>
+  node_version: <Node.js 版本>
+  npm_version: <npm 版本>
+  platform: <darwin | linux | win32>
+  shell: <zsh | bash | powershell>
 ---
 ```
 

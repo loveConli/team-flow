@@ -6,6 +6,13 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.39.0] - 2026-08-06
+
+### Added（workflow-feedback 环境版本记录）
+
+- **feedback-template.md**：YAML frontmatter 增加 `environment` 字段，记录问题发生时的环境版本（plugin_version/node_version/npm_version/platform/shell），version 升到 2
+- **SKILL.md**：Step 2（上下文关联）增加环境版本采集命令表，指导 agent 自动采集并写入 feedback 文件
+
 ## [0.38.0] - 2026-08-06
 
 ### Added（E2E case 记录 + 复利闭环 + 下游确认）
