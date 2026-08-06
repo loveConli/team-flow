@@ -93,6 +93,15 @@ Guard: `... check <dir> specifying bridging --json` → fail = BLOCK. Artifacts 
 ### Route to build-executor (dispatch sub-agent)
 Contract exists and approved, contract matches artifacts. Include `DP-4: 执行模式选择`: propose waves, run `tf execution recommend <change-dir> [--wave ...]`, show the user every available mode plus evidence and the recommendation, then obtain a clear selection. The command saves a current receipt; before the first implementation edit, `build-executor` must run `tf execution plan <change-dir> --mode <selected> --confirm ...` (and `--acknowledge-recommendation` when the selected mode differs from the recommendation) using matching artifacts, contract, and waves, then `tf execution show <change-dir> --json`; report the saved revision, selected mode, recommendation alignment, ordered waves, and actual concurrent-dispatch capability. A revision must repeat recommend and confirmation. Do not transition to `executing` until `show` reports `current: true`; then run `... check <dir> approved-for-build executing --json` → fail = BLOCK. **v0.13 §49 门禁前移**：该 guard 含 `test-matrix-ready` 维度——full 模式非存量 change 必须"带着矩阵开工"（矩阵存在非空 OR 显式 skip 附理由）；FAIL 时回 bridging 让 contract-builder 补矩阵，或按指引显式 skip，禁止绕过。
 
+**v0.39.0 主动串行编排**：workflow-start 必须主动串行编排 build-executor 和 code-reviewer，而不是被动等待 build-executor 完成所有 wave。流程：
+1. 读取 execution plan 获取 wave 列表（`tf execution show <change-dir> --json`）
+2. 对每个 wave：
+   - dispatch build-executor 执行当前 wave
+   - 等待 build-executor 完成（task-notification）
+   - dispatch code-reviewer 审查当前 wave
+   - 等待 review receipt + verdict=pass
+3. 所有 wave 完成后，继续下一步路由
+
 ### 阶段产物同步门禁点（v0.37.0 §68.2 G4）
 
 契约批准（DP-3）后、进入实施（DP-4）前，**阻塞确认**（AskUserQuestion）是否同步 change 规划制品（团队协作：契约是实施授权）：
@@ -107,6 +116,8 @@ Execution hit blockage: test failure, unexpected behavior, build error, task can
 
 ### Route to code-reviewer
 The current planned wave is implemented and ready for spec-compliance + code-quality verification. A reviewer must write an `tf execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict <pass|fail>` receipt before any dependent wave or closing transition.
+
+**v0.39.0 主动串行编排**：workflow-start 在每个 wave 完成后主动 dispatch code-reviewer，而不是等待 build-executor 完成所有 wave。这是 workflow-start 的编排责任，不是 build-executor 的责任。
 
 **逐 wave 审查纪律（v0.36.4）**：每次 code-reviewer dispatch 只审查**一个** wave。禁止将多个 wave 合并为一次审查（vrm4teamflow C1 事件：W1-W4 合并审查导致设计约定类问题在 W4 才发现，修复范围扩大到 8 个 batch）。parallel wave 内的多个 task 作为整体审查一次（receipt 是 wave 级别），但审查 prompt 必须包含每个 task 的独立 diff。
 
@@ -158,6 +169,42 @@ Use content inspection, not timestamps.
 
 **Brief drift (advisory, v0.9, 不阻断)**: change-brief.md 是上游输入（非 team-flow 产物），**不**混入上述三条产物互查、**不**进入 `artifacts_hash`。当 brief 的 `plan_hash` 与当前 `prd/vN/plan.md` 不一致，或 brief AC 列表与 PRD 功能清单明显出入 → 提示"产品层已变更，brief 可能过期，建议回 orchestrator 重新分发（S4→S3 环路）"，**不**触发产物重审。
 
+## Review Findings 处理流程（v0.39.0）
+
+当 code-reviewer 返回 findings 时，workflow-start 必须：
+1. 分析 findings 的严重程度（Critical/Important/Minor）
+2. 通过 SendMessage 将 findings 转发给 build-executor，附带修复指令
+3. 等待 build-executor 修复并返回结果
+4. **禁止直接 Read/Edit/Write 任何代码文件**——无论改动量大小
+
+示例 SendMessage：
+```yaml
+to: build-executor
+message: |
+  code-reviewer 发现以下 findings，请修复：
+  - F-15: policyYear prop 未传递（Critical）
+  - F-16: 评价下拉缺符号（Important）
+  
+  修复后请通知我，我将 dispatch code-reviewer re-review。
+```
+
+## 修复后 Re-review 流程（v0.39.0）
+
+build-executor 修复 findings 后，workflow-start 必须：
+1. dispatch code-reviewer 进行 re-review（只审查修复的 findings）
+2. 等待 re-review 结果
+3. 如果 re-review 通过（PASS 或 PASS_WITH_WARNINGS），记录 review receipt（verdict=pass）
+4. 如果 re-review 不通过（FAIL），重复修复流程（≤3 轮，不收敛转人工）
+5. **禁止在 review receipt 未记录或 verdict!=pass 时进入下一阶段**
+
+## Closing 前置条件检查（v0.39.0）
+
+在路由到 release-archivist 之前，workflow-start 必须检查：
+- 所有 planned wave 的 review receipt 是否存在
+- 所有 review receipt 的 verdict 是否为 pass
+- 如果任何 receipt 缺失或 verdict!=pass，阻断并要求 re-review
+- 检查命令：`tf execution show <change-dir> --json` 查看每个 wave 的 receipt 状态
+
 ## Guardrails
 
 - No implementation before planning artifacts or contract exist
@@ -174,7 +221,8 @@ Use content inspection, not timestamps.
 - **No routing to spec-writer without architecture-design gate pass** (v0.9 §26): `arch_design_decision` must be `required` or `skipped` (not `null`). hotfix/tweak 不豁免
 - **No arch state write without auto-review PASS** (v0.28.1 §36): when `decision: required`, auto-review MUST complete with PASS or PASS_WITH_WARNINGS before writing `arch_design_decision` to yaml. FAIL → loop fix (≤3 rounds) or escalate to human
 - **No routing past DP-A without user confirmation** (v0.29.0 §37): architecture-design 四步协议完成后，必须经 DP-A 用户确认门（AskUserQuestion）才能路由到 spec-writer。用户选择"需要调整"时，修改必须通过子代理执行，修改后重新 auto-review + 重新 DP-A 确认
-- **Artifact Ownership — 主代理不得直接修改子代理产物** (v0.29.0 §37): 子代理是其产物的唯一负责人（architecture-design → `architecture/` 目录，spec-writer → `proposal.md`/`specs/`/`design.md`/`tasks.md`，contract-builder → `execution-contract.md`）。主代理（workflow-start）不得通过 Read + Edit/Write 直接修改子代理的产物文件。修改必须通过 `SendMessage` 恢复原子代理（优先）或启动新子代理执行。例外：仅当子代理无法启动且用户明确授权时，主代理可直接修改，但必须在修改后重新触发对应的 review 验证
+- **Artifact Ownership — 主代理不得直接修改子代理产物** (v0.29.0 §37): 子代理是其产物的唯一负责人（architecture-design → `architecture/` 目录，spec-writer → `proposal.md`/`specs/`/`design.md`/`tasks.md`，contract-builder → `execution-contract.md`，build-executor → 代码文件）。主代理（workflow-start）不得通过 Read + Edit/Write 直接修改子代理的产物文件。修改必须通过 `SendMessage` 恢复原子代理（优先）或启动新子代理执行。**v0.39.0 强化**：主代理 MUST NOT 直接 Edit/Write 任何文件 under `changes/<name>/` 或 `.worktrees/`——无论改动量大小，必须通过 SendMessage 委托子代理执行。例外：仅当子代理无法启动且用户明确授权时，主代理可直接修改，但必须在修改后重新触发对应的 review 验证
+- **修复后必须 re-review** (v0.39.0): build-executor 修复 findings 后，workflow-start 必须 dispatch code-reviewer re-review 确认修复有效，记录 review receipt（verdict=pass）。禁止在 review receipt 未记录或 verdict!=pass 时进入下一阶段
 - **No cross-change artifact modification (v0.30.0)**: 处理 change X 时 **MUST NOT** 编辑 `changes/Y/`（Y≠X）下任何产物。发现跨 change 依赖/问题时：① 在 change X 的 ADR/proposal 中显式声明依赖；② change Y 进入 workflow-start 时，扫描是否有其他 change 声明了对 Y 的依赖并提醒用户；③ change Y 的产物修改必须走 Y 自己的完整流程（architecture-design → auto-review → DP-A），不得绕过。跨 change 一致性核查可调度 `cross-change-consistency-checker` agent（来源：workflow-feedback 2026-08-01）
 
 ## State Writes (v0.22.5 F06 修复)

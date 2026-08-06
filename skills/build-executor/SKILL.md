@@ -107,19 +107,22 @@ Boundaries: if any task touches >1 module, involves schema/API/config changes, o
 
 ## SDD Workflow
 
-For full/hotfix by default. Dispatch according to the persisted plan, review each planned wave, and run a final broad review after all waves.
+For full/hotfix by default. Execute waves as dispatched by workflow-start.
+
+**v0.39.0 主动串行编排**：build-executor 不再负责安排 code-reviewer。workflow-start 会主动串行编排：每个 wave 完成后，workflow-start 会 dispatch code-reviewer 审查。build-executor 只需执行当前 wave，完成后通知 workflow-start。
 
 ### Planned-Wave Loop
 1. Read the current plan with `tf execution show <change-dir> --json`; only waves shown with `current: true` and `eligible: true` may start. A `retryable: true` wave may only be repaired and re-reviewed; do not dispatch its dependents until its replacement receipt is `pass`. The CLI encodes dependencies in `--wave <id>:<strategy>:<tasks>[:<depends-on,...>]` and rejects a review receipt for a wave whose prerequisites lack current `pass` receipts.
 2. A `parallel` wave may dispatch independent tasks simultaneously only when the platform supports concurrent dispatch. If it does not, disclose the unavailable capability and execute the same wave one task at a time without changing its stored strategy.
 3. A `serial` wave dispatches one task at a time in listed order.
-4. After every wave, write a non-empty persisted regular-file review report (separate from the implementer's report), then record exactly one receipt that names that review report:
-   ```bash
-   tf execution review <change-dir> \
-     --wave <wave-id> --base <sha> --head <sha> --report <review-report-path> --verdict <pass|fail>
-   ```
-   Do not begin a dependent wave until its predecessor receipt is `pass`.
-5. Critical/Important findings require a `fail` receipt, a focused repair, re-review, then a replacement `pass` receipt. Never advance or close with a missing or failed receipt.
+4. After every wave, notify workflow-start via SendMessage that the wave is complete and needs review. Include:
+   - Wave ID
+   - Worktree path
+   - Branch
+   - Repositories and commit SHAs (base + head)
+   - Summary of changes
+5. **Do not** attempt to dispatch code-reviewer or write review receipts — that is workflow-start's responsibility.
+6. Critical/Important findings require a `fail` receipt, a focused repair, re-review, then a replacement `pass` receipt. Never advance or close with a missing or failed receipt.
 
 ### Per-Task Loop
 1. **Dispatch implementer**: Load the template with `tf runtime asset read skills/build-executor/implementer-prompt.md`. Extract task brief with `scripts/task-brief PLAN_FILE N`. Include: where task fits, brief path, interfaces from prior tasks, report file path.
@@ -149,7 +152,7 @@ Track in `.superpowers/sdd/progress.md`. Check for existing ledger — completed
 
 ## Inline Execution Mode
 
-Only after a user-confirmed `inline` selection is recorded by `tf execution plan --confirm`; a non-recommended selection also records `--acknowledge-recommendation`. Executes in the current session and still writes one review receipt per planned wave.
+Only after a user-confirmed `inline` selection is recorded by `tf execution plan --confirm`; a non-recommended selection also records `--acknowledge-recommendation`. Executes in the current session. After each wave, notify workflow-start for review (do NOT attempt to write review receipts).
 
 Per-task: extract brief → write failing test → confirm failure → implement → confirm green → checkpoint review (done-when criteria, SHALL/MUST verification) → commit → save a task-level recovery checkpoint when another task remains → append to progress ledger.
 
@@ -180,7 +183,7 @@ DP-5 (debug escalation): `tf state set <change-dir> dp_5_result "<resolution>"` 
 
 ## Completion Standard
 
-Don't report completion until: tests pass, contract obligations satisfied, review blockers resolved, every planned wave has a current `pass` receipt, final review is complete, and workflow is ready for `release-archivist`.
+Don't report completion until: tests pass, contract obligations satisfied, and every planned wave has been notified to workflow-start for review. Review blockers are handled by workflow-start via code-reviewer dispatch.
 
 ## Exception Handling
 
