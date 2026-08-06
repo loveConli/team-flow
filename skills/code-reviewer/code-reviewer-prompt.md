@@ -73,9 +73,9 @@ Subagent (general-purpose):
     - Each case has a corresponding test implementation (test_file + test_method_name match)?
     - Assertions match the matrix's `expected` output?
     - `design_method` matches actual test approach (boundary case uses real boundary values)?
-    - Matrix coverage < 100% → Critical finding (test-matrix-gap)
+    - Matrix coverage < 100% → Critical finding (test-matrix-gap)（分母排除 test_tier=e2e，E2E case 由 release-archivist Step 5b 对账）
     - Candidate Coverage Ledger: deferred items have reasonable reasons?
-    - Pyramid ratio: unit 70-80%, integration ≤30%?
+    - Pyramid ratio: unit 70-80%, integration ≤30%?（分母 = unit+integration，e2e 不计入）
     If `test-matrix.md` does NOT exist, skip this section silently.
 
     **Production readiness:**

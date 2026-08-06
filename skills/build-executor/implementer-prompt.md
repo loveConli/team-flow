@@ -52,6 +52,8 @@ Subagent (general-purpose):
     If `test-matrix.md` exists, read the module section relevant to your task.
     For each case in the matrix, follow the protocol matching its `work_mode`:
 
+    **test_tier=e2e 豁免（v0.38.0）**: `test_tier=e2e` 的 case 不在 implementer 职责内——由 e2e skill / release-archivist Step 5b 覆盖，跳过（不计入模块 coverage，不按 work_mode 走 TDD）。
+
     **work_mode=TDD** (new behavior):
     1. RED: Write failing test matching `case_id` + `test_method_name`, confirm failure
     2. GREEN: Implement minimum code to pass
@@ -68,7 +70,7 @@ Subagent (general-purpose):
     2. Fix production code, confirm green
     3. Report: defect reproduction + fix evidence
 
-    After all cases: self-check matrix coverage = passed cases / total cases in matrix for your module.
+    After all cases: self-check matrix coverage = passed cases / total cases in matrix for your module（分母排除 test_tier=e2e）。
 
     **两不原则 (Two Prohibitions)**:
     - ⛔ DO NOT write production code and test code simultaneously — RED first, then GREEN

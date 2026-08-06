@@ -46,9 +46,11 @@ Compare contract batches against actual diff. Every SHALL/MUST must have impleme
 
 If `test-matrix.md` exists:
 1. **Statistics**: total cases / implemented / passed
-2. **Candidate Coverage Ledger audit**: any `decision=deferred` without reasonable reason?
-3. **Complexity tier check**: cases per module meet minimum (trivial≥3 / medium≥5 / complex≥7)?
-4. **Verdict**:
+2. **E2E 层豁免（v0.38.0）**：`test_tier=e2e` 的 case 从 coverage 分母豁免，单列统计 `e2e cases: implemented N/M（经 Step 5b 验证）`——E2E 证据由 Step 5b 对账，不参与本步骤 100%/90% 判定
+3. **Candidate Coverage Ledger audit**: any `decision=deferred` without reasonable reason?
+4. **Complexity tier check**: cases per module meet minimum (trivial≥3 / medium≥5 / complex≥7)?（E2E case 不参与模块用例数下限判定）
+5. **分母为 0 兜底（v0.38.0）**：纯 e2e change（无 unit/integration case，分母为 0）时，本步骤以 Step 5b E2E 验证结果为准，不判 FAIL（E2E 不替代低层级测试，但边界场景不卡死）
+6. **Verdict**:
    - Matrix coverage = 100% AND all cases pass → **PASS**
    - Matrix coverage ≥ 90% with reasonable deferred items → **CONDITIONAL (WARN)**
    - Matrix coverage < 90% OR unexplained gaps → **FAIL**
@@ -82,12 +84,20 @@ Check for files modified outside scope fence, new dependencies not in design. Un
 - CONDITIONAL → present WARNs, proceed only with user acceptance
 - PASS → proceed to final checks
 
-### Step 5b: E2E Verification (optional, v0.4)
-If an `e2e/` suite exists for the change, fold its report into verification (see design spec ch.16):
+### Step 5b: E2E Verification (conditional, v0.38.0 起由"存在 e2e/ 套件"改为"矩阵含 E2E case"触发)
+
+检测 `test-matrix.md` 是否含 `test_tier=e2e` 的 case：
+1. **无 E2E case** → 跳过（本步骤不执行）
+2. **有 E2E case 且已有 e2e 报告**（`docs/statistics/YYYY-MM-DD-e2e-report.md` 存在）→ 折进验证（见下）
+3. **有 E2E case 且无 e2e 报告** → **AskUserQuestion 阻塞确认**："test-matrix 含 {N} 个 E2E case，是否执行 E2E 测试？"
+   - **是** → 引导执行 `/e2e`（e2e skill：AC 提取 → Playwright 脚本 → 执行 → 报告 `docs/statistics/YYYY-MM-DD-e2e-report.md`），报告产生后回填本步骤验证
+   - **否** → 记录 E2E skip + 理由（如环境不具备/本期不做），报告行 `| E2E | SKIP | [reason] |`（不 FAIL）
+
+有 E2E 报告时的验证逻辑（4 级判定与门禁内联于此；design spec ch.16 仅概述）:
 - Read `docs/statistics/YYYY-MM-DD-e2e-report.md`: AC coverage / four-dimension coverage (EX/ST/BND) / type distribution / uncovered list / failure root-cause (test issue vs implementation issue).
 - **4-level artifact verification** (L1 existence / L2 substance / L3 wiring / L4 dataflow → VERIFIED/HOLLOW/ORPHANED/STUB/MISSING): compare `architecture-design` outputs (API/DB design docs) against actual code; STUB/MISSING = BLOCKER, HOLLOW/ORPHANED = WARNING.
 - **Graded gate**: prototype-phase AC≥80% (HP required, EX/ST/BND non-blocking if absent); integration-phase AC≥95% / EX≥80% / ST≥90% / BND≥75% (AC/EX = BLOCKER, ST/BND = WARNING).
-- Add a report row: `| E2E | PASS/FAIL/WARN | [coverage summary] |`.
+- Add a report row: `| E2E | PASS/FAIL/WARN/SKIP | [coverage summary or skip reason] |`.
 - Note: `ce-proof` is the Proof markdown editor — unrelated to verification; do NOT route E2E there.
 
 ## Final Checks

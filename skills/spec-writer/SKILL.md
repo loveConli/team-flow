@@ -92,7 +92,7 @@ Every requirement must be testable. Use SHALL or MUST. Every requirement must ha
 
 Optional structured AC tags under a Scenario are supported for E2E extraction (v0.4, design spec ch.16): `##### Exception:` (→ EX AC, ×2), `##### State:` (→ ST AC, ×2), `##### Boundary:` (→ BND AC, ×1). These are **OPTIONAL** — omitting them does NOT fail validation. The `e2e` skill applies dimension-conditional gating (absent dimension = N/A, not 0%) plus keyword fallback (error/invalid/fail/边界), so no spec is forced to add tags.
 
-Optional test-dimension tags under a Scenario are supported for test-matrix extraction (v0.12 §44.1): `##### Unit:` (→ unit test hints: equivalence classes, boundary values), `##### Integration:` (→ integration test hints: cross-module, transaction boundaries). These are **OPTIONAL** — omitting them does NOT fail validation. The `contract-builder` extracts matrix skeletons from these tags when present, but does not require them.
+Optional test-dimension tags under a Scenario are supported for test-matrix extraction (v0.12 §44.1): `##### Unit:` (→ unit test hints: equivalence classes, boundary values), `##### Integration:` (→ integration test hints: cross-module, transaction boundaries), `##### E2E:` (→ e2e test hints: UI interaction / cross-layer flows; v0.38.0, test_tier=e2e). These are **OPTIONAL** — omitting them does NOT fail validation. The `contract-builder` extracts matrix skeletons from these tags when present, but does not require them.
 
 ### design.md
 Must have: Context (current state, constraints, stakeholders), Goals, Decisions (Choice + Rationale + Alternatives considered), Risks And Trade-Offs.

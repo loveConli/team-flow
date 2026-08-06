@@ -1,6 +1,6 @@
 {
   "name": "team-flow",
   "description": "Unified workflow plugin: team-flow (spec-driven dev) + compound-engineering core subset + architecture-design (4A/DDD) + prototype (local HTML). 24 skills, one install.",
-  "version": "0.37.0",
+  "version": "0.38.0",
   "contextFileName": "GEMINI.md"
 }

@@ -6,6 +6,33 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-08-06
+
+### Added（E2E case 记录 + 复利闭环 + 下游确认）
+
+- **test-matrix 支持 E2E case（`test_tier=e2e`）**：对齐 v0.12 §42.4 三值承诺（unit/integration/e2e），实现补齐设计——test-strategy §3 从"e2e 独立覆盖不计入本矩阵"改为"含 UI 交互/跨层 AC 显式评估 E2E 必要性：纳入或记录排除理由"；金字塔分母 = unit+integration
+- **复利回写 E2E 层级**：`tf test-merge` rewriteIndex 的 `test_tier_breakdown` 增加 e2e 统计（`unit:N, integration:N, e2e:N`）；extractSummary 识别 `E2E cases:` 行
+- **下游 E2E 确认（release-archivist Step 5b）**：检测 test-matrix 含 E2E case → 无 e2e 报告 → AskUserQuestion 确认是否执行 E2E 测试（是 → 引导 `/e2e`；否 → 记录 skip + 理由，不 FAIL）
+- **LLM 消费点 e2e 豁免（防断链）**：release-archivist Step 2b / build-executor implementer / code-reviewer 三个消费点的 coverage 分母与金字塔配比排除 `test_tier=e2e`
+- **生成器/上游同步**：contract-builder Generation Protocol 第 7 步 E2E 评估 + Summary/契约段 E2E 行；test-matrix-export `TEST_KIND_TO_TIER` 加 `playwright_prototype`/`playwright_integration` → e2e；spec-writer Scenario 标签补 `##### E2E:`；design-methods-detail test_tier 表补 e2e；test-quality-rules 规则 11 明确 e2e case 合法落点 `e2e/`
+
+### Bug Fixes（feedback 2026-08-05，test-merge 五 bug）
+
+- **resolveDeferred 误删 Current Cases**：原全文件 regex `\|<caseId>\|[^\n]*\n` 把 baselines Current Cases 表正常 case 行全部误删（表体清空、Evolution Log 计数保留）→ 改为仅删除 `## Deferred Items` 段内被新 case 覆盖的行
+- **extractSummary 遇 markdown bold 返回 0**：regex `Total cases:\s*(\d+)` 不匹配 `**87**`（C1 矩阵 LLM 手写加粗）→ 容忍可选 `**` 前缀
+- **dry-run 实为真写**：dryRun 仅 gitCommit 生效，Step 2-5 照常写盘 → mergeBaselines/resolveDeferred/appendChangelog/rewriteIndex 全链路 dryRun 透传，dry-run 不写任何文件
+- **mergeExistingBaseline `startsWith('')` 恒真**：Current Cases"覆盖式"语义失效，旧 case 行每次 merge 累积 → 修正退出条件，旧行被替换
+- **`.filter(Boolean)` 丢空列错位**：mock 等空列导致 cells 索引左移，work_mode/test_file/test_method_name 静默错位（E2E case 的 mock 列必空，高发）→ 改 `slice(1,-1)` 按索引保留空列
+- **Evolution Log 幂等**：同 change 同日重复执行不重复 append
+
+### Tests
+
+- **tests/lib/test-merge.test.mjs（新增）**：test-merge 是全库唯一无测试覆盖的核心 merge 命令，补齐 11 个用例（resolveDeferred 不误删 / extractSummary bold / 覆盖式 + 幂等 / 空列列位 / dry-run 不写盘 / E2E 复利统计）
+
+### 来源
+
+- workflow-feedback 2026-08-05（P1-1~P1-4 + P2-1）交叉确认：2 个独立 Explore agent 制品链核查 + resolveDeferred 实证（旧代码表体清空 vs 新代码保留）
+
 ## [0.37.0] - 2026-08-05
 
 ### Added（阶段同步 + 原型版本隔离，设计增强方案 v0.15 §68）

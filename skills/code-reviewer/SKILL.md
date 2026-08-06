@@ -144,7 +144,7 @@ If `test-matrix.md` exists in the change directory, audit the implementation aga
    - Verify `design_method` matches actual test approach (a `boundary` case must use real boundary values, not a happy-path disguised as boundary)
 
 2. **Coverage calculation**:
-   - Matrix coverage = implemented cases / total cases in matrix
+   - Matrix coverage = implemented cases / total cases in matrix（**分母排除 test_tier=e2e**——E2E case 由 release-archivist Step 5b 对账，不在实施层判定）
    - Matrix coverage < 100% → **Critical finding** (test-matrix-gap)
    - List missing case_ids
 
@@ -153,8 +153,9 @@ If `test-matrix.md` exists in the change directory, audit the implementation aga
    - Entries with `decision=covered` actually have corresponding tests?
 
 4. **Pyramid ratio check**:
-   - unit cases: 70-80% of total
-   - integration cases: ≤30% of total
+   - 分母 = unit + integration（e2e 不计入金字塔配比，v0.38.0）
+   - unit cases: 70-80% of (unit+integration)
+   - integration cases: ≤30% of (unit+integration)
    - Significant deviation → **Important finding** (test-pyramid-imbalance)
 
 If `test-matrix.md` does NOT exist, skip this step silently (legacy change compatibility).

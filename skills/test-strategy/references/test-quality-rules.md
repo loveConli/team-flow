@@ -226,6 +226,7 @@ class UserServiceCreateUserTest { ... }
 
 **检查**：
 - case 声明的 `test_tier` 与实际测试文件不符（如 unit case 写到了集成测试文件）
+- `test_tier=e2e` 的 case 合法落点是 `e2e/` 目录（Playwright spec，v0.38.0）——落在普通单元/集成测试文件里算 mismatch
 
 ### 12. evidence-not-in-method
 

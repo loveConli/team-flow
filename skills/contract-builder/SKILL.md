@@ -11,7 +11,7 @@ Read before generating: `proposal.md`, `specs/`, `design.md`, `tasks.md`, then l
 
 **Architecture Design Outputs (v0.9 §26)**: 若 `architecture/` 目录存在，同时读取 `architecture/architecture.md` / `database.md` / `api.md`，作为执行契约的架构约束补充输入——确保 execution-contract.md 的 Implementation Constraints 段包含架构设计的关键约束（聚合边界/CQRS 分流/API 契约/schema 变更）。`architecture/` 不存在时跳过。
 
-**Test Ledger Injection (v0.12 §43.5)**: 若 `docs/test-ledger/` 存在，读取 `INDEX.md`（模块覆盖概览 coverage_status）+ `baselines/{module}.md`（已有 case 避免重复设计；Deferred Items 评估本次是否可解决），作为 test-matrix.md 生成的增量输入。不存在时跳过（首次使用或无历史数据）。
+**Test Ledger Injection (v0.12 §43.5)**: 若 `docs/test-ledger/` 存在，读取 `INDEX.md`（模块覆盖概览 coverage_status）+ `baselines/{module}.md`（已有 case 避免重复设计；Deferred Items 评估本次是否可解决），作为 test-matrix.md 生成的增量输入。不存在时跳过（首次使用或无历史数据）。**tier 语义（v0.38.0）**：baselines 中 `test_tier=e2e` 的行表示"端到端已覆盖"，不参与 unit/integration 去重与金字塔配比——不得把它误判为单测已覆盖而省略低层级 case 设计。
 
 ## Artifact Mapping
 
@@ -57,19 +57,20 @@ When the change involves UI (design.md has a `## UI Contract` section), the exec
 
 ### Generation Protocol
 
-1. **输入来源**：specs/（Scenario + Unit/Integration 标签）、tasks.md（batch + file structure）、test-strategy skill（design_method 规则）、test-ledger baselines（增量输入）
+1. **输入来源**：specs/（Scenario + Unit/Integration/E2E 标签）、tasks.md（batch + file structure）、test-strategy skill（design_method 规则）、test-ledger baselines（增量输入）
 2. **按模块分组**：为每个有业务逻辑的模块（Service/Controller/Repository 等）生成 case 列表
 3. **复杂度分级**：每个模块标注 trivial/medium/complex，作为用例数下限判据（test-strategy §2）
 4. **design_method 覆盖**：每个模块至少 1 个 `{boundary, equivalence}` case + 1 个 `{error, exception, reject}` case（test-strategy §6 schema 强制覆盖）
 5. **对抗验证**：矩阵生成后执行三招回检（test-strategy §4），缺失则追加 adversarial case
 6. **候选覆盖台账**：列出所有被测候选（方法/类），标注 decision（covered/deferred/not_applicable）
+7. **E2E 层评估（v0.38.0）**：对 specs 中含 **UI 交互/跨层链路**的 Scenario（AC 涉及前端交互、跨服务/跨层数据流）显式评估 E2E 必要性——纳入 `test_tier=e2e` 的 case（标准 12 列，case_id `{Module}-e2e-{scene}-{NNN}`，`work_mode=E2E`（不参与 build-executor 的 TDD 路由），mock 列 `-`，test_kind 用 `playwright_prototype`/`playwright_integration`）或记录"E2E 排除 + 理由"（如无 UI/纯后端）。不得静默跳过。
 
 ### 12-Column Format
 
 | case_id | behavior | design_method | input | expected | test_kind | test_tier | mock | work_mode | test_file | test_method_name | run_command |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 
-字段说明见 test-strategy skill 的 `references/design-methods-detail.md`。`test_tier` 从 `test_kind` 派生（unit/integration）。
+字段说明见 test-strategy skill 的 `references/design-methods-detail.md`。`test_tier` 从 `test_kind` 派生，可取 **unit / integration / e2e** 三值（v0.38.0：E2E case 的 test_kind 用 `playwright_prototype` / `playwright_integration`）。
 
 ### Structure
 
@@ -81,6 +82,7 @@ When the change involves UI (design.md has a `## UI Contract` section), the exec
 - Modules covered: {N} (complexity: trivial×{n}, medium×{n}, complex×{n})
 - Unit cases: {N} ({percent}%)
 - Integration cases: {N} ({percent}%)
+- E2E cases: {N} ({percent}%)
 - Deferred items: {N}
 - Matrix revision: 1
 
@@ -104,7 +106,7 @@ When the change involves UI (design.md has a `## UI Contract` section), the exec
 ```markdown
 ## Test Matrix
 See `test-matrix.md` for the full test case matrix (附属产物, 独立 hash).
-- Total cases: {N}, Unit: {N}, Integration: {N}, Deferred: {N}
+- Total cases: {N}, Unit: {N}, Integration: {N}, E2E: {N}, Deferred: {N}
 ```
 
 然后执行 `tf state rebuild <change-dir>` 更新 `test_matrix_hash`。

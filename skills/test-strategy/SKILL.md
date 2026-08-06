@@ -42,7 +42,8 @@ user-invocable: false
 
 - unit（test_tier=unit）：70-80% 的 case
 - integration（test_tier=integration）：≤30% 的 case
-- e2e：由 e2e skill 独立覆盖，不计入本矩阵
+- e2e（test_tier=e2e，v0.38.0）：含 **UI 交互/跨层链路**的 AC（如上下分栏联动、导出端到端、权限 403 端到端）必须显式评估 E2E 必要性——**纳入 E2E case 或记录排除理由**（不静默跳过）。E2E case 沿用标准 12 列格式，`test_tier=e2e`、case_id 用 `{Module}-e2e-{scene}-{NNN}`（3 连字符 + 数字结尾，满足复利台账计数）、mock 列填 `-`。
+- **金字塔分母 = unit + integration**（e2e 不计入金字塔配比，避免稀释 unit 占比判定）。
 
 ## 4. 对抗验证三招（矩阵生成后必检）
 

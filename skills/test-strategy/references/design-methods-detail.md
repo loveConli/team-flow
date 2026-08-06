@@ -179,5 +179,6 @@ CANCELLED ←──────────────┘ (仅 PAID 前可取�
 | service_social, repository_h2 | integration |
 | rabbitmq_social, redis_social | integration |
 | external_api_stub, test_infrastructure | integration |
+| playwright_prototype, playwright_integration（v0.38.0） | e2e |
 
 **用途**：test_tier 用于统计和 CI 分级；test_kind 用于路由到正确的编写模板。

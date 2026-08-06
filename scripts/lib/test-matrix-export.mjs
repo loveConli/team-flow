@@ -54,6 +54,9 @@ const TEST_KIND_TO_TIER = {
   redis_social: 'integration',
   external_api_stub: 'integration',
   test_infrastructure: 'integration',
+  // e2e tier (v0.38.0，对齐 e2e skill 的 prototype/integration 两 project)
+  playwright_prototype: 'e2e',
+  playwright_integration: 'e2e',
 };
 
 /**
@@ -120,6 +123,7 @@ export function convert(matrix, options = {}) {
   // 统计
   const unitCases = cases.filter(c => deriveTestTier(c.test_kind) === 'unit');
   const integrationCases = cases.filter(c => deriveTestTier(c.test_kind) === 'integration');
+  const e2eCases = cases.filter(c => deriveTestTier(c.test_kind) === 'e2e');
 
   // 提取 complexity
   const complexity = matrix.target_complexity || {};
@@ -141,6 +145,7 @@ export function convert(matrix, options = {}) {
   lines.push(`- Modules covered: 1 (${moduleName}, complexity: ${complexityTier})`);
   lines.push(`- Unit cases: ${unitCases.length} (${Math.round(unitCases.length / cases.length * 100) || 0}%)`);
   lines.push(`- Integration cases: ${integrationCases.length} (${Math.round(integrationCases.length / cases.length * 100) || 0}%)`);
+  lines.push(`- E2E cases: ${e2eCases.length} (${Math.round(e2eCases.length / cases.length * 100) || 0}%)`);
   lines.push(`- Deferred items: ${candidateLedger.filter(c => c.decision === 'deferred').length}`);
   lines.push(`- Matrix revision: 1`);
   lines.push('');
