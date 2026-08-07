@@ -53,7 +53,7 @@ argument-hint: "[下一个会话的关注点描述]"
 | 需求注册表 | `.team-flow/registry.yaml` | 活跃需求、需求列表 |
 | 编排状态 | `.team-flow/requirements/<req-id>/orchestrator.yaml` | SOP 阶段（S1-S5） |
 | 变更级状态 | `<change>/.team-flow.yaml` | 状态机 8 态中的当前态 |
-| PRD 版本 | `prd/vN/prd.md` frontmatter | 迭代版本、冻结状态 |
+| PRD 版本 | `requirement/vN/prd.md` frontmatter | 迭代版本、冻结状态 |
 
 **降级规则**：上述文件均不存在 → 通用 handoff 模式（跳过工作流状态节）。
 

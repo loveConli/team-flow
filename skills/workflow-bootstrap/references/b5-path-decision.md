@@ -32,7 +32,7 @@
 | ≥5 模块 或 ≥10 源文件（复杂） | "建议优先重建完整架构——项目有实质架构，基线快照不足以支撑后续设计" |
 | <5 模块 且 <10 源文件（简单） | "项目较简单，可直接进入流程，逆向重建为可选项" |
 
-**去向**：A → workflow-orchestrator ARCH 阶段 reconstruction 模式（arch-reverse-analyst，`references/agents/arch-reverse-analyst.md`）→ architecture-reviewer product 视角评审（≤3 轮循环）→ PASS 后 `tf arch init --mode reconstruction --baseline-ref prd/vN/` 打戳。
+**去向**：A → workflow-orchestrator ARCH 阶段 reconstruction 模式（arch-reverse-analyst，`references/agents/arch-reverse-analyst.md`）→ architecture-reviewer product 视角评审（≤3 轮循环）→ PASS 后 `tf arch init --mode reconstruction --baseline-ref requirement/vN/` 打戳。
 
 ## B 交叉验证与对齐：主代理机械比对
 

@@ -58,8 +58,8 @@ ce-brainstorm 的对话流程收集的信息需要映射到 PRD 模板的 11 个
 
 ## 迭代版本（vN）
 
-- `prd/vN/` 或 `requirement/vN/` 中的 N 是产品迭代版本（v1=MVP, v2=扩展），不是文档版本
-- ce-brainstorm 启动时扫描 `prd/` 和 `requirement/` 目录检测已有迭代（`requirement/` 优先）
+- `requirement/vN/` 中的 N 是产品迭代版本（v1=MVP, v2=扩展），不是文档版本
+- ce-brainstorm 启动时扫描 `requirement/` 目录检测已有迭代（legacy fallback: `prd/`）
 - 自动建议最新迭代或创建新迭代，用户确认后继续
 - 每个迭代目录下只有一个 `prd.md` 文件
 
@@ -75,7 +75,7 @@ ce-brainstorm 的对话流程收集的信息需要映射到 PRD 模板的 11 个
 | 产品版本 | 正文 §1.1 版本信息 | `vN.M`（v1.0/v1.1/…） | **文档修订次版本** | vN 内每次修订递增 M（呼应反馈环路「vN 内修订不升版」）|
 
 - vN 内修订（S3→S2 回退修订）→ 只递增正文 `vN.M` 的 M，**frontmatter `iteration_version` 不变**，并在 §1.2 修订记录追加一行 + 「决策与变更履历」章节记录。
-- 新迭代 → frontmatter `iteration_version` 升 vN+1，正文产品版本重置为 `v(N+1).0`，新建 `prd/v(N+1)/` 目录。
+- 新迭代 → frontmatter `iteration_version` 升 vN+1，正文产品版本重置为 `v(N+1).0`，新建 `requirement/v(N+1)/` 目录。
 
 **文档状态枚举（§1.1）——必须与 frontmatter `frozen` 一致**：
 

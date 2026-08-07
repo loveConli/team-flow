@@ -1,6 +1,6 @@
 # {项目名称} - 实施方案
 
-> 关联 PRD：[prd/vN/prd.md](prd/vN/prd.md)
+> 关联 PRD：[requirement/vN/prd.md](requirement/vN/prd.md)
 > 模式：{业务模式 | 一人公司模式}
 > 版本：{版本号}
 > 创建日期：{YYYY-MM-DD}

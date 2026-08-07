@@ -14,7 +14,7 @@ Read `.team-flow.yaml` (especially `dp_0_decisions`, `dp_0_confirmed`) and any e
 ### Global Prototype Reading (v0.5, v0.37.0 版本化)
 
 Before generating artifacts, **resolve the PRD version and locate the prototype worktree**:
-1. **版本推导（v0.37.0 §68.5）**：读 `change-brief.md` 的 `upstream_plan_ref: prd/vN/plan.md`（无 brief 时从 change 目录名 `v{N}-` 前缀推导）→ PRD 版本 vN
+1. **版本推导（v0.37.0 §68.5）**：读 `change-brief.md` 的 `upstream_plan_ref: requirement/vN/plan.md`（无 brief 时从 change 目录名 `v{N}-` 前缀推导）→ PRD 版本 vN
 2. **原型定位**：原型为独立仓库（有远程），版本 worktree = `<workspace>/.worktrees/prd-vN/prototype/`（该 worktree 不存在时回退 `<workspace>/prototype/` 并提示"原型应位于版本 worktree，`tf prototype branch <prd-vN>` 创建"）
 3. Read `prototype/flow.md` if it exists — this defines page navigation and user flows
 4. List `prototype/pages/` directory — these are the UI contract pages
@@ -33,12 +33,12 @@ Read `docs/solutions/INDEX.md` if it exists. Filter entries where `phase = spec 
 
 若 `change-brief.md` 存在（本 change 由 workflow-orchestrator S4 分发），读取其 Scope / 约束 / AC 列表 / 全局技术方向：
 - **Scope** 作为 proposal.md 的 scope 边界基线——不静默超出 brief scope。
-- **AC 列表** 作为 specs/ 的 AC 覆盖上限——brief 列出的 AC 必须在 specs/ 中体现，**不**静默丢弃；若认为 brief AC 有误或与 plan.md 冲突，以 `prd/vN/plan.md` / PRD 为准并在 proposal 注明，而非静默改写。
+- **AC 列表** 作为 specs/ 的 AC 覆盖上限——brief 列出的 AC 必须在 specs/ 中体现，**不**静默丢弃；若认为 brief AC 有误或与 plan.md 冲突，以 `requirement/vN/plan.md` / PRD 为准并在 proposal 注明，而非静默改写。
 - brief 不存在时（手动新建 / 快速通道）跳过本段，按原流程从 `dp_0_decisions` 取意图。
 
 ### Plan Technical Direction (v0.9)
 
-若产品级 `prd/vN/plan.md` 存在，读取其**高阶技术设计段**（模块边界 / 技术选型 / 数据流方向 / 关键聚合与上下文划分），作为 design.md 的 `## Decisions` 约束输入——保证各 change 的技术方案与全局方向一致，避免各自为政。**禁止**反向要求 plan.md 提供接口清单 / 字段定义 / 方法签名（这些是 spec-writer / architecture-design 在本 change 内的产出，plan.md 不含，见 ce-plan 作用边界与 v0.8 §18.7.2）。plan.md 不存在时跳过本段。
+若产品级 `requirement/vN/plan.md` 存在，读取其**高阶技术设计段**（模块边界 / 技术选型 / 数据流方向 / 关键聚合与上下文划分），作为 design.md 的 `## Decisions` 约束输入——保证各 change 的技术方案与全局方向一致，避免各自为政。**禁止**反向要求 plan.md 提供接口清单 / 字段定义 / 方法签名（这些是 spec-writer / architecture-design 在本 change 内的产出，plan.md 不含，见 ce-plan 作用边界与 v0.8 §18.7.2）。plan.md 不存在时跳过本段。
 
 ### Architecture Design Outputs (v0.9 §26)
 

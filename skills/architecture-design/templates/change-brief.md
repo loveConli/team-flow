@@ -1,7 +1,7 @@
 ---
 upstream_source: orchestrator | manual | null
 upstream_req_id: <req-id>
-upstream_plan_ref: prd/vN/plan.md
+upstream_plan_ref: requirement/vN/plan.md
 upstream_change_id: C2
 plan_hash: sha256:<plan.md 内容摘要>
 ---
@@ -25,5 +25,5 @@ plan_hash: sha256:<plan.md 内容摘要>
 
 ## PRD & plan 引用
 
-- PRD: prd/vN/prd.md §<相关章节>
-- Plan: prd/vN/plan.md ### <C-ID>
+- PRD: requirement/vN/prd.md §<相关章节>
+- Plan: requirement/vN/plan.md ### <C-ID>

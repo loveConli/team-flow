@@ -19,7 +19,7 @@ Before asking questions, understand what exists and what constraints are in plac
 
 ### 1.5 Upstream Inheritance (v0.9)
 
-若 `change-brief.md` 存在（本 change 由 workflow-orchestrator S4 分发），**先读它再提问**：把 brief 的 Scope / 约束 / AC 列表作为提问的**默认值**，只就 brief 未覆盖或用户存疑的部分追问，**不**重新询问已被产品级定稿的意图与 scope。若 brief 不存在（手动新建 / 快速通道），按原流程从零探索。brief 与 `prd/vN/plan.md` 冲突时以 plan.md 为准。
+若 `change-brief.md` 存在（本 change 由 workflow-orchestrator S4 分发），**先读它再提问**：把 brief 的 Scope / 约束 / AC 列表作为提问的**默认值**，只就 brief 未覆盖或用户存疑的部分追问，**不**重新询问已被产品级定稿的意图与 scope。若 brief 不存在（手动新建 / 快速通道），按原流程从零探索。brief 与 `requirement/vN/plan.md` 冲突时以 plan.md 为准。
 
 ### 2. One Question at a Time
 

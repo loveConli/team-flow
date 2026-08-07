@@ -15,8 +15,8 @@ Guard: `arch_design_decision` in `.team-flow.yaml` is `null` → must run before
 
 Dispatch `architecture-design` as sub-agent with inputs:
 - `change-brief.md`（scope / AC / 技术方向）
-- `prd/vN/plan.md` 高阶技术设计段
-- `docs/architecture/iterations/<vN>/architecture.md`（**产品级架构快照，主输入**，v0.36.0）——BC 边界/聚合所有权/全局契约唯一事实源；vN 从 change-brief 的 `upstream_plan_ref`（prd/vN/plan.md）推导；变更级只引用不重定义（触及产品级决策 → 架构修订决策门；仅 change 内细节 → 增量设计）
+- `requirement/vN/plan.md` 高阶技术设计段
+- `docs/architecture/iterations/<vN>/architecture.md`（**产品级架构快照，主输入**，v0.36.0）——BC 边界/聚合所有权/全局契约唯一事实源；vN 从 change-brief 的 `upstream_plan_ref`（requirement/vN/plan.md）推导；变更级只引用不重定义（触及产品级决策 → 架构修订决策门；仅 change 内细节 → 增量设计）
 - existing `specs/`
 - global `docs/architecture/`（As-Is 基线 + 已落地部分）
 
@@ -285,7 +285,7 @@ else:
 ```
 
 - **为何以 brief 存在为主信号**：hotfix / 单 change 快速通道也是 orchestrator 创建的 change，但不产 brief；以 brief 存在为信号可天然排除这两条路径，且对存量手动 change（无 brief）零误伤。
-- **双源权威**：继承的 scope/AC 若与 `prd/vN/plan.md` 冲突，以 plan.md 为准（brief 是 S4 时刻快照，非真相源）；冲突时触发 Brief drift 提示（见「Staleness Detection」）。
+- **双源权威**：继承的 scope/AC 若与 `requirement/vN/plan.md` 冲突，以 plan.md 为准（brief 是 S4 时刻快照，非真相源）；冲突时触发 Brief drift 提示（见「Staleness Detection」）。
 
 After confirmation:
 ```bash

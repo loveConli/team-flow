@@ -73,7 +73,7 @@ tf state init changes/v1-C2-policy-management
 
 ### 3.5 落盘 change-brief.md（v0.9 新增，产品级→变更级交接物）
 
-> **设计意图**：S3/S4 已把每个 change 的 scope、AC、依赖、技术方向定稿，但这些信息此前只活在产品级 `prd/vN/plan.md`，变更层（workflow-start / need-explorer / spec-writer）读不到，导致变更层在 DP-0 重新询问意图、在 need-explorer 重新决策拆分——两层产物断链。本步骤把产品级决策投影到 change 目录内的 `change-brief.md`，作为**上游输入交接物**，让变更层可继承而非重做。
+> **设计意图**：S3/S4 已把每个 change 的 scope、AC、依赖、技术方向定稿，但这些信息此前只活在产品级 `requirement/vN/plan.md`，变更层（workflow-start / need-explorer / spec-writer）读不到，导致变更层在 DP-0 重新询问意图、在 need-explorer 重新决策拆分——两层产物断链。本步骤把产品级决策投影到 change 目录内的 `change-brief.md`，作为**上游输入交接物**，让变更层可继承而非重做。
 
 **职责边界（写死）**：auditor 是只读 agent，**只在审计报告里输出 Dim1 覆盖矩阵**；**落盘动作归 orchestrator 自己**（与 Step 4 写 change_dag 同属编排层自做，见上文「编排层 vs 执行层」表）。即：读取 auditor 报告 Dim1 矩阵 → orchestrator 写入 brief 的 AC 段。
 
@@ -83,7 +83,7 @@ tf state init changes/v1-C2-policy-management
 ---
 upstream_source: orchestrator          # orchestrator | manual | null
 upstream_req_id: <req-id>              # 对应 .team-flow/requirements/<req-id>/
-upstream_plan_ref: prd/vN/plan.md      # hotfix/快速通道为 null
+upstream_plan_ref: requirement/vN/plan.md      # hotfix/快速通道为 null
 upstream_arch_ref: docs/architecture/iterations/vN/architecture.md  # 产品级架构快照（v0.36.3）；ARCH skip 或 hotfix 为 null
 upstream_change_id: C2                 # 对应 change_dag.id
 plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层未同步
@@ -103,13 +103,13 @@ plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层�
 <取自 plan.md 高阶技术设计段的要点指针：模块边界/技术选型/数据流方向，供 spec-writer 作 design.md 约束；**BC 边界/聚合所有权以 `upstream_arch_ref` 产品级快照为准**（v0.36.3），plan.md 仅高阶方向>
 
 ## PRD & plan 引用
-- PRD: prd/vN/prd.md §<相关章节>
-- Plan: prd/vN/plan.md ### <C-ID>
+- PRD: requirement/vN/prd.md §<相关章节>
+- Plan: requirement/vN/plan.md ### <C-ID>
 ```
 
 **hash 豁免（重要）**：change-brief.md 放在 change 根目录，**不**属于 team-flow 五产物（proposal/specs/design/tasks/execution-contract），因此天然**不进入 `artifacts_hash`**（`hash.mjs` 只统计前四类）。空 change 的 `artifacts_hash` 仍为 null，状态机的"无产物"判定不受污染——**绝不**让 brief 入 hash。
 
-**双源权威规则**：scope/技术方向以 `prd/vN/plan.md` 为准、AC 以 PRD 功能清单为准；**brief 只是 S4 时刻的投影快照**，不是第二真相源。若变更层发现 brief 与 plan.md 冲突，以 plan.md 为准并触发 Brief drift 提示（见 workflow-start「Staleness Detection」）。
+**双源权威规则**：scope/技术方向以 `requirement/vN/plan.md` 为准、AC 以 PRD 功能清单为准；**brief 只是 S4 时刻的投影快照**，不是第二真相源。若变更层发现 brief 与 plan.md 冲突，以 plan.md 为准并触发 Brief drift 提示（见 workflow-start「Staleness Detection」）。
 
 ### 4. 写入 change_dag
 

@@ -6,7 +6,16 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
-### Added（workflow-bootstrap B5 降级路径设计 + session-start 语言要求，v0.42.0）
+### Added（ce-brainstorm 阶段断点控制 + L1-L3 用户定义 + prd/ → requirement/ 路径收敛，v0.43.0）
+
+- **阶段断点控制（FB1）**：新增 Execution Architecture 节，4 个显式断点（BP-1 场景后 / BP-2 流程后 / BP-3 方案后 / BP-4 综合后），每个断点提供继续/暂停/回退三选项；主会话负责规划决策，子代理负责执行性产出（PRD 撰写、流程图、活动表）
+- **Phase 1.6 L1-L3 用户定义（FB3）**：Step 0 询问用户 L1-L3 流程层级规划（AI 不自行猜测），AI 聚焦 L4 子流程细化；两阶段确认（L1-L3 框架 → L4 细节逐 L3 确认）
+- **prd/ → requirement/ 路径收敛（FB2）**：新项目不再创建 `prd/` 目录，统一使用 `requirement/vN/`；PRD 输出路径改为 `requirement/vN/prd.md`；50+ 文件跨 skill/agent/template 路径更新；存量 `prd/` 保留 legacy fallback 读取兼容
+- **Phase 1.6 business-processes.md 重构**：新增 Step 0（L1-L3 用户定义）+ Step 1 重命名（聚焦 L4 推导）+ Step 5 两阶段确认
+
+## [0.42.0] - 2026-08-07
+
+### Added（workflow-bootstrap B5 降级路径设计 + session-start 语言要求）
 
 - **B5 路径决策重构（降级路径设计）**：4 平权选项 → 两组降级选项——第一组确保产物可信（A 逆向重建按复杂度分级推荐（≥5 模块或 ≥10 源文件强推）/ B 交叉验证主代理机械比对产出 cross-check-report.md / C 真实性核对用户确认门），第二组直接进入流程（D-F 原 A-C 平移）
 - **references/b5-path-decision.md（新建）**：B5 详细流程（分组展示模板、A 复杂度判据、B 比对清单 + 维度覆盖说明（architecture 显式排除理由）、C 两种模式核对协议（跟随 B / 独立抽查））

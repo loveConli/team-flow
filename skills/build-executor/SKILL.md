@@ -46,7 +46,7 @@ Branch/worktree preflight before ANY implementation edit (mandatory — do not s
 ### UI Contract Prototype Location (v0.37.0 §68.5)
 
 When implementing UI tasks, the UI contract source is the **prototype version worktree**, not the change worktree's prototype copy:
-- **定位**：读 `change-brief.md` 的 `upstream_plan_ref: prd/vN/plan.md`（或 change 目录名 `v{N}-` 前缀）→ PRD 版本 vN → 原型 worktree = `<workspace>/.worktrees/prd-vN/prototype/`
+- **定位**：读 `change-brief.md` 的 `upstream_plan_ref: requirement/vN/plan.md`（或 change 目录名 `v{N}-` 前缀）→ PRD 版本 vN → 原型 worktree = `<workspace>/.worktrees/prd-vN/prototype/`
 - **回退**：该 worktree 不存在时用 `<workspace>/prototype/`，并提示 `tf prototype branch <prd-vN>` 创建
 - **引用**：execution-contract / design.md 中引用的原型页面（`prototype/pages/<page>.html` 等）以此为基准定位；**禁止**引用主干上其他版本的旧原型
 

@@ -40,16 +40,16 @@ Pipeline / `disable-model-invocation` runs already skip the chat confirmation (h
 
 ### Resume Existing Plan Work
 
-If the user references an existing plan file or there is an obvious recent matching plan in `prd/vN/plan.md`:
+If the user references an existing plan file or there is an obvious recent matching plan in `requirement/vN/plan.md`:
 - Read it
 - Confirm whether to update it in place or create a new plan
 - If updating, revise only the still-relevant sections. Plans do not carry per-unit progress state — progress is derived from git by `ce-work`, so there is no progress to preserve across edits
 
-**A PRD document is not a resume target.** A `prd/vN/prd.md` file is a *PRD input*, not an existing plan to resume — do **not** fire the update-or-create confirm for it. Fall through to Phase 0.2, which reads it as input for creating a new plan. This matters most for the hands-off `ce-brainstorm` -> `lfg` flow: `lfg` hands `ce-plan` the PRD path in `disable-model-invocation` pipeline mode, where no user is present to answer a resume prompt.
+**A PRD document is not a resume target.** A `requirement/vN/prd.md` file is a *PRD input*, not an existing plan to resume — do **not** fire the update-or-create confirm for it. Fall through to Phase 0.2, which reads it as input for creating a new plan. This matters most for the hands-off `ce-brainstorm` -> `lfg` flow: `lfg` hands `ce-plan` the PRD path in `disable-model-invocation` pipeline mode, where no user is present to answer a resume prompt.
 
 ### Deepen Intent
 
-The word "deepen" (or "deepening") in reference to a plan is the primary trigger for the deepening fast path. When the user says "deepen the plan", "deepen my plan", "run a deepening pass", or similar, the target document is a **plan** in `prd/vN/plan.md`, not a PRD document. Use any path, keyword, or context the user provides to identify the right plan. If a path is provided, verify it is actually a plan document. If the match is not obvious, confirm with the user before proceeding.
+The word "deepen" (or "deepening") in reference to a plan is the primary trigger for the deepening fast path. When the user says "deepen the plan", "deepen my plan", "run a deepening pass", or similar, the target document is a **plan** in `requirement/vN/plan.md`, not a PRD document. Use any path, keyword, or context the user provides to identify the right plan. If a path is provided, verify it is actually a plan document. If the match is not obvious, confirm with the user before proceeding.
 
 Words like "strengthen", "confidence", "gaps", and "rigor" are NOT sufficient on their own to trigger deepening. These words appear in normal editing requests ("strengthen that section about the diagram", "there are gaps in the test scenarios") and should not cause a holistic deepening pass. Only treat them as deepening intent when the request clearly targets the plan as a whole and does not name a specific section or content area to change — and even then, prefer to confirm with the user before entering the deepening flow.
 
@@ -99,8 +99,8 @@ Otherwise, read `references/universal-planning.md` and follow that workflow inst
 
 Before asking planning questions, resolve the upstream PRD source in this order:
 
-1. **Explicit path from the user.** If it points to a PRD document (`prd/vN/prd.md`), read it as the primary input. If it points to an existing plan (`prd/vN/plan.md`), treat it as a resume/deepening target. If it is a legacy `docs/brainstorms/*-requirements.{md,html}` file, use it as a legacy origin.
-2. **Recent PRD documents.** Scan `prd/` directory for iteration versions (v1, v2, ...). For each version, check if `prd.md` exists. Use the latest version's PRD as input.
+1. **Explicit path from the user.** If it points to a PRD document (`requirement/vN/prd.md`), read it as the primary input. If it points to an existing plan (`requirement/vN/plan.md`), treat it as a resume/deepening target. If it is a legacy `docs/brainstorms/*-requirements.{md,html}` file, use it as a legacy origin.
+2. **Recent PRD documents.** Scan `requirement/` directory for iteration versions (v1, v2, ...). For each version, check if `prd.md` exists. Use the latest version's PRD as input. Legacy fallback: scan `prd/` if `requirement/` does not exist.
 3. **Legacy requirements docs.** Search `docs/brainstorms/` for files matching `*-requirements.md` or `*-requirements.html`. These remain readable historical inputs; do not migrate or rewrite them.
 
 **Relevance criteria:** A PRD source is relevant if:

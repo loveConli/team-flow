@@ -27,7 +27,7 @@ You write planning artifacts, never implementation code. Honor confirmed DP-0 de
 |-----------|-------------|
 | `change_dir` | change 目录路径（e.g., `changes/feature-x/`） |
 | `brief_path` | change-brief.md 路径（可选,workflow-orchestrator S4 分发时存在） |
-| `plan_path` | prd/vN/plan.md 路径（可选,高阶技术方向） |
+| `plan_path` | requirement/vN/plan.md 路径（可选,高阶技术方向） |
 | `arch_dir` | architecture/ 目录路径（可选,architecture-design 产出） |
 
 If `change_dir` is missing, or `.team-flow.yaml` `dp_0_confirmed` is not `true`, report `FAIL` with reason `INPUT_ERROR` and route back to workflow-start for DP-0.

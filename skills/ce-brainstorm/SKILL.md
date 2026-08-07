@@ -8,7 +8,7 @@ argument-hint: "[feature idea or problem to explore] [output:html]"
 
 **Note: The current year is 2026.** Use this when dating PRD documents.
 
-Brainstorming answers **WHAT** to build through collaborative dialogue, producing a **PRD document** (产品需求文档). It precedes `/ce-plan` (**HOW** to build). In compound engineering, write under `prd/vN/prd.md`. The PRD template is configurable via `prd.template` config (default: `templates/prd.md`). This skill explores, clarifies, and documents — it does not implement code.
+Brainstorming answers **WHAT** to build through collaborative dialogue, producing a **PRD document** (产品需求文档). It precedes `/ce-plan` (**HOW** to build). In compound engineering, write under `requirement/vN/prd.md`. The PRD template is configurable via `prd.template` config (default: `templates/prd.md`). This skill explores, clarifies, and documents — it does not implement code.
 
 ## 调用模式（v0.7 新增）
 
@@ -30,6 +30,42 @@ Brainstorming answers **WHAT** to build through collaborative dialogue, producin
 5. **Right-size the artifact** — Simple work gets compact PRD; larger work gets fuller PRD.
 6. **YAGNI on carrying cost, not coding effort** — Simplest approach that delivers value; low-cost polish is worth including.
 7. **Don't turn coverage into decomposition** — Named devices/providers are coverage requirements, not separate workstreams.
+
+## Execution Architecture (v0.43.0+)
+
+> **核心原则：主会话负责规划和决策，子会话负责执行性产出。**
+
+### Session Split
+
+| 职责 | 执行方 | 说明 |
+|------|--------|------|
+| 需求澄清、场景确认、流程确认、方案决策 | **主会话** | 需要用户交互和判断的工作 |
+| PRD 文档撰写（Phase 3） | **子代理**（推荐） | 执行性文档生成，主会话做 QA 和冻结 |
+| 流程图绘制（mermaid） | **子代理**（推荐） | 基于已确认的流程数据生成图表 |
+| 活动表批量生成 | **子代理**（推荐） | 基于已确认的 L4 子流程生成表格 |
+| 综合报告（synthesis summary） | **子代理**（可选） | 大量数据的汇总整理 |
+
+**子代理委托方式**：使用 `Agent` 工具（`context: fork` 或自定义 agent），将已确认的结构化数据作为输入，要求子代理按模板产出。主会话审查产出后决定接受或修正。
+
+### Stage Breakpoints
+
+全流程设置 **4 个断点**，每个断点提供三个选项：
+
+| 断点 | 位置 | 触发时机 |
+|------|------|---------|
+| **BP-1** | Phase 1.5 之后 | 所有场景确认完成后 |
+| **BP-2** | Phase 1.6 之后 | 所有流程确认完成后 |
+| **BP-3** | Phase 2 之后 | 方案探索完成后 |
+| **BP-4** | Phase 2.5 之后 | 综合确认完成后（PRD 生成前） |
+
+**断点交互**（blocking question）：
+
+> "✅ [阶段名] 已完成。请选择：
+> 1. **继续** — 进入下一阶段
+> 2. **暂停并保存进度** — 保存当前产出，稍后可从断点恢复
+> 3. **回退修改** — 返回上一阶段进行调整"
+
+**Lightweight 模式例外**：Lightweight scope 可跳过 BP-1 至 BP-3（需求已足够清晰时），仅保留 BP-4。
 
 ## Interaction Rules
 
@@ -103,13 +139,13 @@ Built-in `templates/prd.md` is relative to the skill's base directory. Custom pa
 
 For detailed routing logic, read `references/phase0-routing.md`. Summary:
 
-- **0.1 Resume**: scan `prd/` for existing work; confirm before resuming
+- **0.1 Resume**: scan `requirement/` for existing work (legacy: fallback `prd/`); confirm before resuming
 - **0.1b Classify**: software → continue; non-software → `references/universal-brainstorming.md`; neither → respond directly
 - **0.1c Verdict**: verdict-shaped requests → offer `/ce-pov` handoff via `references/verdict-routing.md`
 - **0.2 Assess**: clear requirements → skip to Phase 2.5; ambiguous → full brainstorm
 - **0.3 Scope**: Lightweight / Standard / Deep (+ feature vs product); arm visual-probe and blindspot tripwires
 - **0.4 Spine**: create 5-task tracking spine for Standard/Deep
-- **0.5 Iteration**: resolve `ITERATION_VERSION` from `prd/` directory
+- **0.5 Iteration**: resolve `ITERATION_VERSION` from `requirement/` directory (legacy: fallback `prd/`)
 
 ### Phase 1: Understand the Idea
 
@@ -123,7 +159,11 @@ For detailed routing logic, read `references/phase0-routing.md`. Summary:
 
 **1.5 Business Scenario Analysis** — Read `references/business-scenarios.md` for methodology. Trigger: Phase 1.4 completed. Extract business scenarios from dialogue and context, produce QA-1 quality check, then **blocking question** for user confirmation. Output: `requirement/vN/business-analysis.md` (requirements + scenarios sections). Status marked 🔵 pending confirmation, ✅ confirmed on user approval. No ledger update at this stage.
 
-**1.6 Business Process Analysis** — Read `references/business-processes.md` for methodology. Trigger: Phase 1.5 confirmed (✅). Extract business processes, produce QA-2 quality check, then **blocking question** for user confirmation. Output: update `requirement/vN/business-analysis.md` (processes section + scenario/requirement association fields). Status marked 🔵 pending, ✅ confirmed on approval. No ledger update at this stage.
+> **🔲 BP-1 Breakpoint** — 场景确认后触发断点交互（Lightweight 可跳过）。
+
+**1.6 Business Process Analysis** — Read `references/business-processes.md` for methodology. Trigger: Phase 1.5 confirmed (✅). **Step 0: ask user to define L1–L3 hierarchy** (AI does NOT guess L1–L3). Then derive L4 sub-processes under user's framework, produce QA-2 quality check, then **two-stage confirmation** (L1–L3 framework → L4 details per process). Output: update `requirement/vN/business-analysis.md` (processes section + scenario/requirement association fields). Status marked 🔵 pending, ✅ confirmed on approval. No ledger update at this stage.
+
+> **🔲 BP-2 Breakpoint** — 流程确认后触发断点交互（Lightweight 可跳过）。
 
 ### Phase 2: Explore Approaches
 
@@ -135,11 +175,15 @@ Propose **2-3 approaches** (or recommend directly if one is clearly best). Use n
 
 **Granularity: profile-driven product thinking, not architecture.** Address profile dimensions (business process, state model, permissions, data, rules, functions). Do NOT cross into implementation specifics (tables, paths, classes, APIs).
 
+> **🔲 BP-3 Breakpoint** — 方案探索完成后触发断点交互（Lightweight 可跳过）。
+
 ### Phase 2.5: Synthesis Summary
 
 **Read `references/synthesis-summary.md` before composing.** Surface scoping synthesis — user's last chance to correct scope. Fires for all tiers. Path A (announce-only) for Lightweight + no blocking questions; Path B (confirmation gate) for all others. 2.6: dispatch claim verifier during Path B confirmation wait.
 
 **QA-3 quality check** fires after synthesis draft is complete, before the blocking question. Synthesis must reference confirmed scenario IDs (SC-xxx) and process IDs (BP-xxx) as evidence anchors. Unconfirmed (🔵) items are flagged in Call outs section.
+
+> **🔲 BP-4 Breakpoint** — 综合确认完成后、PRD 生成前触发断点交互（**所有 scope 必须触发**，不可跳过）。
 
 ### Phase 3: Generate PRD Document
 
@@ -165,6 +209,8 @@ Propose **2-3 approaches** (or recommend directly if one is clearly best). Use n
 - **⛔ 正确行为**：充分利用原始需求文档的详细内容，保持信息完整性
 
 Read `references/brainstorm-sections.md` for doc-warranted criteria. If warranted: read template from `PRD_TEMPLATE_PATH`, fill via `references/prd-mapping.md`, write to `requirement/{ITERATION_VERSION}/prd.md`. Vocabulary capture: update `CONCEPTS.md` with resolved domain terms (only if it exists).
+
+> **子代理委托建议**：Phase 3 PRD 文档撰写是执行性工作，建议委托子代理完成。主会话将已确认的结构化数据（business-analysis.md + dialogue-log.md + synthesis summary）作为输入传给子代理，子代理按模板填充后产出 PRD 草稿，主会话负责 QA-4 审查和冻结确认。
 
 ### Phase 3.5: Prototype Inner Loop
 

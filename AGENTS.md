@@ -93,7 +93,7 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
   ├── requirements/<req-id>/orchestrator.yaml  # 每需求产品级编排状态
   ├── handoffs/                 # 会话交接文档（v0.16.0 新增，session-handoff 产出，.gitignore）
   └── feedback/                 # 工作流问题记录（v0.16.0 新增，workflow-feedback 产出，git 跟踪）
-prd/                    PRD（有版本 v1→v2→v3，git 分支隔离）
+requirement/            PRD + 台账（有版本 v1→v2→v3，git 分支隔离）
   └── vN/
       ├── prd.md              # 业务要件（ce-brainstorm 产出）
       ├── plan.md             # 实施方案（ce-plan 产出，产品级策略）
@@ -105,7 +105,7 @@ docs/
   ├── architecture/    全局架构三层（v0.36.0）：L1 当前态（ARCHITECTURE.md marker 区 / PHYSICAL-MODEL.md / DATABASE.md / API-INDEX.md / INDEX.md / domains/<bc>.md / diagrams/ / schema-baseline.sql / baseline.md）+ L2 changelog/ + L3 iterations/vN/architecture.md（产品级快照，archived 退役）
   └── solutions/       复利经验库（v0.5 新增，三层索引）
       ├── INDEX.md     # L1 轻量索引（≤150行，每条一行摘要+标签）
-      ├── prd/ plan/ architecture/ prototype/ spec/ build/ review/ cross-phase/  # L2 分阶段目录（v0.36.0 加 architecture）
+      ├── requirement/ plan/ architecture/ prototype/ spec/ build/ review/ cross-phase/  # L2 分阶段目录（v0.36.0 加 architecture）
       └── <file>.md    # L3 经验文件（YAML frontmatter: phase/domain/type/severity）
 changes/<name>/        变更脚手架（S4 创建）：.team-flow.yaml（变更级状态文件）/ change-brief.md（产品级交接物，含 upstream_arch_ref）/ architecture/（变更级三件套 + sql/）
 specs/<cap>/            每变更设计/任务/契约：spec.md / design.md / tasks.md / execution-contract.md / learnings.md（v0.9 起 architecture/ 三件套已迁至 changes/<name>/architecture/）
@@ -244,7 +244,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 ```
 docs/solutions/
 ├── INDEX.md                  # L1：轻量索引（≤150行，每条一行摘要+标签，按 severity 降序）
-├── prd/ plan/ prototype/ spec/ build/ review/ cross-phase/  # L2：分阶段目录
+├── requirement/ plan/ prototype/ spec/ build/ review/ cross-phase/  # L2：分阶段目录
 └── <date>-<summary>.md      # L3：经验文件（YAML frontmatter: phase/domain/type/severity/date/source）
 ```
 

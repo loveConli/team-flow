@@ -9,7 +9,7 @@ the format-specific references (`markdown-rendering.md`, `html-rendering.md`).
 
 A great brainstorm produces the PRD document (业务要件) that defines **WHAT** to build.
 `ce-plan` then reads the PRD and produces an **independent implementation plan** (实施方案) that defines **HOW** to build it.
-The PRD and plan are separate documents in the same `prd/vN/` directory.
+The PRD and plan are separate documents in the same `requirement/vN/` directory.
 
 The PRD enables three audiences to act:
 
@@ -27,7 +27,7 @@ Sections earn their place by serving one of these audiences. Omit padding.
 
 New `ce-brainstorm` outputs follow the PRD artifact contract:
 
-- **Path:** `prd/vN/prd.md` (N is the iteration version number, e.g., v1, v2).
+- **Path:** `requirement/vN/prd.md` (N is the iteration version number, e.g., v1, v2). Legacy fallback: `prd/vN/prd.md`.
 - **Metadata:** `project_name`, `iteration_version`, `prd_template` (template path).
 - **Template source:** read `prd.template` from project configuration, or use
   the default `templates/prd.md`.
@@ -303,7 +303,7 @@ Every PRD produced by `ce-brainstorm` carries metadata in YAML frontmatter.
 - **`title`** — PRD title in format `{项目名称}_D7_业务要件` (matching the H1).
 - **`project_name`** — the project or product name.
 - **`iteration_version`** — the iteration version (e.g., "v1", "v2"),
-  corresponding to the `prd/vN/` directory.
+  corresponding to the `requirement/vN/` directory.
 - **`date`** — creation date in ISO 8601 (`YYYY-MM-DD`).
 - **`prd_template`** — relative path to the PRD template used (e.g.,
   `templates/prd.md`).

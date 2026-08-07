@@ -96,7 +96,7 @@ phases:
 | S0 全新项目 | 无代码库 | 正向设计（首轮不可跳过） |
 | S1 存量代码+无基线 | 有 src/，无 baseline.md | 先 workflow-bootstrap → 逆向重建 |
 | S2 存量+瘦锚点 | baseline.md + ARCHITECTURE 无 BC/聚合层 | 逆向重建（深化） |
-| S3 存量+跑过迭代 | baseline + changes/ + prd/vN/，无 arch_baseline | 逆向重建（首轮强制） |
+| S3 存量+跑过迭代 | baseline + changes/ + requirement/vN/，无 arch_baseline | 逆向重建（首轮强制） |
 | S4 已有产品级架构 | arch_baseline 已打戳 + iterations/ | 正向设计（正轨） |
 
 **skip 条件（须物化）**：迭代无结构性变更（纯 bugfix/重构/不新增 BC 或聚合/不改变聚合边界或全局契约）。判定者 = **编排器 + 用户确认**（非 LLM 自判，防 v0.13 §54 绕过教训）。**skip 必须物化**：写入 `docs/architecture/iterations/vN/` 占位（含 skipped 标记 + 理由），guard 才放行——否则 hotfix/快速通道 change 会卡在 arch-readiness 上（v0.32.2 C1 死锁链同类）。
@@ -104,7 +104,7 @@ phases:
 **时间盒 + 深度分层**：时间盒 ≤1 天；非触及 BC 只维护锚点行，触及 BC 才做按域深化（v0.14 §60.4）。
 
 **输入输出契约**：
-- 输入：prd/vN/prd.md（frozen_downstream）+ plan.md + prototype/ + baseline.md + CONCEPTS.md + 现有全局基线（旧项目）
+- 输入：requirement/vN/prd.md（frozen_downstream）+ plan.md + prototype/ + baseline.md + CONCEPTS.md + 现有全局基线（旧项目）
 - 输出：`docs/architecture/iterations/vN/architecture.md`（6 产物权威快照，预测态，provenance 标注）+ 产品级评审 verdict；**不触发全局覆盖写**（P1：预测态不进实际态）
 
 **门禁**（v0.14 §59.4）：
@@ -119,7 +119,7 @@ phases:
 完全复刻 v0.13 §48.1 schema_version 防污染模式（设计增强方案 v0.14 §59.4/§63.1）：
 
 - **位置**：`.team-flow/arch-state.json`（项目级状态；架构阶段是产品/迭代级，不放 change 的 `.team-flow.yaml`）
-- **内容**：`{ arch_baseline: "v0", established_at: "<date>", mode: "reconstruction" | "design", snapshot_root: "iterations/", baseline_prd_ref: "prd/vN/" }`
+- **内容**：`{ arch_baseline: "v0", established_at: "<date>", mode: "reconstruction" | "design", snapshot_root: "iterations/", baseline_prd_ref: "requirement/vN/" }`
 - **防污染**：仅 `tf arch init` 写入；`tf state set`/rebuild/doctor 一律不得追加（缺失 = 存量信号）
 - **判定**：`arch_baseline == null` → arch-readiness/arch-snapshot 均 PASS + WARN（reason: 'project architecture baseline not established — S3.5 reconstruction pending'）
 
@@ -127,7 +127,7 @@ phases:
 
 - **`frozen_downstream`**（S2 完成时设置）：下游阶段（S3/S4/S5）不可直接修改 PRD，只能通过回退到 S2 修改。**S3→S2 回退 = 临时解除 frozen_downstream**，S2 重新完成后恢复。
 - **`frozen_absolute`**（用户显式确认或 vN+1 启动时设置）：任何修改都必须升版 vN+1。
-- **单一真相源**：frozen 状态以 `prd/vN/prd.md` frontmatter 为准，yaml 只存指针不重复存 frozen 值，避免双写不一致。
+- **单一真相源**：frozen 状态以 `requirement/vN/prd.md` frontmatter 为准，yaml 只存指针不重复存 frozen 值，避免双写不一致。
 
 ## 原型补跑/重跑：部分重入语义（v0.20.0，S1 第 7 入口）
 

@@ -102,7 +102,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --ro
 - docs/architecture/INDEX.md（架构文档索引，v0.23.0）
 - docs/architecture/CONCEPTS.md（领域词汇，N 个术语）
 - CLAUDE.md（项目概况 + 产物结构索引，B4.5）
-- 目录结构：prd/ prototype/ docs/ changes/
+- 目录结构：requirement/ prototype/ docs/ changes/
 
 关键发现：
 - 技术栈：Java 17 + Spring Boot 3 + MySQL 8

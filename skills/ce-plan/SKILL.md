@@ -10,7 +10,7 @@ argument-hint: "[optional: feature description, PRD doc path, plan path to deepe
 
 ## Purpose
 
-`ce-plan` produces an **independent implementation plan** (实施方案) from a PRD or any input, defining **HOW** to build what `ce-brainstorm` scoped as **WHAT**. The PRD and plan are separate documents in the same `prd/vN/` directory. `ce-work` executes implementation-ready plans. A prior brainstorm is useful context but never required.
+`ce-plan` produces an **independent implementation plan** (实施方案) from a PRD or any input, defining **HOW** to build what `ce-brainstorm` scoped as **WHAT**. The PRD and plan are separate documents in the same `requirement/vN/` directory. `ce-work` executes implementation-ready plans. A prior brainstorm is useful context but never required.
 
 **v0.5 scope**: ce-plan focuses on **product-level strategy** — change splitting (scope + dependencies + priority per change), inter-change dependency graph (DAG), and overall technical direction. It does NOT produce file-level Implementation Units, Files lists, or Test scenarios — those belong to spec-writer within each change.
 
@@ -87,7 +87,7 @@ See `references/planning-modes.md` for mode selection logic and PRD chapter mapp
 
 ### Phase 3: Structure the Plan
 
-1. Title: `{项目名称} - 实施方案`. File: `prd/{ITERATION_VERSION}/plan.md`.
+1. Title: `{项目名称} - 实施方案`. File: `requirement/{ITERATION_VERSION}/plan.md`.
 2. Break work into **changes** (C1, C2, …) — focused, independently implementable, dependency-ordered. See `references/change-splitting.md`.
 3. Include a change dependency DAG for 2+ changes. See `references/dependency-graph.md`.
 4. Define each change: Scope, Requirements (cite PRD §), Dependencies (C-ID), Priority (P0/P1/P2), Complexity (S/M/L), Prototype reference.

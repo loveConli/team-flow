@@ -161,7 +161,7 @@ npm run check-versions # 版本一致性守卫（当前应 ✅ 全 0.22.4）
 
 ### 5.1 全局产物结构
 ```
-prd/                    PRD（有版本 v1→v2→v3，git 分支隔离）
+requirement/            PRD + 台账（有版本 v1→v2→v3，git 分支隔离）
 prototype/             全局原型系统（UI 契约真相源）
 docs/architecture/     全局架构锚点
 specs/<cap>/            每变更设计/任务/契约

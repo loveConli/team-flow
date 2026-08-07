@@ -1,6 +1,6 @@
 # team-flow
 
-> 当前版本：`v0.42.0`
+> 当前版本：`v0.43.0`
 
 > 统一插件：**team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同。
 
@@ -56,12 +56,12 @@ git clone <your-repo> && <cli> plugin install ./team-flow
 cp -r <plugin>/skills/prototype/references/prototype-scaffold/ <project>/prototype/
 ```
 
-随后按 `prototype/design-system.md` 填 token；`prototype/` 与 `prd/` 同级、git 分支隔离版本。
+随后按 `prototype/design-system.md` 填 token；`prototype/` 与 `requirement/` 同级、git 分支隔离版本。
 
 ## 全局产物结构
 
 ```
-prd/               PRD + 实施方案 + 原型审查记录（v1→v2，分支隔离）
+requirement/       PRD + 台账 + 实施方案 + 原型审查记录（v1→v2，分支隔离）
 prototype/         全局原型（UI 契约真相源）
 docs/
   ├── architecture/  全局架构三层（v0.36.0）：ARCHITECTURE.md / PHYSICAL-MODEL.md / DATABASE.md / API-INDEX.md / INDEX.md / domains/<bc>.md / iterations/vN/（产品级快照）/ baseline.md

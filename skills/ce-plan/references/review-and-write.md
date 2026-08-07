@@ -35,7 +35,7 @@ If the plan originated from a requirements document, re-read that document and v
 
 Surface plan-time call-outs to the user before Phase 5.2 commits the plan to disk — the latest cheap moment to catch plan-time scope errors. The brainstorm already validated WHAT to build; this phase surfaces HOW the plan will execute on the forks that matter.
 
-Fires **whenever Phase 0.2 resolved an upstream PRD source** — a PRD document (`prd/vN/prd.md`) **or** a legacy `*-requirements.{md,html}` brainstorm doc — AND not on Phase 0.1 fast paths. Skip Phase 5.1.5 only in solo invocation (no upstream source found) — solo plans handled their synthesis in Phase 0.7.
+Fires **whenever Phase 0.2 resolved an upstream PRD source** — a PRD document (`requirement/vN/prd.md`) **or** a legacy `*-requirements.{md,html}` brainstorm doc — AND not on Phase 0.1 fast paths. Skip Phase 5.1.5 only in solo invocation (no upstream source found) — solo plans handled their synthesis in Phase 0.7.
 
 **Read `references/synthesis-summary.md` before composing the scoping synthesis.**
 
@@ -56,10 +56,10 @@ HTML note: `ce-doc-review` is markdown-only today. HTML plans still render the u
 Use the Write tool to save the complete plan:
 
 ```text
-prd/{ITERATION_VERSION}/plan.md
+requirement/{ITERATION_VERSION}/plan.md
 ```
 
-The plan is always written to the same `prd/vN/` directory as the PRD, using the iteration version resolved at Phase 0.2. The plan is always markdown (`.md`).
+The plan is always written to the same `requirement/vN/` directory as the PRD, using the iteration version resolved at Phase 0.2. The plan is always markdown (`.md`).
 
 Compose the plan using the content from `templates/plan.md` (the plan template) and the format-specific principles from the rendering reference loaded at Phase 0.0.
 

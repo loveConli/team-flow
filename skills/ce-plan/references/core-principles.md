@@ -2,7 +2,7 @@
 
 ## Core Principles
 
-1. **Use the PRD as the source of truth** - If `ce-brainstorm` produced a PRD document, planning should read it as the primary input and produce an **independent implementation plan** (not modify the PRD). The PRD defines WHAT; the plan defines HOW. Both are separate artifacts in the same `prd/vN/` directory.
+1. **Use the PRD as the source of truth** - If `ce-brainstorm` produced a PRD document, planning should read it as the primary input and produce an **independent implementation plan** (not modify the PRD). The PRD defines WHAT; the plan defines HOW. Both are separate artifacts in the same `requirement/vN/` directory.
 2. **Decisions, not code** - Capture approach, boundaries, files, dependencies, risks, and test scenarios. Do not pre-write implementation code or shell command choreography. Pseudo-code sketches or DSL grammars that communicate high-level technical design are welcome when they help a reviewer validate direction — but they must be explicitly framed as directional guidance, not implementation specification.
 3. **Research before structuring** - Explore the codebase, institutional learnings, and external guidance when warranted before finalizing the plan.
 4. **Right-size the artifact** - Small work gets a compact plan. Large work gets more structure. The philosophy stays the same at every depth.

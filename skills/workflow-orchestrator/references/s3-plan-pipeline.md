@@ -1,11 +1,11 @@
 # S3 计划阶段（v0.7 修订，pipeline 快速路径）
 
-> 调用 ce-plan 产出 `prd/vN/plan.md`，使用 `pipeline_mode: orchestrator` 减少仪式开销。设计依据：设计增强方案 v0.7 §17.2 / §17.5。
+> 调用 ce-plan 产出 `requirement/vN/plan.md`，使用 `pipeline_mode: orchestrator` 减少仪式开销。设计依据：设计增强方案 v0.7 §17.2 / §17.5。
 
 ## 调用方式
 
 调用 `/ce-plan`，传递：
-- PRD 路径：`prd/vN/prd.md`
+- PRD 路径：`requirement/vN/prd.md`
 - 原型路径：`prototype/`（如存在）
 - 显式参数：`pipeline_mode: orchestrator`
 
@@ -46,6 +46,6 @@ ce-plan 在 orchestrator pipeline 上下文中减少仪式开销，但**保留�
 
 ## 完成条件
 
-- `prd/vN/plan.md` 已产出，含 change 拆分 + 依赖 DAG + 技术方向
+- `requirement/vN/plan.md` 已产出，含 change 拆分 + 依赖 DAG + 技术方向
 - `.team-flow/requirements/<req-id>/orchestrator.yaml` 中 S3 状态 = completed
 - 下一步：进入 ARCH 阶段，产出 `docs/architecture/iterations/vN/architecture.md` 后进 S4（v0.35.0）

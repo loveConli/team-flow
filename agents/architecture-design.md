@@ -36,7 +36,7 @@ You are an independent architecture designer. You read the change brief, plan, e
 |-----------|-------------|
 | `mode` | `change`（默认，workflow-start 五项检查）\| `product`（v0.36.0，S3.5 产品级架构设计） |
 | `change_brief_path` | change-brief.md 路径（scope / AC / 技术方向；change 模式必填） |
-| `plan_path` | prd/vN/plan.md 路径（高阶技术设计段） |
+| `plan_path` | requirement/vN/plan.md 路径（高阶技术设计段） |
 | `snapshot_path` | docs/architecture/iterations/vN/architecture.md（产品级快照；change 模式主输入，product 模式产出目标） |
 | `specs_dir` | changes/<name>/specs/ 路径（现有规格，如有） |
 | `global_arch_dir` | docs/architecture/ 路径（As-Is 基线） |
@@ -108,7 +108,7 @@ verdict: pending_review          # 评审门（architecture-reviewer product 视
 - Execute five-check gate BEFORE producing any deliverable
 - Produce standalone executable SQL files, not embedded code blocks
 - Cite specific brief sections and plan sections for every architecture decision
-- **Produce a PRD Feature → API Endpoint mapping table in api.md** (v0.29.0 §37): before finalizing the API routing table, read `prd/vN/prd.md` feature list (e.g., F001_P0_P1 ~ P0_PN) and map each feature to its corresponding API endpoint(s). For features involving sub-entities (明细/子项), ensure independent CRUD endpoints exist — a query-only endpoint does NOT cover "新增/编辑" functionality. Include this mapping as a dedicated section in api.md for traceability
+- **Produce a PRD Feature → API Endpoint mapping table in api.md** (v0.29.0 §37): before finalizing the API routing table, read `requirement/vN/prd.md` feature list (e.g., F001_P0_P1 ~ P0_PN) and map each feature to its corresponding API endpoint(s). For features involving sub-entities (明细/子项), ensure independent CRUD endpoints exist — a query-only endpoint does NOT cover "新增/编辑" functionality. Include this mapping as a dedicated section in api.md for traceability
 
 **DON'T:**
 - Skip the five-check gate and jump to design

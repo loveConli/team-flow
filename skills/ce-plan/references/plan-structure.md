@@ -6,9 +6,9 @@ Detailed structuring and writing logic for Phases 3 and 4.
 
 - Draft a clear title matching the PRD's project name: `{项目名称} - 实施方案`
 - Determine the plan type: `feat`, `fix`, or `refactor`
-- Build the filename: `prd/{ITERATION_VERSION}/plan.md`
+- Build the filename: `requirement/{ITERATION_VERSION}/plan.md`
   - Use the same iteration version as the PRD (resolved at Phase 0.2)
-  - The plan lives in the same directory as the PRD: `prd/vN/prd.md` (PRD) and `prd/vN/plan.md` (plan)
+  - The plan lives in the same directory as the PRD: `requirement/vN/prd.md` (PRD) and `requirement/vN/plan.md` (plan)
   - Create the directory if it does not exist
   - If a plan already exists at this path, confirm whether to update it or create a new one
 

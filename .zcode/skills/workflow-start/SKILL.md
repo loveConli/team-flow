@@ -30,7 +30,7 @@ Run DP-0 when: change folder doesn't exist, planning artifacts missing/empty, or
 
 ### Upstream Inheritance (v0.9)
 
-若 `change-brief.md` 存在且 `upstream_source == orchestrator`（本 change 由 orchestrator S4 分发），**继承** brief 的 scope/约束/AC 为默认值，DP-0 从"从零问"改为"一次确认继承或修正"，**不**重新问"你想做什么"。否则（手动新建 / hotfix / 单 change 快速通道 / 存量 change 无 brief）照常 DP-0。**主信号 = brief 文件存在**（非 yaml 字段——可天然排除无 brief 的快速通道，且对存量手动 change 零误伤）；双源冲突以 `prd/vN/plan.md` 为准并触发 Brief drift（见「Staleness Detection」）。完整判定伪代码与主信号理由见 `references/routing-rules.md`「DP-0」。
+若 `change-brief.md` 存在且 `upstream_source == orchestrator`（本 change 由 orchestrator S4 分发），**继承** brief 的 scope/约束/AC 为默认值，DP-0 从"从零问"改为"一次确认继承或修正"，**不**重新问"你想做什么"。否则（手动新建 / hotfix / 单 change 快速通道 / 存量 change 无 brief）照常 DP-0。**主信号 = brief 文件存在**（非 yaml 字段——可天然排除无 brief 的快速通道，且对存量手动 change 零误伤）；双源冲突以 `requirement/vN/plan.md` 为准并触发 Brief drift（见「Staleness Detection」）。完整判定伪代码与主信号理由见 `references/routing-rules.md`「DP-0」。
 
 Ask (manual path): change name + one-sentence intent, known constraints, related optimizations (include or stay focused?), communication preference (ask per decision or draft for review).
 
@@ -119,7 +119,7 @@ Use content inspection, not timestamps.
 
 **Stale tasks**: requirement in specs has no corresponding task → stale tasks.
 
-**Brief drift (advisory, v0.9, 不阻断)**: change-brief.md 是上游输入（非 team-flow 产物），**不**混入上述三条产物互查、**不**进入 `artifacts_hash`。当 brief 的 `plan_hash` 与当前 `prd/vN/plan.md` 不一致，或 brief AC 列表与 PRD 功能清单明显出入 → 提示"产品层已变更，brief 可能过期，建议回 orchestrator 重新分发（S4→S3 环路）"，**不**触发产物重审。
+**Brief drift (advisory, v0.9, 不阻断)**: change-brief.md 是上游输入（非 team-flow 产物），**不**混入上述三条产物互查、**不**进入 `artifacts_hash`。当 brief 的 `plan_hash` 与当前 `requirement/vN/plan.md` 不一致，或 brief AC 列表与 PRD 功能清单明显出入 → 提示"产品层已变更，brief 可能过期，建议回 orchestrator 重新分发（S4→S3 环路）"，**不**触发产物重审。
 
 ## Guardrails
 

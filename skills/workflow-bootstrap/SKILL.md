@@ -184,7 +184,7 @@ Step 2: 确定性提取（兜底）
 
 ### B4: Directory Initialization（目录初始化）
 
-创建 team-flow 目录结构：`mkdir -p prd/ prototype/ docs/architecture/ docs/solutions/ changes/`。已有目录不覆盖不删除，只补缺失；目录中有文件保留不改。**Discoverability 检查**：若 `AGENTS.md`/`CLAUDE.md` 未暴露 `docs/architecture/` 和 `prototype/`，advisory 建议用户添加（不自动改）。
+创建 team-flow 目录结构：`mkdir -p requirement/ prototype/ docs/architecture/ docs/solutions/ changes/`。已有目录不覆盖不删除，只补缺失；目录中有文件保留不改。**Discoverability 检查**：若 `AGENTS.md`/`CLAUDE.md` 未暴露 `docs/architecture/` 和 `prototype/`，advisory 建议用户添加（不自动改）。
 
 ### B4.5: CLAUDE.md 初始化（v0.41.0 新增，参考 Claude Code /init）
 
@@ -214,7 +214,7 @@ Step 2: 确定性提取（兜底）
 询问用户。**分组展示**——用户先决定"要不要把地基打牢"（第一组），再决定"打完地基做什么"（第二组）：
 
 > **第一组：确保 bootstrap 产物可信**
-> - A) 逆向重建完整架构（**复杂项目强推 / 简单项目弱推**；→ 进入 workflow-orchestrator ARCH 阶段 reconstruction 模式，arch-reverse-analyst，重建 PASS 后 `tf arch init --mode reconstruction --baseline-ref prd/vN/` 打戳，全量命令见 b5-path-decision.md）
+> - A) 逆向重建完整架构（**复杂项目强推 / 简单项目弱推**；→ 进入 workflow-orchestrator ARCH 阶段 reconstruction 模式，arch-reverse-analyst，重建 PASS 后 `tf arch init --mode reconstruction --baseline-ref requirement/vN/` 打戳，全量命令见 b5-path-decision.md）
 > - B) 交叉验证与对齐 bootstrap 产物（→ 主代理机械比对，产出 `docs/architecture/cross-check-report.md` 疑点清单）
 > - C) 真实性核对（→ 针对 B 疑点清单（跟随 B）或 baseline.md 语义结论抽查（独立），用户逐条确认，修正 baseline.md）
 >

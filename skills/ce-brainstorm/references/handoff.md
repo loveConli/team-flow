@@ -112,7 +112,7 @@ Do not print the closing summary first.
 
 Load the `ce-proof` skill to publish the markdown PRD document. Pass:
 
-- **source file:** `prd/vN/prd.md`
+- **source file:** `requirement/vN/prd.md` (legacy: `prd/vN/prd.md`)
 - **doc title:** `PRD: <topic title>`
 - **identity:** `ai:compound-engineering` / `Compound Engineering`
 

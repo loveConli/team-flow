@@ -69,7 +69,7 @@ prd_draft → user_review → prototype_loop → prd_frozen → completed
 调用 `/ce-brainstorm`（mode: orchestrated）产出 PRD 草稿；**冻结前派 `prd-completeness-reviewer` 子代理做 PRD 完整性评审**（v0.15.0，管"说得全不全"）；原型循环由编排层直接编排（prototype skill 内部编排产出 → prototype-reviewer 自动评审 → 人工评审 → 冻结）；冻结语义为 `frozen_downstream`（迭代内变更不升版）。反馈环路检查点：scope 是否合理。详见 `references/s2-prd-prototype-loop.md`。
 
 ### S3: 计划阶段
-**入口一次性问定计划模式**（业务/一人公司），调用 `/ce-plan`（`pipeline_mode: orchestrator` + `plan_mode: business|solo`，跳过仪式开销、保留 repo research + change splitting + 依赖 DAG + 技术方向）产出 `prd/vN/plan.md`。plan 只到产品级策略 + 高阶技术设计，**不含接口清单**（属各 change 的 spec-writer）。反馈环路检查点：plan 是否暴露 PRD scope 问题（是→回退 S2）。详见 `references/s3-plan-pipeline.md`。完成条件：plan.md 产出 + S3 状态 = completed，**下一步进 ARCH**（v0.36.0）。
+**入口一次性问定计划模式**（业务/一人公司），调用 `/ce-plan`（`pipeline_mode: orchestrator` + `plan_mode: business|solo`，跳过仪式开销、保留 repo research + change splitting + 依赖 DAG + 技术方向）产出 `requirement/vN/plan.md`。plan 只到产品级策略 + 高阶技术设计，**不含接口清单**（属各 change 的 spec-writer）。反馈环路检查点：plan 是否暴露 PRD scope 问题（是→回退 S2）。详见 `references/s3-plan-pipeline.md`。完成条件：plan.md 产出 + S3 状态 = completed，**下一步进 ARCH**（v0.36.0）。
 
 ### ARCH: 产品级架构设计（v0.36.0 新增，S3 之后、S4 之前）
 
@@ -83,7 +83,7 @@ prd_draft → user_review → prototype_loop → prd_frozen → completed
 
 **评审门**：产出经 architecture-reviewer product 视角（`review_mode: product`，A1-A6）评审，**PASS 才进 S4**。
 
-**输出契约**：`docs/architecture/iterations/vN/architecture.md` + 评审 verdict；`orchestrator.yaml` 中 ARCH phase 状态 = completed（`workflow_phase: architecture`）。**首轮项目（`arch_baseline` 缺失）评审 PASS 后执行 `tf arch init --mode reconstruction|design --baseline-ref prd/vN/` 打戳**（v0.36.3）——arch 门禁豁免键由此建立，项目进入「已建档」正轨。
+**输出契约**：`docs/architecture/iterations/vN/architecture.md` + 评审 verdict；`orchestrator.yaml` 中 ARCH phase 状态 = completed（`workflow_phase: architecture`）。**首轮项目（`arch_baseline` 缺失）评审 PASS 后执行 `tf arch init --mode reconstruction|design --baseline-ref requirement/vN/` 打戳**（v0.36.3）——arch 门禁豁免键由此建立，项目进入「已建档」正轨。
 
 ### S4: 拆分验证与分发
 
@@ -136,7 +136,7 @@ prd_draft → user_review → prototype_loop → prd_frozen → completed
 ```yaml
 upstream_source: orchestrator          # orchestrator | manual | null
 upstream_req_id: <req-id>              # 对应 requirement ID
-upstream_plan_ref: prd/vN/plan.md      # hotfix/快速通道为 null
+upstream_plan_ref: requirement/vN/plan.md      # hotfix/快速通道为 null
 upstream_change_id: C2                 # 对应 change_dag.id
 plan_hash: sha256:<plan.md 内容摘要>    # 检测产品层改动后变更层未同步
 ```

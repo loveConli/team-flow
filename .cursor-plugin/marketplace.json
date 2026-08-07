@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Unified workflow plugin marketplace for Cursor (team-flow: team-flow + compound + architecture-design + prototype).",
-    "version": "0.42.0"
+    "version": "0.43.0"
   },
   "plugins": [
     {

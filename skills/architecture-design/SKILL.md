@@ -66,7 +66,7 @@ description: 基于 4A 企业架构 + DDD 领域驱动设计的架构/API/DB 设
 ### 输入
 
 - `change-brief.md`（scope / AC / 技术方向）
-- `prd/vN/plan.md` 高阶技术设计段（模块边界/技术选型/数据流/关键聚合划分）
+- `requirement/vN/plan.md` 高阶技术设计段（模块边界/技术选型/数据流/关键聚合划分）
 - `docs/architecture/iterations/vN/architecture.md`（产品级架构快照，**主输入**，v0.35.0）——BC 边界/聚合所有权/全局契约的唯一事实源
 - 全局 `docs/architecture/`（As-Is 实际态基线，已落地部分）
 - 现有 `specs/`（若有）
@@ -156,7 +156,7 @@ changes/<name>/
 - **不**重复 Swagger 管理的内容：请求/响应 schema、错误码定义、参数明细等由 Swagger/OpenAPI 规范承载
 - frontmatter 须声明 `api_contract_manager: swagger`，表明详细契约由 Swagger 工具链管理
 - sql/ 目录中的 DDL 和 migration 脚本为独立可执行 `.sql` 文件，不嵌入 markdown 文档
-- **PRD 功能清单 → API 端点映射表（v0.29.0 §37 新增）**：在 api.md 中增加独立章节，逐条对照 `prd/vN/prd.md` 功能清单（如 F001_P0_P1 ~ P0_PN），映射每个功能点到对应的 API 端点。对于涉及子实体（明细/子项）的功能，必须确保独立 CRUD 端点存在——仅查询端点不覆盖"新增/编辑"功能。此映射表供 architecture-reviewer A4 交叉验证使用
+- **PRD 功能清单 → API 端点映射表（v0.29.0 §37 新增）**：在 api.md 中增加独立章节，逐条对照 `requirement/vN/prd.md` 功能清单（如 F001_P0_P1 ~ P0_PN），映射每个功能点到对应的 API 端点。对于涉及子实体（明细/子项）的功能，必须确保独立 CRUD 端点存在——仅查询端点不覆盖"新增/编辑"功能。此映射表供 architecture-reviewer A4 交叉验证使用
 
 **下游消费**：
 - `architecture/architecture.md` → spec-writer：design.md Decisions 约束

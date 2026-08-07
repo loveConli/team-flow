@@ -5,7 +5,7 @@
 ```
 docs/solutions/
 ├── INDEX.md                  # L1：轻量索引（≤150行，每条一行摘要+标签）
-├── prd/                      # 按阶段分目录
+├── requirement/              # 按阶段分目录
 ├── plan/
 ├── prototype/
 ├── spec/

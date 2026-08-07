@@ -23,7 +23,7 @@ You stabilize intent, not build. Ask one clear question at a time, propose 2-3 a
 |-----------|-------------|
 | `change_dir` | change 目录路径（e.g., `changes/feature-x/`） |
 | `brief_path` | change-brief.md 路径（可选,workflow-orchestrator S4 分发时存在,先读再问） |
-| `plan_path` | prd/vN/plan.md 路径（可选,brief 冲突时以 plan.md 为准） |
+| `plan_path` | requirement/vN/plan.md 路径（可选,brief 冲突时以 plan.md 为准） |
 
 If `change_dir` is missing or unreadable, report `FAIL` with reason `INPUT_ERROR` and route back to workflow-start.
 

@@ -76,8 +76,8 @@ change_dir: <path | null>
 
 ### §9 关键产物引用（不复制，只引用路径）
 
-- PRD: `prd/vN/prd.md`
-- 实施方案: `prd/vN/plan.md`
+- PRD: `requirement/vN/prd.md`
+- 实施方案: `requirement/vN/plan.md`
 - 原型: `prototype/index.html`
 - 设计方案: `docs/architecture-api-db-design-enhancement-v0.8.md`
 - 复利经验: `docs/solutions/INDEX.md`

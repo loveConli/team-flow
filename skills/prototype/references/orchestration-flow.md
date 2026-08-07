@@ -88,7 +88,7 @@ test -f <prototype_path>/index.html && test -s <prototype_path>/index.html && ec
 - **P0 工艺机械检查（v0.18.0）**：裸 hex / 靛蓝黑名单 / emoji / 填充文案 / scrollIntoView / data-testid / accent 超限——P0 违规 = Critical
 - **Craft Quality 4 席 rubric（v0.18.0）**：工艺(×0.4)+品牌(×0.2)+无障碍(×0.2)+文案(×0.2) 加权合成
 
-agent 直接写审查报告到 `prd/vN/prototype-auto-review.md`。
+agent 直接写审查报告到 `requirement/vN/prototype-auto-review.md`。
 
 判定（v0.18.0 升级）：
 - **PASS**：Critical=0 且 Important=0 且 craft 合成 ≥6.0
@@ -104,7 +104,7 @@ agent 直接写审查报告到 `prd/vN/prototype-auto-review.md`。
 ## 步骤 ⑥ 人工评审路由（主代理）
 
 主代理用 AskUserQuestion 呈现评审结论 + 争议项，LT 选择：
-- **PRD 有问题** → 回 orchestrator S2 修订 PRD（**vN 内修订 + 变更履历，非升版**；见 feedback-loops 设计）→ PRD 更新后再回 ① 更新原型。**独立调用 fallback**（非 orchestrator 触发时）：无 S2 可回，直接提示 LT 修订 `prd/vN/prd.md` 后重入本 skill。
+- **PRD 有问题** → 回 orchestrator S2 修订 PRD（**vN 内修订 + 变更履历，非升版**；见 feedback-loops 设计）→ PRD 更新后再回 ① 更新原型。**独立调用 fallback**（非 orchestrator 触发时）：无 S2 可回，直接提示 LT 修订 `requirement/vN/prd.md` 后重入本 skill。
 - **原型需调整**（美观/体验/品牌/信息密度等自动评审查不到的维度）→ **⛔ 必须通过 SendMessage 恢复原 prototype-builder 实施调整**（`SendMessage(to: builder_agent_id, message: "用户评审反馈：{调整意见}。请修改原型。")`），修改后 SendMessage 恢复原 prototype-reviewer 重新评审。**禁止启动新子代理**（唯一例外：SendMessage 恢复失败时的 fallback）
 - **通过** → 冻结：PRD frontmatter `frozen: true`（frozen_downstream），prototype 定版
 

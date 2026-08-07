@@ -39,14 +39,14 @@ prd_draft → user_review → prototype_loop → prd_frozen → completed
 
 调用 `/ce-brainstorm`，**显式传入** `mode: orchestrated`（B6 跨 skill 集成规约：用显式入参，禁止语义推断）。被 orchestrator 调用时 ce-brainstorm 跳过其内部 Phase 3.5 原型循环（循环归编排层），直接调用时（standalone）保留。
 
-> **阶段后压缩协议（A4）**：ce-brainstorm 冻结 PRD 后，编排层主动触发 compact，只保留 `prd/vN/prd.md` 路径与 frozen 状态，丢弃过程对话。会话级 skill 的过程对话会进入编排层上下文窗口，必须压缩。
+> **阶段后压缩协议（A4）**：ce-brainstorm 冻结 PRD 后，编排层主动触发 compact，只保留 `requirement/vN/prd.md` 路径与 frozen 状态，丢弃过程对话。会话级 skill 的过程对话会进入编排层上下文窗口，必须压缩。
 
 ### 1.5 用户确认 PRD 草稿（强制阻塞点）
 
 **⛔ 关键：PRD草稿完成后，必须等待用户确认，不能自动进入下一步。**
 
 PRD草稿生成后：
-1. 输出PRD文档位置：`prd/vN/prd.md`
+1. 输出PRD文档位置：`requirement/vN/prd.md`
 2. **阻塞等待用户确认**（使用 AskUserQuestion）
 3. 用户确认后，才能进入步骤2（判断是否需要原型）
 
@@ -63,7 +63,7 @@ PRD草稿生成后：
 ```
 调用 prototype skill 产出原型
   → 自动评审（prototype-reviewer agent，独立上下文）
-    → 输出一致性报告（编排层落盘到 prd/vN/prototype-auto-review.md）
+    → 输出一致性报告（编排层落盘到 requirement/vN/prototype-auto-review.md）
     → FAIL（Critical > 0）→ 修正 → 重新自动评审（≤3 轮）
     → PASS_WITH_WARNINGS → 警告项交人工裁定
     → PASS → 进入人工评审
@@ -89,7 +89,7 @@ S2 冻结后，**阻塞确认**（AskUserQuestion）是否同步阶段产物（�
 - **B 仅提交不推送**：`tf publish --prd`
 - **C 暂不同步**：继续 S3，后续可补
 
-同步对象：`prd/vN/` + 原型（push `prd-vN` 分支）+ `.team-flow/`（orchestrator.yaml / registry.yaml）。
+同步对象：`requirement/vN/` + 原型（push `prd-vN` 分支）+ `.team-flow/`（orchestrator.yaml / registry.yaml）。
 
 ### 5. 复利捕获
 
@@ -133,6 +133,6 @@ tf solutions capture --phase prd --domain <domain> --type pitfall --severity <se
 
 ## 完成条件
 
-- `prd/vN/prd.md` frontmatter `frozen: true`（frozen_downstream 已设置）
-- 如需原型：`prd/vN/prototype-auto-review.md` 已落盘且 verdict 为 PASS / PASS_WITH_WARNINGS（人工已裁定）
+- `requirement/vN/prd.md` frontmatter `frozen: true`（frozen_downstream 已设置）
+- 如需原型：`requirement/vN/prototype-auto-review.md` 已落盘且 verdict 为 PASS / PASS_WITH_WARNINGS（人工已裁定）
 - `.team-flow/requirements/<req-id>/orchestrator.yaml` 中 S2 状态 = completed，`prd_version` 已记录

@@ -25,9 +25,9 @@ After resolving the PRD source, determine the planning mode:
 
 If a relevant PRD document exists:
 1. Read the PRD document thoroughly — all 11 chapters, focusing on filled chapters (业务流程, 系统功能清单, 画面原型, etc.).
-   1b. Read `prd/vN/prototype-review.md` if it exists — confirm the prototype inner loop completed and PRD is frozen. If PRD is not frozen (no `frozen: true` in frontmatter), warn the user that the PRD has not been through prototype review and recommend completing the inner loop before planning.
+   1b. Read `requirement/vN/prototype-review.md` if it exists — confirm the prototype inner loop completed and PRD is frozen. If PRD is not frozen (no `frozen: true` in frontmatter), warn the user that the PRD has not been through prototype review and recommend completing the inner loop before planning.
 2. Announce the selected planning mode (业务模式 or 一人公司模式, resolved at Phase 0.2).
-3. Announce that `ce-plan` will produce an independent implementation plan at `prd/vN/plan.md` (not modify the PRD).
+3. Announce that `ce-plan` will produce an independent implementation plan at `requirement/vN/plan.md` (not modify the PRD).
 4. The PRD is the WHAT; the plan is the HOW. Do not rewrite or re-interpret the PRD's business requirements.
 5. Carry forward all applicable information from the PRD:
    - 业务流程 (§2-§3) → informs task breakdown and dependencies

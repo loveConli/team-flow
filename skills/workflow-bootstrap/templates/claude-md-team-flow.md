@@ -44,8 +44,8 @@ team-flow 工作流在 `changes/<name>/` 下通过状态机驱动变更，核心
 
 | 产物 | 路径 | 状态 |
 |------|------|------|
-| 产品级 PRD | `prd/vN/prd.md` | ce-brainstorm 引用 |
-| 产品级计划 | `prd/vN/plan.md` | ce-plan 引用 |
+| 产品级 PRD | `requirement/vN/prd.md` | ce-brainstorm 引用 |
+| 产品级计划 | `requirement/vN/plan.md` | ce-plan 引用 |
 | 变更简报 | `changes/<name>/change-brief.md` | orchestrator S4 产出，hash 显式排除 |
 | 架构设计 | `changes/<name>/architecture/{architecture,database,api}.md` | hash 纳入 artifacts_hash |
 | 需求注册表 | `.team-flow/registry.yaml` | workflow-orchestrator 引用 |

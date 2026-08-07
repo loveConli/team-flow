@@ -12,7 +12,31 @@ Detailed process derivation and structured output logic for Phase 1.6. The main 
 - `requirement/vN/business-analysis.md` — confirmed scenarios with IDs (✅ SC-xxx)
 - `requirement/ledger.md` — archived process records from prior versions
 
-## Step 1: Derive Processes from Scenarios
+## Step 0: Elicit User's L1–L3 Hierarchy (v0.43.0+)
+
+> **核心原则**：L1–L3 是组织级知识（流程分类、流程分组、业务流程），用户通常已有清晰的规划。AI 的价值集中在 L4 子流程的细化上（活动拆解、步骤说明、异常处理）。不要自行猜测 L1–L3。
+
+**Blocking question** — 在推导任何流程之前，先询问用户：
+
+> "你们通常如何组织业务流程？请按以下层级告诉我：
+> - **L1 流程分类**（如：核心业务、支撑管理、战略决策）
+> - **L2 流程分组**（如：采购管理、销售管理、人力资源）
+> - **L3 业务流程**（如：采购申请流程、供应商评审流程）"
+
+**如果用户不熟悉 L1–L4 概念**，提供简要说明：
+
+| 层级 | 含义 | 示例 |
+|------|------|------|
+| L1 流程分类 | 最高层流程域划分 | 核心业务 / 支撑管理 |
+| L2 流程分组 | 分类下的业务领域 | 采购管理 / 销售管理 |
+| L3 业务流程 | 具体的端到端业务流程 | 采购申请流程 |
+| L4 子流程 | 流程内的具体活动段（AI 协助细化） | 需求提报 / 审批 / 下单 |
+
+**确认 L1–L3 框架后才进入 Step 1。** 如果用户说"你来帮我规划"或"我没有现成的分类"，AI 可以基于已确认的业务场景（SC-xxx）推导 L1–L3 建议，但必须经用户确认。
+
+## Step 1: Derive L4 Sub-processes from Scenarios
+
+Based on the user-confirmed L1–L3 framework, derive L4 sub-processes for each L3 process:
 
 For each confirmed scenario, derive a step sequence using BPMN thinking:
 
@@ -21,7 +45,7 @@ For each confirmed scenario, derive a step sequence using BPMN thinking:
 - **Events**: start event, intermediate events, end event
 - **Gateways**: decision points that branch the flow (exclusive / parallel / inclusive)
 
-Produce one draft process per scenario. A scenario may map to one or more L4 sub-processes.
+Map each scenario to the appropriate L3 process (from user's framework), then produce L4 sub-processes under that L3. A scenario may map to one or more L4 sub-processes.
 
 ## Step 2: Compare Against Existing Processes
 
@@ -42,12 +66,12 @@ Classify each draft process:
 
 ### 3.1 L1–L4 Classification Table
 
-Fill the business process overview table (aligns with PRD §2):
+Fill the business process overview table (aligns with PRD §2). **L1–L3 come from the user-confirmed framework (Step 0); L4 is derived by AI (Step 1):**
 
-| L1 Group | L2 Category | L3 Process | L4 Sub-process | Status | Related Scenarios |
+| L1 Group (用户定义) | L2 Category (用户定义) | L3 Process (用户定义) | L4 Sub-process (AI 细化) | Status | Related Scenarios |
 |----------|-------------|------------|----------------|--------|-------------------|
 
-**Hierarchy**: L1 → L2 → L3 → L4. L3 is a collection of L4 sub-processes. Each ledger record corresponds to one L4. **L4 is the minimum recording unit.**
+**Hierarchy**: L1 → L2 → L3 → L4. L1–L3 are user-defined organizational structure; L4 is AI-assisted refinement. L3 is a collection of L4 sub-processes. Each ledger record corresponds to one L4. **L4 is the minimum recording unit.**
 
 ### 3.2 Process Flow Diagram
 
@@ -117,12 +141,21 @@ Dispatch `process-quality-checker` sub-agent. Evaluate 9 checks:
 
 **Routing**: All Error checks PASS → proceed to Step 5. Any Error FAIL → return to correct (max 3 rounds). Warnings are reported but do not block.
 
-## Step 5: Display & Confirmation
+## Step 5: Layered Display & Confirmation (v0.43.0+)
 
-Present all three output forms to the user as a blocking question:
+Use **two-stage confirmation** to reduce correction cost:
 
-- ✅ **Confirmed** → upgrade status to ✅ 已确认; write into current version `business-analysis.md`; exit (no ledger update).
-- ✏️ **Adjust** → apply feedback; return to Step 3; loop until confirmed.
+**Stage A — L1–L3 Framework Review:**
+Present the L1–L4 classification table (3.1) to the user. Focus on confirming the L1–L3 framework is correct:
+- ✅ **L1–L3 框架确认** → proceed to Stage B
+- ✏️ **L1–L3 需要调整** → apply feedback on L1–L3; re-derive L4 under adjusted framework; re-present Stage A
+
+**Stage B — L4 Detail Review (per L3 process):**
+For each L3 process, present its L4 sub-processes with flow diagrams (3.2), activity tables (3.3), and attribute blocks (3.4) as a blocking question:
+- ✅ **Confirmed** → upgrade status to ✅ 已确认
+- ✏️ **Adjust** → apply feedback; return to Step 3 for this L3; loop until confirmed
+
+After all L3 processes confirmed: write into current version `business-analysis.md`; exit (no ledger update).
 
 ## Write Rules
 

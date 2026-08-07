@@ -21,8 +21,8 @@ After writing, return a summary of the verdict + the report file path. Do NOT mo
 
 | Parameter | Description |
 |-----------|-------------|
-| `prd_path` | PRD 文件路径（e.g., `prd/v1/prd.md`） |
-| `plan_path` | plan.md 路径（e.g., `prd/v1/plan.md`） |
+| `prd_path` | PRD 文件路径（e.g., `requirement/v1/prd.md`） |
+| `plan_path` | plan.md 路径（e.g., `requirement/v1/plan.md`） |
 | `change_brief_path` | change-brief.md 路径（e.g., `changes/<name>/change-brief.md`） |
 | `architecture_dir` | 架构产出目录（e.g., `changes/<name>/architecture/`） |
 | `global_arch_dir` | 全局架构目录（e.g., `docs/architecture/`） |
@@ -90,7 +90,7 @@ Dimensions requiring semantic understanding, marked as "advisory, false positive
 
 4. **A4 需求覆盖** (v0.29.0 §37 增强：双对照源 + 子实体 CRUD 检查):
    - **对照源 1（现有）**：Read change-brief.md → extract all requirement items (scope, AC, technical direction)
-   - **对照源 2（v0.29.0 新增）**：Read `prd/vN/prd.md` → extract feature list (e.g., F001_P0_P1 ~ P0_PN)
+   - **对照源 2（v0.29.0 新增）**：Read `requirement/vN/prd.md` → extract feature list (e.g., F001_P0_P1 ~ P0_PN)
    - Read plan.md → extract relevant technical design sections
    - For each requirement from BOTH sources, check if architecture deliverables provide corresponding design:
      - New aggregate → architecture.md covers it?

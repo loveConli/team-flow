@@ -51,7 +51,7 @@ S5→S4 回退时，按在途 change 状态分区处置（前置条件）：
 
 - S3→S2 回退 = **临时解除 frozen_downstream**，S2 重新完成后恢复
 - 若 PRD 处于 `frozen_absolute`（用户显式确认或 vN+1 已启动），任何修改必须升版 vN+1，**不允许 vN 内修订**
-- frozen 状态以 `prd/vN/prd.md` frontmatter 为单一真相源。详见 state-model.md「双层冻结」
+- frozen 状态以 `requirement/vN/prd.md` frontmatter 为单一真相源。详见 state-model.md「双层冻结」
 
 ## 复利集成
 

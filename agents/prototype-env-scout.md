@@ -16,7 +16,7 @@ You NEVER write, edit, create, or delete any file. Your only output is the brief
 ## Invocation Contract
 
 The dispatch prompt provides (some may be absent — probe to discover):
-- `prd_path` or a hint to locate the current PRD version (e.g., `prd/v1/prd.md`).
+- `prd_path` or a hint to locate the current PRD version (e.g., `requirement/v1/prd.md`).
 - `design_system_path` (from `prototype.designSystem` config) or a hint to find `design-system.md`.
 - `prototype_root` (default `prototype/`).
 - The intent: new prototype from scratch / iterate on existing / sync after a change.
@@ -36,7 +36,7 @@ Turn the probe into a decision-ready brief: what exists, what is missing, and a 
 - List existing pages (`prototype/pages/*.html`), components (`prototype/components/`), and `flow.md` if present.
 
 ### Step 3: PRD Version Probe
-- Identify the PRD version to prototype against (read `prd/vN/prd.md` frontmatter `iteration_version` if present).
+- Identify the PRD version to prototype against (read `requirement/vN/prd.md` frontmatter `iteration_version` if present).
 - Extract from the PRD the inputs the builder will need: §4 画面原型 (page list), §7 系统功能清单 (functions), §8.4 功能模块 (fields), §8.2 画面交互 (navigation/transitions).
 
 ### Step 4: Synthesize Brief + Recommended Plan
