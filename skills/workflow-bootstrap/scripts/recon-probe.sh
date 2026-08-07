@@ -4,7 +4,7 @@
 #
 # 用途
 #   对既有代码库做"固定化、可复现"的机械采集：目录树 / 依赖清单 / LOC 与文件
-#   类型分布 / 测试文件计数 / DB 迁移清单 / README-docs 探测。
+#   类型分布 / 测试文件计数 / DB 迁移清单 / README-docs 探测 / Git 子仓库结构。
 #   本脚本只做**确定性机械采集**（设计文档 v0.8 §17.8 第四类载体）——同项目两次
 #   运行结果一致，可横展对比。语义判断（架构模式 / 聚合根推断 / 框架定性）交给
 #   消费本脚本 JSON 输出的侦察子代理（codebase-recon-analyst）完成。
@@ -369,6 +369,75 @@ if [ "$DDL_TABLE_COUNT" -eq 0 ]; then
 fi
 
 # ============================================================================
+# ⑧ Git 子仓库扫描（v0.41.0：git-structure 维度）
+# ----------------------------------------------------------------------------
+# 识别 root 自身 git 仓库状态 + 嵌套 git 仓库（排除 root 自身）+ git submodule
+# + .gitignore 忽略子仓库规则。设计契约：只做确定性机械采集（目录/文件探测），
+# 每个子仓库的用途/提交顺序约束等语义判断交给侦察子代理。
+# ============================================================================
+
+# 判断 root 自身是否为 git 仓库（.git 目录或 git rev-parse 兜底）
+IS_GIT_REPO=false
+if [ -d "$ROOT_ABS/.git" ] || git -C "$ROOT_ABS" rev-parse --git-dir >/dev/null 2>&1; then
+  IS_GIT_REPO=true
+fi
+
+# 查找嵌套 git 仓库（.git 目录或文件——submodule/worktree 可能是文件），排除 root 自身
+: > "$TMP/sub_repos.txt"
+if [ "$IS_GIT_REPO" = true ]; then
+  find "$ROOT_ABS" -maxdepth 3 \
+    \( -type d -name .git -o -type f -name .git \) \
+    -print 2>/dev/null \
+    | grep -v "^$ROOT_ABS/.git$" \
+    | while IFS= read -r _g; do
+        rel="$(dirname "${_g#"$ROOT_ABS"/}")"
+        echo "$rel"
+      done | sort -u > "$TMP/sub_repos.txt"
+fi
+SUB_REPO_COUNT=$(wc -l < "$TMP/sub_repos.txt" | tr -d ' ')
+
+# git submodule 列表（.gitmodules 存在时）
+: > "$TMP/submodules.txt"
+if [ -f "$ROOT_ABS/.gitmodules" ]; then
+  grep -oE 'path[[:space:]]*=[[:space:]]*[^[:space:]]+' "$ROOT_ABS/.gitmodules" 2>/dev/null \
+    | sed -E 's/path[[:space:]]*=[[:space:]]*//' | sort -u > "$TMP/submodules.txt"
+fi
+SUBMODULE_COUNT=$(wc -l < "$TMP/submodules.txt" | tr -d ' ')
+
+# 构建 sub_repos JSON 数组（含 type / has_remote）
+: > "$TMP/sub_repos.json"
+if [ "$IS_GIT_REPO" = true ]; then
+  while IFS= read -r _sr; do
+    [ -z "$_sr" ] && continue
+    _type="nested"
+    if [ -f "$ROOT_ABS/.gitmodules" ] \
+      && grep -qE "^[[:space:]]*path[[:space:]]*=[[:space:]]*${_sr}[[:space:]]*$" "$ROOT_ABS/.gitmodules" 2>/dev/null; then
+      _type="submodule"
+    fi
+    _has_remote="false"
+    if git -C "$ROOT_ABS/$_sr" remote 2>/dev/null | grep -q .; then
+      _has_remote="true"
+    fi
+    printf '{"path":"%s","type":"%s","has_remote":%s},' \
+      "$(json_escape "$_sr")" "$_type" "$_has_remote" >> "$TMP/sub_repos.json"
+  done < "$TMP/sub_repos.txt"
+fi
+SUB_REPOS_JSON="$(sed 's/,$//' "$TMP/sub_repos.json" 2>/dev/null)"
+
+# .gitignore 中是否忽略了任一子仓库
+GITIGNORE_IGNORES_SUBREPOS=false
+if [ -f "$ROOT_ABS/.gitignore" ] && [ "$SUB_REPO_COUNT" -gt 0 ]; then
+  while IFS= read -r _sr; do
+    [ -z "$_sr" ] && continue
+    # 匹配：整行 / 目录行（斜杠结尾）/ 项目名
+    if grep -qE "(^|/)[[:space:]]*${_sr}(/|$)" "$ROOT_ABS/.gitignore" 2>/dev/null; then
+      GITIGNORE_IGNORES_SUBREPOS=true
+      break
+    fi
+  done < "$TMP/sub_repos.txt"
+fi
+
+# ============================================================================
 # 组装 JSON
 # ============================================================================
 {
@@ -399,10 +468,17 @@ fi
   printf '  "docs": {"docs_dir": %s, "doc_files": %s},\n' \
     "$DOCS_DIR" "$(json_array_from_file "$TMP/doc_files.txt")"
   # ⑦ DDL 提取（v0.24.0）
-  printf '  "ddl_extraction": {"source": "%s", "table_count": %s, "tables": %s, "ddl_statements": "%s"}\n' \
+  printf '  "ddl_extraction": {"source": "%s", "table_count": %s, "tables": %s, "ddl_statements": "%s"},\n' \
     "$(json_escape "$DDL_SOURCE")" "$DDL_TABLE_COUNT" \
     "$(json_array_from_file "$TMP/ddl_tables.txt")" \
     "$(json_escape "$(cat "$TMP/ddl_statements.sql" 2>/dev/null)")"
+  # ⑧ Git 子仓库结构（v0.41.0）
+  printf '  "git_structure": {"is_git_repo": %s, "sub_repo_count": %s, "sub_repos": [%s], "submodule_count": %s, "submodules": %s, "gitignore_ignores_subrepos": %s}\n' \
+    "$IS_GIT_REPO" "$SUB_REPO_COUNT" \
+    "$SUB_REPOS_JSON" \
+    "$SUBMODULE_COUNT" \
+    "$(json_array_from_file "$TMP/submodules.txt")" \
+    "$GITIGNORE_IGNORES_SUBREPOS"
   printf '}\n'
 } > "$TMP/out.json"
 
@@ -443,6 +519,7 @@ fi
   echo "docs/ 目录   : $DOCS_DIR"
   echo "README 等    : $(wc -l < "$TMP/doc_files.txt" | tr -d ' ') 个"
   echo "DDL 提取     : source=$DDL_SOURCE, tables=$DDL_TABLE_COUNT"
+  echo "git 仓库     : is_repo=$IS_GIT_REPO, 子仓库=$SUB_REPO_COUNT, submodule=$SUBMODULE_COUNT"
   echo "================================================="
 } >&2
 

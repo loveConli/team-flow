@@ -11,7 +11,8 @@ description: 既有项目接入初始化器。在首次使用 team-flow 时执�
 
 ```
 workflow-bootstrap（一次性，手动触发）
-  → B1 代码库侦察 → B2 架构基线 → B3 领域词汇 → B4 目录初始化 → B5 路径判断
+  → B1 代码库侦察 → B1.5 conventions → B2 架构基线 → B3 领域词汇 → B4 目录初始化
+  → B4.5 CLAUDE.md 初始化 → B5 路径判断
   → 进入 workflow-orchestrator S1（注入 baseline 上下文）
 ```
 
@@ -58,7 +59,7 @@ Do NOT invoke for:
 - **模式**（询问用户）：Quick（默认，技术栈+模块+架构模式+测试文档，~2 分钟）/ Deep（+数据模型+API 表面，~10 分钟）。
 - **B1.1 脚本采集**：`bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --root <根> --out /tmp/recon-<slug>.json`（固定化，两次接入结果一致）。
 - **B1.2 并行子代理**：读 `references/agents/codebase-recon-analyst.md`，把 JSON 路径作 `recon_json` 入参，按维度并行派发（§18.1 返回）。
-- **B1.3 主代理汇总**：只汇总不重新侦察，整合已有文档（合并而非覆盖，标注来源），写 `docs/architecture/baseline.md`。
+- **B1.3 主代理汇总**：只汇总不重新侦察，整合已有文档（合并而非覆盖，标注来源），写 `docs/architecture/baseline.md`。**维度闭合校验（v0.41.0）**：汇总前核对已派发维度 vs 已返回 handoff（status 非未返回 + deliverable 非空），缺失维度在 baseline.md 顶部标记 INCOMPLETE（advisory 不阻断，Success Output 警告）。
 
 详细流程（脚本采集项、子代理维度表、侦察内容树、已有文档处理）见 `references/b1-reconnaissance.md`。
 
@@ -185,6 +186,29 @@ Step 2: 确定性提取（兜底）
 
 创建 team-flow 目录结构：`mkdir -p prd/ prototype/ docs/architecture/ docs/solutions/ changes/`。已有目录不覆盖不删除，只补缺失；目录中有文件保留不改。**Discoverability 检查**：若 `AGENTS.md`/`CLAUDE.md` 未暴露 `docs/architecture/` 和 `prototype/`，advisory 建议用户添加（不自动改）。
 
+### B4.5: CLAUDE.md 初始化（v0.41.0 新增，参考 Claude Code /init）
+
+将项目基本信息（参考 /init）和 team-flow 产物索引写入工作区 CLAUDE.md。维护原则：**索引级 + 结构级，简明扼要**——目标是每次开启会话对项目空间有全局认识，不长篇大论。
+
+**触发条件**：CLAUDE.md 存在但不含 `## 产物结构` 章节（追加模式），或不存在（新建模式）。
+
+**执行流程**：
+
+1. 检查 CLAUDE.md 是否已存在
+2. **不存在（新建模式）**：从 `templates/claude-md-team-flow.md` 复制模板，填入 B1 侦察结果：
+   - 项目概况（语言/框架/构建工具/数据库，2-3 行）← B1 technology 维度
+   - 开发命令（构建/测试/lint，只列非标准的）← B1 侦察 + README
+   - 工作区结构（简化目录树 ≤3 层）← B1 directory_tree
+   - Git 仓库结构（子仓库清单 + 类型 + 用途）← B1 git-structure 维度
+   - 产物结构（索引级：产物表 + 路径，详细内容引用 baseline.md）← 标准化模板
+   - Git 管理规则（提交/推送顺序约束 + 子仓库操作规则）← 标准化框架
+3. **已存在（追加模式）**：检查是否含 `## 产物结构` 章节
+   - 含 → 跳过（不覆盖用户已有内容）
+   - 不含 → 追加产物结构索引章节；**仅当缺 `## Git 管理规则` 时**一并追加，避免重复章节
+4. 若模板有占位符未填（如侦察缺失的维度），保留 `{{PLACEHOLDER}}` 并提示用户补充
+
+**不做的事**：不写 SOP 流程（由 skill 负责）、不写变更级状态机（由 workflow skill 负责）、不列可自动发现的文件清单。
+
 ### B5: Path Decision（路径判断）
 
 询问用户：
@@ -213,10 +237,10 @@ Step 2: 确定性提取（兜底）
 ## Output Standard
 
 每次交互结束时说明：
-1. 已完成的阶段（B1-B1.5-B2-B3-B4-B5）
-2. 已产出的制品（baseline.md / conventions / ARCHITECTURE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / CONCEPTS.md / 目录结构）
+1. 已完成的阶段（B1-B1.5-B2-B3-B4-B4.5-B5）
+2. 已产出的制品（baseline.md / conventions / ARCHITECTURE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / CONCEPTS.md / CLAUDE.md / 目录结构）
 3. 下一步建议（调用哪个 skill）
 
 ## Success Output
 
-接入结束时输出：侦察模式、产出清单（baseline.md / conventions / ARCHITECTURE.md / DATABASE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / docs/architecture/CONCEPTS.md / 目录结构）、关键发现（技术栈/模块数/架构模式/测试覆盖）、下一步建议。完整模板见 `references/b1-reconnaissance.md`「Success Output 模板」。
+接入结束时输出：侦察模式、产出清单（baseline.md / conventions / ARCHITECTURE.md / DATABASE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / docs/architecture/CONCEPTS.md / CLAUDE.md / 目录结构）、关键发现（技术栈/模块数/架构模式/测试覆盖）、下一步建议。完整模板见 `references/b1-reconnaissance.md`「Success Output 模板」。

@@ -6,6 +6,15 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+### Added（workflow-bootstrap CLAUDE.md 初始化 + Git 多子仓库识别，v0.41.0）
+
+- **B4.5 CLAUDE.md 初始化**（参考 Claude Code /init）：将项目基本信息（项目概况/开发命令/工作区结构/Git 结构）+ team-flow 产物结构索引写入工作区 CLAUDE.md；维护原则=索引级+结构级；已有 CLAUDE.md 追加模式（产物结构 + Git 管理规则章节），无则从 `templates/claude-md-team-flow.md` 新建
+- **CLAUDE.md 标准模板**：`skills/workflow-bootstrap/templates/claude-md-team-flow.md`（新建），覆盖 /init 内容 + team-flow 产物结构表（代码强制 + 设计层面）
+- **recon-probe.sh ⑧ Git 子仓库扫描**：识别嵌套 git 仓库 / submodule / .gitignore 忽略规则，JSON 新增 `git_structure` 字段（is_git_repo / sub_repos[{path,type,has_remote}] / submodules / gitignore_ignores_subrepos）
+- **codebase-recon-analyst git-structure 维度**：侦察维度 6→7，识别子仓库用途（代码库/文档/工具）+ git 操作约束（提交/推送顺序、版本联动、隔离）
+- **B1.3 维度闭合校验**：汇总前核对已派发维度 vs 已返回 handoff（status + deliverable 非空），缺失维度标 INCOMPLETE（advisory 不阻断，Success Output 警告）
+- **AGENTS.md 同步**：workflow-bootstrap 流程描述补 B4.5 + git-structure + 闭合校验
+
 ## [0.39.0] - 2026-08-06
 
 ### Added（workflow-feedback 环境版本记录）

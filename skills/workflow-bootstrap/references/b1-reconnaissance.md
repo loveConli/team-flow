@@ -13,7 +13,7 @@
 bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --root <项目根> --out /tmp/recon-<slug>.json
 ```
 
-固定采集（不依赖 LLM，两次接入结果一致）：目录树（限深 4 层）、依赖清单（pom/package.json/requirements/go.mod/build.gradle）、LOC 与文件类型分布、测试文件计数（含 `.test.mjs`/`.spec.mjs`）、DB 迁移文件清单、README/docs 探测。输出结构化 JSON 供子代理消费。脚本只做确定性机械采集（§17.8 第四类载体），语义判断交给子代理 LLM。
+固定采集（不依赖 LLM，两次接入结果一致）：目录树（限深 4 层）、依赖清单（pom/package.json/requirements/go.mod/build.gradle）、LOC 与文件类型分布、测试文件计数（含 `.test.mjs`/`.spec.mjs`）、DB 迁移文件清单、README/docs 探测、Git 子仓库结构（v0.41.0：嵌套仓库/submodule/.gitignore 忽略规则）。输出结构化 JSON 供子代理消费。脚本只做确定性机械采集（§17.8 第四类载体），语义判断交给子代理 LLM。
 
 ## B1.1a DDL 提取能力（v0.23.0 设计，v0.24.0 已实现）
 
@@ -42,6 +42,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --ro
 | 模块结构（分层/边界） | ✓ | ✓ |
 | 已有架构模式（DDD/MVC/微服务/单体） | ✓ | ✓ |
 | 测试现状 + 已有文档 | ✓ | ✓ |
+| Git 仓库结构（子仓库/submodule） | ✓ | ✓ |
 | 数据模型（实体/迁移/聚合根候选） | — | ✓ |
 | API 表面（REST/gRPC/CLI） | — | ✓ |
 
@@ -50,6 +51,18 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --ro
 ## B1.3 主代理汇总
 
 主代理收集各子代理摘要 + 脚本 JSON，**只汇总不重新侦察**，整合已有文档（见下），写 `docs/architecture/baseline.md`。
+
+**维度完整性校验（v0.41.0 新增）**：汇总前必须执行闭合校验，防止静默丢失维度：
+
+```
+1. 核对已派发维度 vs 已返回 handoff（status != 未返回）
+2. 每个返回的 handoff 检查 deliverable 字段非空
+3. 缺失维度 → 在 baseline.md 顶部标记 INCOMPLETE + 缺失维度名
+4. 缺失维度不阻断流程（advisory），但 Success Output 中必须警告
+5. blocked / outstanding_questions 按 §18.1 交接协议由主代理裁决 / 批量确认
+
+假设：deliverable 非空按"该维度已覆盖"计；blocked 但带部分交付的，由主代理人工裁决是否归账。
+```
 
 ## 侦察内容维度（子代理产出，供 baseline.md 组织）
 
@@ -60,7 +73,8 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --ro
 ├── 数据模型（Deep：实体/迁移/聚合根候选/实体关系）
 ├── API 表面（Deep：REST/gRPC/CLI 主要清单）
 ├── 测试现状（测试目录/框架/粗略覆盖）
-└── 已有文档（README/docs/注释密度）
+├── 已有文档（README/docs/注释密度）
+└── Git 仓库结构（子仓库清单/类型/用途/操作约束）
 ```
 
 ## 已有文档处理
@@ -87,6 +101,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --ro
 - docs/architecture/API-INDEX.md（API 端点索引，v0.23.0）
 - docs/architecture/INDEX.md（架构文档索引，v0.23.0）
 - docs/architecture/CONCEPTS.md（领域词汇，N 个术语）
+- CLAUDE.md（项目概况 + 产物结构索引，B4.5）
 - 目录结构：prd/ prototype/ docs/ changes/
 
 关键发现：
@@ -94,6 +109,7 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --ro
 - 模块数：5（user-service, order-service, ...）
 - 架构模式：微服务 + DDD 分层
 - 测试覆盖：约 60%（JUnit 5 + Mockito）
+- ⚠ INCOMPLETE：<缺失维度名>（如 api-surface——Deep 模式未派发）
 
 下一步：
 → 运行 /workflow-orchestrator 开始产品级流程

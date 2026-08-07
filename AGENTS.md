@@ -68,8 +68,8 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 - 与 workflow-start 分层：orchestrator 管"做什么、什么顺序"（产品级策略），workflow-start 管"怎么做"（变更级执行）
 
 ### 7. workflow-bootstrap（1 skill，既有项目接入，v0.15.0 脚本+子代理侦察）
-- 一次性"侦察 + 基线建立"：代码库侦察 → 架构基线文档化 → 领域词汇提取 → 目录初始化 → 进入 workflow-orchestrator
-- **B1 侦察（v0.15.0）**：先跑确定性脚本 `scripts/recon-probe.sh`（可复现固定化采集）→ 并行派发 `codebase-recon-analyst` 子代理语义增强 → 主代理汇总写 baseline.md
+- 一次性"侦察 + 基线建立"：代码库侦察 → 架构基线文档化 → 领域词汇提取 → 目录初始化 → CLAUDE.md 初始化（B4.5，v0.41.0）→ 进入 workflow-orchestrator
+- **B1 侦察（v0.15.0）**：先跑确定性脚本 `scripts/recon-probe.sh`（可复现固定化采集，含 Git 子仓库结构 v0.41.0）→ 并行派发 `codebase-recon-analyst` 子代理语义增强（7 维度含 git-structure）→ 主代理汇总写 baseline.md（维度闭合校验 v0.41.0）
 - 仅首次使用时执行；`docs/architecture/baseline.md` 已存在则跳过
 
 ### 8. session-handoff（1 skill，会话交接，v0.16.0 新增）
