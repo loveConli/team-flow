@@ -111,6 +111,14 @@ For full/hotfix by default. Execute waves as dispatched by workflow-start.
 
 **v0.39.0 主动串行编排**：build-executor 不再负责安排 code-reviewer。workflow-start 会主动串行编排：每个 wave 完成后，workflow-start 会 dispatch code-reviewer 审查。build-executor 只需执行当前 wave，完成后通知 workflow-start。
 
+### Test Infrastructure Check (v0.43.1, before first wave)
+
+开始实施前检测项目测试基础设施，避免测试静默跳过（设计增强方案 v0.18 §76，来源：workflow-feedback 2026-08-06——surefire 2.22.2 不支持 JUnit 5 `@Nested`，64% 测试从未执行但报告 "91 tests pass"）：
+
+1. **Java 项目**：读 `pom.xml` 的 maven-surefire-plugin 版本 + JUnit 版本。
+2. **兼容性判断**：surefire < 2.22.2 且测试计划含 JUnit 5 `@Nested` → 警告"@Nested 自动发现不兼容，建议 flatten 测试类或升级 surefire"。
+3. **沉淀 conventions**：检测结果写入 `.team-flow/conventions/`（项目级测试基础设施约束，v0.11 §33 机制），供后续 change 复用。写入方式沿用下方「阶段转换前规范建议」协议——YAML frontmatter（name/description/date）+ 正文约束，用户确认后追加，更新 date 字段。
+
 ### Planned-Wave Loop
 1. Read the current plan with `tf execution show <change-dir> --json`; only waves shown with `current: true` and `eligible: true` may start. A `retryable: true` wave may only be repaired and re-reviewed; do not dispatch its dependents until its replacement receipt is `pass`. The CLI encodes dependencies in `--wave <id>:<strategy>:<tasks>[:<depends-on,...>]` and rejects a review receipt for a wave whose prerequisites lack current `pass` receipts.
 2. A `parallel` wave may dispatch independent tasks simultaneously only when the platform supports concurrent dispatch. If it does not, disclose the unavailable capability and execute the same wave one task at a time without changing its stored strategy.
@@ -124,12 +132,24 @@ For full/hotfix by default. Execute waves as dispatched by workflow-start.
 5. **Do not** attempt to dispatch code-reviewer or write review receipts — that is workflow-start's responsibility.
 6. Critical/Important findings require a `fail` receipt, a focused repair, re-review, then a replacement `pass` receipt. Never advance or close with a missing or failed receipt.
 
+### Wave Verify: Actual Test Count (v0.43.1)
+
+每个 wave 完成、通知 workflow-start 审查前，验证测试**实际执行**的数量（设计增强方案 v0.18 §76，来源：workflow-feedback 2026-08-06——64% 测试静默跳过但报告全绿）：
+
+1. 运行测试套件后，用 `tf test record <change-dir> --from <runner-output-file>` 解析**实际执行数量**（`Tests run: N`）。
+2. 对照 test-matrix 当前 wave 覆盖的用例数（**分母排除 `test_tier=e2e`**——E2E case 由 Playwright 执行，不进入 `mvn test`/`npm test` 的 `Tests run: N`，口径与 code-reviewer Step 5b / release-archivist Step 2b 一致）：实际执行数明显低于预期（< 70%）→ **警告 + 调查**（@Nested 静默跳过、测试未被发现、编译期跳过等），未查明前不得报告 "N tests pass"。
+3. 报告引用实际执行数（`Tests run: N`），而非 BUILD SUCCESS 或编译通过数量。
+
 ### Per-Task Loop
 1. **Dispatch implementer**: Load the template with `tf runtime asset read skills/build-executor/implementer-prompt.md`. Extract task brief with `scripts/task-brief PLAN_FILE N`. Include: where task fits, brief path, interfaces from prior tasks, report file path.
 2. **Handle response**: DONE → generate review package + dispatch reviewer. DONE_WITH_CONCERNS → assess. NEEDS_CONTEXT → provide context. BLOCKED → re-dispatch with better model or escalate.
-3. **Review**: Load `tf runtime asset read skills/build-executor/task-reviewer-prompt.md`. Reviewer returns spec compliance + code quality verdicts with the wave ID, git range, report path, and `pass`/`fail` receipt command.
-4. **Fix**: If Critical or Important issues, write the `fail` receipt, dispatch fix subagent, re-review, and write the replacement `pass` receipt.
-5. **Mark complete**: Append to `.superpowers/sdd/progress.md`: `Task N: complete (commits <base7>..<head7>, review clean)`
+3. **Verify task output（v0.43.1）**：任务标记完成前验证产物——**前置到审查前**（源头校验：文件存在性是审查的前提，让 reviewer 专注质量而非兜底）。设计增强方案 v0.18 §75，来源：workflow-feedback 2026-08-06——Task 标记 [x] 但文件未创建）：
+   - Create 任务：目标文件必须存在且非空（`test -s <path>`）
+   - Modify 任务：目标文件必须有变更（相对 wave base 的 `git diff --name-only` 包含该文件）
+   - 验证失败 → 不标记完成，先补创建/修改——"标记完成"与"文件存在"绑定，杜绝任务状态失真
+4. **Review**（task 级轻量审查；wave 级 code-reviewer 由 workflow-start 主动编排，v0.39.0）: Load `tf runtime asset read skills/build-executor/task-reviewer-prompt.md`. Reviewer returns spec compliance + code quality verdicts with the wave ID, git range, report path, and `pass`/`fail` receipt command.
+5. **Fix**: If Critical or Important issues, write the `fail` receipt, dispatch fix subagent, re-review, and write the replacement `pass` receipt.
+6. **Mark complete**: Append to `.superpowers/sdd/progress.md`: `Task N: complete (commits <base7>..<head7>, review clean)`
 
 ### Model Selection
 Use the configured profile that matches the task role. Resolve it before dispatch:

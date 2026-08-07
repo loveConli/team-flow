@@ -140,6 +140,7 @@ Subagent (general-purpose):
     - Did I follow TDD if required?
     - Are tests comprehensive?
     - Is the test output pristine (no stray warnings or noise)?
+    - Tests actually EXECUTED (`Tests run: N`), not just compiled — surefire/@Nested version mismatches can silently skip tests (v0.43.1)
     - If test-matrix.md exists: matrix coverage = passed cases / total cases for my module
     - Each case's `design_method` matches the actual test approach (boundary case uses real boundary values, not happy-path disguised as boundary)
 

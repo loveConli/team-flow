@@ -6,6 +6,19 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+### Added（closing 代码落地 + 文件存在性双层防护 + 测试执行可信度 + spec 路径契约，v0.43.1）
+
+- **`tf deisolate --merge` 健壮性增强**：dirty 阻断（未提交改动默认不合并，`--force` 跳过）/ ahead==0 短路（幂等）/ 冲突报告（unmerged 文件清单 + 非零 exit）
+- **release-archivist Step 5c Code Landing**：closing 增加代码落地检查（检测 worktree → AskUserQuestion 合并时机 → 主分支编译验证 + 依赖链顺序提示 + 冲突处理）；v0.35.0 Worktree Deisolation 段改为引用 Step 5c（MERGED/PENDING/N/A）
+- **references/worktree-merge.md（新建）**：worktree 合并规范（merge commit 不 rebase、多仓库 Case A、依赖链顺序、冲突人工处理、合并后编译验证）
+- **build-executor 任务完成前文件存在性验证**：Create 文件必须存在非空、Modify 必须有 diff，标记完成与文件存在绑定
+- **code-reviewer Step 1b File Existence Check**：tasks.md Create/Modify 清单与 git diff 求交集，缺失标 Critical（missing-file/no-change）
+- **build-executor Wave Verify**：`tf test record` 解析实际执行数量（分母排除 test_tier=e2e），<70% 警告 + 调查
+- **build-executor Test Infrastructure Check**：首 wave 前检测 surefire/JUnit @Nested 兼容性，沉淀 conventions
+- **spec-writer specs/ 路径契约**：`specs/<capability>/spec.md` 子目录结构（禁止 flat 文件）
+
+## [0.43.0] - 2026-08-07
+
 ### Added（ce-brainstorm 阶段断点控制 + L1-L3 用户定义 + prd/ → requirement/ 路径收敛，v0.43.0）
 
 - **阶段断点控制（FB1）**：新增 Execution Architecture 节，4 个显式断点（BP-1 场景后 / BP-2 流程后 / BP-3 方案后 / BP-4 综合后），每个断点提供继续/暂停/回退三选项；主会话负责规划决策，子代理负责执行性产出（PRD 撰写、流程图、活动表）

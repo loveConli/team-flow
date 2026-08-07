@@ -49,6 +49,13 @@ Subagent (general-purpose):
     merge-blocking complexity as Important and behavior-neutral redundancy as Minor. Do not use line count as evidence, and do not recommend removing
     required tests, validation, security, or error handling.
 
+    **File Existence Check (v0.43.1, 前置):**
+    Derive the current wave's file set: intersect `git diff --name-only BASE..HEAD`
+    with `tasks.md`'s `## File Structure` (Create/Modify list, change-global).
+    - Create files (in the diff) must exist and be non-empty → missing = Critical finding (`missing-file`)
+    - Modify files (in the diff) must have a diff → no change = Critical finding (`no-change`)
+    File existence is a precondition — a file that does not exist cannot be spec-compliant.
+
     **Code quality:**
     - Clean separation of concerns?
     - Proper error handling?

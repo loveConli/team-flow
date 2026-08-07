@@ -101,7 +101,7 @@ Commands:
                         Upgrade inline/batch to SDD, or replan existing SDD waves, as a new revision
   execution review <change-dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict pass|fail
                         Record one review receipt for a planned wave
-  deisolate <change-dir> [--merge] [--clean] [--json]
+  deisolate <change-dir> [--merge] [--force] [--clean] [--json]
                         Show worktree status / merge branch back / clean worktree
   runtime check-update  Run a portable update check for canonical skills
   runtime infer <dir>   Infer workflow mode without a plugin-root path

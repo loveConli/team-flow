@@ -88,6 +88,8 @@ Run: `tf runtime config --get artifacts.order` — generate in configured order 
 Must state: problem, what changes, capabilities affected, impact areas.
 
 ### specs/
+**路径契约（v0.43.1，设计增强方案 v0.18 §77）**：每个 capability 一个子目录——`specs/<capability>/spec.md`。**禁止** flat 文件 `specs/<capability>.md`（`tf validate` 会拒绝：`Invalid spec path`）。示例：`specs/capability-cascade-selection/spec.md`。多个 capability 则多个子目录，各自一个 spec.md。
+
 Every requirement must be testable. Use SHALL or MUST. Every requirement must have at least one `#### Scenario:` with WHEN/THEN. Group under ADDED/MODIFIED/REMOVED Requirements headers.
 
 Optional structured AC tags under a Scenario are supported for E2E extraction (v0.4, design spec ch.16): `##### Exception:` (→ EX AC, ×2), `##### State:` (→ ST AC, ×2), `##### Boundary:` (→ BND AC, ×1). These are **OPTIONAL** — omitting them does NOT fail validation. The `e2e` skill applies dimension-conditional gating (absent dimension = N/A, not 0%) plus keyword fallback (error/invalid/fail/边界), so no spec is forced to add tags.
@@ -133,6 +135,7 @@ Generate one at a time. Confirm each before next. This prevents scope drift — 
 - `## Why` > 50 chars, `## What Changes`, `## Scope` (In/Out), `## Impact`, `## Capabilities`, no TBD/TODO
 
 ### specs/
+- **路径契约（v0.43.1，设计增强方案 v0.18 §77）**：specs 采用 `specs/<capability>/spec.md` 子目录结构（flat 文件 `specs/<capability>.md` 会被 `tf validate` 拒绝）。
 - SHALL/MUST for required behavior, `#### Scenario:` with WHEN/THEN per requirement, grouped under delta headers, no contradictions; optional `##### Exception:/State:/Boundary:` sub-tags allowed but NOT required (absent dimension = N/A, not 0%); optional `##### Unit:/Integration:` sub-tags allowed but NOT required (test-matrix hints for contract-builder). Regression: a spec containing `##### Exception:` must still pass `npm run validate` (validateDeltaSpec must not reject unknown sub-headings).
 
 ### design.md

@@ -26,6 +26,7 @@ export async function run(args) {
     options: {
       merge: { type: 'boolean', default: false },
       clean: { type: 'boolean', default: false },
+      force: { type: 'boolean', default: false }, // v0.43.1：跳过 dirty 阻断
       'project-root': { type: 'string' },
       json: { type: 'boolean', default: false },
       help: { type: 'boolean', default: false },
@@ -68,6 +69,12 @@ export async function run(args) {
     console.log(JSON.stringify({ found: true, repos: results }, null, 2));
   } else {
     printReport(results, values);
+  }
+
+  // v0.43.1：merge 失败（冲突 / dirty 阻断）→ exit 非零，调用方（release-archivist）可检测。
+  // nothing-to-merge（success + skipped）不算失败。
+  if (results.some(r => r.merge && r.merge.success === false)) {
+    process.exitCode = 1;
   }
 }
 
@@ -163,9 +170,9 @@ function processRepo(repo, values) {
     result.dirty = '?';
   }
 
-  // 操作
+  // 操作（v0.43.1：合并前防护——dirty 阻断 / ahead==0 短路，设计增强方案 v0.18 §74）
   if (values.merge) {
-    result.merge = mergeBranch(repo, branch, masterBranch);
+    result.merge = doMerge(repo, branch, masterBranch, result, values);
   }
   if (values.clean) {
     result.clean = cleanWorktree(repo, branch);
@@ -194,6 +201,28 @@ function detectMasterBranch(repoPath) {
   return 'master';
 }
 
+// v0.43.1：合并前防护（设计增强方案 v0.18 §74）
+// 1. dirty 阻断：worktree 有未提交改动时默认不合并（避免改动混入 master），--force 跳过
+// 2. ahead==0 短路：分支相对目标分支无新 commit 时跳过合并（幂等，可安全重复调用）
+// 3. 冲突报告：merge 失败时解析 unmerged 文件列表，引导人工解决而非静默失败
+function doMerge(repo, branch, masterBranch, state, values) {
+  if (state.dirty === true && !values.force) {
+    return {
+      success: false,
+      skipped: 'dirty',
+      message: `Worktree has uncommitted changes — commit or stash them before merging, or use --force`,
+    };
+  }
+  if (typeof state.ahead === 'number' && state.ahead === 0) {
+    return {
+      success: true,
+      skipped: 'nothing-to-merge',
+      message: `Branch '${branch}' is up to date with '${masterBranch}' — nothing to merge`,
+    };
+  }
+  return mergeBranch(repo, branch, masterBranch);
+}
+
 function mergeBranch(repo, branch, masterBranch) {
   try {
     const output = execFileSync('git', ['merge', branch, '--no-edit'], {
@@ -201,7 +230,30 @@ function mergeBranch(repo, branch, masterBranch) {
     });
     return { success: true, message: output.trim() };
   } catch (e) {
-    return { success: false, message: (e.stderr || e.stdout || e.message || '').toString().trim() };
+    const raw = (e.stderr || e.stdout || e.message || '').toString().trim();
+    const conflicts = collectConflicts(repo.repoPath);
+    return {
+      success: false,
+      conflicts,
+      message: conflicts.length > 0
+        ? `Merge conflict in ${conflicts.length} file(s): ${conflicts.join(', ')}. Resolve manually, then 'git add' + 'git commit' to complete the merge.`
+        : raw,
+    };
+  }
+}
+
+// v0.43.1：解析 merge 冲突的 unmerged 文件列表（git status --porcelain 的 UU/AA/DD/AU/UA/DU/UD）
+function collectConflicts(repoPath) {
+  try {
+    const status = execFileSync('git', ['status', '--porcelain'], {
+      encoding: 'utf-8', cwd: repoPath, stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    return status
+      .split('\n')
+      .filter(line => /^(UU|AA|DD|AU|UA|DU|UD)/.test(line.trim()))
+      .map(line => line.trim().replace(/^(UU|AA|DD|AU|UA|DU|UD)\s+/, ''));
+  } catch {
+    return [];
   }
 }
 
@@ -260,7 +312,18 @@ function printReport(results, values) {
     console.log(`    Uncommitted changes: ${r.dirty === true ? '⚠️  YES' : r.dirty === false ? 'no' : 'unknown'}`);
 
     if (r.merge) {
-      console.log(`    Merge: ${r.merge.success ? '✅ ' + r.merge.message : '❌ ' + r.merge.message}`);
+      if (r.merge.skipped === 'nothing-to-merge') {
+        console.log(`    Merge: ⏭️  ${r.merge.message}`);
+      } else if (r.merge.skipped === 'dirty') {
+        console.log(`    Merge: ⛔ ${r.merge.message}`);
+      } else if (r.merge.success) {
+        console.log(`    Merge: ✅ ${r.merge.message}`);
+      } else {
+        console.log(`    Merge: ❌ ${r.merge.message}`);
+        if (r.merge.conflicts && r.merge.conflicts.length > 0) {
+          console.log(`    Conflicts: ${r.merge.conflicts.length} file(s)`);
+        }
+      }
     }
     if (r.clean) {
       console.log(`    Worktree removed: ${r.clean.worktreeRemoved ? '✅' : '❌'}`);
@@ -282,6 +345,7 @@ function printHelp() {
   console.log(`Usage:
   tf deisolate <change-dir>                    # dry-run: show worktree status
   tf deisolate <change-dir> --merge             # merge worktree branch back to master
+  tf deisolate <change-dir> --merge --force     # merge even with uncommitted changes
   tf deisolate <change-dir> --merge --clean     # merge + remove worktree + delete branch
   tf deisolate <change-dir> --clean             # remove worktree only (no merge)
   tf deisolate <change-dir> --json              # JSON output`);

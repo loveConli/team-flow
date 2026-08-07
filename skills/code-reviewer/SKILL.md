@@ -100,6 +100,15 @@ The code-reviewer agent follows this 6-step process:
 3. Read `design.md` to understand architectural decisions
 4. Get the list of changed files: `git diff --name-only BASE..HEAD` or from the change directory
 
+### Step 1b: File Existence Check (前置, v0.43.1)
+
+在 spec-compliance 之前校验 tasks.md 声明的文件是否实际落地（设计增强方案 v0.18 §75，来源：workflow-feedback 2026-08-06——build-executor 标记 Task 完成但文件未创建，审查未发现直到 closing）：
+
+**推导当前 wave 文件集**：tasks.md 的 `## File Structure` 是 change 全局清单，需裁剪到当前 wave——取 `git diff --name-only BASE..HEAD`（本 wave 实际变更文件），与 File Structure 求交集：
+1. **Create 文件** = 声明为 Create 且**落在 diff 范围内**的文件 → 必须存在且非空（`test -s <path>`），缺失标 **Critical finding**（`missing-file`）。
+2. **Modify 文件** = 声明为 Modify 且**在 diff 中**的文件 → 必须有变更，无变更标 **Critical finding**（`no-change`）。
+3. 存在性校验是 spec-compliance 的前置——文件都不存在，谈不上合规。
+
 ### Step 2: Spec Compliance Check
 
 For each requirement in specs/:

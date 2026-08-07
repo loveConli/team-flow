@@ -100,6 +100,22 @@ Check for files modified outside scope fence, new dependencies not in design. Un
 - Add a report row: `| E2E | PASS/FAIL/WARN/SKIP | [coverage summary or skip reason] |`.
 - Note: `ce-proof` is the Proof markdown editor — unrelated to verification; do NOT route E2E there.
 
+### Step 5c: Code Landing (conditional, v0.43.1)
+
+检测 change 是否有未合并的 worktree 代码——"代码不合并 = 没完成"（设计增强方案 v0.18 §74，来源：workflow-feedback 2026-08-06 C2-policy-management bff 10 commits + ui 3 commits 遗留 worktree）。
+
+1. **检测 worktree 状态**：`tf deisolate <change-dir>`（dry-run）→ 是否存在 worktree 且有未合并 commit（ahead > 0）。
+2. **无 worktree 或无需合并**（hotfix/tweak 直改主分支）→ 跳过，报告行 `| Code Landing | N/A | 未使用 worktree 隔离 |`。
+3. **有未合并 commit → AskUserQuestion 阻塞确认**：
+   - **A 现在合并** → 执行 `tf deisolate <change-dir> --merge`（多仓库逐 repo 合并）→ 合并后**主分支编译验证**（`mvn test` / `npm run build` / 项目类型对应命令，exit 0 且产物非空）→ 报告行 `| Code Landing | PASS | merged N commits to master, build verified |`
+   - **B 暂不合并** → 记录 reason（如依赖 change 未先合入），报告行 `| Code Landing | DEFERRED | [reason] |`（不 FAIL——合并时机受团队协作节奏约束）
+   - **C 无需合并** → 记录 reason，报告行 `| Code Landing | N/A | [reason] |`
+4. **依赖链顺序提示**：若 change 依赖其他在途 change（change DAG / `change_dag`），提示"依赖 change 需先合入 master 再合并本 change"——共享代码（如枚举）先合入者先落地，避免被后合入者覆盖。
+5. **冲突处理**：`tf deisolate --merge` 返回非零（冲突/dirty 阻断）时，输出原因 → 冲突文件清单 → 人工解决（`git add` + `git commit` 完成 merge）→ 重新执行编译验证。完整规范见 `references/worktree-merge.md`。
+6. **编译验证失败**（选项 A 合并成功但主分支编译/测试失败）→ 报告行 `| Code Landing | FAIL | build verification failed after merge, <resolution> |`，不进入下一步直到修复或回退合并。
+
+**合并模式（v0.43.1 决策）**：merge commit（`git merge --no-edit`），**不 rebase**——保留真实合并历史、冲突只解决一次、可安全回退；rebase 在多仓库 + 依赖链场景重写历史，复杂度与风险不成比例（强壮性优先）。
+
 ## Final Checks
 
 **⛔ 状态字段禁写（v0.30.0 + v0.13 §50）**：仅写本 skill 的 `dp_6_*`/`dp_7_*` 决策字段；测试证据经 `tf test record` 程序化写入（不再手工 set `test_result`）；**MUST NOT** 修改 `.team-flow.yaml` 的 `state`/`workflow` 核心字段——closing 转换由主代理经 `tf state transition` 执行（来源：workflow-feedback 2026-08-01）。
@@ -230,8 +246,11 @@ After compound promotion, check if worktree isolation exists for this change:
 tf deisolate <change-dir>
 ```
 
-If worktrees exist (output shows `found: true` or ahead/behind stats), include the deisolation report in the closing summary. **Do NOT auto-merge** — the orchestrator or user decides the merge strategy. Mark `Worktree deisolation` in the Step 5 report as:
-- `PENDING` — worktrees detected, user action required
+If worktrees exist (output shows `found: true` or ahead/behind stats), include the deisolation report in the closing summary.
+
+**合并决策由 Step 5c Code Landing 负责（v0.43.1）**：本步骤**不再决定合并策略**——v0.35.0 的 "Do NOT auto-merge" 已被 Step 5c 的 AskUserQuestion 三选项（A 现在合并 / B 暂不合并 / C 无需合并）取代。Step 5c 已合并（PASS）→ 本步骤仅报告剩余 worktree 状态 / 清理建议（`MERGED`）；Step 5c 为 DEFERRED 或未执行 → 本步骤标记 `PENDING`（worktrees 仍存在，用户后续决定）。Mark `Worktree deisolation` in the Step 5 report as:
+- `MERGED` — Step 5c 已合并 + 主分支编译验证通过
+- `PENDING` — Step 5c 未合并（DEFERRED/跳过），worktrees 仍存在，user action required
 - `N/A` — no worktrees found (single-repo or already cleaned)
 
 This step is advisory — skip silently when `tf deisolate` reports no worktrees.
