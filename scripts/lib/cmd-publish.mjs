@@ -19,16 +19,18 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, rmdirSync } from 'node:fs';
 import { join, resolve, isAbsolute } from 'node:path';
+import { detectWorkspaceRoot } from './git-utils.mjs';
 
 const LOCK_PATH = '.publish.lock';
 
 /** 解析 CLI 参数。 */
 function parseArgv(argv) {
-  const parsed = { targets: [], push: false, dryRun: false, changeDir: null };
+  const parsed = { targets: [], push: false, dryRun: false, changeDir: null, projectRoot: null };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--push') parsed.push = true;
     else if (a === '--dry-run') parsed.dryRun = true;
+    else if (a === '--project-root') { parsed.projectRoot = argv[++i]; }
     else if (a === '--prd') parsed.targets.push('prd');
     else if (a === '--arch') parsed.targets.push('arch');
     else if (a === '--changes') {
@@ -179,17 +181,27 @@ export async function run(args = []) {
   if (parsed.help) {
     console.log(`tf publish — 阶段产物白名单提交 + 可选推送（v0.37.0 §68.3）
 
-用法：tf publish <target> [--push] [--dry-run]
+用法：tf publish <target> [--push] [--dry-run] [--project-root <path>]
   --prd         提交 PRD + orchestrator.yaml + registry.yaml + 主仓库 prototype/
   --arch        提交 docs/architecture/（迭代快照）
   --changes     提交整个 changes/（或 --changes <change-dir> 指定单个 change）
   --all         提交全部上述
   --push        同时推送到远程当前分支（默认只提交不推送）
-  --dry-run     只打印将执行的 git 动作，不落盘不 commit`);
+  --dry-run     只打印将执行的 git 动作，不落盘不 commit
+  --project-root <path>
+                显式指定主仓库根目录（多仓库 worktree 场景下自动检测失败时使用）`);
     return;
   }
 
-  const projectRoot = git(process.cwd(), 'rev-parse', '--show-toplevel');
+  let projectRoot;
+  if (parsed.projectRoot) {
+    projectRoot = resolve(parsed.projectRoot);
+  } else {
+    projectRoot = detectWorkspaceRoot(process.cwd());
+    if (!projectRoot) {
+      projectRoot = git(process.cwd(), 'rev-parse', '--show-toplevel');
+    }
+  }
   const whitelist = collectWhitelist(projectRoot, parsed.targets, parsed.changeDir);
 
   if (whitelist.length === 0) {

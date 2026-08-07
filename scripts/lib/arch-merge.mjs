@@ -18,13 +18,14 @@
 import {
   readFileSync, writeFileSync as fsWriteFileSync, existsSync, mkdirSync, readdirSync, rmdirSync, cpSync,
 } from 'node:fs';
-import { join, basename, dirname, resolve, sep } from 'node:path';
-import { execSync } from 'node:child_process';
+import { join, basename, dirname, resolve } from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 import {
   parseTableAfter, extractEndpoints, extractAggregates,
   extractTablesFromSql, extractTablesFromDatabaseMd, readFrontmatter,
 } from './arch-parse.mjs';
+import { detectWorkspaceRoot, getGitRoot } from './git-utils.mjs';
 
 const MARKER_BEGIN = '<!-- arch:current-state:begin -->';
 const MARKER_END = '<!-- arch:current-state:end -->';
@@ -417,9 +418,9 @@ function gitCommit(projectRoot, globalArchDir, touchedFiles, changeName, dryRun)
   try {
     // 白名单：只 add 本次 touch 的文件（防卷走他人未提交工作）
     for (const f of touchedFiles) {
-      execSync(`git add "${f}"`, { stdio: 'pipe' });
+      execFileSync('git', ['add', f], { cwd: projectRoot, stdio: 'pipe' });
     }
-    execSync(`git commit -m "${commitMsg}"`, { stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', commitMsg], { cwd: projectRoot, stdio: 'pipe' });
     return { committed: true, message: commitMsg };
   } catch (e) {
     return { committed: false, error: e.message };
@@ -427,9 +428,11 @@ function gitCommit(projectRoot, globalArchDir, touchedFiles, changeName, dryRun)
 }
 
 /** 检测 docs/architecture/ 下非本次 touch 的脏文件（团队协作安全底线）。 */
-function detectUntouchedDirtyFiles(globalArchDir, touchedFiles) {
+function detectUntouchedDirtyFiles(projectRoot, globalArchDir, touchedFiles) {
   try {
-    const status = execSync(`git status --porcelain -- ${globalArchDir}`, { stdio: 'pipe' }).toString();
+    const status = execFileSync('git', ['status', '--porcelain', '--', globalArchDir], {
+      cwd: projectRoot, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'],
+    });
     const dirty = status.split('\n').filter(Boolean)
       .map(line => line.replace(/^\S+\s+/, '').trim())
       .filter(p => p && !touchedFiles.includes(resolve(p)) && !touchedFiles.includes(p));
@@ -461,9 +464,7 @@ export function run(args = {}) {
 
   let projectRoot = args.projectRoot;
   if (!projectRoot) {
-    const abs = resolve(changeDir);
-    const changesIdx = abs.lastIndexOf(sep + 'changes' + sep);
-    projectRoot = changesIdx > 0 ? abs.slice(0, changesIdx) : process.cwd();
+    projectRoot = detectWorkspaceRoot(changeDir) || getGitRoot(changeDir);
   }
 
   const changeName = basename(changeDir.replace(/\/$/, ''));
@@ -530,7 +531,7 @@ export function run(args = {}) {
       join(globalArchDir, 'INDEX.md'),
       ...(archiveResult.files || []),  // v0.36.3：changelog/ 复制文件入白名单
     ].filter(p => existsSync(p));
-    const dirty = detectUntouchedDirtyFiles(globalArchDir, touchedFiles);
+    const dirty = detectUntouchedDirtyFiles(projectRoot, globalArchDir, touchedFiles);
     if (dirty.length > 0) {
       console.warn(`  [WARN] docs/architecture/ 存在非本次 touch 的脏文件（${dirty.length} 个）：${dirty.slice(0, 5).join(', ')} — 白名单 git add 不卷走它们，但请确认是否他人未提交工作`);
     }

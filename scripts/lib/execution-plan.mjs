@@ -5,6 +5,7 @@ import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { computeArtifactsHash, computeContractHash } from './hash.mjs';
 import { getOverlayPaths } from './sdd-overlay.mjs';
 import { readState } from './state-loader.mjs';
+import { detectWorkspaceRoot, findSubRepo } from './git-utils.mjs';
 
 export const EXECUTION_MODES = ['inline', 'batch-inline', 'sdd'];
 
@@ -130,7 +131,7 @@ export function validatePlan(changeDir, plan) {
   return { valid: failures.length === 0, failures, plan };
 }
 
-export function recordReview(changeDir, waveId, receipt) {
+export function recordReview(changeDir, waveId, receipt, repoPath) {
   const plan = readPlan(changeDir);
   const validation = validatePlan(changeDir, plan);
   if (!validation.valid) throw new Error(`Cannot record a review for an invalid execution plan: ${validation.failures.join('; ')}`);
@@ -145,7 +146,7 @@ export function recordReview(changeDir, waveId, receipt) {
   }
   for (const field of ['base', 'head']) requireText(receipt?.[field], `receipt.${field}`);
   const report = validateReviewReportEvidence(changeDir, receipt?.report);
-  const { base, head } = validateReviewRange(changeDir, receipt.base, receipt.head);
+  const { base, head, subRepoPath } = validateReviewRange(changeDir, receipt.base, receipt.head, repoPath);
   // v0.13 §51.2：测试统计为可选证据字段（提供时必须为非负整数）。
   // 硬门禁在入口（test-matrix-ready）与 closing（tests-passing），此处只沉淀证据，
   // 避免单 wave 零测试造成 BUG-A 式过严死锁（DDL/脚手架类 wave 可能合理无测试）。
@@ -166,6 +167,9 @@ export function recordReview(changeDir, waveId, receipt) {
     head,
     report,
     ...(tests ? { tests } : {}),
+    // Persist repo path when SHA was resolved in a sub-repository, so
+    // readCurrentReview can re-validate without re-scanning.
+    ...(subRepoPath ? { repo: relative(changeDir, subRepoPath) } : {}),
     plan_hash: plan.hash,
     plan_revision: plan.revision,
     recorded_at: new Date().toISOString(),
@@ -187,7 +191,10 @@ export function readCurrentReview(changeDir, waveId, plan = readPlan(changeDir))
   try {
     const receipt = JSON.parse(readFileSync(filePath, 'utf8'));
     if (receipt?.plan_hash !== plan.hash || receipt?.plan_revision !== plan.revision) return null;
-    const range = validateReviewRange(changeDir, receipt?.base, receipt?.head);
+    // When the receipt records a repo path (sub-repo scenario), use it for
+    // SHA re-validation.  Otherwise fall back to the default main-repo path.
+    const repoPath = receipt?.repo ? resolve(changeDir, receipt.repo) : undefined;
+    const range = validateReviewRange(changeDir, receipt?.base, receipt?.head, repoPath);
     if (receipt.base !== range.base || receipt.head !== range.head) return null;
     // A passing receipt is current evidence only while its referenced report
     // remains safe and readable. Recheck it here because reports can be
@@ -276,10 +283,74 @@ function getPhysicalReviewsDirectory(changeDir) {
   return { changeRoot, reviewsDir: directory };
 }
 
-function validateReviewRange(changeDir, base, head) {
-  const gitRoot = getGitRoot(changeDir);
-  const resolvedBase = resolveGitCommit(gitRoot, base, 'base');
-  const resolvedHead = resolveGitCommit(gitRoot, head, 'head');
+function validateReviewRange(changeDir, base, head, repoPath) {
+  const gitRoot = resolveGitRoot(changeDir, repoPath);
+
+  let resolvedBase, resolvedHead, subRepoPath;
+  try {
+    resolvedBase = resolveGitCommit(gitRoot, base, 'base');
+    resolvedHead = resolveGitCommit(gitRoot, head, 'head');
+  } catch (primaryError) {
+    // Sub-repo fallback: when SHA is not in the main repo, scan workspace
+    // children for a sub-repository that contains it (e.g. bff/, ui/).
+    // Only attempt when --repo was not explicitly provided.
+    if (repoPath) throw primaryError;
+
+    const workspaceRoot = detectWorkspaceRoot(changeDir);
+    if (!workspaceRoot) throw primaryError;
+
+    const subRoot = findSubRepo(workspaceRoot, head);
+    if (!subRoot) throw primaryError;
+
+    resolvedBase = resolveGitCommit(subRoot, base, 'base');
+    resolvedHead = resolveGitCommit(subRoot, head, 'head');
+    subRepoPath = subRoot;
+  }
+
+  // Track when SHA was resolved outside the changeDir's own repo.
+  // This happens either through automatic fallback (subRepoPath set above)
+  // or through explicit --repo pointing to a different repository.
+  if (!subRepoPath && repoPath) {
+    const defaultRoot = resolveGitRoot(changeDir);
+    if (gitRoot !== defaultRoot) subRepoPath = gitRoot;
+  }
+
+  const effectiveRoot = subRepoPath || gitRoot;
+  const result = validateResolvedRange(effectiveRoot, resolvedBase, resolvedHead);
+  return { ...result, subRepoPath };
+}
+
+/**
+ * Resolve the git root for SHA verification. Honors an explicit --repo path;
+ * otherwise uses the changeDir's own git repository.
+ */
+function resolveGitRoot(changeDir, repoPath) {
+  if (repoPath) {
+    const absRepo = isAbsolute(repoPath) ? repoPath : resolve(changeDir, repoPath);
+    try {
+      return execFileSync('git', ['-C', absRepo, 'rev-parse', '--show-toplevel'], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'ignore'],
+      }).trim();
+    } catch {
+      throw new Error(`--repo path '${repoPath}' is not inside a Git work tree`);
+    }
+  }
+  try {
+    return execFileSync('git', ['-C', changeDir, 'rev-parse', '--show-toplevel'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    throw new Error('Review receipts require the change directory to be inside a Git work tree');
+  }
+}
+
+/**
+ * Validate a resolved SHA range: base must differ from head, and base must
+ * be an ancestor of head. Shared by both primary and sub-repo paths.
+ */
+function validateResolvedRange(gitRoot, resolvedBase, resolvedHead) {
   // v0.13 §51.1：禁止空 diff review（base === head）。
   // C1-domain-policy 现场曾出现 6 个 receipt 全部 base==head==初始 commit，
   // 即 review 对空 diff 进行。本校验同时强制"每 wave 落 commit"的纪律。
@@ -297,17 +368,6 @@ function validateReviewRange(changeDir, base, head) {
     throw new Error('Review receipt base must be an ancestor of head');
   }
   return { base: resolvedBase, head: resolvedHead };
-}
-
-function getGitRoot(changeDir) {
-  try {
-    return execFileSync('git', ['-C', changeDir, 'rev-parse', '--show-toplevel'], {
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-  } catch {
-    throw new Error('Review receipts require the change directory to be inside a Git work tree');
-  }
 }
 
 function resolveGitCommit(gitRoot, revision, field) {

@@ -20,6 +20,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, rmSync, appendFileSync, readFileSync } from 'node:fs';
 import { join, resolve, basename } from 'node:path';
+import { detectWorkspaceRoot } from './git-utils.mjs';
 
 const PROTECTED = ['main', 'master'];
 
@@ -39,12 +40,20 @@ function normalizeBranchName(raw) {
 }
 
 /** 定位 workspace root（cwd 在主仓库内）与原型仓库路径。 */
-function resolveLayout() {
+function resolveLayout(projectRootArg) {
   let workspaceRoot;
-  try {
-    workspaceRoot = git(process.cwd(), 'rev-parse', '--show-toplevel');
-  } catch {
-    throw new Error('无法定位 workspace root：cwd 不在 git 仓库内？');
+  if (projectRootArg) {
+    workspaceRoot = resolve(projectRootArg);
+  } else {
+    // 优先从 changes/ 布局推断（worktree 中 cwd 可能不是主仓库）
+    workspaceRoot = detectWorkspaceRoot(process.cwd());
+    if (!workspaceRoot) {
+      try {
+        workspaceRoot = git(process.cwd(), 'rev-parse', '--show-toplevel');
+      } catch {
+        throw new Error('无法定位 workspace root：cwd 不在 git 仓库内？请使用 --project-root 指定');
+      }
+    }
   }
   const protoRepo = join(workspaceRoot, 'prototype');
   if (!existsSync(join(protoRepo, '.git'))) {
@@ -84,8 +93,8 @@ function localBranchExists(protoRepo, branch) {
 }
 
 /** 子命令 branch：创建/复用原型版本 worktree。 */
-function cmdBranch(branchName) {
-  const { workspaceRoot, protoRepo } = resolveLayout();
+function cmdBranch(branchName, projectRootArg) {
+  const { workspaceRoot, protoRepo } = resolveLayout(projectRootArg);
   const wtPath = join(workspaceRoot, '.worktrees', branchName, basename(protoRepo));
 
   // 幂等：worktree 已存在 → 复用
@@ -118,8 +127,8 @@ function cmdBranch(branchName) {
 }
 
 /** 子命令 deisolate：版本收尾 merge 回主干 + 清理 worktree。 */
-function cmdDeisolate(branchName, opts) {
-  const { workspaceRoot, protoRepo } = resolveLayout();
+function cmdDeisolate(branchName, opts, projectRootArg) {
+  const { workspaceRoot, protoRepo } = resolveLayout(projectRootArg);
   const wtPath = join(workspaceRoot, '.worktrees', branchName, basename(protoRepo));
   const result = { branch: branchName, worktreePath: wtPath };
 
@@ -181,8 +190,9 @@ function usage() {
   console.log(`tf prototype — 原型仓库版本 worktree 隔离（v0.37.0 §68.4）
 
 用法：
-  tf prototype branch <prd-vN>                 # 创建/复用原型版本 worktree（隔离 + 团队拉取）
-  tf prototype deisolate <prd-vN> [--merge] [--clean]
+  tf prototype branch <prd-vN> [--project-root <path>]
+                                               # 创建/复用原型版本 worktree（隔离 + 团队拉取）
+  tf prototype deisolate <prd-vN> [--merge] [--clean] [--project-root <path>]
                                                # 版本收尾：merge 回主干 + 清理 worktree
 
 示例：
@@ -210,13 +220,20 @@ export async function run(args = []) {
   try { branchName = normalizeBranchName(rawVersion); }
   catch (e) { console.error(e.message); process.exit(2); }
 
+  // Extract --project-root from remaining args
+  let projectRootArg;
+  const projectRootIdx = rest.indexOf('--project-root');
+  if (projectRootIdx !== -1 && rest[projectRootIdx + 1]) {
+    projectRootArg = rest[projectRootIdx + 1];
+  }
+
   try {
     if (sub === 'branch') {
-      return cmdBranch(branchName);
+      return cmdBranch(branchName, projectRootArg);
     }
     if (sub === 'deisolate') {
       const opts = { merge: rest.includes('--merge'), clean: rest.includes('--clean') };
-      return cmdDeisolate(branchName, opts);
+      return cmdDeisolate(branchName, opts, projectRootArg);
     }
     console.error(`未知子命令：${sub}（可用：branch / deisolate）`);
     process.exit(2);

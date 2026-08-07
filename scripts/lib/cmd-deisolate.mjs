@@ -18,6 +18,7 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, rmSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
+import { detectWorkspaceRoot } from './git-utils.mjs';
 
 export async function run(args) {
   const { positionals, values } = parseArgs({
@@ -70,11 +71,6 @@ export async function run(args) {
   }
 }
 
-function detectWorkspaceRoot(absChangeDir) {
-  const parent = dirname(absChangeDir);
-  if (basename(parent) !== 'changes') return null;
-  return dirname(parent);
-}
 
 // Case A: <root>/.worktrees/<change>/<repo>/
 function detectCaseA(root, changeName) {

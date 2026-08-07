@@ -24,7 +24,8 @@
 // names) and are passed as array elements, never interpolated into a shell string;
 // branch names are additionally sanitized to git-legal characters before use.
 import { execFileSync } from 'node:child_process';
-import { resolve, basename, dirname, join } from 'node:path';
+import { resolve, basename, join } from 'node:path';
+import { detectWorkspaceRoot } from './lib/git-utils.mjs';
 import { readdirSync, existsSync, appendFileSync, readFileSync } from 'node:fs';
 
 const rawChangeDir = process.argv[2];
@@ -57,13 +58,6 @@ function sanitizeBranchName(raw) {
     .replace(/^[./-]+/, '')             // 去掉开头 . / -（git 禁止 . 开头；避免 '-' 开头当选项）
     .replace(/[/.]+$/, '');             // 去掉结尾 / .
   return cleaned || 'change';
-}
-
-// 若 change-dir 形如 <root>/changes/<name>，返回 <root>；否则返回 null。
-function detectWorkspaceRoot(absChangeDir) {
-  const parent = dirname(absChangeDir);          // <root>/changes
-  if (basename(parent) !== 'changes') return null;
-  return dirname(parent);                        // <root>
 }
 
 // 枚举 root 下含 .git 的直接子目录（= 代码仓库），按目录名排序保证确定性。

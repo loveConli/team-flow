@@ -28,6 +28,7 @@ export async function run(args) {
       'tests-failed': { type: 'string' },
       json: { type: 'boolean', default: false },
       help: { type: 'boolean', default: false },
+      repo: { type: 'string' },
     },
     allowPositionals: true,
   });
@@ -144,7 +145,7 @@ function recordAndPrintReview(changeDir, values) {
     head: values.head,
     report: values.report,
     tests: parseTestsStats(values),
-  });
+  }, values.repo);
   print(values.json, { ok: true, wave: values.wave[0], receipt }, `Review for ${values.wave[0]} recorded: ${receipt.status}.`);
 }
 
@@ -237,6 +238,6 @@ function printHelp() {
   tf execution plan <dir> --mode <mode> --confirm --reason <text> --wave <id>:<strategy>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]
   tf execution show <dir> [--json]
   tf execution revise <dir> --mode sdd --confirm --reason <text> --wave <id>:<strategy>:<task,...>[:<depends-on,...>] [--acknowledge-recommendation]
-  tf execution review <dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict pass|fail [--tests-total N --tests-passed N --tests-failed N]
+  tf execution review <dir> --wave <id> --base <sha> --head <sha> --report <path> --verdict pass|fail [--repo <path>] [--tests-total N --tests-passed N --tests-failed N]
   tf execution refresh-hash <dir> [--json]   # refresh artifacts/contract hash without bumping revision`);
 }
