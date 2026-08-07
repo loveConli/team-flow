@@ -111,6 +111,10 @@ bash ${CLAUDE_PLUGIN_ROOT}/skills/workflow-bootstrap/scripts/recon-probe.sh --ro
 - 测试覆盖：约 60%（JUnit 5 + Mockito）
 - ⚠ INCOMPLETE：<缺失维度名>（如 api-surface——Deep 模式未派发）
 
+建议：
+→ 复杂项目（≥5 模块 或 ≥10 源文件）优先逆向重建完整架构
+→ 交叉验证与真实性核对：docs/architecture/cross-check-report.md（如执行 B）
+
 下一步：
 → 运行 /workflow-orchestrator 开始产品级流程
 → 或运行 /architecture-design 进行完整架构设计

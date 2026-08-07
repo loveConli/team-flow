@@ -6,7 +6,17 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
-### Added（workflow-bootstrap CLAUDE.md 初始化 + Git 多子仓库识别，v0.41.0）
+### Added（workflow-bootstrap B5 降级路径设计 + session-start 语言要求，v0.42.0）
+
+- **B5 路径决策重构（降级路径设计）**：4 平权选项 → 两组降级选项——第一组确保产物可信（A 逆向重建按复杂度分级推荐（≥5 模块或 ≥10 源文件强推）/ B 交叉验证主代理机械比对产出 cross-check-report.md / C 真实性核对用户确认门），第二组直接进入流程（D-F 原 A-C 平移）
+- **references/b5-path-decision.md（新建）**：B5 详细流程（分组展示模板、A 复杂度判据、B 比对清单 + 维度覆盖说明（architecture 显式排除理由）、C 两种模式核对协议（跟随 B / 独立抽查））
+- **b1-reconnaissance.md Success Output 同步**：产出清单增加 cross-check-report.md + 重建建议
+- **hooks/session-start 语言要求**：Inject workflow context 的 msg 追加 `## Language` 指令——要求中文交流，技术术语/代码/命令保持英文
+- **AGENTS.md 同步**：workflow-bootstrap 描述补 B5 降级路径
+
+## [0.41.0] - 2026-08-07
+
+### Added（workflow-bootstrap CLAUDE.md 初始化 + Git 多子仓库识别）
 
 - **B4.5 CLAUDE.md 初始化**（参考 Claude Code /init）：将项目基本信息（项目概况/开发命令/工作区结构/Git 结构）+ team-flow 产物结构索引写入工作区 CLAUDE.md；维护原则=索引级+结构级；已有 CLAUDE.md 追加模式（产物结构 + Git 管理规则章节），无则从 `templates/claude-md-team-flow.md` 新建
 - **CLAUDE.md 标准模板**：`skills/workflow-bootstrap/templates/claude-md-team-flow.md`（新建），覆盖 /init 内容 + team-flow 产物结构表（代码强制 + 设计层面）

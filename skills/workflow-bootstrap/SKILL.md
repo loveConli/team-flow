@@ -209,21 +209,33 @@ Step 2: 确定性提取（兜底）
 
 **不做的事**：不写 SOP 流程（由 skill 负责）、不写变更级状态机（由 workflow skill 负责）、不列可自动发现的文件清单。
 
-### B5: Path Decision（路径判断）
+### B5: Path Decision（路径判断，v0.42.0 重构：降级路径设计）
 
-询问用户：
+询问用户。**分组展示**——用户先决定"要不要把地基打牢"（第一组），再决定"打完地基做什么"（第二组）：
 
-> 您希望从哪个需求开始使用 team-flow？
-> - A) 我有一个具体的功能需求（→ 进入 workflow-orchestrator S1，S3 后进 ARCH 产品级架构设计）
-> - B) 我有一个模糊的产品方向（→ ce-brainstorm）
-> - C) 我只是想建立架构基线，暂不开发新需求（→ 结束）
-> - D) 我想从既有代码逆向重建完整架构（→ 进入 workflow-orchestrator ARCH 阶段 reconstruction 模式，arch-reverse-analyst，v0.36.0；重建 PASS 后 `tf arch init` 打戳）
+> **第一组：确保 bootstrap 产物可信**
+> - A) 逆向重建完整架构（**复杂项目强推 / 简单项目弱推**；→ 进入 workflow-orchestrator ARCH 阶段 reconstruction 模式，arch-reverse-analyst，重建 PASS 后 `tf arch init --mode reconstruction --baseline-ref prd/vN/` 打戳，全量命令见 b5-path-decision.md）
+> - B) 交叉验证与对齐 bootstrap 产物（→ 主代理机械比对，产出 `docs/architecture/cross-check-report.md` 疑点清单）
+> - C) 真实性核对（→ 针对 B 疑点清单（跟随 B）或 baseline.md 语义结论抽查（独立），用户逐条确认，修正 baseline.md）
+>
+> **第二组：直接进入 team-flow 流程**
+> - D) 我有一个具体的功能需求（→ 进入 workflow-orchestrator S1，S3 后进 ARCH 产品级架构设计）
+> - E) 我有一个模糊的产品方向（→ ce-brainstorm）
+> - F) 我只是想建立架构基线，暂不开发新需求（→ 结束）
+
+**A 分级推荐判据**（基于 B1 侦察结果）：
+- 复杂项目（≥5 模块 或 ≥10 源文件，复用 B2 触发判据）→ 提示"建议优先重建完整架构"
+- 简单项目（<5 模块 且 <10 源文件）→ 提示"项目较简单，可直接进入流程，重建为可选项"
+
+**B/C 串联闭环**：选 B → 主代理产出疑点清单 → 提示是否进入 C（是 → 逐条 AskUserQuestion 核对并修正 baseline.md；否 → 疑点留档标记 deferred，不阻断）。
 
 **逆向重建衔接（v0.36.3）**：ARCH 阶段 reconstruction 模式复用本 bootstrap 的 recon-probe.sh（--ddl-out）+ codebase-recon-analyst，并派发 `arch-reverse-analyst` 补 BC/状态/指令事件维度（见 `references/agents/arch-reverse-analyst.md`）。
 
 **上下文传递**：
 - 将 `docs/architecture/baseline.md` 和 `docs/architecture/CONCEPTS.md` 的路径传递给 workflow-orchestrator S1
 - 作为后续流程的架构上下文
+
+详细流程（分组展示模板、A 复杂度判据来源、B 7 类比对清单 + report 格式、C 核对协议）见 `references/b5-path-decision.md`。
 
 ## Guardrails
 
@@ -238,9 +250,9 @@ Step 2: 确定性提取（兜底）
 
 每次交互结束时说明：
 1. 已完成的阶段（B1-B1.5-B2-B3-B4-B4.5-B5）
-2. 已产出的制品（baseline.md / conventions / ARCHITECTURE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / CONCEPTS.md / CLAUDE.md / 目录结构）
+2. 已产出的制品（baseline.md / conventions / ARCHITECTURE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / CONCEPTS.md / CLAUDE.md / cross-check-report.md（如执行 B）/ 目录结构）
 3. 下一步建议（调用哪个 skill）
 
 ## Success Output
 
-接入结束时输出：侦察模式、产出清单（baseline.md / conventions / ARCHITECTURE.md / DATABASE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / docs/architecture/CONCEPTS.md / CLAUDE.md / 目录结构）、关键发现（技术栈/模块数/架构模式/测试覆盖）、下一步建议。完整模板见 `references/b1-reconnaissance.md`「Success Output 模板」。
+接入结束时输出：侦察模式、产出清单（baseline.md / conventions / ARCHITECTURE.md / DATABASE.md / PHYSICAL-MODEL.md / schema-baseline.sql / API-INDEX.md / INDEX.md / docs/architecture/CONCEPTS.md / CLAUDE.md / cross-check-report.md（如执行 B）/ 目录结构）、关键发现（技术栈/模块数/架构模式/测试覆盖）、下一步建议。完整模板见 `references/b1-reconnaissance.md`「Success Output 模板」。

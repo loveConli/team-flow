@@ -70,6 +70,7 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 ### 7. workflow-bootstrap（1 skill，既有项目接入，v0.15.0 脚本+子代理侦察）
 - 一次性"侦察 + 基线建立"：代码库侦察 → 架构基线文档化 → 领域词汇提取 → 目录初始化 → CLAUDE.md 初始化（B4.5，v0.41.0）→ 进入 workflow-orchestrator
 - **B1 侦察（v0.15.0）**：先跑确定性脚本 `scripts/recon-probe.sh`（可复现固定化采集，含 Git 子仓库结构 v0.41.0）→ 并行派发 `codebase-recon-analyst` 子代理语义增强（7 维度含 git-structure）→ 主代理汇总写 baseline.md（维度闭合校验 v0.41.0）
+- **B5 路径决策（v0.42.0 降级路径设计）**：两组选项——第一组确保产物可信（A 逆向重建按复杂度分级推荐 / B 交叉验证主代理比对产出 cross-check-report.md / C 真实性核对用户确认门），第二组直接进入流程（D-F 原 A-C 平移）
 - 仅首次使用时执行；`docs/architecture/baseline.md` 已存在则跳过
 
 ### 8. session-handoff（1 skill，会话交接，v0.16.0 新增）

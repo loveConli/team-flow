@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# v0.41.0: auto-sync CLI version with plugin version
+# v0.42.0: auto-sync CLI version with plugin version
 set -e
 
 # ═══════════════════════════════════════════════════════════════
 # Plugin version (update this when releasing new versions)
 # ═══════════════════════════════════════════════════════════════
-PLUGIN_VERSION="0.41.0"
+PLUGIN_VERSION="0.42.0"
 
 # ═══════════════════════════════════════════════════════════════
 # Step 1: Auto-sync CLI version with plugin version
@@ -45,7 +45,7 @@ sync_tf_version
 # Step 2: Inject workflow context
 # ═══════════════════════════════════════════════════════════════
 
-msg="<EXTREMELY_IMPORTANT>\nYou have team-flow installed. Invoke /team-flow:workflow-start or /team-flow:workflow-orchestrator ONLY when active team-flow artifacts exist (\`.team-flow.yaml\`, \`proposal.md\`, \`execution-contract.md\`, \`specs/\`) or the user explicitly requests it. For ordinary coding tasks, do NOT invoke them.\n</EXTREMELY_IMPORTANT>\n<EXTREMELY_IMPORTANT>\n## Workspace Directory Rule\n\"Base directory for this skill\" = skill source location (read SKILL.md/references/ ONLY). User project = \`pwd\`. ALL project artifacts (changes/, prd/, docs/, .team-flow/, etc.) MUST operate under \`pwd\`, NEVER the skill base directory. Run \`pwd\` first in every skill execution.\n</EXTREMELY_IMPORTANT>"
+msg="<EXTREMELY_IMPORTANT>\nYou have team-flow installed. Invoke /team-flow:workflow-start or /team-flow:workflow-orchestrator ONLY when active team-flow artifacts exist (\`.team-flow.yaml\`, \`proposal.md\`, \`execution-contract.md\`, \`specs/\`) or the user explicitly requests it. For ordinary coding tasks, do NOT invoke them.\n</EXTREMELY_IMPORTANT>\n<EXTREMELY_IMPORTANT>\n## Workspace Directory Rule\n\"Base directory for this skill\" = skill source location (read SKILL.md/references/ ONLY). User project = \`pwd\`. ALL project artifacts (changes/, prd/, docs/, .team-flow/, etc.) MUST operate under \`pwd\`, NEVER the skill base directory. Run \`pwd\` first in every skill execution.\n</EXTREMELY_IMPORTANT>\n<EXTREMELY_IMPORTANT>\n## Language\nCommunicate with the user in Chinese (中文). Technical terms, code, and commands remain in English.\n</EXTREMELY_IMPORTANT>"
 
 # Three platforms share the same message, only output format differs.
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
