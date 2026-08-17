@@ -6,6 +6,19 @@ The format loosely follows Keep a Changelog.
 
 ## [Unreleased]
 
+### Added（独立 business-analysis skill/agent，v0.44.0）
+
+- **新增 `skills/business-analysis/`**：独立业务分析 skill，将任意用户输入整理为 `requirement/vN/business-analysis.md`，产出 Requirements List 与 Scenario List
+- **新增 `agents/business-analysis.md`**：配套独立 agent，`tools` 含 Read/Bash/Grep/Glob/Write/Edit，写入前必须阻塞用户确认
+- **多轮单问澄清协议**：每次只问 1 个问题，用户无法回答时记录为 `TODO-xxx`，相关条目保持 🔵 pending
+- **版本解析规则**：支持显式参数 / `tf runtime config --get active.requirement` / `requirement/` 目录扫描 / 默认 `v1`
+- **输出格式契约**：只含需求列表 + 业务场景列表 + Open Questions/TODOs，禁止写入 `ledger.md`、PRD、流程、架构、`.team-flow.yaml`
+- **QA 检查清单**：5 项 Error 检查（角色覆盖、六维度齐全、REQ 引用存在、对话证据可追溯、Acceptance 可测试）
+- **技能/Agent 计数同步**：24 skills + 15 agents → 25 skills + 16 agents，plugin.json / marketplace.json / README.md / AGENTS.md / package.json / gemini-extension.json 等同步更新
+- **测试覆盖**：`tests/lib/cmd-install-workbuddy.test.mjs` 技能数断言更新为 25；保留 `docs/examples/*/specs/` 示例目录（`.gitignore` 例外规则）
+
+## [0.43.1] - 2026-08-07
+
 ### Added（closing 代码落地 + 文件存在性双层防护 + 测试执行可信度 + spec 路径契约，v0.43.1）
 
 - **`tf deisolate --merge` 健壮性增强**：dirty 阻断（未提交改动默认不合并，`--force` 跳过）/ ahead==0 短路（幂等）/ 冲突报告（unmerged 文件清单 + 非零 exit）

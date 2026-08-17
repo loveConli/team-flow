@@ -1,6 +1,6 @@
 # AGENTS.md · team-flow
 
-> team-flow 统一插件 = **team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（24 skills + 15 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
+> team-flow 统一插件 = **team-flow**（spec 驱动开发）+ **compound-engineering 核心子集**（全局复利）+ **architecture-design**（4A+DDD 增量设计）+ **prototype**（本地 HTML 原型）+ **e2e**（AC 驱动 Playwright E2E）+ **workflow-orchestrator**（产品级编排）+ **workflow-bootstrap**（既有项目接入）。一次安装，七套能力协同（25 skills + 16 agents），支持 9 安装面（Claude Code, Cursor, OpenAI Codex CLI/App, GitHub Copilot CLI, Gemini CLI, OpenCode, WorkBuddy, Trae, ima-copilot）。
 
 ## What This Is
 
@@ -12,7 +12,7 @@
 
 ### 身份与依赖关系
 
-- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 24 个 skills + 15 个 agents + hooks + templates
+- **team-flow**（本插件）：Claude Code / Cursor 等宿主的插件实体（`plugin.json` name = `team-flow`），包含 25 个 skills + 16 个 agents + hooks + templates
 - **@xulthekl/team-flow**（npm 底座包）：team-flow 的 CLI 工具层（`package.json` name = `@xulthekl/team-flow`，bin = `tf` / `team-flow`），提供状态机、校验、复利 CLI 等运行时能力
 - 关系：team-flow 插件 **包含** @xulthekl/team-flow npm 包作为底座（同一仓库、同一版本）。skills 中的 `tf ...` 调用的是已全局安装的 @xulthekl/team-flow CLI，版本由 session-start hook 自动同步
 - 历史身份（已废弃）：`spec-superflow`（npm 包名，0.11.0 后停止发布）/ `ssf`（CLI 前缀）/ `.spec-superflow.yaml`（状态文件）—— 详见设计增强方案 v0.9 §27
@@ -33,7 +33,7 @@ node --test tests/e2e.test.mjs --test-name-pattern="parseDeltaSpec"
 npm run validate
 ```
 
-## 能力概览（九套合一，24 skills）
+## 能力概览（十套合一，25 skills）
 
 ### 1. team-flow（底座，9 skills）
 spec 驱动开发过程。8 态变更机：`exploring → specifying → bridging → approved-for-build → executing → closing`（另有 `debugging` 侧路径 + `abandoned` 终态）。
@@ -84,6 +84,11 @@ spec 驱动开发过程。8 态变更机：`exploring → specifying → bridgin
 - 与 ce-compound 互补：ce-compound 是"经验沉淀端"，workflow-feedback 是"问题发现端"
 - 输出到 `.team-flow/feedback/`（git 跟踪，改进输入持久化）
 - release-archivist 收尾时联动建议触发
+
+### 10. business-analysis（1 skill，独立业务分析工具）
+- 将任意用户输入整理为 `requirement/vN/business-analysis.md`，产出 Requirements List 与 Scenario List
+- 支持多轮单问澄清、待办记录、新增/更新模式，写入前必须阻塞用户确认
+- 不进入核心工作流，作为独立外挂工具运行
 
 ## 全局产物结构（Discoverability —— 设计/开发前先检索）
 
@@ -169,7 +174,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
   全局作为下一 change / 下一 PRD 版本的 grounding → 闭环
 ```
 
-## Skills 索引（24 个）
+## Skills 索引（25 个）
 
 | Skill | 归属 | 用途 |
 |---|---|---|
@@ -197,6 +202,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | workflow-bootstrap | 既有项目接入 | 既有项目侦察+基线建立（v0.6） |
 | session-handoff | 会话交接 | 上下文腐化时压缩会话为交接文档（v0.16.0） |
 | workflow-feedback | 工作流反馈 | 工作流问题结构化记录（v0.16.0） |
+| business-analysis | 独立业务分析 | 将任意输入整理为 requirement/vN/business-analysis.md（独立外挂，v0.44.0） |
 
 ### 触发域分层（v0.12.0 新增）
 
@@ -207,13 +213,13 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | 接入层 | workflow-bootstrap | "初始化/接入/分析代码库" | 一次性，触发词独特，无冲突 |
 | 产品级（唯一入口） | **workflow-orchestrator** | 新的产品级需求（"新需求/从头开始/我有个想法/做一个XX"） | 拥有所有"产品级新需求"触发词，内部路由到 ce-brainstorm/ce-plan |
 | 变更级（唯一入口） | workflow-start | change 上下文内的操作（.team-flow.yaml） | 有强上下文约束，与产品级天然隔离 |
-| 步骤级 - 独立工具 | ce-ideate, ce-strategy, ce-compound, ce-proof, architecture-design, prototype, e2e, session-handoff, workflow-feedback | 各自独特触发词 | 无冲突，可独立触发 |
+| 步骤级 - 独立工具 | ce-ideate, ce-strategy, ce-compound, ce-proof, architecture-design, prototype, e2e, session-handoff, workflow-feedback, **business-analysis** | 各自独特触发词 | 无冲突，可独立触发；business-analysis 不进入核心工作流 |
 | 步骤级 - 受限独立 | ce-brainstorm, ce-plan | 可独立触发，但产品级新需求应走 orchestrator | description 中标注路由指导 |
 | 步骤级 - 仅路由 | need-explorer, spec-writer, contract-builder, build-executor, code-reviewer, spec-merger, release-archivist, bug-investigator | 仅由 workflow-start 路由 | 不独立触发 |
 
 > **规则**：新增 skill 时必须在此表登记所属层级。产品级新需求触发词归 workflow-orchestrator 独占。
 
-### Agents 索引（v0.7 新增，v0.30.0 增至 15 个）
+### Agents 索引（v0.7 新增，v0.30.0 增至 16 个）
 
 > **agent 文件设计规范见 CONTRIBUTING.md §6 + `templates/agent-template.md`**（v0.33.0）：frontmatter 必须合法 YAML（非法时 Claude Code 静默降级，skills: 预加载与 tools: 限制全部失效）；description 单句、禁 `<example>` 块；新增/修改 agent 必过 frontmatter-lint + 实证探针。
 
@@ -234,6 +240,7 @@ STRATEGY.md CONCEPTS.md 产品策略(BA) / 领域词汇
 | contract-builder | 执行契约 agent——将规划制品压缩为单一执行握手 execution-contract.md、守 DP-3 批准门（可写型，契约文件唯一所有者；spec-writer DP-2 后、build-executor 前） | Read/Bash/Grep/Glob/Write/Edit | workflow-start 路由时作为子代理 dispatch |
 | build-executor | 构建执行 agent——以契约为权威驱动 TDD 批次实施（SDD/Inline/Batch Inline）、守 TDD Iron Law（可写型，实施代码所有者；契约 DP-3 批准后、release-archivist 前） | Read/Bash/Grep/Glob/Write/Edit | workflow-start 路由时作为子代理 dispatch |
 | release-archivist | 发布归档 agent——执行验证、产出 closing 总结、完成归档就绪（arch-merge → prototype-sync → 复利晋升）（可写型，归档制品所有者；build-executor 后、change 关闭前） | Read/Bash/Grep/Glob/Write/Edit | workflow-start 路由时作为子代理 dispatch |
+| business-analysis | 独立业务分析 agent——将任意输入整理为 requirement/vN/business-analysis.md，多轮单问澄清、待办记录、新增/更新模式，写入前阻塞确认 | Read/Bash/Grep/Glob/Write/Edit | 独立触发，不进入 workflow-orchestrator 核心流程（v0.44.0） |
 
 ## 复利贯穿机制（v0.5 新增）
 

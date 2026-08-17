@@ -1,6 +1,6 @@
 {
   "name": "team-flow",
-  "version": "0.43.1",
+  "version": "0.44.0",
   "description": "Spec-first workflow that bridges OpenSpec-style planning and Superpowers-style execution discipline.",
   "author": {
     "name": "MageByte",
@@ -26,7 +26,7 @@
   "interface": {
     "displayName": "team-flow",
     "shortDescription": "Spec-first workflow with guarded execution.",
-    "longDescription": "A self-contained Codex workflow plugin with 24 skills for intent exploration, planning artifacts, execution contracts, TDD execution, review gates, systematic debugging, closure, and delta spec sync.",
+    "longDescription": "A self-contained Codex workflow plugin with 25 skills for intent exploration, planning artifacts, execution contracts, TDD execution, review gates, systematic debugging, closure, delta spec sync, and independent business analysis.",
     "developerName": "MageByte",
     "category": "Developer Tools",
     "composerIcon": "./assets/icon.svg",
